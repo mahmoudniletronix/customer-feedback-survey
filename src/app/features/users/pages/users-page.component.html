@@ -1,0 +1,6 @@
+<app-card [title]="'users.adminManagement' | t" [subtitle]="'users.subtitle' | t">
+  <div card-actions class="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-50 text-[#11A7C9]">
+    <app-icon [icon]="usersIcon" [size]="20" />
+  </div>
+  <app-user-table [users]="usersStore.users()" />
+</app-card>

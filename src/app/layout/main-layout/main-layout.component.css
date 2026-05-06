@@ -1,0 +1,233 @@
+.app-header {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 0.85rem 1rem;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .app-header {
+    padding: 0.9rem 2rem;
+  }
+}
+
+.header-container {
+  min-height: 3rem;
+}
+
+.role-icon-tile {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(17, 167, 201, 0.16);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(17, 167, 201, 0.13), rgba(255, 255, 255, 0.86));
+  color: #0e8bab;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+}
+
+@media (min-width: 640px) {
+  .role-icon-tile {
+    display: inline-flex;
+  }
+}
+
+/* Page Meta */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #11a7c9;
+  background: rgba(17, 167, 201, 0.08);
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  margin-bottom: 0.25rem;
+  width: fit-content;
+}
+
+.role-badge app-icon {
+  opacity: 0.8;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+}
+
+/* Buttons */
+.lang-toggle-btn,
+.icon-action-btn,
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.85rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lang-toggle-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  height: 2.5rem;
+  padding: 0 0.8rem 0 0.45rem;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #475569;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+:host-context([dir='rtl']) .lang-toggle-btn {
+  padding: 0 0.45rem 0 0.8rem;
+}
+
+.lang-toggle-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.icon-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.icon-action-btn {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #475569;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.icon-action-btn:hover {
+  border-color: rgba(17, 167, 201, 0.28);
+  color: #0e8bab;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.notification-dot {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 2px solid white;
+  border-radius: 9999px;
+  background: #d94b5a;
+}
+
+:host-context([dir='rtl']) .notification-dot {
+  right: auto;
+  left: 0.55rem;
+}
+
+/* User Profile */
+.user-profile {
+  height: 2.75rem;
+  padding: 0.25rem 0.55rem 0.25rem 0.35rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.045);
+}
+
+:host-context([dir='rtl']) .user-profile {
+  padding: 0.25rem 0.35rem 0.25rem 0.55rem;
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.1;
+  max-width: 10rem;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, #11a7c9 0%, #0e8bab 100%);
+  border-radius: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(17, 167, 201, 0.2);
+}
+
+/* Logout */
+.logout-btn {
+  background: #d94b5a;
+  color: white;
+  height: 2.5rem;
+  padding: 0 1rem;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(217, 75, 90, 0.2);
+}
+
+.logout-btn:hover {
+  background: #c43e4d;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(217, 75, 90, 0.3);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 639px) {
+  .page-title {
+    font-size: 1.05rem;
+  }
+
+  .role-badge {
+    font-size: 0.58rem;
+    padding-inline: 0.45rem;
+  }
+
+  .lang-toggle-btn,
+  .icon-action-btn,
+  .logout-btn {
+    height: 2.35rem;
+  }
+
+  .logout-btn {
+    width: 2.35rem;
+    padding: 0;
+  }
+}

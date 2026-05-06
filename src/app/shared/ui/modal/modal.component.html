@@ -1,0 +1,18 @@
+@if (open()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+    <section class="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl shadow-slate-950/20">
+      <header class="mb-5 flex items-center justify-between gap-4">
+        <h2 class="text-lg font-bold text-slate-900">{{ title() }}</h2>
+        <button
+          type="button"
+          class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          [attr.aria-label]="'common.closeModal' | t"
+          (click)="closed.emit()"
+        >
+          X
+        </button>
+      </header>
+      <ng-content />
+    </section>
+  </div>
+}

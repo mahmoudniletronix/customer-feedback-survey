@@ -1,0 +1,36 @@
+<label class="block">
+  <span class="mb-2 block text-sm font-semibold text-slate-700">{{ label() }}</span>
+  <div class="relative">
+    <input
+      class="w-full rounded-2xl border px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10 disabled:bg-slate-100"
+      [class.border-[#D94B5A]]="invalid()"
+      [class.border-slate-200]="!invalid()"
+      [class.pe-12]="canTogglePassword()"
+      [type]="inputType()"
+      [placeholder]="placeholder()"
+      [disabled]="disabled()"
+      [value]="value()"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()"
+    />
+
+    @if (canTogglePassword()) {
+      <button
+        class="password-toggle absolute inset-y-1 end-1 inline-flex w-10 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-[#11A7C9] focus:outline-none focus:ring-4 focus:ring-[#11A7C9]/10 disabled:pointer-events-none disabled:opacity-50"
+        type="button"
+        [disabled]="disabled()"
+        [attr.aria-label]="passwordToggleLabel()"
+        [attr.title]="passwordToggleLabel()"
+        (click)="togglePasswordVisibility()"
+      >
+        <app-icon [icon]="passwordToggleIcon()" [size]="18" />
+      </button>
+    }
+  </div>
+  @if (hint()) {
+    <span class="mt-2 block text-xs text-slate-500">{{ hint() }}</span>
+  }
+  @if (error()) {
+    <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ error() }}</span>
+  }
+</label>

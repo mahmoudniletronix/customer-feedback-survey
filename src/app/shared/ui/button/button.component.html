@@ -1,0 +1,11 @@
+<button
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  [class]="classes()"
+  (click)="pressed.emit($event)"
+>
+  @if (loading()) {
+    <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+  }
+  <ng-content />
+</button>

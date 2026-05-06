@@ -1,0 +1,28 @@
+<div class="overflow-hidden rounded-2xl border border-slate-100">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-100 text-sm">
+      <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+        <tr>
+          @for (column of columns(); track column.key) {
+            <th class="px-4 py-3">{{ column.label }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 bg-white">
+        @for (row of rows(); track row[trackKey()]) {
+          <tr class="hover:bg-slate-50">
+            @for (column of columns(); track column.key) {
+              <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ row[column.key] }}</td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td class="px-4 py-8 text-center text-slate-500" [attr.colspan]="columns().length">
+              {{ 'common.noRecords' | t }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

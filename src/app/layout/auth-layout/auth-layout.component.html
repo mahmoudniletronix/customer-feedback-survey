@@ -1,0 +1,36 @@
+<main class="auth-page grid min-h-screen bg-[#F7F9FC] lg:grid-cols-[1.05fr_0.95fr]">
+  <section
+    class="auth-hero hidden overflow-hidden bg-[#1F3A56] p-10 text-white lg:flex lg:flex-col lg:justify-between"
+  >
+    <div class="auth-hero-content">
+      <div
+        class="hero-logo mb-14 inline-flex rounded-2xl bg-white px-6 py-4 shadow-2xl shadow-slate-950/15"
+      >
+        <img class="h-14 w-auto" src="/images/nile.png" alt="NILETRONIX" />
+      </div>
+      <h1 class="hero-title max-w-xl text-4xl font-bold leading-tight">
+        {{ 'app.authHeroTitle' | t }}
+      </h1>
+      <p class="hero-description mt-5 max-w-lg text-base leading-7 text-cyan-50/80">
+        {{ 'app.authHeroDescription' | t }}
+      </p>
+    </div>
+    <!-- <div class="hero-stats grid grid-cols-3 gap-4 text-sm">
+      <div class="stat-card rounded-2xl bg-white/10 p-4">
+        <span class="block text-2xl font-bold">18</span>
+        {{ 'common.branches' | t }}
+      </div>
+      <div class="stat-card rounded-2xl bg-white/10 p-4">
+        <span class="block text-2xl font-bold">64</span>
+        {{ 'common.departments' | t }}
+      </div>
+      <div class="stat-card rounded-2xl bg-white/10 p-4">
+        <span class="block text-2xl font-bold">92%</span>
+        {{ 'common.sla' | t }}
+      </div>
+    </div> -->
+  </section>
+  <section class="login-stage flex items-center justify-center p-6">
+    <router-outlet />
+  </section>
+</main>

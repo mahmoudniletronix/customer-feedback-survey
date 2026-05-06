@@ -1,0 +1,7 @@
+:host {
+  display: block;
+}
+
+.password-toggle {
+  -webkit-tap-highlight-color: transparent;
+}

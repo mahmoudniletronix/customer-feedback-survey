@@ -1,0 +1,16 @@
+<div class="space-y-6">
+  <div class="flex items-start gap-3">
+    <span class="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-[#11A7C9]">
+      <app-icon [icon]="reportIcon" [size]="21" />
+    </span>
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">{{ 'reports.title' | t }}</h2>
+      <p class="mt-2 text-sm text-slate-500">{{ 'reports.subtitle' | t }}</p>
+    </div>
+  </div>
+  <div class="grid gap-4 md:grid-cols-3">
+    @for (report of reportsStore.summaries(); track report.id) {
+      <app-report-card [report]="report" />
+    }
+  </div>
+</div>

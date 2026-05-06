@@ -1,0 +1,84 @@
+<div
+  class="min-h-screen bg-[#F7F9FC] lg:grid"
+  [class.lg:grid-cols-[5rem_1fr]]="sidebarCollapsed()"
+  [class.lg:grid-cols-[18rem_1fr]]="!sidebarCollapsed()"
+>
+  @if (mobileSidebarOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden"
+      [attr.aria-label]="'common.closeSidebar' | t"
+      (click)="closeMobileSidebar()"
+    ></button>
+  }
+
+  <app-sidebar
+    [collapsed]="sidebarCollapsed()"
+    [mobileOpen]="mobileSidebarOpen()"
+    (toggle)="toggleSidebar()"
+    (close)="closeMobileSidebar()"
+  />
+  <div class="min-w-0">
+    <header class="app-header sticky top-0 z-30">
+      <div class="header-container flex items-center justify-between gap-4">
+        <div class="header-left flex min-w-0 items-center gap-4">
+          <div class="role-icon-tile">
+            <app-icon [icon]="roleIcon()" [size]="20" />
+          </div>
+          <div class="page-meta min-w-0">
+            <div class="role-badge flex items-center gap-1.5">
+              <app-icon [icon]="roleIcon()" [size]="10" />
+              <span>{{ authStore.role() | roleLabel }}</span>
+            </div>
+            <h1 class="page-title truncate">{{ pageTitle() }}</h1>
+          </div>
+        </div>
+
+        <div class="header-right flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            class="lang-toggle-btn"
+            [attr.aria-label]="'common.changeLanguage' | t"
+            (click)="i18n.toggleLanguage()"
+          >
+            <span class="icon-circle">
+              <app-icon [icon]="languagesIcon" [size]="14" />
+            </span>
+            <span>{{ i18n.nextLanguageLabel() }}</span>
+          </button>
+
+          <button type="button" class="icon-action-btn" [attr.aria-label]="'common.notifications' | t">
+            <app-icon [icon]="notificationIcon" [size]="17" />
+            <span class="notification-dot"></span>
+          </button>
+
+          <div class="user-profile hidden md:flex items-center gap-3">
+            <div class="user-avatar">
+              {{ userInitial() }}
+            </div>
+            <div class="user-info">
+              <p class="user-name">
+                <app-icon [icon]="userIcon" [size]="13" class="text-slate-400" />
+                <span>{{ userDisplayName() }}</span>
+              </p>
+              <p class="user-email">{{ userEmail() }}</p>
+            </div>
+            <app-icon [icon]="chevronDownIcon" [size]="14" class="text-slate-400" />
+          </div>
+
+          <button
+            type="button"
+            class="logout-btn"
+            (click)="logout()"
+          >
+            <app-icon [icon]="logoutIcon" [size]="16" />
+            <span class="hidden sm:inline">{{ 'common.logout' | t }}</span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="p-4 lg:p-8">
+      <router-outlet />
+    </main>
+  </div>
+</div>
