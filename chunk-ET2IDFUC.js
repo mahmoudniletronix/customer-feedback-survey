@@ -1,1 +1,0 @@
-import"./chunk-2NFLSA4Y.js";var t=[{path:"login",loadComponent:()=>import("./chunk-DWSBOLYT.js").then(o=>o.LoginPageComponent)},{path:"",pathMatch:"full",redirectTo:"login"}];export{t as AUTH_ROUTES};
