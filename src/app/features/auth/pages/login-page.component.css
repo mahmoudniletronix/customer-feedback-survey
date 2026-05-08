@@ -42,6 +42,7 @@
   from {
     transform: translate(0, 0) scale(1);
   }
+
   to {
     transform: translate(20px, 30px) scale(1.1);
   }
@@ -50,7 +51,7 @@
 .login-brand {
   margin: 0 auto 2rem;
   width: fit-content;
-  background: #ffffff;
+  /* background: #ffffff; */
   padding: 1rem 1.5rem;
   border-radius: 1.5rem;
   box-shadow:
@@ -110,6 +111,7 @@
     opacity: 0;
     transform: translateY(-15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -121,6 +123,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -132,6 +135,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -139,19 +143,23 @@
 }
 
 @keyframes shake {
+
   10%,
   90% {
     transform: translate3d(-1px, 0, 0);
   }
+
   20%,
   80% {
     transform: translate3d(2px, 0, 0);
   }
+
   30%,
   50%,
   70% {
     transform: translate3d(-3px, 0, 0);
   }
+
   40%,
   60% {
     transform: translate3d(3px, 0, 0);
@@ -159,6 +167,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .login-header h2,
   .login-header p,
   .premium-card,
