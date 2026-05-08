@@ -1,0 +1,1 @@
+import{c as o,h as e}from"./chunk-DI4FGTNT.js";import{L as r}from"./chunk-QX4IASUW.js";var s=n=>()=>{let a=r(e),u=r(o),t=a.role();return t&&n.includes(t)?!0:u.createUrlTree(["/dashboard"])};export{s as a};

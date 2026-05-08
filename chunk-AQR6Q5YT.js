@@ -1,0 +1,1 @@
+import{a as o,b as t}from"./chunk-ZISF5JUQ.js";import"./chunk-QX4IASUW.js";import"./chunk-2NFLSA4Y.js";var m=[{path:"",providers:[o,t],loadComponent:()=>import("./chunk-NKLPKB6J.js").then(r=>r.ReportsPageComponent)}];export{m as REPORTS_ROUTES};

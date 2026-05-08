@@ -1,0 +1,1 @@
+import{a as r,b as e}from"./chunk-3BH3KEE7.js";import{a as o}from"./chunk-MXDENIDP.js";import"./chunk-DI4FGTNT.js";import"./chunk-LWHBIB7G.js";import"./chunk-QX4IASUW.js";import"./chunk-2NFLSA4Y.js";var a=[{path:"",canActivate:[o(["SUPER_ADMIN"])],providers:[r,e],loadComponent:()=>import("./chunk-LQZYQVMR.js").then(t=>t.BranchesPageComponent)}];export{a as BRANCHES_ROUTES};

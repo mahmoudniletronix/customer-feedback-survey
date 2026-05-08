@@ -1,0 +1,1 @@
+import{a as o,b as r}from"./chunk-WMD2JY5W.js";import"./chunk-3KP74IBW.js";import"./chunk-DI4FGTNT.js";import"./chunk-LWHBIB7G.js";import"./chunk-QX4IASUW.js";import"./chunk-2NFLSA4Y.js";var m=[{path:"",providers:[o,r],loadComponent:()=>import("./chunk-PUUOQGF6.js").then(t=>t.DashboardPageComponent)}];export{m as DASHBOARD_ROUTES};
