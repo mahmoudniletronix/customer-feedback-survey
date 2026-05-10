@@ -26,11 +26,22 @@ export class AuthService {
   private toSession(response: LoginResponse, userNameOrEmail: string): AuthSession {
     const userType = this.resolveUserType(response);
     const role = USER_TYPE_ROLE_MAP[userType];
+    const tokenPayload = this.decodeJwtPayload(response.token);
     const user: User = {
-      id: userNameOrEmail,
-      name: this.displayName(userNameOrEmail),
-      email: userNameOrEmail,
+      id: this.readString(tokenPayload, 'sub') ?? userNameOrEmail,
+      name: this.readString(tokenPayload, 'name') ?? this.displayName(userNameOrEmail),
+      email: this.readString(tokenPayload, 'email') ?? userNameOrEmail,
       role,
+      branchId:
+        this.readString(tokenPayload, 'branchId') ??
+        this.readString(tokenPayload, 'BranchId') ??
+        this.readString(tokenPayload, 'branch_id') ??
+        undefined,
+      departmentId:
+        this.readString(tokenPayload, 'departmentId') ??
+        this.readString(tokenPayload, 'DepartmentId') ??
+        this.readString(tokenPayload, 'department_id') ??
+        undefined,
     };
 
     return {
@@ -64,5 +75,27 @@ export class AuthService {
 
   private displayName(userNameOrEmail: string): string {
     return userNameOrEmail.includes('@') ? userNameOrEmail.split('@')[0] : userNameOrEmail;
+  }
+
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
+    const payload = token.split('.')[1];
+    if (!payload) {
+      return null;
+    }
+
+    try {
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+      const decoded = globalThis.atob(padded);
+      const parsed = JSON.parse(decoded) as unknown;
+      return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private readString(payload: Record<string, unknown> | null, key: string): string | null {
+    const value = payload?.[key];
+    return typeof value === 'string' && value.length > 0 ? value : null;
   }
 }

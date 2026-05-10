@@ -12,5 +12,6 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class ModalComponent {
   readonly open = input(false);
   readonly title = input('');
+  readonly size = input<'md' | 'lg'>('md');
   readonly closed = output<void>();
 }

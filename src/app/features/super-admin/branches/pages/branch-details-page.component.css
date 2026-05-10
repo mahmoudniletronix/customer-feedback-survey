@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host ::ng-deep app-card,
+:host ::ng-deep app-input,
+:host ::ng-deep app-modal {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  :host ::ng-deep app-button {
+    display: block;
+    width: 100%;
+  }
+
+  :host ::ng-deep app-button button {
+    width: 100%;
+  }
+}

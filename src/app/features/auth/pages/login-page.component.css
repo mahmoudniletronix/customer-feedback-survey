@@ -180,3 +180,43 @@
     transition: none;
   }
 }
+
+@media (max-width: 639px) {
+  :host {
+    max-width: 100%;
+  }
+
+  .login-brand {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+  }
+
+  .login-brand img {
+    height: 2.75rem;
+  }
+
+  .login-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .login-header h2 {
+    font-size: 1.45rem;
+  }
+
+  .login-header p {
+    font-size: 0.82rem;
+  }
+
+  .login-form {
+    gap: 1rem;
+  }
+
+  .login-footer {
+    margin-top: 1.25rem;
+  }
+
+  .bg-blur-blob {
+    display: none;
+  }
+}

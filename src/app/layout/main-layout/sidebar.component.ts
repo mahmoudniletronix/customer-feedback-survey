@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LucideIconData,
   MessageSquareText,
+  Network,
   PanelLeftClose,
   PanelLeftOpen,
   UsersRound
@@ -31,7 +32,14 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'nav.dashboard',
     path: '/dashboard',
     icon: LayoutDashboard,
-    roles: ['SUPER_ADMIN', 'BRANCH_ADMIN', 'DEPARTMENT_ADMIN']
+    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN']
+  },
+  {
+    label: 'My Branch',
+    labelKey: 'nav.branchWorkspace',
+    path: '/branch-admin',
+    icon: Building2,
+    roles: ['BRANCH_ADMIN']
   },
   {
     label: 'Branches',
@@ -41,25 +49,32 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: ['SUPER_ADMIN']
   },
   {
+    label: 'Departments',
+    labelKey: 'nav.departments',
+    path: '/departments',
+    icon: Network,
+    roles: ['SUPER_ADMIN']
+  },
+  {
     label: 'Surveys',
     labelKey: 'nav.surveys',
     path: '/survey',
     icon: ClipboardList,
-    roles: ['BRANCH_ADMIN', 'DEPARTMENT_ADMIN']
+    roles: ['DEPARTMENT_ADMIN']
   },
   {
     label: 'Users',
     labelKey: 'nav.users',
     path: '/users',
     icon: UsersRound,
-    roles: ['SUPER_ADMIN', 'BRANCH_ADMIN']
+    roles: ['SUPER_ADMIN']
   },
   {
     label: 'Reports',
     labelKey: 'nav.reports',
     path: '/reports',
     icon: ChartNoAxesColumnIncreasing,
-    roles: ['SUPER_ADMIN', 'BRANCH_ADMIN', 'DEPARTMENT_ADMIN']
+    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN']
   }
 ];
 

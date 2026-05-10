@@ -68,6 +68,9 @@ export class AuthStore {
 
   redirectPath(): string {
     const role = this.role();
+    if (role === 'BRANCH_ADMIN') {
+      return '/branch-admin';
+    }
     if (role === 'DEPARTMENT_ADMIN') {
       return '/survey';
     }

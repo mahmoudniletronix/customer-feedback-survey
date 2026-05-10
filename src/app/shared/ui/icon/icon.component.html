@@ -17,7 +17,11 @@
         <path [attr.d]="node.attrs['d']" />
       }
       @case ('circle') {
-        <circle [attr.cx]="node.attrs['cx']" [attr.cy]="node.attrs['cy']" [attr.r]="node.attrs['r']" />
+        <circle
+          [attr.cx]="node.attrs['cx']"
+          [attr.cy]="node.attrs['cy']"
+          [attr.r]="node.attrs['r']"
+        />
       }
       @case ('rect') {
         <rect

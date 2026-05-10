@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Bell, Briefcase, ChevronDown, Languages, LogOut, ShieldCheck, Store, UserRound } from 'lucide-angular';
+import { Bell, Briefcase, ChevronDown, Languages, LogOut, Menu, ShieldCheck, Store, UserRound } from 'lucide-angular';
 import { AuthStore } from '../../features/auth/state/auth.store';
 import { I18nService } from '../../core/services/i18n.service';
 import { RoleLabelPipe } from '../../shared/pipes/role-label.pipe';
@@ -23,6 +23,7 @@ export class MainLayoutComponent {
   readonly mobileSidebarOpen = signal(false);
   readonly languagesIcon = Languages;
   readonly logoutIcon = LogOut;
+  readonly menuIcon = Menu;
   readonly userIcon = UserRound;
   readonly notificationIcon = Bell;
   readonly chevronDownIcon = ChevronDown;

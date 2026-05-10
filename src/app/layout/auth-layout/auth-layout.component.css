@@ -1,3 +1,8 @@
+.auth-page {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
 .auth-hero {
   position: relative;
 }
@@ -62,6 +67,21 @@
 
 .login-stage {
   animation-delay: 120ms;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@media (max-width: 639px) {
+  .auth-page {
+    min-height: 100dvh;
+  }
+
+  .login-stage {
+    align-items: flex-start;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
 }
 
 @keyframes auth-fade-up {

@@ -1,0 +1,224 @@
+<div class="mx-auto max-w-7xl space-y-4 px-1 text-sm">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-2.5 sm:flex-row sm:items-start">
+      <app-button type="button" variant="secondary" (pressed)="goBack()">
+        <app-icon [icon]="arrowLeftIcon" [size]="17" />
+        {{ 'common.back' | t }}
+      </app-button>
+      <div class="min-w-0">
+        <h2 class="text-xl font-bold text-slate-900">{{ 'departments.detailsTitle' | t }}</h2>
+        <p class="mt-1 text-xs text-slate-500">{{ 'departments.detailsSubtitle' | t }}</p>
+      </div>
+    </div>
+
+    @if (departmentsStore.selectedDetails(); as department) {
+      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        @if (!editMode()) {
+          <app-button type="button" variant="secondary" (pressed)="enableEdit()">
+            <app-icon [icon]="editIcon" [size]="17" />
+            {{ 'common.edit' | t }}
+          </app-button>
+        }
+        <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
+          <app-icon [icon]="deleteIcon" [size]="17" />
+          {{ 'common.delete' | t }}
+        </app-button>
+      </div>
+    }
+  </div>
+
+  @if (departmentsStore.detailsLoading()) {
+    <div class="flex items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600">
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      {{ 'departments.detailsLoading' | t }}
+    </div>
+  } @else if (departmentsStore.detailsError()) {
+    <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      {{ departmentsStore.detailsError() ?? '' | t }}
+    </div>
+  } @else if (departmentsStore.selectedDetails(); as department) {
+    @if (departmentsStore.success()) {
+      <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ departmentsStore.success() ?? '' | t }}
+      </div>
+    }
+    @if (departmentsStore.error()) {
+      <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+        {{ departmentsStore.error() ?? '' | t }}
+      </div>
+    }
+    @if (departmentAdminsStore.success()) {
+      <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ departmentAdminsStore.success() ?? '' | t }}
+      </div>
+    }
+    @if (departmentAdminsStore.error()) {
+      <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+        {{ departmentAdminsStore.error() ?? '' | t }}
+      </div>
+    }
+
+    <app-card [title]="department.nameEn" [subtitle]="department.nameAr || ('departments.noArabicName' | t)">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <p class="text-xs font-semibold text-slate-400">
+          {{ department.createdOnUtc ? (department.createdOnUtc | date: 'medium') : '-' }}
+        </p>
+        <span
+          class="inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-bold"
+          [class.bg-emerald-50]="department.isActive"
+          [class.text-emerald-700]="department.isActive"
+          [class.bg-slate-100]="!department.isActive"
+          [class.text-slate-500]="!department.isActive"
+        >
+          {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
+        </span>
+      </div>
+    </app-card>
+
+    @if (editMode()) {
+      <app-card [title]="'departments.editDepartment' | t" [subtitle]="'departments.editDepartmentSubtitle' | t">
+        <form class="space-y-3" [formGroup]="departmentForm" (ngSubmit)="updateDepartment()">
+          <div class="grid gap-3 md:grid-cols-2">
+            <app-input
+              [label]="'departments.nameEn' | t"
+              formControlName="nameEn"
+              [error]="fieldError('nameEn') | t"
+            />
+            <app-input
+              [label]="'departments.nameAr' | t"
+              formControlName="nameAr"
+              [error]="fieldError('nameAr') | t"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <app-button type="submit" [loading]="departmentsStore.updating()">
+              <app-icon [icon]="saveIcon" [size]="17" />
+              {{ 'common.save' | t }}
+            </app-button>
+            <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
+              <app-icon [icon]="cancelIcon" [size]="17" />
+              {{ 'common.cancel' | t }}
+            </app-button>
+          </div>
+        </form>
+      </app-card>
+    }
+
+    <section class="grid gap-3 sm:grid-cols-2">
+      <app-card [title]="'departments.departmentAdminsCount' | t">
+        <p class="text-xl font-bold text-slate-900">{{ department.summary.departmentAdminsCount }}</p>
+      </app-card>
+      <app-card [title]="'departments.operatorsCount' | t">
+        <p class="text-xl font-bold text-slate-900">{{ department.summary.operatorsCount }}</p>
+      </app-card>
+    </section>
+
+    <div class="grid gap-3 xl:grid-cols-2">
+      <app-card [title]="'departments.departmentAdmins' | t">
+        <div card-actions>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="openCreateDepartmentAdmin()">
+            <app-icon [icon]="userPlusIcon" [size]="15" />
+            {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+          </app-button>
+        </div>
+        <div class="space-y-2">
+          @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
+            <div class="rounded-xl border border-slate-100 p-3">
+              <p class="text-sm font-bold text-slate-900">{{ admin.nameEn }}</p>
+              <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
+              @if (admin.phoneNumber) {
+                <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
+              }
+            </div>
+          } @empty {
+            <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+          }
+        </div>
+      </app-card>
+
+      <app-card [title]="'departments.operators' | t">
+        <div class="space-y-2">
+          @for (operator of department.operators; track operator.operatorId) {
+            <div class="rounded-xl border border-slate-100 p-3">
+              <p class="text-sm font-bold text-slate-900">{{ operator.nameEn }}</p>
+              <p class="mt-1 text-xs text-slate-500">{{ operator.userName }} - {{ operator.email }}</p>
+              @if (operator.phoneNumber) {
+                <p class="mt-1 text-xs text-slate-500">{{ operator.phoneNumber }}</p>
+              }
+            </div>
+          } @empty {
+            <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+          }
+        </div>
+      </app-card>
+    </div>
+  }
+</div>
+
+<app-modal
+  [title]="'departmentAdmins.createDepartmentAdmin' | t"
+  [open]="createDepartmentAdminModalOpen()"
+  (closed)="closeCreateDepartmentAdminModal()"
+>
+  <form class="space-y-3" [formGroup]="departmentAdminForm" (ngSubmit)="createDepartmentAdmin()">
+    @if (departmentsStore.selectedDetails(); as department) {
+      <div class="rounded-xl border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
+        {{ 'departments.selectedDepartment' | t }}:
+        <span class="text-[#0d94b3]">{{ department.nameEn }}</span>
+      </div>
+    }
+
+    <input type="hidden" formControlName="departmentId" />
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'departmentAdmins.nameEn' | t"
+        [placeholder]="'departmentAdmins.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="departmentAdminFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'departmentAdmins.nameAr' | t"
+        [placeholder]="'departmentAdmins.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="departmentAdminFieldError('nameAr') | t"
+      />
+    </div>
+
+    <app-input
+      [label]="'branches.userName' | t"
+      [placeholder]="'departmentAdmins.userNamePlaceholder' | t"
+      formControlName="userName"
+      [error]="departmentAdminFieldError('userName') | t"
+    />
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'common.email' | t"
+        type="email"
+        [placeholder]="'departmentAdmins.emailPlaceholder' | t"
+        formControlName="email"
+        [error]="departmentAdminFieldError('email') | t"
+      />
+      <app-input
+        [label]="'branches.phoneNumber' | t"
+        [placeholder]="'departmentAdmins.phoneNumberPlaceholder' | t"
+        formControlName="phoneNumber"
+        [error]="departmentAdminFieldError('phoneNumber') | t"
+      />
+    </div>
+
+    <app-input
+      [label]="'common.password' | t"
+      type="password"
+      [placeholder]="'departmentAdmins.passwordPlaceholder' | t"
+      formControlName="password"
+      [error]="departmentAdminFieldError('password') | t"
+    />
+
+    <app-button type="submit" [fullWidth]="true" [loading]="departmentAdminsStore.creating()">
+      <app-icon [icon]="userPlusIcon" [size]="17" />
+      {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+    </app-button>
+  </form>
+</app-modal>

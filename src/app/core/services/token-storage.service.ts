@@ -191,7 +191,13 @@ export class TokenStorageService {
       id: this.readString(payload, 'sub') ?? email,
       name: userName,
       email,
-      role
+      role,
+      branchId: this.readString(payload, 'branchId') ?? this.readString(payload, 'BranchId') ?? this.readString(payload, 'branch_id') ?? undefined,
+      departmentId:
+        this.readString(payload, 'departmentId') ??
+        this.readString(payload, 'DepartmentId') ??
+        this.readString(payload, 'department_id') ??
+        undefined
     };
   }
 

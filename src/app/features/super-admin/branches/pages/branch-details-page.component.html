@@ -1,0 +1,488 @@
+<div class="mx-auto max-w-7xl space-y-4 px-1 text-sm">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-2.5 sm:flex-row sm:items-start">
+      <app-button type="button" variant="secondary" (pressed)="goBack()">
+        <app-icon [icon]="arrowLeftIcon" [size]="17" />
+        {{ 'common.back' | t }}
+      </app-button>
+      <div class="min-w-0">
+        <h2 class="text-xl font-bold text-slate-900">{{ 'branches.detailsTitle' | t }}</h2>
+        <p class="mt-1 text-xs text-slate-500">{{ 'branches.detailsSubtitle' | t }}</p>
+      </div>
+    </div>
+
+    @if (branchesStore.selectedBranchDetails(); as branch) {
+      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        @if (!editMode()) {
+          <app-button type="button" variant="secondary" (pressed)="enableEdit()">
+            <app-icon [icon]="editIcon" [size]="17" />
+            {{ 'common.edit' | t }}
+          </app-button>
+        }
+        <app-button type="button" variant="danger" [loading]="branchesStore.deleting()" (pressed)="deleteBranch()">
+          <app-icon [icon]="deleteIcon" [size]="17" />
+          {{ 'common.delete' | t }}
+        </app-button>
+      </div>
+    }
+  </div>
+
+  @if (branchesStore.detailsLoading()) {
+    <div class="flex items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600">
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      {{ 'branches.detailsLoading' | t }}
+    </div>
+  } @else if (branchesStore.detailsError()) {
+    <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      {{ branchesStore.detailsError() ?? '' | t }}
+    </div>
+  } @else if (branchesStore.selectedBranchDetails(); as branch) {
+    @if (branchesStore.detailsSuccess()) {
+      <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ branchesStore.detailsSuccess() ?? '' | t }}
+      </div>
+    }
+    @if (departmentAdminsStore.success()) {
+      <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ departmentAdminsStore.success() ?? '' | t }}
+      </div>
+    }
+    @if (departmentAdminsStore.error()) {
+      <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+        {{ departmentAdminsStore.error() ?? '' | t }}
+      </div>
+    }
+    @if (branchAdminsStore.success()) {
+      <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ branchAdminsStore.success() ?? '' | t }}
+      </div>
+    }
+    @if (branchAdminsStore.error()) {
+      <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+        {{ branchAdminsStore.error() ?? '' | t }}
+      </div>
+    }
+    @if (departmentsStore.success()) {
+      <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ departmentsStore.success() ?? '' | t }}
+      </div>
+    }
+    @if (departmentsStore.error()) {
+      <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+        {{ departmentsStore.error() ?? '' | t }}
+      </div>
+    }
+
+    <app-card [title]="branch.code" [subtitle]="branch.nameEn">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0">
+          @if (branch.nameAr) {
+            <p class="text-xs font-semibold text-slate-500">{{ branch.nameAr }}</p>
+          }
+          <p class="mt-2 text-xs text-slate-600">{{ branch.address || '-' }}</p>
+          <p class="mt-1 text-xs font-semibold text-slate-400">
+            {{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'medium') : '-' }}
+          </p>
+        </div>
+        <span
+          class="inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-bold"
+          [class.bg-emerald-50]="branch.isActive"
+          [class.text-emerald-700]="branch.isActive"
+          [class.bg-slate-100]="!branch.isActive"
+          [class.text-slate-500]="!branch.isActive"
+        >
+          {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
+        </span>
+      </div>
+    </app-card>
+
+    @if (editMode()) {
+      <app-card [title]="'branches.editBranch' | t" [subtitle]="'branches.editBranchSubtitle' | t">
+        <form class="space-y-3" [formGroup]="branchForm" (ngSubmit)="updateBranch()">
+          <div class="grid gap-3 md:grid-cols-2">
+            <app-input
+              [label]="'branches.nameEn' | t"
+              formControlName="nameEn"
+              [error]="fieldError('nameEn') | t"
+            />
+            <app-input
+              [label]="'branches.nameAr' | t"
+              formControlName="nameAr"
+              [error]="fieldError('nameAr') | t"
+            />
+          </div>
+          <div class="grid gap-3 md:grid-cols-2">
+            <app-input
+              [label]="'branches.code' | t"
+              formControlName="code"
+              [error]="fieldError('code') | t"
+            />
+            <app-input
+              [label]="'branches.address' | t"
+              formControlName="address"
+              [error]="fieldError('address') | t"
+            />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <app-button type="submit" [loading]="branchesStore.updating()">
+              <app-icon [icon]="saveIcon" [size]="17" />
+              {{ 'common.save' | t }}
+            </app-button>
+            <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
+              <app-icon [icon]="cancelIcon" [size]="17" />
+              {{ 'common.cancel' | t }}
+            </app-button>
+          </div>
+        </form>
+      </app-card>
+    }
+
+    <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <app-card [title]="'branches.branchAdminsCount' | t">
+        <p class="text-xl font-bold text-slate-900">{{ branch.summary.branchAdminsCount }}</p>
+      </app-card>
+      <app-card [title]="'branches.departmentsCount' | t">
+        <p class="text-xl font-bold text-slate-900">{{ branch.summary.departmentsCount }}</p>
+      </app-card>
+      <app-card [title]="'branches.branchUsersCount' | t">
+        <p class="text-xl font-bold text-slate-900">{{ branch.summary.branchUsersCount }}</p>
+      </app-card>
+      <app-card [title]="'branches.questionsCount' | t">
+        <p class="text-xl font-bold text-slate-900">{{ branch.summary.questionsCount }}</p>
+      </app-card>
+    </section>
+
+    <div class="grid gap-3 xl:grid-cols-2">
+      <app-card [title]="'branches.branchAdmins' | t">
+        <div class="space-y-2">
+          @for (admin of branch.branchAdmins; track admin.branchAdminId) {
+            <button
+              type="button"
+              class="w-full rounded-xl border border-slate-100 p-3 text-start transition hover:border-[#11A7C9]/40 hover:bg-cyan-50/40"
+              (click)="openBranchAdminDetails(admin)"
+            >
+              <p class="text-sm font-bold text-slate-900">{{ admin.nameEn }}</p>
+              <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
+              @if (admin.phoneNumber) {
+                <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
+              }
+            </button>
+          } @empty {
+            <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+          }
+        </div>
+      </app-card>
+
+      <app-card [title]="'common.departments' | t">
+        <div class="space-y-2">
+          @for (department of branch.departments; track department.departmentId) {
+            <div
+              role="button"
+              tabindex="0"
+              class="rounded-xl border border-slate-100 p-3 transition hover:border-[#11A7C9]/40 hover:bg-cyan-50/40"
+              (click)="openDepartmentDetails(department)"
+              (keydown.enter)="openDepartmentDetails(department)"
+              (keydown.space)="$event.preventDefault(); openDepartmentDetails(department)"
+            >
+              <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                <div class="min-w-0">
+                  <p class="text-sm font-bold text-slate-900">
+                    {{ department.nameEn }}{{ department.code ? ' - ' + department.code : '' }}
+                  </p>
+                  @if (department.nameAr) {
+                    <p class="mt-1 text-xs text-slate-500">{{ department.nameAr }}</p>
+                  }
+                </div>
+                <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                  <p class="text-xs font-semibold text-slate-500">
+                    {{ 'branches.operatorsCount' | t }}: {{ department.operatorsCount }}
+                  </p>
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    (pressed)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
+                  >
+                    <app-icon [icon]="userPlusIcon" [size]="15" />
+                    {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+                  </app-button>
+                </div>
+              </div>
+              @if (department.departmentAdmins.length > 0) {
+                <div class="mt-3 border-t border-slate-100 pt-3">
+                  @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
+                    <p class="text-xs text-slate-600">{{ admin.nameEn }} - {{ admin.email }}</p>
+                  }
+                </div>
+              }
+            </div>
+          } @empty {
+            <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+          }
+        </div>
+      </app-card>
+
+      <app-card [title]="'branches.branchUsers' | t">
+        <div class="space-y-2">
+          @for (user of branch.branchUsers; track user.branchUserId) {
+            <div class="rounded-xl border border-slate-100 p-3">
+              <p class="text-sm font-bold text-slate-900">{{ user.nameEn }}</p>
+              <p class="mt-1 text-xs text-slate-500">{{ user.userName }} - {{ user.email }}</p>
+              @if (user.roles.length > 0) {
+                <div class="mt-2 flex flex-wrap gap-2">
+                  @for (role of user.roles; track role.roleId) {
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                      {{ role.name }}
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          } @empty {
+            <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+          }
+        </div>
+      </app-card>
+
+      <app-card [title]="'branches.templates' | t">
+        <div class="space-y-2">
+          @for (template of branch.templates; track template.templateId) {
+            <div class="rounded-xl border border-slate-100 p-3">
+              <p class="text-sm font-bold text-slate-900">{{ template.nameEn }}</p>
+              @if (template.description) {
+                <p class="mt-1 text-xs text-slate-500">{{ template.description }}</p>
+              }
+              <p class="mt-2 text-xs font-semibold text-slate-500">
+                {{ template.status }} - {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
+              </p>
+            </div>
+          } @empty {
+            <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+          }
+        </div>
+      </app-card>
+    </div>
+
+    <app-card [title]="'branches.questionGroups' | t">
+      <div class="grid gap-3 xl:grid-cols-2">
+        @for (group of branch.questionGroups; track group.groupId) {
+          <div class="rounded-xl border border-slate-100 p-3">
+            <p class="text-sm font-bold text-slate-900">{{ group.nameEn }}</p>
+            @if (group.nameAr) {
+              <p class="mt-1 text-xs text-slate-500">{{ group.nameAr }}</p>
+            }
+            @for (question of group.questions; track question.questionId) {
+              <div class="mt-2 rounded-lg bg-slate-50 p-2.5">
+                <p class="text-xs font-semibold text-slate-700">{{ question.textEn }} - {{ question.type }}</p>
+                @if (question.textAr) {
+                  <p class="mt-1 text-xs text-slate-500">{{ question.textAr }}</p>
+                }
+              </div>
+            } @empty {
+              <p class="mt-2 text-xs text-slate-500">{{ 'common.noRecords' | t }}</p>
+            }
+          </div>
+        } @empty {
+          <p class="text-sm text-slate-500">{{ 'common.noRecords' | t }}</p>
+        }
+      </div>
+    </app-card>
+  }
+</div>
+
+<app-modal
+  [title]="'branchAdmins.detailsTitle' | t"
+  [open]="branchAdminDetailsModalOpen()"
+  (closed)="closeBranchAdminDetails()"
+>
+  @if (selectedBranchAdmin(); as admin) {
+    <form class="space-y-3" [formGroup]="branchAdminDetailsForm" (ngSubmit)="updateBranchAdmin()">
+      <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+        <p class="text-sm font-bold text-slate-900">{{ admin.nameEn }}</p>
+        <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
+        @if (admin.phoneNumber) {
+          <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
+        }
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'branches.adminNameEn' | t"
+          formControlName="nameEn"
+          [error]="branchAdminDetailsFieldError('nameEn') | t"
+        />
+        <app-input
+          [label]="'branches.adminNameAr' | t"
+          formControlName="nameAr"
+          [error]="branchAdminDetailsFieldError('nameAr') | t"
+        />
+      </div>
+
+      <app-input
+        [label]="'branches.userName' | t"
+        formControlName="userName"
+        [error]="branchAdminDetailsFieldError('userName') | t"
+      />
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'common.email' | t"
+          type="email"
+          formControlName="email"
+          [error]="branchAdminDetailsFieldError('email') | t"
+        />
+        <app-input
+          [label]="'branches.phoneNumber' | t"
+          formControlName="phoneNumber"
+          [error]="branchAdminDetailsFieldError('phoneNumber') | t"
+        />
+      </div>
+
+      <div class="flex flex-col justify-between gap-2 pt-1 sm:flex-row sm:flex-wrap">
+        <app-button type="button" variant="danger" [loading]="branchAdminsStore.deleting()" (pressed)="deleteBranchAdmin()">
+          <app-icon [icon]="deleteIcon" [size]="16" />
+          {{ 'common.delete' | t }}
+        </app-button>
+        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <app-button type="button" variant="secondary" (pressed)="closeBranchAdminDetails()">
+            <app-icon [icon]="cancelIcon" [size]="16" />
+            {{ 'common.cancel' | t }}
+          </app-button>
+          <app-button type="submit" [loading]="branchAdminsStore.updating()">
+            <app-icon [icon]="saveIcon" [size]="16" />
+            {{ 'common.save' | t }}
+          </app-button>
+        </div>
+      </div>
+    </form>
+  }
+</app-modal>
+
+<app-modal
+  [title]="'departments.detailsTitle' | t"
+  [open]="departmentDetailsModalOpen()"
+  (closed)="closeDepartmentDetails()"
+>
+  @if (selectedDepartmentDetails(); as department) {
+    <form class="space-y-3" [formGroup]="departmentDetailsForm" (ngSubmit)="updateDepartment()">
+      <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+        <p class="text-sm font-bold text-slate-900">
+          {{ department.nameEn }}{{ department.code ? ' - ' + department.code : '' }}
+        </p>
+        @if (department.nameAr) {
+          <p class="mt-1 text-xs text-slate-500">{{ department.nameAr }}</p>
+        }
+        <p class="mt-2 text-xs font-semibold text-slate-500">
+          {{ 'branches.operatorsCount' | t }}: {{ department.operatorsCount }}
+        </p>
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'departments.nameEn' | t"
+          formControlName="nameEn"
+          [error]="departmentDetailsFieldError('nameEn') | t"
+        />
+        <app-input
+          [label]="'departments.nameAr' | t"
+          formControlName="nameAr"
+          [error]="departmentDetailsFieldError('nameAr') | t"
+        />
+      </div>
+
+      @if (department.departmentAdmins.length > 0) {
+        <div class="rounded-xl border border-slate-100 p-3">
+          <p class="text-xs font-bold text-slate-500">{{ 'branches.departmentAdminsCount' | t }}</p>
+          @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
+            <p class="mt-2 text-xs text-slate-600">{{ admin.nameEn }} - {{ admin.email }}</p>
+          }
+        </div>
+      }
+
+      <div class="flex flex-col justify-between gap-2 pt-1 sm:flex-row sm:flex-wrap">
+        <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
+          <app-icon [icon]="deleteIcon" [size]="16" />
+          {{ 'common.delete' | t }}
+        </app-button>
+        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <app-button type="button" variant="secondary" (pressed)="closeDepartmentDetails()">
+            <app-icon [icon]="cancelIcon" [size]="16" />
+            {{ 'common.cancel' | t }}
+          </app-button>
+          <app-button type="submit" [loading]="departmentsStore.updating()">
+            <app-icon [icon]="saveIcon" [size]="16" />
+            {{ 'common.save' | t }}
+          </app-button>
+        </div>
+      </div>
+    </form>
+  }
+</app-modal>
+
+<app-modal
+  [title]="'departmentAdmins.createDepartmentAdmin' | t"
+  [open]="createDepartmentAdminModalOpen()"
+  (closed)="closeCreateDepartmentAdminModal()"
+>
+  <form class="space-y-3" [formGroup]="departmentAdminForm" (ngSubmit)="createDepartmentAdmin()">
+    @if (selectedDepartment(); as department) {
+      <div class="rounded-xl border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
+        {{ 'departments.selectedDepartment' | t }}:
+        <span class="text-[#0d94b3]">{{ department.nameEn }}{{ department.code ? ' - ' + department.code : '' }}</span>
+      </div>
+    }
+
+    <input type="hidden" formControlName="departmentId" />
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'departmentAdmins.nameEn' | t"
+        [placeholder]="'departmentAdmins.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="departmentAdminFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'departmentAdmins.nameAr' | t"
+        [placeholder]="'departmentAdmins.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="departmentAdminFieldError('nameAr') | t"
+      />
+    </div>
+
+    <app-input
+      [label]="'branches.userName' | t"
+      [placeholder]="'departmentAdmins.userNamePlaceholder' | t"
+      formControlName="userName"
+      [error]="departmentAdminFieldError('userName') | t"
+    />
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'common.email' | t"
+        type="email"
+        [placeholder]="'departmentAdmins.emailPlaceholder' | t"
+        formControlName="email"
+        [error]="departmentAdminFieldError('email') | t"
+      />
+      <app-input
+        [label]="'branches.phoneNumber' | t"
+        [placeholder]="'departmentAdmins.phoneNumberPlaceholder' | t"
+        formControlName="phoneNumber"
+        [error]="departmentAdminFieldError('phoneNumber') | t"
+      />
+    </div>
+
+    <app-input
+      [label]="'common.password' | t"
+      type="password"
+      [placeholder]="'departmentAdmins.passwordPlaceholder' | t"
+      formControlName="password"
+      [error]="departmentAdminFieldError('password') | t"
+    />
+
+    <app-button type="submit" [fullWidth]="true" [loading]="departmentAdminsStore.creating()">
+      <app-icon [icon]="userPlusIcon" [size]="17" />
+      {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+    </app-button>
+  </form>
+</app-modal>

@@ -29,7 +29,17 @@ export const routes: Routes = [
       {
         path: 'branches',
         loadChildren: () =>
-          import('./features/branches/branches.routes').then((m) => m.BRANCHES_ROUTES)
+          import('./features/super-admin/super-admin.routes').then((m) => m.SUPER_ADMIN_ROUTES)
+      },
+      {
+        path: 'departments',
+        loadChildren: () =>
+          import('./features/super-admin/departments/departments.routes').then((m) => m.DEPARTMENTS_ROUTES)
+      },
+      {
+        path: 'branch-admin',
+        loadChildren: () =>
+          import('./features/branch-admin/branch-admin.routes').then((m) => m.BRANCH_ADMIN_ROUTES)
       },
       {
         path: 'survey',
