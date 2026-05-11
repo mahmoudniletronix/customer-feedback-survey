@@ -35,7 +35,7 @@ export class MainLayoutComponent {
   readonly roleIcon = computed(() => {
     const role = this.authStore.role();
     if (role === 'SUPER_ADMIN') return ShieldCheck;
-    if (role === 'BRANCH_ADMIN') return Store;
+    if (role === 'BRANCH_ADMIN' || role === 'BRANCH_USER') return Store;
     return Briefcase;
   });
 
@@ -46,6 +46,9 @@ export class MainLayoutComponent {
     }
     if (role === 'BRANCH_ADMIN') {
       return this.i18n.translate('layout.branchOperations');
+    }
+    if (role === 'BRANCH_USER') {
+      return this.i18n.translate('layout.branchUserWorkspace');
     }
     return this.i18n.translate('layout.departmentWorkspace');
   });

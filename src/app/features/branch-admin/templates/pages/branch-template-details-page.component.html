@@ -1,0 +1,199 @@
+<div class="mx-auto max-w-5xl space-y-4 px-1 text-sm">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+      <app-button type="button" variant="secondary" (pressed)="goBack()">
+        <app-icon [icon]="arrowLeftIcon" [size]="17" />
+        {{ 'common.back' | t }}
+      </app-button>
+      <div class="min-w-0">
+        <p
+          class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
+        >
+          {{ 'common.branchAdmin' | t }}
+        </p>
+        <h2 class="mt-2 text-xl font-bold text-slate-900">
+          {{ 'branchTemplates.detailsTitle' | t }}
+        </h2>
+        <p class="mt-1 text-xs text-slate-500">{{ 'branchTemplates.detailsSubtitle' | t }}</p>
+      </div>
+    </div>
+
+    @if (templatesStore.selectedTemplate(); as template) {
+      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        @if (editMode()) {
+          <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
+            <app-icon [icon]="cancelIcon" [size]="17" />
+            {{ 'common.cancel' | t }}
+          </app-button>
+          <app-button
+            type="button"
+            [loading]="templatesStore.updating()"
+            (pressed)="updateTemplate()"
+          >
+            <app-icon [icon]="saveIcon" [size]="17" />
+            {{ 'common.save' | t }}
+          </app-button>
+        } @else {
+          <app-button type="button" variant="secondary" (pressed)="enableEdit()">
+            <app-icon [icon]="editIcon" [size]="17" />
+            {{ 'common.edit' | t }}
+          </app-button>
+          <app-button
+            type="button"
+            variant="danger"
+            [disabled]="!template.isActive || templatesStore.deleting()"
+            [loading]="templatesStore.deleting()"
+            (pressed)="deleteTemplate()"
+          >
+            <app-icon [icon]="deleteIcon" [size]="17" />
+            {{ 'common.delete' | t }}
+          </app-button>
+        }
+      </div>
+    }
+  </div>
+
+  @if (templatesStore.detailsLoading()) {
+    <div
+      class="flex items-center gap-2 rounded-xl border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
+    >
+      <span
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+      ></span>
+      {{ 'branchTemplates.detailsLoading' | t }}
+    </div>
+  } @else if (templatesStore.detailsError()) {
+    <div
+      class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+    >
+      {{ templatesStore.detailsError() ?? '' | t }}
+    </div>
+  } @else if (templatesStore.selectedTemplate(); as template) {
+    @if (templatesStore.success()) {
+      <div
+        class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
+        {{ templatesStore.success() ?? '' | t }}
+      </div>
+    }
+    @if (templatesStore.error()) {
+      <div
+        class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+      >
+        {{ templatesStore.error() ?? '' | t }}
+      </div>
+    }
+
+    <app-card [title]="template.nameEn" [subtitle]="template.nameAr">
+      @if (editMode()) {
+        <form class="space-y-3" [formGroup]="templateForm" (ngSubmit)="updateTemplate()">
+          <div class="grid gap-3 md:grid-cols-2">
+            <app-input
+              [label]="'branchTemplates.nameEn' | t"
+              [placeholder]="'branchTemplates.nameEnPlaceholder' | t"
+              formControlName="nameEn"
+              [error]="templateFieldError('nameEn') | t"
+            />
+            <app-input
+              [label]="'branchTemplates.nameAr' | t"
+              [placeholder]="'branchTemplates.nameArPlaceholder' | t"
+              formControlName="nameAr"
+              [error]="templateFieldError('nameAr') | t"
+            />
+          </div>
+
+          <app-input
+            [label]="'branchTemplates.templateDescription' | t"
+            [placeholder]="'branchTemplates.descriptionPlaceholder' | t"
+            formControlName="description"
+            [error]="templateFieldError('description') | t"
+          />
+
+          <div class="flex flex-wrap justify-end gap-2">
+            <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
+              {{ 'common.cancel' | t }}
+            </app-button>
+            <app-button type="submit" [loading]="templatesStore.updating()">
+              <app-icon [icon]="saveIcon" [size]="17" />
+              {{ 'common.save' | t }}
+            </app-button>
+          </div>
+        </form>
+      } @else {
+        <div class="space-y-5">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <div class="flex items-start gap-3">
+                <span
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+                >
+                  <app-icon [icon]="fileTextIcon" [size]="20" />
+                </span>
+                <div class="min-w-0">
+                  <p
+                    class="break-words text-base font-bold text-slate-900 [overflow-wrap:anywhere]"
+                  >
+                    {{ template.nameEn }}
+                  </p>
+                  <p
+                    class="mt-1 break-words text-sm font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                  >
+                    {{ template.nameAr || '-' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+                {{ template.status }}
+              </span>
+              <span
+                class="rounded-full px-2.5 py-1 text-xs font-bold"
+                [class.bg-emerald-50]="template.isActive"
+                [class.text-emerald-700]="template.isActive"
+                [class.bg-slate-100]="!template.isActive"
+                [class.text-slate-500]="!template.isActive"
+              >
+                {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-400">
+              {{ 'branchTemplates.templateDescription' | t }}
+            </p>
+            <p class="mt-2 break-words leading-6 text-slate-700 [overflow-wrap:anywhere]">
+              {{ template.description || '-' }}
+            </p>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-2">
+            <!-- <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+            <p class="text-xs font-bold text-slate-400">{{ 'branchTemplates.templateId' | t }}</p>
+            <p class="mt-1 break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
+              {{ template.templateId }}
+            </p>
+          </div> -->
+            <!-- <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+            <p class="text-xs font-bold text-slate-400">{{ 'branchTemplates.branchId' | t }}</p>
+            <p class="mt-1 break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
+              {{ template.branchId || '-' }}
+            </p>
+          </div> -->
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <p class="text-xs font-bold text-slate-400">{{ 'branches.questionsCount' | t }}</p>
+              <p class="mt-1 font-semibold text-slate-800">{{ template.questionsCount }}</p>
+            </div>
+            <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <p class="text-xs font-bold text-slate-400">{{ 'branches.createdOn' | t }}</p>
+              <p class="mt-1 font-semibold text-slate-800">
+                {{ template.createdOnUtc ? (template.createdOnUtc | date: 'medium') : '-' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+    </app-card>
+  }
+</div>

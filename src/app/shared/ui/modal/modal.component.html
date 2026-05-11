@@ -1,22 +1,28 @@
 @if (open()) {
-  <div class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-2 sm:items-center sm:p-4">
+  <div
+    class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-2 backdrop-blur-[2px] sm:items-center sm:p-4"
+  >
     <section
-      class="max-h-[calc(100dvh-1rem)] w-full overflow-y-auto rounded-xl bg-white p-4 shadow-2xl shadow-slate-950/20 sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:p-6"
+      class="max-h-[calc(100dvh-1rem)] w-full overflow-hidden rounded-2xl border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[calc(100dvh-2rem)]"
       [class.max-w-xl]="size() === 'md'"
-      [class.max-w-5xl]="size() === 'lg'"
+      [class.max-w-4xl]="size() === 'lg'"
     >
-      <header class="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 sm:-mx-6 sm:-mt-6 sm:mb-5 sm:px-6">
-        <h2 class="min-w-0 text-base font-bold text-slate-900 sm:text-lg">{{ title() }}</h2>
+      <header
+        class="flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3.5 sm:px-6"
+      >
+        <h2 class="min-w-0 text-base font-bold leading-6 text-slate-900">{{ title() }}</h2>
         <button
           type="button"
-          class="shrink-0 rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/30"
           [attr.aria-label]="'common.closeModal' | t"
           (click)="closed.emit()"
         >
-          X
+          ×
         </button>
       </header>
-      <ng-content />
+      <div class="max-h-[calc(100dvh-5.5rem)] overflow-y-auto p-4 sm:p-6">
+        <ng-content />
+      </div>
     </section>
   </div>
 }

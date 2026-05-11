@@ -1,38 +1,64 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, map, switchMap, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthSession, Role, User, UserType } from '../../../shared/models/role.model';
-import { LoginCredentials, LoginResponse } from '../models/auth.model';
+import { BranchUserMyRolesResponse, LoginCredentials, LoginResponse } from '../models/auth.model';
 
 const USER_TYPE_ROLE_MAP: Record<UserType, Role> = {
   SuperAdmin: 'SUPER_ADMIN',
   BranchAdmin: 'BRANCH_ADMIN',
   DepartmentAdmin: 'DEPARTMENT_ADMIN',
+  BranchUser: 'BRANCH_USER',
 };
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly loginUrl = `${environment.apiBaseUrl}/api/auth/login`;
+  private readonly branchUserMyRolesUrl = `${environment.apiBaseUrl}/api/branch-users/my-roles`;
 
   login(credentials: LoginCredentials): Observable<AuthSession> {
     return this.http.post<LoginResponse>(this.loginUrl, credentials).pipe(
-      map((response) => this.toSession(response, credentials.userNameOrEmail)),
+      switchMap((response) => this.resolveBranchUserRoles(response)),
+      map(({ response, branchUserRoles }) => this.toSession(response, credentials.userNameOrEmail, branchUserRoles)),
       catchError(() => throwError(() => new Error('auth.invalidCredentials'))),
     );
   }
 
-  private toSession(response: LoginResponse, userNameOrEmail: string): AuthSession {
+  private resolveBranchUserRoles(
+    response: LoginResponse,
+  ): Observable<{ response: LoginResponse; branchUserRoles: BranchUserMyRolesResponse | null }> {
+    const userType = this.resolveUserType(response);
+    if (userType !== 'BranchUser') {
+      return new Observable((subscriber) => {
+        subscriber.next({ response, branchUserRoles: null });
+        subscriber.complete();
+      });
+    }
+
+    return this.http
+      .get<BranchUserMyRolesResponse>(this.branchUserMyRolesUrl, {
+        headers: new HttpHeaders({ Authorization: `Bearer ${response.token}` }),
+      })
+      .pipe(map((branchUserRoles) => ({ response, branchUserRoles })));
+  }
+
+  private toSession(
+    response: LoginResponse,
+    userNameOrEmail: string,
+    branchUserRoles: BranchUserMyRolesResponse | null,
+  ): AuthSession {
     const userType = this.resolveUserType(response);
     const role = USER_TYPE_ROLE_MAP[userType];
     const tokenPayload = this.decodeJwtPayload(response.token);
     const user: User = {
-      id: this.readString(tokenPayload, 'sub') ?? userNameOrEmail,
+      id: branchUserRoles?.applicationUserId ?? this.readString(tokenPayload, 'sub') ?? userNameOrEmail,
       name: this.readString(tokenPayload, 'name') ?? this.displayName(userNameOrEmail),
       email: this.readString(tokenPayload, 'email') ?? userNameOrEmail,
       role,
       branchId:
+        branchUserRoles?.branchId ??
         this.readString(tokenPayload, 'branchId') ??
         this.readString(tokenPayload, 'BranchId') ??
         this.readString(tokenPayload, 'branch_id') ??
@@ -47,8 +73,8 @@ export class AuthService {
     return {
       token: response.token,
       userType,
-      roles: response.roles,
-      permissions: response.permissions,
+      roles: this.resolveApiRoles(response, branchUserRoles),
+      permissions: response.permissions ?? [],
       user,
     };
   }
@@ -58,11 +84,14 @@ export class AuthService {
       return response.userType;
     }
 
-    if (response.roles.includes('System Administrator')) {
+    const roles = response.roles ?? [];
+    const permissions = response.permissions ?? [];
+
+    if (roles.includes('System Administrator')) {
       return 'SuperAdmin';
     }
 
-    if (response.permissions.some((permission) => permission.startsWith('BranchAdmins.'))) {
+    if (permissions.some((permission) => permission.startsWith('BranchAdmins.'))) {
       return 'BranchAdmin';
     }
 
@@ -70,7 +99,16 @@ export class AuthService {
   }
 
   private isUserType(value: unknown): value is UserType {
-    return value === 'SuperAdmin' || value === 'BranchAdmin' || value === 'DepartmentAdmin';
+    return value === 'SuperAdmin' || value === 'BranchAdmin' || value === 'DepartmentAdmin' || value === 'BranchUser';
+  }
+
+  private resolveApiRoles(
+    response: LoginResponse,
+    branchUserRoles: BranchUserMyRolesResponse | null,
+  ): readonly string[] {
+    const responseRoles = response.roles ?? [];
+    const assignedRoles = branchUserRoles?.roles?.map((role) => role.name ?? '').filter((role) => role.length > 0) ?? [];
+    return [...new Set([...responseRoles, ...assignedRoles])];
   }
 
   private displayName(userNameOrEmail: string): string {

@@ -16,44 +16,22 @@
     </app-card>
 
     <app-card [title]="'dashboard.roleWorkspace' | t" [subtitle]="'dashboard.roleWorkspaceSubtitle' | t">
-      @switch (authStore.role()) {
-        @case ('SUPER_ADMIN') {
-          <div class="space-y-3 text-sm text-slate-600">
-            <a routerLink="/branches" class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4 transition hover:bg-cyan-50 hover:text-[#0e8bab]">
-              <app-icon [icon]="buildingIcon" [size]="18" />
-              {{ 'dashboard.actionManageBranches' | t }}
-            </a>
-            <p class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-              <app-icon [icon]="chartIcon" [size]="18" />
-              {{ 'dashboard.actionReviewGlobalReports' | t }}
-            </p>
-          </div>
+      <div class="space-y-3 text-sm text-slate-600">
+        @for (action of workspaceActions(); track action.path) {
+          <a
+            [routerLink]="action.path"
+            class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4 transition hover:bg-cyan-50 hover:text-[#0e8bab]"
+          >
+            <app-icon [icon]="action.icon" [size]="18" />
+            {{ action.labelKey | t }}
+          </a>
+        } @empty {
+          <p class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+            <app-icon [icon]="fileTextIcon" [size]="18" />
+            {{ 'common.noRecords' | t }}
+          </p>
         }
-        @case ('BRANCH_ADMIN') {
-          <div class="space-y-3 text-sm text-slate-600">
-            <p class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-              <app-icon [icon]="userCogIcon" [size]="18" />
-              {{ 'dashboard.actionManageDepartments' | t }}
-            </p>
-            <p class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-              <app-icon [icon]="chartIcon" [size]="18" />
-              {{ 'dashboard.actionTrackBranchAnalytics' | t }}
-            </p>
-          </div>
-        }
-        @default {
-          <div class="space-y-3 text-sm text-slate-600">
-            <p class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-              <app-icon [icon]="squarePenIcon" [size]="18" />
-              {{ 'dashboard.actionCreateSurveys' | t }}
-            </p>
-            <p class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-              <app-icon [icon]="fileTextIcon" [size]="18" />
-              {{ 'dashboard.actionReviewFeedback' | t }}
-            </p>
-          </div>
-        }
-      }
+      </div>
     </app-card>
   </div>
 </div>

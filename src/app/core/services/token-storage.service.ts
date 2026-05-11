@@ -74,11 +74,16 @@ export class TokenStorageService {
   }
 
   private isRole(value: unknown): value is Role {
-    return value === 'SUPER_ADMIN' || value === 'BRANCH_ADMIN' || value === 'DEPARTMENT_ADMIN';
+    return (
+      value === 'SUPER_ADMIN' ||
+      value === 'BRANCH_ADMIN' ||
+      value === 'DEPARTMENT_ADMIN' ||
+      value === 'BRANCH_USER'
+    );
   }
 
   private isUserType(value: unknown): value is UserType {
-    return value === 'SuperAdmin' || value === 'BranchAdmin' || value === 'DepartmentAdmin';
+    return value === 'SuperAdmin' || value === 'BranchAdmin' || value === 'DepartmentAdmin' || value === 'BranchUser';
   }
 
   private getSessionFromToken(): AuthSession | null {
@@ -162,6 +167,9 @@ export class TokenStorageService {
     if (roles.some((role) => role === 'DepartmentAdmin' || role === 'Department Administrator')) {
       return 'DepartmentAdmin';
     }
+    if (roles.some((role) => role === 'BranchUser' || role === 'Branch User')) {
+      return 'BranchUser';
+    }
 
     return null;
   }
@@ -172,6 +180,9 @@ export class TokenStorageService {
     }
     if (userType === 'BranchAdmin') {
       return 'BRANCH_ADMIN';
+    }
+    if (userType === 'BranchUser') {
+      return 'BRANCH_USER';
     }
     return 'DEPARTMENT_ADMIN';
   }

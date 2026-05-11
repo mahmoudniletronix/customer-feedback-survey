@@ -96,6 +96,17 @@
   color: #11a7c9;
 }
 
+.nav-item-child {
+  margin-inline-start: 1rem;
+  padding-inline-start: 0.55rem;
+  font-size: 0.84rem;
+}
+
+.sidebar-collapsed .nav-item-child {
+  margin-inline-start: 0;
+  padding-inline-start: 0.65rem;
+}
+
 /* Active State */
 .nav-item-active {
   background: rgba(255, 255, 255, 0.12) !important;

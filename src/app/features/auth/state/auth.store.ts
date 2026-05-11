@@ -71,9 +71,72 @@ export class AuthStore {
     if (role === 'BRANCH_ADMIN') {
       return '/branch-admin';
     }
+    if (this.canAccessTemplates()) {
+      return '/branch-admin/templates';
+    }
+    if (this.canAccessQuestions()) {
+      return '/branch-admin/questions';
+    }
+    if (this.canAccessQuestionGroups()) {
+      return '/branch-admin/question-groups';
+    }
+    if (this.canAccessReports()) {
+      return '/reports';
+    }
     if (role === 'DEPARTMENT_ADMIN') {
       return '/survey';
     }
     return '/dashboard';
+  }
+
+  canAccessTemplates(): boolean {
+    return this.role() === 'BRANCH_ADMIN' || this.hasApiRole('Template Editor');
+  }
+
+  canAccessQuestionGroups(): boolean {
+    return (
+      this.role() === 'BRANCH_ADMIN' ||
+      this.hasApiRole('Question Editor') ||
+      this.hasPermission('QuestionGroups.ViewAll')
+    );
+  }
+
+  canManageQuestionGroups(action: 'Create' | 'Update' | 'Delete' | 'ViewAll'): boolean {
+    return (
+      this.role() === 'BRANCH_ADMIN' ||
+      this.hasApiRole('Question Editor') ||
+      this.hasPermission(`QuestionGroups.${action}`)
+    );
+  }
+
+  canAccessQuestions(): boolean {
+    return this.role() === 'BRANCH_ADMIN' || this.hasApiRole('Question Editor') || this.hasPermission('Questions.ViewAll');
+  }
+
+  canManageQuestions(action: 'Create' | 'Update' | 'Delete' | 'ViewAll'): boolean {
+    return (
+      this.role() === 'BRANCH_ADMIN' ||
+      this.hasApiRole('Question Editor') ||
+      this.hasPermission(`Questions.${action}`)
+    );
+  }
+
+  canAccessReports(): boolean {
+    const role = this.role();
+    return role === 'SUPER_ADMIN' || role === 'DEPARTMENT_ADMIN' || this.hasApiRole('Report Viewer');
+  }
+
+  hasApiRole(expectedRole: string): boolean {
+    return this.apiRoles().some((role) => this.normalizeRole(role) === this.normalizeRole(expectedRole));
+  }
+
+  hasPermission(expectedPermission: string): boolean {
+    return this.permissions().some(
+      (permission) => this.normalizeRole(permission) === this.normalizeRole(expectedPermission),
+    );
+  }
+
+  private normalizeRole(role: string): string {
+    return role.replace(/[\s_-]/g, '').toLowerCase();
   }
 }

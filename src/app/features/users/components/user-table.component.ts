@@ -38,7 +38,8 @@ export class UserTableComponent {
     const key = {
       SUPER_ADMIN: 'common.superAdmin',
       BRANCH_ADMIN: 'common.branchAdmin',
-      DEPARTMENT_ADMIN: 'common.departmentAdmin'
+      DEPARTMENT_ADMIN: 'common.departmentAdmin',
+      BRANCH_USER: 'common.branchUser'
     }[role];
 
     return this.i18n.translate(key);

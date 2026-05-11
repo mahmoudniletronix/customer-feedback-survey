@@ -1,0 +1,480 @@
+<div class="mx-auto max-w-7xl space-y-4 px-1 text-sm">
+  <div>
+    <!-- <p
+      class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
+    >
+      {{ 'common.branchAdmin' | t }}
+    </p> -->
+    <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'branchTemplates.title' | t }}</h2>
+    <p class="mt-1 text-xs text-slate-500">{{ 'branchTemplates.description' | t }}</p>
+  </div>
+
+  @if (templatesStore.success()) {
+    <div
+      class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+    >
+      {{ templatesStore.success() ?? '' | t }}
+    </div>
+  }
+
+  @if (templatesStore.error()) {
+    <div
+      class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+    >
+      {{ templatesStore.error() ?? '' | t }}
+    </div>
+  }
+
+  <app-card
+    [title]="'branchTemplates.createTitle' | t"
+    [subtitle]="'branchTemplates.createSubtitle' | t"
+  >
+    <form class="space-y-3" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'branchTemplates.nameEn' | t"
+          [placeholder]="'branchTemplates.nameEnPlaceholder' | t"
+          formControlName="nameEn"
+          [error]="templateFieldError('nameEn') | t"
+        />
+        <app-input
+          [label]="'branchTemplates.nameAr' | t"
+          [placeholder]="'branchTemplates.nameArPlaceholder' | t"
+          formControlName="nameAr"
+          [error]="templateFieldError('nameAr') | t"
+        />
+      </div>
+
+      <app-input
+        [label]="'branchTemplates.templateDescription' | t"
+        [placeholder]="'branchTemplates.descriptionPlaceholder' | t"
+        formControlName="description"
+        [error]="templateFieldError('description') | t"
+      />
+
+      <div class="flex justify-end">
+        <app-button type="submit" [loading]="templatesStore.creating()">
+          <app-icon [icon]="plusIcon" [size]="17" />
+          {{ 'branchTemplates.createAction' | t }}
+        </app-button>
+      </div>
+    </form>
+  </app-card>
+
+  <app-card
+    [title]="'branchTemplates.listTitle' | t"
+    [subtitle]="'branchTemplates.listSubtitle' | t"
+  >
+    <form
+      class="mb-4 grid gap-3 lg:grid-cols-[1fr_10rem_10rem_auto_auto]"
+      [formGroup]="searchForm"
+      (ngSubmit)="searchTemplates()"
+    >
+      <app-input
+        [label]="'branchTemplates.search' | t"
+        [placeholder]="'branchTemplates.searchPlaceholder' | t"
+        formControlName="searchText"
+      />
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
+          {{ 'branchTemplates.isActiveFilter' | t }}
+        </span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="isActive"
+        >
+          <option value="">{{ 'branchTemplates.allTemplates' | t }}</option>
+          <option value="true">{{ 'common.active' | t }}</option>
+          <option value="false">{{ 'branches.inactive' | t }}</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
+          {{ 'branchTemplates.orderSort' | t }}
+        </span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="orderSort"
+        >
+          <option value="">{{ 'branchTemplates.defaultSort' | t }}</option>
+          <option value="Newest">{{ 'branchTemplates.newest' | t }}</option>
+          <option value="Oldest">{{ 'branchTemplates.oldest' | t }}</option>
+        </select>
+      </label>
+      <div class="flex items-end">
+        <app-button type="submit" [loading]="templatesStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="17" />
+          {{ 'branches.searchAction' | t }}
+        </app-button>
+      </div>
+      <div class="flex items-end">
+        <app-button type="button" variant="secondary" (pressed)="clearTemplateSearch()">
+          {{ 'branches.clearSearch' | t }}
+        </app-button>
+      </div>
+    </form>
+
+    <div class="hidden overflow-hidden rounded-xl border border-slate-100 lg:block">
+      <div class="overflow-x-auto">
+        <table class="w-full table-fixed divide-y divide-slate-100 text-sm">
+          <colgroup>
+            <col class="w-[17%]" />
+            <col class="w-[15%]" />
+            <col class="w-[34%]" />
+            <col class="w-[12%]" />
+            <col class="w-[10%]" />
+            <col class="w-[11%]" />
+            <col class="w-[11%]" />
+          </colgroup>
+          <thead
+            class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+          >
+            <tr>
+              <th class="px-4 py-3">{{ 'branchTemplates.nameEn' | t }}</th>
+              <th class="px-4 py-3">{{ 'branchTemplates.nameAr' | t }}</th>
+              <th class="px-4 py-3">{{ 'branchTemplates.templateDescription' | t }}</th>
+              <th class="px-4 py-3">{{ 'common.status' | t }}</th>
+              <th class="px-4 py-3">{{ 'branches.questionsCount' | t }}</th>
+              <th class="px-4 py-3">{{ 'branches.createdOn' | t }}</th>
+              <th class="px-4 py-3 text-end">{{ 'branches.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
+            @if (templatesStore.loading()) {
+              <tr>
+                <td class="px-4 py-8 text-center text-slate-500" colspan="7">
+                  <span
+                    class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                  ></span>
+                  {{ 'branchTemplates.loading' | t }}
+                </td>
+              </tr>
+            } @else {
+              @for (template of templatesStore.templates(); track template.templateId) {
+                <tr
+                  class="cursor-pointer align-top transition hover:bg-slate-50"
+                  [routerLink]="[template.templateId]"
+                >
+                  <td class="px-4 py-3">
+                    <p class="break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
+                      {{ template.nameEn }}
+                    </p>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    <p class="break-words [overflow-wrap:anywhere]">{{ template.nameAr || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    <p
+                      class="max-h-20 overflow-hidden break-words leading-5 [overflow-wrap:anywhere]"
+                    >
+                      {{ template.description || '-' }}
+                    </p>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex flex-wrap gap-2">
+                      <span
+                        class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600"
+                      >
+                        {{ template.status }}
+                      </span>
+                      <span
+                        class="rounded-full px-2.5 py-1 text-xs font-bold"
+                        [class.bg-emerald-50]="template.isActive"
+                        [class.text-emerald-700]="template.isActive"
+                        [class.bg-slate-100]="!template.isActive"
+                        [class.text-slate-500]="!template.isActive"
+                      >
+                        {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    {{ template.questionsCount }}
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    {{ template.createdOnUtc ? (template.createdOnUtc | date: 'mediumDate') : '-' }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex justify-end gap-2">
+                      <app-button
+                        size="sm"
+                        type="button"
+                        variant="secondary"
+                        (pressed)="openEditTemplate($event, template)"
+                      >
+                        <app-icon [icon]="editIcon" [size]="15" />
+                      </app-button>
+                      @if (template.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="danger"
+                          [disabled]="templatesStore.deleting()"
+                          [loading]="templatesStore.deleting()"
+                          (pressed)="deleteTemplate($event, template)"
+                        >
+                          <app-icon [icon]="deleteIcon" [size]="15" />
+                        </app-button>
+                      } @else {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          [disabled]="templatesStore.restoring()"
+                          [loading]="templatesStore.restoring()"
+                          (pressed)="restoreTemplate($event, template)"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="15" />
+                        </app-button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td class="px-4 py-8 text-center text-slate-500" colspan="7">
+                    <app-icon
+                      class="mx-auto mb-2 text-slate-300"
+                      [icon]="fileTextIcon"
+                      [size]="24"
+                    />
+                    {{ 'common.noRecords' | t }}
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="space-y-3 lg:hidden">
+      @if (templatesStore.loading()) {
+        <div class="rounded-xl border border-slate-100 bg-white p-4 text-center text-slate-500">
+          <span
+            class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+          ></span>
+          {{ 'branchTemplates.loading' | t }}
+        </div>
+      } @else {
+        @for (template of templatesStore.templates(); track template.templateId) {
+          <article
+            class="cursor-pointer rounded-xl border border-slate-100 bg-white p-4 transition hover:border-cyan-100 hover:bg-slate-50"
+            [routerLink]="[template.templateId]"
+          >
+            <div class="flex items-start gap-3">
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+              >
+                <app-icon [icon]="fileTextIcon" [size]="18" />
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
+                  {{ template.nameEn }}
+                </p>
+                <p
+                  class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                >
+                  {{ template.nameAr || '-' }}
+                </p>
+              </div>
+            </div>
+
+            <p class="mt-3 break-words text-xs leading-5 text-slate-600 [overflow-wrap:anywhere]">
+              {{ template.description || '-' }}
+            </p>
+
+            <div class="mt-4 grid gap-2 text-xs text-slate-600 sm:grid-cols-3">
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'common.status' | t }}</p>
+                <div class="mt-1 flex flex-wrap gap-1.5">
+                  <span class="rounded-full bg-slate-100 px-2 py-1 font-bold text-slate-600">
+                    {{ template.status }}
+                  </span>
+                  <span
+                    class="rounded-full px-2 py-1 font-bold"
+                    [class.bg-emerald-50]="template.isActive"
+                    [class.text-emerald-700]="template.isActive"
+                    [class.bg-slate-100]="!template.isActive"
+                    [class.text-slate-500]="!template.isActive"
+                  >
+                    {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  </span>
+                </div>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'branches.questionsCount' | t }}</p>
+                <p class="mt-1 font-semibold text-slate-800">{{ template.questionsCount }}</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'branches.createdOn' | t }}</p>
+                <p class="mt-1 font-semibold text-slate-800">
+                  {{ template.createdOnUtc ? (template.createdOnUtc | date: 'mediumDate') : '-' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
+              <app-button
+                size="sm"
+                type="button"
+                variant="secondary"
+                (pressed)="openEditTemplate($event, template)"
+              >
+                <app-icon [icon]="editIcon" [size]="15" />
+                {{ 'common.edit' | t }}
+              </app-button>
+              @if (template.isActive) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="danger"
+                  [disabled]="templatesStore.deleting()"
+                  [loading]="templatesStore.deleting()"
+                  (pressed)="deleteTemplate($event, template)"
+                >
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                  {{ 'common.delete' | t }}
+                </app-button>
+              } @else {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  [disabled]="templatesStore.restoring()"
+                  [loading]="templatesStore.restoring()"
+                  (pressed)="restoreTemplate($event, template)"
+                >
+                  <app-icon [icon]="restoreIcon" [size]="15" />
+                  {{ 'branchTemplates.restore' | t }}
+                </app-button>
+              }
+            </div>
+          </article>
+        } @empty {
+          <div class="rounded-xl border border-slate-100 bg-white p-6 text-center text-slate-500">
+            <app-icon class="mx-auto mb-2 text-slate-300" [icon]="fileTextIcon" [size]="24" />
+            {{ 'common.noRecords' | t }}
+          </div>
+        }
+      }
+    </div>
+
+    <div
+      class="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
+    >
+      <p class="text-sm font-semibold text-slate-500">
+        {{ 'branches.paginationSummary' | t }}
+        {{ templatesStore.currentPage() }} / {{ templatesStore.totalPages() }}
+        -
+        {{ templatesStore.totalItems() }} {{ 'branchTemplates.totalItems' | t }}
+      </p>
+      <div class="flex gap-2">
+        <app-button
+          size="sm"
+          type="button"
+          variant="secondary"
+          [disabled]="!templatesStore.hasPreviousPage() || templatesStore.loading()"
+          (pressed)="goToPreviousTemplatesPage()"
+        >
+          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          {{ 'branches.previousPage' | t }}
+        </app-button>
+        <app-button
+          size="sm"
+          type="button"
+          variant="secondary"
+          [disabled]="!templatesStore.hasNextPage() || templatesStore.loading()"
+          (pressed)="goToNextTemplatesPage()"
+        >
+          {{ 'branches.nextPage' | t }}
+          <app-icon [icon]="chevronRightIcon" [size]="15" />
+        </app-button>
+      </div>
+    </div>
+  </app-card>
+
+  @if (templatesStore.createdTemplate(); as template) {
+    <app-card [title]="'branchTemplates.createdTemplate' | t">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span
+              class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+            >
+              <app-icon [icon]="fileTextIcon" [size]="18" />
+            </span>
+            <div class="min-w-0">
+              <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
+                {{ template.nameEn }}
+              </p>
+              <p class="break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]">
+                {{ template.nameAr }}
+              </p>
+            </div>
+          </div>
+          <p class="mt-3 break-words text-xs text-slate-600 [overflow-wrap:anywhere]">
+            {{ template.description }}
+          </p>
+          <p class="mt-2 break-words text-xs font-semibold text-slate-400 [overflow-wrap:anywhere]">
+            {{ 'branchTemplates.templateId' | t }}: {{ template.templateId }}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+            {{ template.status }}
+          </span>
+          <span
+            class="rounded-full px-2.5 py-1 text-xs font-bold"
+            [class.bg-emerald-50]="template.isActive"
+            [class.text-emerald-700]="template.isActive"
+            [class.bg-slate-100]="!template.isActive"
+            [class.text-slate-500]="!template.isActive"
+          >
+            {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
+          </span>
+        </div>
+      </div>
+    </app-card>
+  }
+</div>
+
+<app-modal
+  [title]="'branchTemplates.updateTitle' | t"
+  [open]="editModalOpen()"
+  (closed)="closeEditTemplate()"
+>
+  <form class="space-y-3" [formGroup]="editTemplateForm" (ngSubmit)="updateSelectedTemplate()">
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'branchTemplates.nameEn' | t"
+        [placeholder]="'branchTemplates.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="editTemplateFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'branchTemplates.nameAr' | t"
+        [placeholder]="'branchTemplates.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="editTemplateFieldError('nameAr') | t"
+      />
+    </div>
+
+    <app-input
+      [label]="'branchTemplates.templateDescription' | t"
+      [placeholder]="'branchTemplates.descriptionPlaceholder' | t"
+      formControlName="description"
+      [error]="editTemplateFieldError('description') | t"
+    />
+
+    <div class="flex flex-wrap justify-end gap-2">
+      <app-button type="button" variant="secondary" (pressed)="closeEditTemplate()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="templatesStore.updating()">
+        <app-icon [icon]="editIcon" [size]="17" />
+        {{ 'common.save' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>

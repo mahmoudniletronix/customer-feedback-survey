@@ -1,5 +1,5 @@
 <div
-  class="min-h-screen bg-[#F7F9FC] lg:grid"
+  class="h-dvh overflow-hidden bg-[#F7F9FC] lg:grid"
   [class.lg:grid-cols-[5rem_1fr]]="sidebarCollapsed()"
   [class.lg:grid-cols-[18rem_1fr]]="!sidebarCollapsed()"
 >
@@ -18,18 +18,18 @@
     (toggle)="toggleSidebar()"
     (close)="closeMobileSidebar()"
   />
-  <div class="min-w-0">
-    <header class="app-header sticky top-0 z-30">
+  <div class="flex h-dvh min-w-0 flex-col">
+    <header class="app-header sticky top-0 z-30 shrink-0">
       <div class="header-container flex items-center justify-between gap-2 sm:gap-4">
         <div class="header-left flex min-w-0 items-center gap-2 sm:gap-4">
-          <button
+          <!-- <button
             type="button"
             class="mobile-menu-btn lg:hidden"
             [attr.aria-label]="'common.openSidebar' | t"
             (click)="openMobileSidebar()"
           >
             <app-icon [icon]="menuIcon" [size]="18" />
-          </button>
+          </button> -->
           <div class="role-icon-tile">
             <app-icon [icon]="roleIcon()" [size]="20" />
           </div>
@@ -85,7 +85,7 @@
         </div>
       </div>
     </header>
-    <main class="min-w-0 p-3 sm:p-4 lg:p-6 xl:p-8">
+    <main class="min-h-0 min-w-0 flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 xl:p-8">
       <router-outlet />
     </main>
   </div>

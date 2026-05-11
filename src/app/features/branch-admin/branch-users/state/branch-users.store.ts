@@ -54,7 +54,9 @@ export class BranchUsersStore {
   readonly assigningRoles = this.assigningRolesSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())),
+  );
   readonly hasPreviousPage = computed(() => this.currentPageSignal() > 1);
   readonly hasNextPage = computed(() => this.currentPageSignal() < this.totalPages());
 
@@ -73,7 +75,7 @@ export class BranchUsersStore {
       .list(nextQuery)
       .pipe(
         take(1),
-        finalize(() => this.loadingSignal.set(false))
+        finalize(() => this.loadingSignal.set(false)),
       )
       .subscribe({
         next: (page) => {
@@ -98,7 +100,7 @@ export class BranchUsersStore {
       .rolesSelection()
       .pipe(
         take(1),
-        finalize(() => this.rolesLoadingSignal.set(false))
+        finalize(() => this.rolesLoadingSignal.set(false)),
       )
       .subscribe({
         next: (roles) => {
@@ -139,7 +141,7 @@ export class BranchUsersStore {
       .create(payload)
       .pipe(
         take(1),
-        finalize(() => this.creatingSignal.set(false))
+        finalize(() => this.creatingSignal.set(false)),
       )
       .subscribe({
         next: () => {
@@ -153,7 +155,11 @@ export class BranchUsersStore {
       });
   }
 
-  assignRoles(applicationUserId: string, payload: AssignBranchUserRolesPayload, onAssigned: () => void): void {
+  assignRoles(
+    applicationUserId: string,
+    payload: AssignBranchUserRolesPayload,
+    onAssigned: () => void,
+  ): void {
     this.assigningRolesSignal.set(true);
     this.errorSignal.set(null);
     this.successSignal.set(null);
@@ -162,7 +168,7 @@ export class BranchUsersStore {
       .assignRoles(applicationUserId, payload)
       .pipe(
         take(1),
-        finalize(() => this.assigningRolesSignal.set(false))
+        finalize(() => this.assigningRolesSignal.set(false)),
       )
       .subscribe({
         next: () => {
@@ -209,10 +215,16 @@ export class BranchUsersStore {
 
   private mapBackendErrorCode(code: string): string {
     const normalizedCode = code.toLowerCase();
-    if (normalizedCode.includes('usernamealreadyexists') || normalizedCode.includes('username_alreadyexists')) {
+    if (
+      normalizedCode.includes('usernamealreadyexists') ||
+      normalizedCode.includes('username_alreadyexists')
+    ) {
       return 'branchUsers.userNameAlreadyExists';
     }
-    if (normalizedCode.includes('emailalreadyexists') || normalizedCode.includes('email_alreadyexists')) {
+    if (
+      normalizedCode.includes('emailalreadyexists') ||
+      normalizedCode.includes('email_alreadyexists')
+    ) {
       return 'branchUsers.emailAlreadyExists';
     }
     if (normalizedCode.includes('rolenotallowed') || normalizedCode.includes('role_notallowed')) {

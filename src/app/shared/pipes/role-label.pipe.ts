@@ -5,7 +5,8 @@ import { Role } from '../models/role.model';
 const LABEL_KEYS: Record<Role, string> = {
   SUPER_ADMIN: 'common.superAdmin',
   BRANCH_ADMIN: 'common.branchAdmin',
-  DEPARTMENT_ADMIN: 'common.departmentAdmin'
+  DEPARTMENT_ADMIN: 'common.departmentAdmin',
+  BRANCH_USER: 'common.branchUser'
 };
 
 @Pipe({
