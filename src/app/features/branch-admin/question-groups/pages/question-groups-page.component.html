@@ -1,7 +1,17 @@
-<div class="mx-auto max-w-7xl space-y-4 px-1 text-sm">
-  <div>
-    <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'questionGroups.title' | t }}</h2>
-    <p class="mt-1 text-xs text-slate-500">{{ 'questionGroups.description' | t }}</p>
+<div class="mx-auto max-w-7xl space-y-4 px-3 text-sm sm:px-4 lg:px-1">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+      <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'questionGroups.title' | t }}</h2>
+      <p class="mt-1 text-xs text-slate-500">{{ 'questionGroups.description' | t }}</p>
+    </div>
+    @if (canCreate()) {
+      <div class="flex justify-end sm:shrink-0">
+        <app-button type="button" (pressed)="openCreateGroup()">
+          <app-icon [icon]="plusIcon" [size]="17" />
+          {{ 'questionGroups.createAction' | t }}
+        </app-button>
+      </div>
+    }
   </div>
 
   @if (questionGroupsStore.success()) {
@@ -16,37 +26,9 @@
     </div>
   }
 
-  @if (canCreate()) {
-    <app-card [title]="'questionGroups.createTitle' | t" [subtitle]="'questionGroups.createSubtitle' | t">
-      <form class="space-y-3" [formGroup]="groupForm" (ngSubmit)="createGroup()">
-        <div class="grid gap-3 md:grid-cols-2">
-          <app-input
-            [label]="'questionGroups.nameEn' | t"
-            [placeholder]="'questionGroups.nameEnPlaceholder' | t"
-            formControlName="nameEn"
-            [error]="groupFieldError('nameEn') | t"
-          />
-          <app-input
-            [label]="'questionGroups.nameAr' | t"
-            [placeholder]="'questionGroups.nameArPlaceholder' | t"
-            formControlName="nameAr"
-            [error]="groupFieldError('nameAr') | t"
-          />
-        </div>
-
-        <div class="flex justify-end">
-          <app-button type="submit" [loading]="questionGroupsStore.creating()">
-            <app-icon [icon]="plusIcon" [size]="17" />
-            {{ 'questionGroups.createAction' | t }}
-          </app-button>
-        </div>
-      </form>
-    </app-card>
-  }
-
   <app-card [title]="'questionGroups.listTitle' | t" [subtitle]="'questionGroups.listSubtitle' | t">
     <form
-      class="mb-4 grid gap-3 xl:grid-cols-[1fr_10rem_9rem_10rem_auto_auto]"
+      class="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_10rem_9rem_10rem_auto_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchGroups()"
     >
@@ -95,13 +77,13 @@
           <option value="Oldest">{{ 'questionGroups.oldest' | t }}</option>
         </select>
       </label>
-      <div class="flex items-end">
+      <div class="flex items-end md:justify-start">
         <app-button type="submit" [loading]="questionGroupsStore.loading()">
           <app-icon [icon]="searchIcon" [size]="17" />
           {{ 'branches.searchAction' | t }}
         </app-button>
       </div>
-      <div class="flex items-end">
+      <div class="flex items-end md:justify-start">
         <app-button type="button" variant="secondary" (pressed)="clearGroupSearch()">
           {{ 'branches.clearSearch' | t }}
         </app-button>
@@ -252,30 +234,34 @@
               </div>
             </div>
 
-            <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
+            <div class="mt-4 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 sm:flex sm:flex-wrap sm:justify-end">
               @if (canUpdate()) {
-                <app-button
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                  (pressed)="openEditGroup($event, group)"
-                >
-                  <app-icon [icon]="editIcon" [size]="15" />
-                  {{ 'common.edit' | t }}
-                </app-button>
+                <div class="flex justify-end">
+                  <app-button
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                    (pressed)="openEditGroup($event, group)"
+                  >
+                    <app-icon [icon]="editIcon" [size]="15" />
+                    {{ 'common.edit' | t }}
+                  </app-button>
+                </div>
               }
               @if (canDelete() && group.isActive) {
-                <app-button
-                  size="sm"
-                  type="button"
-                  variant="danger"
-                  [disabled]="questionGroupsStore.deleting()"
-                  [loading]="questionGroupsStore.deleting()"
-                  (pressed)="openDeleteGroup($event, group)"
-                >
-                  <app-icon [icon]="deleteIcon" [size]="15" />
-                  {{ 'common.delete' | t }}
-                </app-button>
+                <div class="flex justify-end">
+                  <app-button
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    [disabled]="questionGroupsStore.deleting()"
+                    [loading]="questionGroupsStore.deleting()"
+                    (pressed)="openDeleteGroup($event, group)"
+                  >
+                    <app-icon [icon]="deleteIcon" [size]="15" />
+                    {{ 'common.delete' | t }}
+                  </app-button>
+                </div>
               }
             </div>
           </article>
@@ -295,7 +281,7 @@
         -
         {{ questionGroupsStore.totalItems() }} {{ 'questionGroups.totalItems' | t }}
       </p>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <app-button
           size="sm"
           type="button"
@@ -355,6 +341,43 @@
   }
 </div>
 
+<app-modal
+  [title]="'questionGroups.createTitle' | t"
+  [open]="createModalOpen()"
+  (closed)="closeCreateGroup()"
+  size="lg"
+>
+  <p class="mb-4 text-xs font-semibold text-slate-500">
+    {{ 'questionGroups.createSubtitle' | t }}
+  </p>
+  <form class="space-y-3" [formGroup]="groupForm" (ngSubmit)="createGroup()">
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'questionGroups.nameEn' | t"
+        [placeholder]="'questionGroups.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="groupFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'questionGroups.nameAr' | t"
+        [placeholder]="'questionGroups.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="groupFieldError('nameAr') | t"
+      />
+    </div>
+
+    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+      <app-button type="button" variant="secondary" (pressed)="closeCreateGroup()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="questionGroupsStore.creating()">
+        <app-icon [icon]="plusIcon" [size]="17" />
+        {{ 'questionGroups.createAction' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
 <app-modal [title]="'questionGroups.updateTitle' | t" [open]="editModalOpen()" (closed)="closeEditGroup()">
   <form class="space-y-3" [formGroup]="editGroupForm" (ngSubmit)="updateSelectedGroup()">
     <div class="grid gap-3 md:grid-cols-2">
@@ -397,7 +420,7 @@
           </p>
         }
       </div>
-      <div class="flex flex-wrap justify-end gap-2">
+      <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
         <app-button type="button" variant="secondary" (pressed)="closeDeleteGroup()">
           {{ 'common.cancel' | t }}
         </app-button>

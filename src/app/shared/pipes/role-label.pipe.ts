@@ -6,13 +6,14 @@ const LABEL_KEYS: Record<Role, string> = {
   SUPER_ADMIN: 'common.superAdmin',
   BRANCH_ADMIN: 'common.branchAdmin',
   DEPARTMENT_ADMIN: 'common.departmentAdmin',
-  BRANCH_USER: 'common.branchUser'
+  BRANCH_USER: 'common.branchUser',
+  OPERATOR: 'common.operator',
 };
 
 @Pipe({
   name: 'roleLabel',
   standalone: true,
-  pure: false
+  pure: false,
 })
 export class RoleLabelPipe implements PipeTransform {
   private readonly i18n = inject(I18nService);

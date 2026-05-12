@@ -10,6 +10,7 @@ const USER_TYPE_ROLE_MAP: Record<UserType, Role> = {
   BranchAdmin: 'BRANCH_ADMIN',
   DepartmentAdmin: 'DEPARTMENT_ADMIN',
   BranchUser: 'BRANCH_USER',
+  Operator: 'OPERATOR',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -87,7 +88,7 @@ export class AuthService {
     const roles = response.roles ?? [];
     const permissions = response.permissions ?? [];
 
-    if (roles.includes('System Administrator')) {
+    if (roles.some((role) => this.normalizeRole(role) === 'systemadministrator')) {
       return 'SuperAdmin';
     }
 
@@ -95,11 +96,21 @@ export class AuthService {
       return 'BranchAdmin';
     }
 
+    if (roles.some((role) => this.normalizeRole(role).includes('operator'))) {
+      return 'Operator';
+    }
+
     return 'DepartmentAdmin';
   }
 
   private isUserType(value: unknown): value is UserType {
-    return value === 'SuperAdmin' || value === 'BranchAdmin' || value === 'DepartmentAdmin' || value === 'BranchUser';
+    return (
+      value === 'SuperAdmin' ||
+      value === 'BranchAdmin' ||
+      value === 'DepartmentAdmin' ||
+      value === 'BranchUser' ||
+      value === 'Operator'
+    );
   }
 
   private resolveApiRoles(
@@ -113,6 +124,10 @@ export class AuthService {
 
   private displayName(userNameOrEmail: string): string {
     return userNameOrEmail.includes('@') ? userNameOrEmail.split('@')[0] : userNameOrEmail;
+  }
+
+  private normalizeRole(role: string): string {
+    return role.replace(/[\s_-]/g, '').toLowerCase();
   }
 
   private decodeJwtPayload(token: string): Record<string, unknown> | null {

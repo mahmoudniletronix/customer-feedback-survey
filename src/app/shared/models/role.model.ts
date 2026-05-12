@@ -1,5 +1,5 @@
-export type Role = 'SUPER_ADMIN' | 'BRANCH_ADMIN' | 'DEPARTMENT_ADMIN' | 'BRANCH_USER';
-export type UserType = 'SuperAdmin' | 'BranchAdmin' | 'DepartmentAdmin' | 'BranchUser';
+export type Role = 'SUPER_ADMIN' | 'BRANCH_ADMIN' | 'DEPARTMENT_ADMIN' | 'BRANCH_USER' | 'OPERATOR';
+export type UserType = 'SuperAdmin' | 'BranchAdmin' | 'DepartmentAdmin' | 'BranchUser' | 'Operator';
 
 export interface User {
   id: string;

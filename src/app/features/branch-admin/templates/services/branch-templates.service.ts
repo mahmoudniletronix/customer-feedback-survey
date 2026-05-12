@@ -5,12 +5,23 @@ import { environment } from '../../../../../environments/environment';
 import {
   BranchTemplate,
   BranchTemplateApiResponse,
+  BranchTemplateQuestionGroupSelection,
+  BranchTemplateQuestionGroupSelectionApiResponse,
+  BranchTemplateQuestionSelection,
+  BranchTemplateQuestionSelectionApiResponse,
+  BranchTemplateQuestionSelectionItem,
+  BranchTemplateQuestionSelectionItemApiResponse,
   BranchTemplateSelection,
   BranchTemplateSelectionApiResponse,
   BranchTemplatesPageApiResponse,
   BranchTemplatesPageResult,
   BranchTemplatesQuery,
   CreateBranchTemplatePayload,
+  UpdateBranchTemplateQuestionsApiResponse,
+  UpdateBranchTemplateQuestionsPayload,
+  UpdateBranchTemplateQuestionsResult,
+  UpdatedBranchTemplateQuestion,
+  UpdatedBranchTemplateQuestionApiResponse,
   UpdateBranchTemplatePayload,
 } from '../models/branch-template.model';
 
@@ -40,10 +51,11 @@ export class BranchTemplatesService {
     }
 
     return this.http
-      .get<BranchTemplatesPageApiResponse | readonly BranchTemplateApiResponse[] | BranchTemplateApiResponse>(
-        this.templatesUrl,
-        { params },
-      )
+      .get<
+        | BranchTemplatesPageApiResponse
+        | readonly BranchTemplateApiResponse[]
+        | BranchTemplateApiResponse
+      >(this.templatesUrl, { params })
       .pipe(map((response) => this.toPageResult(response, query)));
   }
 
@@ -71,10 +83,30 @@ export class BranchTemplatesService {
       .pipe(map((response) => this.toTemplate(response)));
   }
 
+  getQuestionsSelection(templateId: string): Observable<BranchTemplateQuestionSelection> {
+    return this.http
+      .get<BranchTemplateQuestionSelectionApiResponse>(
+        `${this.templatesUrl}/${templateId}/questions-selection`,
+      )
+      .pipe(map((response) => this.toQuestionsSelection(response, templateId)));
+  }
+
   update(templateId: string, payload: UpdateBranchTemplatePayload): Observable<BranchTemplate> {
     return this.http
       .put<BranchTemplateApiResponse>(`${this.templatesUrl}/${templateId}`, payload)
       .pipe(map((response) => this.toTemplate(response)));
+  }
+
+  updateQuestions(
+    templateId: string,
+    payload: UpdateBranchTemplateQuestionsPayload,
+  ): Observable<UpdateBranchTemplateQuestionsResult> {
+    return this.http
+      .put<UpdateBranchTemplateQuestionsApiResponse>(
+        `${this.templatesUrl}/${templateId}/questions`,
+        payload,
+      )
+      .pipe(map((response) => this.toUpdatedQuestions(response, templateId)));
   }
 
   delete(templateId: string): Observable<BranchTemplate> {
@@ -90,7 +122,10 @@ export class BranchTemplatesService {
   }
 
   private toPageResult(
-    response: BranchTemplatesPageApiResponse | readonly BranchTemplateApiResponse[] | BranchTemplateApiResponse,
+    response:
+      | BranchTemplatesPageApiResponse
+      | readonly BranchTemplateApiResponse[]
+      | BranchTemplateApiResponse,
     query: BranchTemplatesQuery,
   ): BranchTemplatesPageResult {
     if (this.isTemplatesArray(response)) {
@@ -136,7 +171,9 @@ export class BranchTemplatesService {
     };
   }
 
-  private toTemplateSelection(response: BranchTemplateSelectionApiResponse): BranchTemplateSelection {
+  private toTemplateSelection(
+    response: BranchTemplateSelectionApiResponse,
+  ): BranchTemplateSelection {
     return {
       id: this.readRecordId(response.id),
       nameEn: response.nameEn ?? '',
@@ -148,6 +185,68 @@ export class BranchTemplatesService {
     };
   }
 
+  private toQuestionsSelection(
+    response: BranchTemplateQuestionSelectionApiResponse,
+    fallbackTemplateId: string,
+  ): BranchTemplateQuestionSelection {
+    return {
+      templateId: this.readRecordId(response.templateId) || fallbackTemplateId,
+      branchId: this.readRecordId(response.branchId),
+      templateNameEn: response.templateNameEn ?? '',
+      templateNameAr: response.templateNameAr ?? '',
+      status: response.status ?? 'Draft',
+      isActive: response.isActive ?? true,
+      groups: (response.groups ?? []).map((group) => this.toQuestionSelectionGroup(group)),
+    };
+  }
+
+  private toQuestionSelectionGroup(
+    response: BranchTemplateQuestionGroupSelectionApiResponse,
+  ): BranchTemplateQuestionGroupSelection {
+    return {
+      groupId: this.readRecordId(response.groupId),
+      nameEn: response.nameEn ?? '',
+      nameAr: response.nameAr ?? '',
+      questions: (response.questions ?? []).map((question) =>
+        this.toQuestionSelectionItem(question),
+      ),
+    };
+  }
+
+  private toQuestionSelectionItem(
+    response: BranchTemplateQuestionSelectionItemApiResponse,
+  ): BranchTemplateQuestionSelectionItem {
+    return {
+      questionId: this.readRecordId(response.questionId),
+      textEn: response.textEn ?? '',
+      textAr: response.textAr ?? '',
+      type: response.type !== null && response.type !== undefined ? String(response.type) : '',
+      isSelected: response.isSelected ?? false,
+      order: response.order ?? null,
+    };
+  }
+
+  private toUpdatedQuestions(
+    response: UpdateBranchTemplateQuestionsApiResponse,
+    fallbackTemplateId: string,
+  ): UpdateBranchTemplateQuestionsResult {
+    const questions = (response.questions ?? []).map((question) => this.toUpdatedQuestion(question));
+
+    return {
+      templateId: this.readRecordId(response.templateId) || fallbackTemplateId,
+      branchId: this.readRecordId(response.branchId),
+      questionsCount: response.questionsCount ?? questions.length,
+      questions,
+    };
+  }
+
+  private toUpdatedQuestion(response: UpdatedBranchTemplateQuestionApiResponse): UpdatedBranchTemplateQuestion {
+    return {
+      questionId: this.readRecordId(response.questionId),
+      order: response.order ?? 0,
+    };
+  }
+
   private isPageResponse(
     response: BranchTemplatesPageApiResponse | BranchTemplateApiResponse,
   ): response is BranchTemplatesPageApiResponse {
@@ -155,7 +254,10 @@ export class BranchTemplatesService {
   }
 
   private isTemplatesArray(
-    response: BranchTemplatesPageApiResponse | readonly BranchTemplateApiResponse[] | BranchTemplateApiResponse,
+    response:
+      | BranchTemplatesPageApiResponse
+      | readonly BranchTemplateApiResponse[]
+      | BranchTemplateApiResponse,
   ): response is readonly BranchTemplateApiResponse[] {
     return Array.isArray(response);
   }

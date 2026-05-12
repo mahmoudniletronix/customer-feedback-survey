@@ -66,6 +66,13 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
               ),
           },
           {
+            path: ':templateId/questions',
+            loadComponent: () =>
+              import('./templates/pages/branch-template-questions-page.component').then(
+                (m) => m.BranchTemplateQuestionsPageComponent,
+              ),
+          },
+          {
             path: ':templateId',
             loadComponent: () =>
               import('./templates/pages/branch-template-details-page.component').then(

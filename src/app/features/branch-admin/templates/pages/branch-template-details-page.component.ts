@@ -2,7 +2,17 @@ import { DatePipe, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ArrowLeft, FileText, Pencil, Save, Trash2, X } from 'lucide-angular';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Circle,
+  FileText,
+  ListChecks,
+  Pencil,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
@@ -14,7 +24,15 @@ import { BranchTemplatesStore } from '../state/branch-templates.store';
 @Component({
   selector: 'app-branch-template-details-page',
   standalone: true,
-  imports: [ButtonComponent, CardComponent, DatePipe, IconComponent, InputComponent, ReactiveFormsModule, TranslatePipe],
+  imports: [
+    ButtonComponent,
+    CardComponent,
+    DatePipe,
+    IconComponent,
+    InputComponent,
+    ReactiveFormsModule,
+    TranslatePipe,
+  ],
   templateUrl: './branch-template-details-page.component.html',
   styleUrl: './branch-template-details-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,10 +47,13 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
+  readonly checkedIcon = CheckCircle2;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
   readonly fileTextIcon = FileText;
+  readonly listChecksIcon = ListChecks;
   readonly saveIcon = Save;
+  readonly unselectedIcon = Circle;
   readonly editMode = signal(false);
 
   readonly templateForm = this.formBuilder.nonNullable.group({
@@ -67,6 +88,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     }
 
     this.templatesStore.loadDetails(templateId);
+    this.templatesStore.loadQuestionsSelection(templateId);
   }
 
   goBack(): void {
@@ -116,6 +138,15 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     this.templatesStore.deleteTemplate(template.templateId, () => {
       void this.router.navigateByUrl('/branch-admin/templates');
     });
+  }
+
+  openQuestionsManager(): void {
+    const template = this.templatesStore.selectedTemplate();
+    if (!template) {
+      return;
+    }
+
+    void this.router.navigate(['/branch-admin/templates', template.templateId, 'questions']);
   }
 
   templateFieldError(field: keyof typeof this.templateForm.controls): string {

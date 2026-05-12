@@ -50,6 +50,17 @@ export const routes: Routes = [
         loadChildren: () => import('./features/users/users.routes').then((m) => m.USERS_ROUTES)
       },
       {
+        path: 'operators',
+        loadChildren: () => import('./features/operators/operators.routes').then((m) => m.OPERATORS_ROUTES)
+      },
+      {
+        path: 'operator',
+        loadChildren: () =>
+          import('./features/operator-workspace/operator-workspace.routes').then(
+            (m) => m.OPERATOR_WORKSPACE_ROUTES,
+          )
+      },
+      {
         path: 'reports',
         loadChildren: () =>
           import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES)

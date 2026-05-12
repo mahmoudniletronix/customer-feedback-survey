@@ -71,6 +71,9 @@ export class AuthStore {
     if (role === 'BRANCH_ADMIN') {
       return '/branch-admin';
     }
+    if (role === 'OPERATOR') {
+      return '/operator/templates';
+    }
     if (this.canAccessTemplates()) {
       return '/branch-admin/templates';
     }

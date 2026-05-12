@@ -1,8 +1,18 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { ChevronLeft, ChevronRight, FileText, Pencil, Plus, RotateCcw, Search, Trash2 } from 'lucide-angular';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  ListChecks,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Search,
+  Trash2,
+} from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
@@ -35,15 +45,19 @@ export class BranchTemplatesPageComponent implements OnInit {
   readonly templatesStore = inject(BranchTemplatesStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
   readonly fileTextIcon = FileText;
+  readonly listChecksIcon = ListChecks;
   readonly plusIcon = Plus;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
   readonly selectedTemplate = signal<BranchTemplate | null>(null);
 
@@ -91,6 +105,16 @@ export class BranchTemplatesPageComponent implements OnInit {
     this.templatesStore.nextPage();
   }
 
+  openCreateTemplate(): void {
+    this.templatesStore.clearMessages();
+    this.createModalOpen.set(true);
+  }
+
+  closeCreateTemplate(): void {
+    this.templateForm.reset();
+    this.createModalOpen.set(false);
+  }
+
   createTemplate(): void {
     this.templateForm.markAllAsTouched();
     if (this.templateForm.invalid || this.templatesStore.creating()) {
@@ -98,7 +122,7 @@ export class BranchTemplatesPageComponent implements OnInit {
     }
 
     this.templatesStore.createTemplate(this.templateForm.getRawValue(), () => {
-      this.templateForm.reset();
+      this.closeCreateTemplate();
     });
   }
 
@@ -112,6 +136,11 @@ export class BranchTemplatesPageComponent implements OnInit {
       description: template.description,
     });
     this.editModalOpen.set(true);
+  }
+
+  openTemplateQuestions(event: MouseEvent, template: BranchTemplate): void {
+    event.stopPropagation();
+    void this.router.navigate([template.templateId, 'questions'], { relativeTo: this.route });
   }
 
   closeEditTemplate(): void {
@@ -128,9 +157,13 @@ export class BranchTemplatesPageComponent implements OnInit {
       return;
     }
 
-    this.templatesStore.updateTemplate(template.templateId, this.editTemplateForm.getRawValue(), () => {
-      this.closeEditTemplate();
-    });
+    this.templatesStore.updateTemplate(
+      template.templateId,
+      this.editTemplateForm.getRawValue(),
+      () => {
+        this.closeEditTemplate();
+      },
+    );
   }
 
   deleteTemplate(event: MouseEvent, template: BranchTemplate): void {

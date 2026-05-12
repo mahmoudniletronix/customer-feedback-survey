@@ -1,12 +1,20 @@
-<div class="mx-auto max-w-7xl space-y-4 px-1 text-sm">
-  <div>
+<div class="mx-auto max-w-7xl space-y-4 px-3 text-sm sm:px-4 lg:px-1">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <!-- <p
       class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
     >
       {{ 'common.branchAdmin' | t }}
     </p> -->
-    <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'branchTemplates.title' | t }}</h2>
-    <p class="mt-1 text-xs text-slate-500">{{ 'branchTemplates.description' | t }}</p>
+    <div class="min-w-0">
+      <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'branchTemplates.title' | t }}</h2>
+      <p class="mt-1 text-xs text-slate-500">{{ 'branchTemplates.description' | t }}</p>
+    </div>
+    <div class="flex justify-end sm:shrink-0">
+      <app-button type="button" (pressed)="openCreateTemplate()">
+        <app-icon [icon]="plusIcon" [size]="17" />
+        {{ 'branchTemplates.createAction' | t }}
+      </app-button>
+    </div>
   </div>
 
   @if (templatesStore.success()) {
@@ -26,47 +34,11 @@
   }
 
   <app-card
-    [title]="'branchTemplates.createTitle' | t"
-    [subtitle]="'branchTemplates.createSubtitle' | t"
-  >
-    <form class="space-y-3" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
-      <div class="grid gap-3 md:grid-cols-2">
-        <app-input
-          [label]="'branchTemplates.nameEn' | t"
-          [placeholder]="'branchTemplates.nameEnPlaceholder' | t"
-          formControlName="nameEn"
-          [error]="templateFieldError('nameEn') | t"
-        />
-        <app-input
-          [label]="'branchTemplates.nameAr' | t"
-          [placeholder]="'branchTemplates.nameArPlaceholder' | t"
-          formControlName="nameAr"
-          [error]="templateFieldError('nameAr') | t"
-        />
-      </div>
-
-      <app-input
-        [label]="'branchTemplates.templateDescription' | t"
-        [placeholder]="'branchTemplates.descriptionPlaceholder' | t"
-        formControlName="description"
-        [error]="templateFieldError('description') | t"
-      />
-
-      <div class="flex justify-end">
-        <app-button type="submit" [loading]="templatesStore.creating()">
-          <app-icon [icon]="plusIcon" [size]="17" />
-          {{ 'branchTemplates.createAction' | t }}
-        </app-button>
-      </div>
-    </form>
-  </app-card>
-
-  <app-card
     [title]="'branchTemplates.listTitle' | t"
     [subtitle]="'branchTemplates.listSubtitle' | t"
   >
     <form
-      class="mb-4 grid gap-3 lg:grid-cols-[1fr_10rem_10rem_auto_auto]"
+      class="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_10rem_10rem_auto_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchTemplates()"
     >
@@ -101,13 +73,13 @@
           <option value="Oldest">{{ 'branchTemplates.oldest' | t }}</option>
         </select>
       </label>
-      <div class="flex items-end">
+      <div class="flex items-end md:justify-start">
         <app-button type="submit" [loading]="templatesStore.loading()">
           <app-icon [icon]="searchIcon" [size]="17" />
           {{ 'branches.searchAction' | t }}
         </app-button>
       </div>
-      <div class="flex items-end">
+      <div class="flex items-end md:justify-start">
         <app-button type="button" variant="secondary" (pressed)="clearTemplateSearch()">
           {{ 'branches.clearSearch' | t }}
         </app-button>
@@ -118,13 +90,13 @@
       <div class="overflow-x-auto">
         <table class="w-full table-fixed divide-y divide-slate-100 text-sm">
           <colgroup>
-            <col class="w-[17%]" />
             <col class="w-[15%]" />
-            <col class="w-[34%]" />
+            <col class="w-[13%]" />
+            <col class="w-[28%]" />
             <col class="w-[12%]" />
             <col class="w-[10%]" />
-            <col class="w-[11%]" />
-            <col class="w-[11%]" />
+            <col class="w-[10%]" />
+            <col class="w-[12%]" />
           </colgroup>
           <thead
             class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
@@ -196,6 +168,13 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex justify-end gap-2">
+                      <app-button
+                        size="sm"
+                        type="button"
+                        (pressed)="openTemplateQuestions($event, template)"
+                      >
+                        <app-icon [icon]="listChecksIcon" [size]="15" />
+                      </app-button>
                       <app-button
                         size="sm"
                         type="button"
@@ -314,40 +293,54 @@
               </div>
             </div>
 
-            <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
+            <div class="mt-4 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 sm:flex sm:flex-wrap sm:justify-end">
               <app-button
                 size="sm"
                 type="button"
-                variant="secondary"
-                (pressed)="openEditTemplate($event, template)"
+                (pressed)="openTemplateQuestions($event, template)"
               >
-                <app-icon [icon]="editIcon" [size]="15" />
-                {{ 'common.edit' | t }}
+                <app-icon [icon]="listChecksIcon" [size]="15" />
+                {{ 'branchTemplates.manageQuestions' | t }}
               </app-button>
-              @if (template.isActive) {
-                <app-button
-                  size="sm"
-                  type="button"
-                  variant="danger"
-                  [disabled]="templatesStore.deleting()"
-                  [loading]="templatesStore.deleting()"
-                  (pressed)="deleteTemplate($event, template)"
-                >
-                  <app-icon [icon]="deleteIcon" [size]="15" />
-                  {{ 'common.delete' | t }}
-                </app-button>
-              } @else {
+              <div class="flex justify-end">
                 <app-button
                   size="sm"
                   type="button"
                   variant="secondary"
-                  [disabled]="templatesStore.restoring()"
-                  [loading]="templatesStore.restoring()"
-                  (pressed)="restoreTemplate($event, template)"
+                  (pressed)="openEditTemplate($event, template)"
                 >
-                  <app-icon [icon]="restoreIcon" [size]="15" />
-                  {{ 'branchTemplates.restore' | t }}
+                  <app-icon [icon]="editIcon" [size]="15" />
+                  {{ 'common.edit' | t }}
                 </app-button>
+              </div>
+              @if (template.isActive) {
+                <div class="flex justify-end">
+                  <app-button
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    [disabled]="templatesStore.deleting()"
+                    [loading]="templatesStore.deleting()"
+                    (pressed)="deleteTemplate($event, template)"
+                  >
+                    <app-icon [icon]="deleteIcon" [size]="15" />
+                    {{ 'common.delete' | t }}
+                  </app-button>
+                </div>
+              } @else {
+                <div class="flex justify-end">
+                  <app-button
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                    [disabled]="templatesStore.restoring()"
+                    [loading]="templatesStore.restoring()"
+                    (pressed)="restoreTemplate($event, template)"
+                  >
+                    <app-icon [icon]="restoreIcon" [size]="15" />
+                    {{ 'branchTemplates.restore' | t }}
+                  </app-button>
+                </div>
               }
             </div>
           </article>
@@ -369,7 +362,7 @@
         -
         {{ templatesStore.totalItems() }} {{ 'branchTemplates.totalItems' | t }}
       </p>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <app-button
           size="sm"
           type="button"
@@ -440,6 +433,50 @@
 </div>
 
 <app-modal
+  [title]="'branchTemplates.createTitle' | t"
+  [open]="createModalOpen()"
+  (closed)="closeCreateTemplate()"
+  size="lg"
+>
+  <p class="mb-4 text-xs font-semibold text-slate-500">
+    {{ 'branchTemplates.createSubtitle' | t }}
+  </p>
+  <form class="space-y-3" [formGroup]="templateForm" (ngSubmit)="createTemplate()">
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'branchTemplates.nameEn' | t"
+        [placeholder]="'branchTemplates.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="templateFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'branchTemplates.nameAr' | t"
+        [placeholder]="'branchTemplates.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="templateFieldError('nameAr') | t"
+      />
+    </div>
+
+    <app-input
+      [label]="'branchTemplates.templateDescription' | t"
+      [placeholder]="'branchTemplates.descriptionPlaceholder' | t"
+      formControlName="description"
+      [error]="templateFieldError('description') | t"
+    />
+
+    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+      <app-button type="button" variant="secondary" (pressed)="closeCreateTemplate()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="templatesStore.creating()">
+        <app-icon [icon]="plusIcon" [size]="17" />
+        {{ 'branchTemplates.createAction' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
+<app-modal
   [title]="'branchTemplates.updateTitle' | t"
   [open]="editModalOpen()"
   (closed)="closeEditTemplate()"
@@ -467,7 +504,7 @@
       [error]="editTemplateFieldError('description') | t"
     />
 
-    <div class="flex flex-wrap justify-end gap-2">
+    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
       <app-button type="button" variant="secondary" (pressed)="closeEditTemplate()">
         {{ 'common.cancel' | t }}
       </app-button>

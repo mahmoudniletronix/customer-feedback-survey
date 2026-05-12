@@ -49,6 +49,7 @@ export class QuestionGroupsPageComponent implements OnInit {
   readonly plusIcon = Plus;
   readonly searchIcon = Search;
 
+  readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
   readonly deleteModalOpen = signal(false);
   readonly selectedGroup = signal<QuestionGroupListItem | null>(null);
@@ -107,6 +108,20 @@ export class QuestionGroupsPageComponent implements OnInit {
     this.questionGroupsStore.nextPage();
   }
 
+  openCreateGroup(): void {
+    if (!this.canCreate()) {
+      return;
+    }
+
+    this.questionGroupsStore.clearMessages();
+    this.createModalOpen.set(true);
+  }
+
+  closeCreateGroup(): void {
+    this.groupForm.reset();
+    this.createModalOpen.set(false);
+  }
+
   createGroup(): void {
     this.groupForm.markAllAsTouched();
     if (this.groupForm.invalid || this.questionGroupsStore.creating() || !this.canCreate()) {
@@ -114,7 +129,7 @@ export class QuestionGroupsPageComponent implements OnInit {
     }
 
     this.questionGroupsStore.createGroup(this.toPayload(this.groupForm.getRawValue()), () => {
-      this.groupForm.reset();
+      this.closeCreateGroup();
     });
   }
 

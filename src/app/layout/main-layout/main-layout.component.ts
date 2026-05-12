@@ -50,6 +50,9 @@ export class MainLayoutComponent {
     if (role === 'BRANCH_USER') {
       return this.i18n.translate('layout.branchUserWorkspace');
     }
+    if (role === 'OPERATOR') {
+      return this.i18n.translate('layout.operatorWorkspace');
+    }
     return this.i18n.translate('layout.departmentWorkspace');
   });
 

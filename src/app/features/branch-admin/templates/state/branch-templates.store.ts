@@ -3,9 +3,11 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
 import {
   BranchTemplate,
+  BranchTemplateQuestionSelection,
   BranchTemplateSelection,
   BranchTemplatesQuery,
   CreateBranchTemplatePayload,
+  UpdateBranchTemplateQuestionsPayload,
   UpdateBranchTemplatePayload,
 } from '../models/branch-template.model';
 import { BranchTemplatesService } from '../services/branch-templates.service';
@@ -37,6 +39,7 @@ export class BranchTemplatesStore {
   private readonly selectionSignal = signal<readonly BranchTemplateSelection[]>([]);
   private readonly createdTemplateSignal = signal<BranchTemplate | null>(null);
   private readonly selectedTemplateSignal = signal<BranchTemplate | null>(null);
+  private readonly questionsSelectionSignal = signal<BranchTemplateQuestionSelection | null>(null);
   private readonly currentPageSignal = signal(this.defaultQuery.pageNumber);
   private readonly pageSizeSignal = signal(this.defaultQuery.pageSize);
   private readonly totalItemsSignal = signal(0);
@@ -46,18 +49,22 @@ export class BranchTemplatesStore {
   private readonly loadingSignal = signal(false);
   private readonly selectionLoadingSignal = signal(false);
   private readonly detailsLoadingSignal = signal(false);
+  private readonly questionsSelectionLoadingSignal = signal(false);
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
+  private readonly updatingQuestionsSignal = signal(false);
   private readonly deletingSignal = signal(false);
   private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly detailsErrorSignal = signal<string | null>(null);
+  private readonly questionsSelectionErrorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
 
   readonly templates = this.templatesSignal.asReadonly();
   readonly selection = this.selectionSignal.asReadonly();
   readonly createdTemplate = this.createdTemplateSignal.asReadonly();
   readonly selectedTemplate = this.selectedTemplateSignal.asReadonly();
+  readonly questionsSelection = this.questionsSelectionSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
   readonly pageSize = this.pageSizeSignal.asReadonly();
   readonly totalItems = this.totalItemsSignal.asReadonly();
@@ -67,16 +74,30 @@ export class BranchTemplatesStore {
   readonly loading = this.loadingSignal.asReadonly();
   readonly selectionLoading = this.selectionLoadingSignal.asReadonly();
   readonly detailsLoading = this.detailsLoadingSignal.asReadonly();
+  readonly questionsSelectionLoading = this.questionsSelectionLoadingSignal.asReadonly();
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
+  readonly updatingQuestions = this.updatingQuestionsSignal.asReadonly();
   readonly deleting = this.deletingSignal.asReadonly();
   readonly restoring = this.restoringSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly detailsError = this.detailsErrorSignal.asReadonly();
+  readonly questionsSelectionError = this.questionsSelectionErrorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
   readonly hasPreviousPage = computed(() => this.currentPageSignal() > 1);
   readonly hasNextPage = computed(() => this.currentPageSignal() < this.totalPages());
+  readonly selectedQuestionsCount = computed(
+    () =>
+      this.questionsSelectionSignal()?.groups.reduce(
+        (total, group) => total + group.questions.filter((question) => question.isSelected).length,
+        0,
+      ) ?? 0,
+  );
+  readonly totalQuestionsSelectionCount = computed(
+    () =>
+      this.questionsSelectionSignal()?.groups.reduce((total, group) => total + group.questions.length, 0) ?? 0,
+  );
 
   load(query: Partial<BranchTemplatesQuery> = {}): void {
     const nextQuery: BranchTemplatesQuery = {
@@ -177,9 +198,34 @@ export class BranchTemplatesStore {
       });
   }
 
+  loadQuestionsSelection(templateId: string): void {
+    this.questionsSelectionLoadingSignal.set(true);
+    this.questionsSelectionErrorSignal.set(null);
+    this.questionsSelectionSignal.set(null);
+
+    this.branchTemplatesService
+      .getQuestionsSelection(templateId)
+      .pipe(
+        take(1),
+        finalize(() => this.questionsSelectionLoadingSignal.set(false)),
+      )
+      .subscribe({
+        next: (selection) => {
+          this.questionsSelectionSignal.set(selection);
+        },
+        error: (error: unknown) => {
+          this.questionsSelectionErrorSignal.set(
+            this.readErrorKey(error, 'branchTemplates.questionsSelectionLoadError'),
+          );
+        },
+      });
+  }
+
   clearDetails(): void {
     this.selectedTemplateSignal.set(null);
     this.detailsErrorSignal.set(null);
+    this.questionsSelectionSignal.set(null);
+    this.questionsSelectionErrorSignal.set(null);
   }
 
   createTemplate(payload: CreateBranchTemplatePayload, onCreated: () => void): void {
@@ -235,6 +281,48 @@ export class BranchTemplatesStore {
         },
         error: (error: unknown) => {
           this.errorSignal.set(this.readErrorKey(error, 'branchTemplates.updateError'));
+        },
+      });
+  }
+
+  updateTemplateQuestions(
+    templateId: string,
+    payload: UpdateBranchTemplateQuestionsPayload,
+    onUpdated: () => void,
+  ): void {
+    if (this.updatingQuestionsSignal()) {
+      return;
+    }
+
+    this.updatingQuestionsSignal.set(true);
+    this.questionsSelectionErrorSignal.set(null);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.branchTemplatesService
+      .updateQuestions(templateId, payload)
+      .pipe(
+        take(1),
+        finalize(() => this.updatingQuestionsSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('branchTemplates.questionsUpdateSuccess');
+          this.loadQuestionsSelection(templateId);
+          const selectedTemplate = this.selectedTemplateSignal();
+          if (selectedTemplate?.templateId === templateId) {
+            this.selectedTemplateSignal.set({
+              ...selectedTemplate,
+              questionsCount: payload.questionIds.length,
+            });
+          }
+          this.replaceTemplateQuestionsCount(templateId, payload.questionIds.length);
+          onUpdated();
+        },
+        error: (error: unknown) => {
+          this.questionsSelectionErrorSignal.set(
+            this.readErrorKey(error, 'branchTemplates.questionsUpdateError'),
+          );
         },
       });
   }
@@ -395,5 +483,13 @@ export class BranchTemplatesStore {
   private matchesActiveFilter(template: BranchTemplate): boolean {
     const isActive = this.isActiveSignal();
     return isActive === null || template.isActive === isActive;
+  }
+
+  private replaceTemplateQuestionsCount(templateId: string, questionsCount: number): void {
+    this.templatesSignal.update((templates) =>
+      templates.map((template) =>
+        template.templateId === templateId ? { ...template, questionsCount } : template,
+      ),
+    );
   }
 }

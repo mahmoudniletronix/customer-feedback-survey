@@ -12,6 +12,7 @@ import {
   Network,
   PanelLeftClose,
   PanelLeftOpen,
+  UserCog,
   UsersRound
 } from 'lucide-angular';
 import { Role } from '../../shared/models/role.model';
@@ -106,6 +107,20 @@ const MENU_ITEMS: readonly MenuItem[] = [
     path: '/survey',
     icon: ClipboardList,
     roles: ['DEPARTMENT_ADMIN']
+  },
+  {
+    label: 'Operators',
+    labelKey: 'operators.title',
+    path: '/operators',
+    icon: UserCog,
+    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN']
+  },
+  {
+    label: 'My templates',
+    labelKey: 'operatorTemplates.title',
+    path: '/operator/templates',
+    icon: FileText,
+    roles: ['OPERATOR']
   },
   {
     label: 'Users',

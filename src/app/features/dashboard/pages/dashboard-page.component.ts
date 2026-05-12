@@ -46,6 +46,7 @@ export class DashboardPageComponent implements OnInit {
     if (role === 'SUPER_ADMIN') {
       return [
         { labelKey: 'dashboard.actionManageBranches', path: '/branches', icon: this.buildingIcon },
+        { labelKey: 'operators.title', path: '/operators', icon: this.userCogIcon },
         { labelKey: 'dashboard.actionReviewGlobalReports', path: '/reports', icon: this.chartIcon },
       ];
     }
@@ -94,9 +95,14 @@ export class DashboardPageComponent implements OnInit {
 
     if (role === 'DEPARTMENT_ADMIN') {
       return [
+        { labelKey: 'operators.title', path: '/operators', icon: this.userCogIcon },
         { labelKey: 'dashboard.actionCreateSurveys', path: '/survey', icon: this.squarePenIcon },
         { labelKey: 'dashboard.actionReviewFeedback', path: '/reports', icon: this.fileTextIcon },
       ];
+    }
+
+    if (role === 'OPERATOR') {
+      return [{ labelKey: 'operatorTemplates.title', path: '/operator/templates', icon: this.fileTextIcon }];
     }
 
     return [];

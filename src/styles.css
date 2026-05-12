@@ -15,12 +15,18 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--color-background);
   color: #122033;
   font-family: Cairo, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 button:not(:disabled),
@@ -50,8 +56,12 @@ canvas {
 }
 
 @media (max-width: 640px) {
-  body {
+  html {
     font-size: 13px;
+  }
+
+  body {
+    font-size: 12px;
   }
 
   table.min-w-full {
