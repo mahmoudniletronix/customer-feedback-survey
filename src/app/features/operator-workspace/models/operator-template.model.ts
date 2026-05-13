@@ -1,3 +1,8 @@
+import {
+  QuestionAnswerOption,
+  QuestionAnswerOptionApiResponse,
+} from '../../../shared/models/question-answer.model';
+
 export interface OperatorMyTemplates {
   operatorId: string;
   departmentId: string;
@@ -15,7 +20,29 @@ export interface OperatorAssignedTemplate {
   branchNameAr: string;
   branchCode: string;
   questionsCount: number;
+  hasAnswered: boolean;
+  latestResponse: OperatorLatestTemplateResponse | null;
   questions: readonly OperatorAssignedTemplateQuestion[];
+}
+
+export interface OperatorLatestTemplateResponse {
+  surveyResponseId: string;
+  submittedOnUtc: string;
+  answersCount: number;
+  answers: readonly OperatorLatestTemplateAnswer[];
+}
+
+export interface OperatorLatestTemplateAnswer {
+  questionId: string;
+  questionType: string;
+  selectedQuestionOptionId: string | null;
+  selectedOptionTextEn: string | null;
+  selectedOptionTextAr: string | null;
+  starRatingValue: number | null;
+  smileValue: number | null;
+  textAnswer: string | null;
+  voiceFileName: string | null;
+  voiceFileUrl: string | null;
 }
 
 export interface OperatorAssignedTemplateQuestion {
@@ -28,6 +55,24 @@ export interface OperatorAssignedTemplateQuestion {
   groupId: string;
   groupNameEn: string;
   groupNameAr: string;
+  options: readonly QuestionAnswerOption[];
+}
+
+export interface OperatorTemplateAnswerSubmission {
+  questionId: string;
+  selectedQuestionOptionId?: string;
+  starRatingValue?: number;
+  smileValue?: number;
+  textAnswer?: string;
+  voiceFile?: File;
+}
+
+export interface OperatorTemplateResponseResult {
+  surveyResponseId: string;
+  operatorId: string;
+  templateId: string;
+  answersCount: number;
+  submittedOnUtc: string;
 }
 
 export interface OperatorMyTemplatesApiResponse {
@@ -47,7 +92,29 @@ export interface OperatorAssignedTemplateApiResponse {
   branchNameAr?: string | null;
   branchCode?: string | null;
   questionsCount?: number;
+  hasAnswered?: boolean;
+  latestResponse?: OperatorLatestTemplateResponseApiResponse | null;
   questions?: readonly OperatorAssignedTemplateQuestionApiResponse[];
+}
+
+export interface OperatorLatestTemplateResponseApiResponse {
+  surveyResponseId?: string | number;
+  submittedOnUtc?: string | null;
+  answersCount?: number;
+  answers?: readonly OperatorLatestTemplateAnswerApiResponse[];
+}
+
+export interface OperatorLatestTemplateAnswerApiResponse {
+  questionId?: string | number;
+  questionType?: string | null;
+  selectedQuestionOptionId?: string | number | null;
+  selectedOptionTextEn?: string | null;
+  selectedOptionTextAr?: string | null;
+  starRatingValue?: number | null;
+  smileValue?: number | null;
+  textAnswer?: string | null;
+  voiceFileName?: string | null;
+  voiceFileUrl?: string | null;
 }
 
 export interface OperatorAssignedTemplateQuestionApiResponse {
@@ -60,4 +127,13 @@ export interface OperatorAssignedTemplateQuestionApiResponse {
   groupId?: string | number;
   groupNameEn?: string;
   groupNameAr?: string | null;
+  options?: readonly QuestionAnswerOptionApiResponse[];
+}
+
+export interface OperatorTemplateResponseApiResponse {
+  surveyResponseId?: string | number;
+  operatorId?: string | number;
+  templateId?: string | number;
+  answersCount?: number;
+  submittedOnUtc?: string;
 }

@@ -13,7 +13,7 @@ export interface OperatorListItem {
 }
 
 export interface CreateOperatorPayload {
-  departmentId: string;
+  departmentId?: string;
   nameEn: string;
   nameAr: string;
   userName: string;
@@ -66,6 +66,16 @@ export interface OperatorDepartmentSelection {
   id: string;
   nameEn: string;
   nameAr: string;
+}
+
+export interface OperatorActiveTemplateSelection {
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  branchId: string;
+  branchNameEn: string;
+  branchNameAr: string;
+  branchCode: string;
 }
 
 export interface OperatorTemplateQuestionSelectionItem {
@@ -151,6 +161,16 @@ export interface OperatorDepartmentSelectionApiResponse {
   departmentId?: string | number;
   nameEn?: string;
   nameAr?: string | null;
+}
+
+export interface OperatorActiveTemplateSelectionApiResponse {
+  id?: string | number;
+  nameEn?: string;
+  nameAr?: string | null;
+  branchId?: string | number;
+  branchNameEn?: string;
+  branchNameAr?: string | null;
+  branchCode?: string | null;
 }
 
 export interface OperatorTemplateQuestionSelectionApiResponse {

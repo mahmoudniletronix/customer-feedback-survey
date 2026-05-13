@@ -14,11 +14,16 @@ import {
   X,
 } from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
+import {
+  QuestionAnswerTypeInput,
+  questionAnswerTypeLabelKey,
+} from '../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
+import { QuestionAnswerPreviewComponent } from '../../../../shared/ui/question-answer-preview/question-answer-preview.component';
 import { BranchTemplatesStore } from '../state/branch-templates.store';
 
 @Component({
@@ -30,6 +35,7 @@ import { BranchTemplatesStore } from '../state/branch-templates.store';
     DatePipe,
     IconComponent,
     InputComponent,
+    QuestionAnswerPreviewComponent,
     ReactiveFormsModule,
     TranslatePipe,
   ],
@@ -147,6 +153,15 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     }
 
     void this.router.navigate(['/branch-admin/templates', template.templateId, 'questions']);
+  }
+
+  answerTypeLabel(type: QuestionAnswerTypeInput): string {
+    const labelKey = questionAnswerTypeLabelKey(type);
+    if (labelKey) {
+      return this.i18n.translate(labelKey);
+    }
+
+    return typeof type === 'string' || typeof type === 'number' ? String(type) : '-';
   }
 
   templateFieldError(field: keyof typeof this.templateForm.controls): string {

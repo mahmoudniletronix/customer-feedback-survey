@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronLeft, ChevronRight, FileText, Pencil, Plus, Search, Trash2 } from 'lucide-angular';
+import { ChevronLeft, ChevronRight, FileText, Pencil, Plus, RotateCcw, Search, Trash2 } from 'lucide-angular';
 import { AuthStore } from '../../../auth/state/auth.store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
@@ -47,6 +47,7 @@ export class QuestionGroupsPageComponent implements OnInit {
   readonly editIcon = Pencil;
   readonly groupIcon = FileText;
   readonly plusIcon = Plus;
+  readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
 
   readonly createModalOpen = signal(false);
@@ -58,6 +59,7 @@ export class QuestionGroupsPageComponent implements OnInit {
   readonly canCreate = computed(() => this.canUseQuestionGroups('QuestionGroups.Create'));
   readonly canUpdate = computed(() => this.canUseQuestionGroups('QuestionGroups.Update'));
   readonly canDelete = computed(() => this.canUseQuestionGroups('QuestionGroups.Delete'));
+  readonly canRestore = computed(() => this.canUseQuestionGroups('QuestionGroups.Update'));
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -201,6 +203,15 @@ export class QuestionGroupsPageComponent implements OnInit {
     this.questionGroupsStore.deleteGroup(group.groupId, () => {
       this.closeDeleteGroup();
     });
+  }
+
+  restoreGroup(event: MouseEvent, group: QuestionGroupListItem): void {
+    event.stopPropagation();
+    if (group.isActive || this.questionGroupsStore.restoring() || !this.canRestore()) {
+      return;
+    }
+
+    this.questionGroupsStore.restoreGroup(group.groupId, () => undefined);
   }
 
   groupFieldError(field: keyof typeof this.groupForm.controls): string {

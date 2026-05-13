@@ -1,3 +1,8 @@
+import {
+  QuestionAnswerOption,
+  QuestionAnswerOptionApiResponse,
+} from '../../../../shared/models/question-answer.model';
+
 export type BranchTemplateStatus = 'Draft' | 'Published' | 'Archived' | string;
 
 export interface BranchTemplate {
@@ -61,6 +66,7 @@ export interface BranchTemplateQuestionSelectionItem {
   type: string;
   isSelected: boolean;
   order: number | null;
+  options: readonly QuestionAnswerOption[];
 }
 
 export interface UpdateBranchTemplateQuestionsPayload {
@@ -140,6 +146,7 @@ export interface BranchTemplateQuestionSelectionItemApiResponse {
   type?: string | number | null;
   isSelected?: boolean;
   order?: number | null;
+  options?: readonly QuestionAnswerOptionApiResponse[];
 }
 
 export interface UpdateBranchTemplateQuestionsApiResponse {

@@ -41,6 +41,8 @@ export class AuthStore {
   }
 
   login(credentials: LoginCredentials): void {
+    this.tokenStorage.clear();
+    this.sessionSignal.set(null);
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
@@ -48,7 +50,7 @@ export class AuthStore {
       .login(credentials)
       .pipe(
         take(1),
-        finalize(() => this.loadingSignal.set(false))
+        finalize(() => this.loadingSignal.set(false)),
       )
       .subscribe({
         next: (session) => {
@@ -57,13 +59,16 @@ export class AuthStore {
         },
         error: (error: Error) => {
           this.errorSignal.set(error.message);
-        }
+        },
       });
   }
 
   logout(): void {
+    this.tokenStorage.clear();
     this.sessionSignal.set(null);
-    void this.router.navigateByUrl('/auth/login');
+    this.loadingSignal.set(false);
+    this.errorSignal.set(null);
+    void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
   }
 
   redirectPath(): string {
@@ -113,7 +118,11 @@ export class AuthStore {
   }
 
   canAccessQuestions(): boolean {
-    return this.role() === 'BRANCH_ADMIN' || this.hasApiRole('Question Editor') || this.hasPermission('Questions.ViewAll');
+    return (
+      this.role() === 'BRANCH_ADMIN' ||
+      this.hasApiRole('Question Editor') ||
+      this.hasPermission('Questions.ViewAll')
+    );
   }
 
   canManageQuestions(action: 'Create' | 'Update' | 'Delete' | 'ViewAll'): boolean {
@@ -126,11 +135,15 @@ export class AuthStore {
 
   canAccessReports(): boolean {
     const role = this.role();
-    return role === 'SUPER_ADMIN' || role === 'DEPARTMENT_ADMIN' || this.hasApiRole('Report Viewer');
+    return (
+      role === 'SUPER_ADMIN' || role === 'DEPARTMENT_ADMIN' || this.hasApiRole('Report Viewer')
+    );
   }
 
   hasApiRole(expectedRole: string): boolean {
-    return this.apiRoles().some((role) => this.normalizeRole(role) === this.normalizeRole(expectedRole));
+    return this.apiRoles().some(
+      (role) => this.normalizeRole(role) === this.normalizeRole(expectedRole),
+    );
   }
 
   hasPermission(expectedPermission: string): boolean {

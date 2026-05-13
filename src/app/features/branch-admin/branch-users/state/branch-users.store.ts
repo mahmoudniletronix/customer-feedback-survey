@@ -6,7 +6,9 @@ import {
   BranchUser,
   BranchUsersQuery,
   CreateBranchUserPayload,
+  ResetBranchUserPasswordPayload,
   RoleSelection,
+  UpdateBranchUserPayload,
 } from '../models/branch-user.model';
 import { BranchUsersService } from '../services/branch-users.service';
 
@@ -26,6 +28,7 @@ export class BranchUsersStore {
     pageNumber: 1,
     pageSize: 10,
     searchText: '',
+    isActive: null,
   };
 
   private readonly branchUsersService = inject(BranchUsersService);
@@ -35,9 +38,14 @@ export class BranchUsersStore {
   private readonly pageSizeSignal = signal(this.defaultQuery.pageSize);
   private readonly totalItemsSignal = signal(0);
   private readonly searchTextSignal = signal(this.defaultQuery.searchText);
+  private readonly isActiveSignal = signal<boolean | null>(this.defaultQuery.isActive);
   private readonly loadingSignal = signal(false);
   private readonly rolesLoadingSignal = signal(false);
   private readonly creatingSignal = signal(false);
+  private readonly updatingSignal = signal(false);
+  private readonly deletingSignal = signal(false);
+  private readonly restoringSignal = signal(false);
+  private readonly resettingPasswordSignal = signal(false);
   private readonly assigningRolesSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
@@ -48,9 +56,14 @@ export class BranchUsersStore {
   readonly pageSize = this.pageSizeSignal.asReadonly();
   readonly totalItems = this.totalItemsSignal.asReadonly();
   readonly searchText = this.searchTextSignal.asReadonly();
+  readonly isActive = this.isActiveSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly rolesLoading = this.rolesLoadingSignal.asReadonly();
   readonly creating = this.creatingSignal.asReadonly();
+  readonly updating = this.updatingSignal.asReadonly();
+  readonly deleting = this.deletingSignal.asReadonly();
+  readonly restoring = this.restoringSignal.asReadonly();
+  readonly resettingPassword = this.resettingPasswordSignal.asReadonly();
   readonly assigningRoles = this.assigningRolesSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
@@ -65,11 +78,13 @@ export class BranchUsersStore {
       pageNumber: query.pageNumber ?? this.currentPageSignal(),
       pageSize: query.pageSize ?? this.pageSizeSignal(),
       searchText: query.searchText ?? this.searchTextSignal(),
+      isActive: query.isActive !== undefined ? query.isActive : this.isActiveSignal(),
     };
 
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
     this.searchTextSignal.set(nextQuery.searchText);
+    this.isActiveSignal.set(nextQuery.isActive);
 
     this.branchUsersService
       .list(nextQuery)
@@ -113,10 +128,11 @@ export class BranchUsersStore {
       });
   }
 
-  search(searchText: string): void {
+  search(searchText: string, isActive: boolean | null): void {
     this.load({
       pageNumber: this.defaultQuery.pageNumber,
       searchText,
+      isActive,
     });
   }
 
@@ -151,6 +167,109 @@ export class BranchUsersStore {
         },
         error: (error: unknown) => {
           this.errorSignal.set(this.readErrorKey(error, 'branchUsers.createError'));
+        },
+      });
+  }
+
+  updateBranchUser(
+    applicationUserId: string,
+    payload: UpdateBranchUserPayload,
+    onUpdated: () => void,
+  ): void {
+    this.updatingSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.branchUsersService
+      .update(applicationUserId, payload)
+      .pipe(
+        take(1),
+        finalize(() => this.updatingSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('branchUsers.updateSuccess');
+          this.load();
+          onUpdated();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'branchUsers.updateError'));
+        },
+      });
+  }
+
+  deleteBranchUser(applicationUserId: string, onDeleted: () => void): void {
+    this.deletingSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.branchUsersService
+      .delete(applicationUserId)
+      .pipe(
+        take(1),
+        finalize(() => this.deletingSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('branchUsers.deleteSuccess');
+          this.load();
+          onDeleted();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'branchUsers.deleteError'));
+        },
+      });
+  }
+
+  restoreBranchUser(applicationUserId: string, onRestored: () => void): void {
+    if (this.restoringSignal()) {
+      return;
+    }
+
+    this.restoringSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.branchUsersService
+      .restore(applicationUserId)
+      .pipe(
+        take(1),
+        finalize(() => this.restoringSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('branchUsers.restoreSuccess');
+          this.load();
+          onRestored();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'branchUsers.restoreError'));
+        },
+      });
+  }
+
+  resetPassword(
+    applicationUserId: string,
+    payload: ResetBranchUserPasswordPayload,
+    onReset: () => void,
+  ): void {
+    this.resettingPasswordSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.branchUsersService
+      .resetPassword(applicationUserId, payload)
+      .pipe(
+        take(1),
+        finalize(() => this.resettingPasswordSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('branchUsers.resetPasswordSuccess');
+          onReset();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'branchUsers.resetPasswordError'));
         },
       });
   }

@@ -49,8 +49,18 @@ export class OperatorsPageComponent implements OnInit {
   readonly templatesSearchText = signal('');
   readonly selectedTemplateIds = signal<readonly string[]>([]);
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
+  readonly isDepartmentAdmin = computed(() => this.authStore.role() === 'DEPARTMENT_ADMIN');
   readonly currentDepartmentId = computed(() => this.authStore.user()?.departmentId ?? '');
-  readonly canCreateOperator = computed(() => this.isSuperAdmin() || this.currentDepartmentId().length > 0);
+  readonly canCreateOperator = computed(() => this.isSuperAdmin() || this.isDepartmentAdmin());
+  readonly activeTemplateBranchesCount = computed(
+    () =>
+      new Set(
+        this.operatorsStore
+          .activeTemplates()
+          .map((template) => template.branchId || template.branchCode)
+          .filter((branchId) => branchId.length > 0),
+      ).size,
+  );
   readonly allTemplatesForModal = computed<readonly OperatorTemplateSelectionItem[]>(() => {
     const selection = this.operatorsStore.templatesSelection();
     if (!selection) {
@@ -120,12 +130,16 @@ export class OperatorsPageComponent implements OnInit {
 
   ngOnInit(): void {
     const departmentId = this.currentDepartmentId();
+    this.configureDepartmentControls();
     this.searchForm.controls.departmentId.setValue(departmentId);
     this.operatorForm.controls.departmentId.setValue(departmentId);
     this.operatorsStore.load({ departmentId });
 
     if (this.isSuperAdmin()) {
       this.operatorsStore.loadDepartments();
+    }
+    if (this.isDepartmentAdmin()) {
+      this.operatorsStore.loadActiveTemplates();
     }
   }
 
@@ -153,9 +167,10 @@ export class OperatorsPageComponent implements OnInit {
     }
 
     const value = this.operatorForm.getRawValue();
+    const departmentId = value.departmentId.trim();
     this.operatorsStore.createOperator(
       {
-        departmentId: value.departmentId,
+        ...(departmentId.length > 0 ? { departmentId } : {}),
         nameEn: value.nameEn.trim(),
         nameAr: value.nameAr.trim(),
         userName: value.userName.trim(),
@@ -214,6 +229,9 @@ export class OperatorsPageComponent implements OnInit {
     this.selectedTemplatesOperator.set(operator);
     this.templatesSearchText.set('');
     this.templatesModalOpen.set(true);
+    if (this.isDepartmentAdmin()) {
+      this.operatorsStore.loadActiveTemplates();
+    }
     this.operatorsStore.loadTemplatesSelection(operator.operatorId);
   }
 
@@ -379,5 +397,21 @@ export class OperatorsPageComponent implements OnInit {
       return 10;
     }
     return Math.min(Math.max(pageSize, 1), 100);
+  }
+
+  private configureDepartmentControls(): void {
+    const createDepartmentControl = this.operatorForm.controls.departmentId;
+
+    if (this.isSuperAdmin()) {
+      createDepartmentControl.setValidators([Validators.required]);
+      createDepartmentControl.enable({ emitEvent: false });
+      this.searchForm.controls.departmentId.enable({ emitEvent: false });
+    } else {
+      createDepartmentControl.clearValidators();
+      createDepartmentControl.disable({ emitEvent: false });
+      this.searchForm.controls.departmentId.disable({ emitEvent: false });
+    }
+
+    createDepartmentControl.updateValueAndValidity({ emitEvent: false });
   }
 }

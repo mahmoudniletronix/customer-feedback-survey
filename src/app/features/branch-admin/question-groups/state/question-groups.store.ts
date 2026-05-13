@@ -44,6 +44,7 @@ export class QuestionGroupsStore {
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
   private readonly deletingSignal = signal(false);
+  private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
 
@@ -59,6 +60,7 @@ export class QuestionGroupsStore {
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
   readonly deleting = this.deletingSignal.asReadonly();
+  readonly restoring = this.restoringSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
@@ -201,6 +203,33 @@ export class QuestionGroupsStore {
         },
         error: (error: unknown) => {
           this.errorSignal.set(this.readErrorKey(error, 'questionGroups.deleteError'));
+        },
+      });
+  }
+
+  restoreGroup(groupId: string, onRestored: () => void): void {
+    if (this.restoringSignal()) {
+      return;
+    }
+
+    this.restoringSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.questionGroupsService
+      .restore(groupId)
+      .pipe(
+        take(1),
+        finalize(() => this.restoringSignal.set(false)),
+      )
+      .subscribe({
+        next: (group) => {
+          this.replaceGroupInList(this.mergeGroup(groupId, group));
+          this.successSignal.set('questionGroups.restoreSuccess');
+          onRestored();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'questionGroups.restoreError'));
         },
       });
   }

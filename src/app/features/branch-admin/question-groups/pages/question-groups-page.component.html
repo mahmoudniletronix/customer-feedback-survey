@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-7xl space-y-4 px-3 text-sm sm:px-4 lg:px-1">
+<div class="w-full space-y-4 text-sm">
   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
       <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'questionGroups.title' | t }}</h2>
@@ -169,6 +169,18 @@
                           <app-icon [icon]="deleteIcon" [size]="15" />
                         </app-button>
                       }
+                      @if (canRestore() && !group.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          [disabled]="questionGroupsStore.restoring()"
+                          [loading]="questionGroupsStore.restoring()"
+                          (pressed)="restoreGroup($event, group)"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="15" />
+                        </app-button>
+                      }
                     </div>
                   </td>
                 </tr>
@@ -260,6 +272,21 @@
                   >
                     <app-icon [icon]="deleteIcon" [size]="15" />
                     {{ 'common.delete' | t }}
+                  </app-button>
+                </div>
+              }
+              @if (canRestore() && !group.isActive) {
+                <div class="flex justify-end">
+                  <app-button
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                    [disabled]="questionGroupsStore.restoring()"
+                    [loading]="questionGroupsStore.restoring()"
+                    (pressed)="restoreGroup($event, group)"
+                  >
+                    <app-icon [icon]="restoreIcon" [size]="15" />
+                    {{ 'common.restore' | t }}
                   </app-button>
                 </div>
               }

@@ -1,23 +1,100 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronLeft, ChevronRight, HelpCircle, Pencil, Plus, Search, Trash2 } from 'lucide-angular';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  ChevronLeft,
+  ChevronRight,
+  HelpCircle,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Search,
+  Trash2,
+} from 'lucide-angular';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { AuthStore } from '../../../auth/state/auth.store';
+import {
+  QUESTION_ANSWER_TYPE,
+  QUESTION_ANSWER_TYPE_LABEL_KEYS,
+  QuestionAnswerOption,
+  QuestionAnswerOptionPayload,
+  QuestionAnswerType,
+  QuestionAnswerTypeInput,
+  isSingleChoiceAnswerType,
+  questionAnswerTypeLabelKey,
+  toQuestionAnswerType,
+} from '../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
-import { CreateQuestionRequest, QuestionListItem, QuestionTypeOption } from '../models/question.model';
+import { QuestionAnswerPreviewComponent } from '../../../../shared/ui/question-answer-preview/question-answer-preview.component';
+import {
+  CreateQuestionRequest,
+  QuestionListItem,
+  QuestionTypeOption,
+} from '../models/question.model';
 import { QuestionsStore } from '../state/questions.store';
 
 const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
-  { value: 1, label: 'Rating' },
-  { value: 2, label: 'Text' },
-  { value: 3, label: 'Multiple choice' },
-  { value: 4, label: 'Yes / No' },
+  {
+    value: QUESTION_ANSWER_TYPE.SingleChoice,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.SingleChoice],
+  },
+  {
+    value: QUESTION_ANSWER_TYPE.Voice,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.Voice],
+  },
+  {
+    value: QUESTION_ANSWER_TYPE.StarRating,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.StarRating],
+  },
+  {
+    value: QUESTION_ANSWER_TYPE.Complain,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.Complain],
+  },
+  {
+    value: QUESTION_ANSWER_TYPE.Smiles,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.Smiles],
+  },
 ];
+
+type QuestionMainField = 'groupId' | 'textEn' | 'textAr' | 'type';
+type QuestionOptionField = 'textEn' | 'textAr' | 'order';
+
+interface QuestionOptionFormControls {
+  textEn: FormControl<string>;
+  textAr: FormControl<string>;
+  order: FormControl<string>;
+}
+
+interface QuestionFormControls {
+  groupId: FormControl<string>;
+  textEn: FormControl<string>;
+  textAr: FormControl<string>;
+  type: FormControl<string>;
+  options: FormArray<FormGroup<QuestionOptionFormControls>>;
+}
+
+type QuestionFormGroup = FormGroup<QuestionFormControls>;
+type QuestionOptionsFormArray = FormArray<FormGroup<QuestionOptionFormControls>>;
+type QuestionFormValue = ReturnType<QuestionFormGroup['getRawValue']>;
 
 @Component({
   selector: 'app-questions-page',
@@ -29,6 +106,7 @@ const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
     IconComponent,
     InputComponent,
     ModalComponent,
+    QuestionAnswerPreviewComponent,
     ReactiveFormsModule,
     TranslatePipe,
   ],
@@ -40,6 +118,7 @@ export class QuestionsPageComponent implements OnInit {
   readonly questionsStore = inject(QuestionsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -47,6 +126,7 @@ export class QuestionsPageComponent implements OnInit {
   readonly editIcon = Pencil;
   readonly plusIcon = Plus;
   readonly questionIcon = HelpCircle;
+  readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
   readonly questionTypeOptions = QUESTION_TYPE_OPTIONS;
 
@@ -55,10 +135,21 @@ export class QuestionsPageComponent implements OnInit {
   readonly deleteModalOpen = signal(false);
   readonly selectedQuestion = signal<QuestionListItem | null>(null);
   readonly questionPendingDelete = signal<QuestionListItem | null>(null);
+  readonly createAnswerType = signal<QuestionAnswerType>(QUESTION_ANSWER_TYPE.SingleChoice);
+  readonly editAnswerType = signal<QuestionAnswerType>(QUESTION_ANSWER_TYPE.SingleChoice);
+  readonly createOptionsError = signal('');
+  readonly editOptionsError = signal('');
 
   readonly canCreate = computed(() => this.authStore.canManageQuestions('Create'));
   readonly canUpdate = computed(() => this.authStore.canManageQuestions('Update'));
   readonly canDelete = computed(() => this.authStore.canManageQuestions('Delete'));
+  readonly canRestore = computed(() => this.authStore.canManageQuestions('Update'));
+  readonly createIsSingleChoice = computed(
+    () => this.createAnswerType() === QUESTION_ANSWER_TYPE.SingleChoice,
+  );
+  readonly editIsSingleChoice = computed(
+    () => this.editAnswerType() === QUESTION_ANSWER_TYPE.SingleChoice,
+  );
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -67,19 +158,16 @@ export class QuestionsPageComponent implements OnInit {
     orderSort: [''],
   });
 
-  readonly questionForm = this.formBuilder.nonNullable.group({
-    groupId: ['', [Validators.required]],
-    textEn: ['', [Validators.required, Validators.maxLength(500)]],
-    textAr: ['', [Validators.maxLength(500)]],
-    type: ['1', [Validators.required]],
-  });
+  readonly questionForm = this.createQuestionForm();
+  readonly editQuestionForm = this.createQuestionForm();
 
-  readonly editQuestionForm = this.formBuilder.nonNullable.group({
-    groupId: ['', [Validators.required]],
-    textEn: ['', [Validators.required, Validators.maxLength(500)]],
-    textAr: ['', [Validators.maxLength(500)]],
-    type: ['1', [Validators.required]],
-  });
+  get createOptions(): QuestionOptionsFormArray {
+    return this.questionForm.controls.options;
+  }
+
+  get editOptions(): QuestionOptionsFormArray {
+    return this.editQuestionForm.controls.options;
+  }
 
   ngOnInit(): void {
     this.questionsStore.load();
@@ -92,28 +180,25 @@ export class QuestionsPageComponent implements OnInit {
 
     this.questionsStore.clearMessages();
     this.questionsStore.loadGroupsSelection();
-    this.questionForm.reset({
-      groupId: '',
-      textEn: '',
-      textAr: '',
-      type: '1',
-    });
+    this.resetCreateQuestionForm();
     this.createModalOpen.set(true);
   }
 
   closeCreateQuestion(): void {
-    this.questionForm.reset({
-      groupId: '',
-      textEn: '',
-      textAr: '',
-      type: '1',
-    });
+    this.resetCreateQuestionForm();
     this.createModalOpen.set(false);
   }
 
   createQuestion(): void {
     this.questionForm.markAllAsTouched();
-    if (this.questionForm.invalid || this.questionsStore.creating() || !this.canCreate()) {
+    this.createOptionsError.set(this.validateOptions(this.createAnswerType(), this.createOptions));
+
+    if (
+      this.questionForm.invalid ||
+      this.createOptionsError().length > 0 ||
+      this.questionsStore.creating() ||
+      !this.canCreate()
+    ) {
       return;
     }
 
@@ -131,22 +216,21 @@ export class QuestionsPageComponent implements OnInit {
     this.questionsStore.clearMessages();
     this.questionsStore.loadGroupsSelection();
     this.selectedQuestion.set(question);
-    this.editQuestionForm.setValue({
+    this.setQuestionOptions(this.editOptions, question.options);
+    this.editQuestionForm.patchValue({
       groupId: question.groupId,
       textEn: question.textEn,
       textAr: question.textAr ?? '',
       type: String(question.type || 1),
     });
+    this.editAnswerType.set(question.type);
+    this.syncOptionsState(this.editOptions, question.type);
+    this.editOptionsError.set('');
     this.editModalOpen.set(true);
   }
 
   closeEditQuestion(): void {
-    this.editQuestionForm.reset({
-      groupId: '',
-      textEn: '',
-      textAr: '',
-      type: '1',
-    });
+    this.resetEditQuestionForm();
     this.selectedQuestion.set(null);
     this.editModalOpen.set(false);
   }
@@ -154,14 +238,25 @@ export class QuestionsPageComponent implements OnInit {
   updateSelectedQuestion(): void {
     const question = this.selectedQuestion();
     this.editQuestionForm.markAllAsTouched();
+    this.editOptionsError.set(this.validateOptions(this.editAnswerType(), this.editOptions));
 
-    if (!question || this.editQuestionForm.invalid || this.questionsStore.updating() || !this.canUpdate()) {
+    if (
+      !question ||
+      this.editQuestionForm.invalid ||
+      this.editOptionsError().length > 0 ||
+      this.questionsStore.updating() ||
+      !this.canUpdate()
+    ) {
       return;
     }
 
-    this.questionsStore.updateQuestion(question.questionId, this.toPayload(this.editQuestionForm.getRawValue()), () => {
-      this.closeEditQuestion();
-    });
+    this.questionsStore.updateQuestion(
+      question.questionId,
+      this.toPayload(this.editQuestionForm.getRawValue()),
+      () => {
+        this.closeEditQuestion();
+      },
+    );
   }
 
   openDeleteQuestion(event: MouseEvent, question: QuestionListItem): void {
@@ -189,6 +284,15 @@ export class QuestionsPageComponent implements OnInit {
     this.questionsStore.deleteQuestion(question.questionId, () => {
       this.closeDeleteQuestion();
     });
+  }
+
+  restoreQuestion(event: MouseEvent, question: QuestionListItem): void {
+    event.stopPropagation();
+    if (question.isActive || this.questionsStore.restoring() || !this.canRestore()) {
+      return;
+    }
+
+    this.questionsStore.restoreQuestion(question.questionId, () => undefined);
   }
 
   searchQuestions(): void {
@@ -219,18 +323,81 @@ export class QuestionsPageComponent implements OnInit {
     this.questionsStore.nextPage();
   }
 
-  questionFieldError(field: keyof typeof this.questionForm.controls): string {
+  questionFieldError(field: QuestionMainField): string {
     const control = this.questionForm.controls[field];
     return this.fieldError(field, control.touched, control.valid, control.hasError('required'));
   }
 
-  editQuestionFieldError(field: keyof typeof this.editQuestionForm.controls): string {
+  editQuestionFieldError(field: QuestionMainField): string {
     const control = this.editQuestionForm.controls[field];
     return this.fieldError(field, control.touched, control.valid, control.hasError('required'));
   }
 
+  questionOptionFieldError(index: number, field: QuestionOptionField): string {
+    return this.optionFieldError(this.createOptions, index, field);
+  }
+
+  editQuestionOptionFieldError(index: number, field: QuestionOptionField): string {
+    return this.optionFieldError(this.editOptions, index, field);
+  }
+
+  onCreateQuestionTypeChanged(event: Event): void {
+    const answerType = this.readAnswerTypeFromEvent(event);
+    this.createAnswerType.set(answerType);
+    this.syncOptionsState(this.createOptions, answerType);
+    this.createOptionsError.set('');
+  }
+
+  onEditQuestionTypeChanged(event: Event): void {
+    const answerType = this.readAnswerTypeFromEvent(event);
+    this.editAnswerType.set(answerType);
+    this.syncOptionsState(this.editOptions, answerType);
+    this.editOptionsError.set('');
+  }
+
+  addCreateOption(): void {
+    this.addOption(this.createOptions);
+    this.createOptionsError.set('');
+  }
+
+  addEditOption(): void {
+    this.addOption(this.editOptions);
+    this.editOptionsError.set('');
+  }
+
+  removeCreateOption(index: number): void {
+    this.removeOption(this.createOptions, index);
+    this.createOptionsError.set('');
+  }
+
+  removeEditOption(index: number): void {
+    this.removeOption(this.editOptions, index);
+    this.editOptionsError.set('');
+  }
+
+  canRemoveCreateOption(): boolean {
+    return this.createOptions.length > 2;
+  }
+
+  canRemoveEditOption(): boolean {
+    return this.editOptions.length > 2;
+  }
+
+  answerTypeLabel(type: QuestionAnswerTypeInput, fallbackTypeName = ''): string {
+    const labelKey =
+      questionAnswerTypeLabelKey(type) ?? questionAnswerTypeLabelKey(fallbackTypeName);
+    if (labelKey) {
+      return this.i18n.translate(labelKey);
+    }
+
+    return (
+      fallbackTypeName ||
+      (typeof type === 'string' || typeof type === 'number' ? String(type) : '-')
+    );
+  }
+
   private fieldError(
-    field: keyof typeof this.questionForm.controls,
+    field: QuestionMainField,
     touched: boolean,
     valid: boolean,
     required: boolean,
@@ -252,14 +419,195 @@ export class QuestionsPageComponent implements OnInit {
     return 'questions.textMaxLength';
   }
 
-  private toPayload(value: { groupId: string; textEn: string; textAr: string; type: string }): CreateQuestionRequest {
+  private createQuestionForm(): QuestionFormGroup {
+    return this.formBuilder.nonNullable.group({
+      groupId: ['', [Validators.required]],
+      textEn: ['', [Validators.required, Validators.maxLength(500)]],
+      textAr: ['', [Validators.maxLength(500)]],
+      type: [String(QUESTION_ANSWER_TYPE.SingleChoice), [Validators.required]],
+      options: this.formBuilder.array<FormGroup<QuestionOptionFormControls>>([
+        this.createOptionForm(1),
+        this.createOptionForm(2),
+      ]),
+    });
+  }
+
+  private createOptionForm(
+    order: number,
+    option?: QuestionAnswerOption,
+  ): FormGroup<QuestionOptionFormControls> {
+    return this.formBuilder.nonNullable.group({
+      textEn: [option?.textEn ?? '', [Validators.required]],
+      textAr: [option?.textAr ?? ''],
+      order: [
+        String(option?.order || order),
+        [Validators.required, Validators.pattern(/^[1-9]\d*$/)],
+      ],
+    });
+  }
+
+  private resetCreateQuestionForm(): void {
+    this.resetQuestionForm(this.questionForm, this.createOptions);
+    this.createAnswerType.set(QUESTION_ANSWER_TYPE.SingleChoice);
+    this.syncOptionsState(this.createOptions, QUESTION_ANSWER_TYPE.SingleChoice);
+    this.createOptionsError.set('');
+  }
+
+  private resetEditQuestionForm(): void {
+    this.resetQuestionForm(this.editQuestionForm, this.editOptions);
+    this.editAnswerType.set(QUESTION_ANSWER_TYPE.SingleChoice);
+    this.syncOptionsState(this.editOptions, QUESTION_ANSWER_TYPE.SingleChoice);
+    this.editOptionsError.set('');
+  }
+
+  private resetQuestionForm(form: QuestionFormGroup, options: QuestionOptionsFormArray): void {
+    form.reset({
+      groupId: '',
+      textEn: '',
+      textAr: '',
+      type: String(QUESTION_ANSWER_TYPE.SingleChoice),
+    });
+    this.setQuestionOptions(options, []);
+  }
+
+  private setQuestionOptions(
+    optionsControl: QuestionOptionsFormArray,
+    options: readonly QuestionAnswerOption[],
+  ): void {
+    optionsControl.clear();
+
+    for (const option of options) {
+      optionsControl.push(this.createOptionForm(option.order, option));
+    }
+
+    this.ensureMinimumOptions(optionsControl);
+  }
+
+  private syncOptionsState(
+    optionsControl: QuestionOptionsFormArray,
+    answerType: QuestionAnswerType,
+  ): void {
+    if (answerType === QUESTION_ANSWER_TYPE.SingleChoice) {
+      this.ensureMinimumOptions(optionsControl);
+      optionsControl.enable();
+      return;
+    }
+
+    optionsControl.disable();
+  }
+
+  private ensureMinimumOptions(optionsControl: QuestionOptionsFormArray): void {
+    while (optionsControl.length < 2) {
+      optionsControl.push(this.createOptionForm(optionsControl.length + 1));
+    }
+  }
+
+  private addOption(optionsControl: QuestionOptionsFormArray): void {
+    optionsControl.push(this.createOptionForm(optionsControl.length + 1));
+  }
+
+  private removeOption(optionsControl: QuestionOptionsFormArray, index: number): void {
+    if (optionsControl.length <= 2) {
+      return;
+    }
+
+    optionsControl.removeAt(index);
+  }
+
+  private optionFieldError(
+    optionsControl: QuestionOptionsFormArray,
+    index: number,
+    field: QuestionOptionField,
+  ): string {
+    const option = optionsControl.at(index);
+    const control = option.controls[field];
+
+    if (!control.touched || control.valid) {
+      return '';
+    }
+
+    if (field === 'textEn' && control.hasError('required')) {
+      return 'questions.optionTextEnRequired';
+    }
+
+    if (field === 'order' && control.hasError('required')) {
+      return 'questions.optionOrderRequired';
+    }
+
+    if (field === 'order' && control.hasError('pattern')) {
+      return 'questions.optionOrderPositive';
+    }
+
+    return '';
+  }
+
+  private validateOptions(
+    answerType: QuestionAnswerType,
+    optionsControl: QuestionOptionsFormArray,
+  ): string {
+    if (!isSingleChoiceAnswerType(answerType)) {
+      return '';
+    }
+
+    optionsControl.markAllAsTouched();
+
+    if (optionsControl.length < 2) {
+      return 'questions.singleChoiceMinOptions';
+    }
+
+    if (optionsControl.invalid) {
+      return '';
+    }
+
+    const options = this.toOptionPayloads(optionsControl.getRawValue());
+    const normalizedText = options.map((option) => option.textEn.toLowerCase());
+    const orderValues = options.map((option) => option.order);
+
+    if (new Set(normalizedText).size !== normalizedText.length) {
+      return 'questions.optionTextEnUnique';
+    }
+
+    if (new Set(orderValues).size !== orderValues.length) {
+      return 'questions.optionOrderUnique';
+    }
+
+    return '';
+  }
+
+  private toPayload(value: QuestionFormValue): CreateQuestionRequest {
     const textAr = value.textAr.trim();
+    const answerType = toQuestionAnswerType(value.type) ?? QUESTION_ANSWER_TYPE.SingleChoice;
+
     return {
       groupId: value.groupId,
       textEn: value.textEn.trim(),
       textAr: textAr.length > 0 ? textAr : null,
-      type: Number(value.type),
+      type: answerType,
+      options:
+        answerType === QUESTION_ANSWER_TYPE.SingleChoice
+          ? this.toOptionPayloads(value.options)
+          : [],
     };
+  }
+
+  private toOptionPayloads(
+    options: readonly { textEn: string; textAr: string; order: string }[],
+  ): readonly QuestionAnswerOptionPayload[] {
+    return options.map((option) => {
+      const textAr = option.textAr.trim();
+
+      return {
+        textEn: option.textEn.trim(),
+        textAr: textAr.length > 0 ? textAr : null,
+        order: Number(option.order),
+      };
+    });
+  }
+
+  private readAnswerTypeFromEvent(event: Event): QuestionAnswerType {
+    const target = event.target;
+    const value = target instanceof HTMLSelectElement ? target.value : '';
+    return toQuestionAnswerType(value) ?? QUESTION_ANSWER_TYPE.SingleChoice;
   }
 
   private toIsActiveFilter(value: string): boolean | null {

@@ -1,3 +1,10 @@
+import {
+  QuestionAnswerOption,
+  QuestionAnswerOptionApiResponse,
+  QuestionAnswerOptionPayload,
+  QuestionAnswerType,
+} from '../../../../shared/models/question-answer.model';
+
 export interface QuestionListItem {
   questionId: string;
   branchId: string;
@@ -6,17 +13,19 @@ export interface QuestionListItem {
   groupNameAr: string | null;
   textEn: string;
   textAr: string | null;
-  type: number;
+  type: QuestionAnswerType;
   typeName: string;
   isActive: boolean;
   createdOnUtc: string;
+  options: readonly QuestionAnswerOption[];
 }
 
 export interface CreateQuestionRequest {
   groupId: string;
   textEn: string;
   textAr?: string | null;
-  type: number;
+  type: QuestionAnswerType;
+  options: readonly QuestionAnswerOptionPayload[];
 }
 
 export interface UpdateQuestionRequest extends CreateQuestionRequest {}
@@ -37,8 +46,8 @@ export interface QuestionsPageResult {
 }
 
 export interface QuestionTypeOption {
-  value: number;
-  label: string;
+  value: QuestionAnswerType;
+  labelKey: string;
 }
 
 export interface QuestionApiResponse {
@@ -53,6 +62,7 @@ export interface QuestionApiResponse {
   typeName?: string | null;
   isActive?: boolean;
   createdOnUtc?: string;
+  options?: readonly QuestionAnswerOptionApiResponse[];
 }
 
 export interface QuestionsPageApiResponse {

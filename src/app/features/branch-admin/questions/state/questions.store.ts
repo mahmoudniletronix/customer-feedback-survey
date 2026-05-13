@@ -48,6 +48,7 @@ export class QuestionsStore {
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
   private readonly deletingSignal = signal(false);
+  private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
 
@@ -64,6 +65,7 @@ export class QuestionsStore {
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
   readonly deleting = this.deletingSignal.asReadonly();
+  readonly restoring = this.restoringSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
@@ -234,6 +236,33 @@ export class QuestionsStore {
       });
   }
 
+  restoreQuestion(questionId: string, onRestored: () => void): void {
+    if (this.restoringSignal()) {
+      return;
+    }
+
+    this.restoringSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.questionsService
+      .restore(questionId)
+      .pipe(
+        take(1),
+        finalize(() => this.restoringSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('questions.restoreSuccess');
+          this.load();
+          onRestored();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'questions.restoreError'));
+        },
+      });
+  }
+
   clearMessages(): void {
     this.errorSignal.set(null);
     this.successSignal.set(null);
@@ -291,6 +320,34 @@ export class QuestionsStore {
     }
     if (normalized.includes('invalidquestiontype') || normalized.includes('invalidtype')) {
       return 'questions.invalidType';
+    }
+    if (normalized.includes('singlechoice') && normalized.includes('option') && normalized.includes('least')) {
+      return 'questions.singleChoiceMinOptions';
+    }
+    if (normalized.includes('options') && normalized.includes('only') && normalized.includes('singlechoice')) {
+      return 'questions.optionsOnlySingleChoice';
+    }
+    if (normalized.includes('optiontexten') && normalized.includes('required')) {
+      return 'questions.optionTextEnRequired';
+    }
+    if (normalized.includes('optionorder') && normalized.includes('required')) {
+      return 'questions.optionOrderRequired';
+    }
+    if (normalized.includes('optionorder') && (normalized.includes('greater') || normalized.includes('positive'))) {
+      return 'questions.optionOrderPositive';
+    }
+    if (normalized.includes('optionorder') && normalized.includes('unique')) {
+      return 'questions.optionOrderUnique';
+    }
+    if (normalized.includes('optiontexten') && normalized.includes('unique')) {
+      return 'questions.optionTextEnUnique';
+    }
+    if (
+      normalized.includes('template') &&
+      normalized.includes('type') &&
+      (normalized.includes('change') || normalized.includes('linked'))
+    ) {
+      return 'questions.typeChangeBlockedByTemplate';
     }
     return '';
   }

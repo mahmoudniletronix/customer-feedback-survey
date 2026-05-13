@@ -1,5 +1,13 @@
 import { Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   ArrowLeft,
@@ -14,6 +22,11 @@ import {
   Search,
   Trash2,
 } from 'lucide-angular';
+import { I18nService } from '../../../../core/services/i18n.service';
+import {
+  QuestionAnswerTypeInput,
+  questionAnswerTypeLabelKey,
+} from '../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
@@ -37,13 +50,20 @@ interface TemplateQuestionManagerGroup {
 @Component({
   selector: 'app-branch-template-questions-page',
   standalone: true,
-  imports: [ButtonComponent, CardComponent, IconComponent, RouterLink, TranslatePipe],
+  imports: [
+    ButtonComponent,
+    CardComponent,
+    IconComponent,
+    RouterLink,
+    TranslatePipe,
+  ],
   templateUrl: './branch-template-questions-page.component.html',
   styleUrl: './branch-template-questions-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BranchTemplateQuestionsPageComponent implements OnInit {
   readonly templatesStore = inject(BranchTemplatesStore);
+  private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
 
@@ -65,7 +85,9 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   readonly draggingQuestionId = signal<string | null>(null);
 
   readonly templateId = computed(() => this.route.snapshot.paramMap.get('templateId') ?? '');
-  readonly selectedQuestionIds = computed(() => new Set(this.selectedQuestions().map((question) => question.questionId)));
+  readonly selectedQuestionIds = computed(
+    () => new Set(this.selectedQuestions().map((question) => question.questionId)),
+  );
   readonly allQuestions = computed(() => this.flattenSelectionQuestions());
   readonly filteredAvailableGroups = computed(() => this.toFilteredAvailableGroups());
   readonly hasAvailableQuestions = computed(() =>
@@ -93,7 +115,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
       this.selectedQuestions.set(
         this.flattenSelectionQuestions()
           .filter((question) => question.isSelected)
-          .sort((first, second) => (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER)),
+          .sort(
+            (first, second) =>
+              (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
+          ),
       );
       this.initializedTemplateId.set(selection.templateId);
     });
@@ -124,16 +149,23 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
       return;
     }
 
-    this.selectedQuestions.update((questions) => [...questions, { ...question, isSelected: true, order: questions.length + 1 }]);
+    this.selectedQuestions.update((questions) => [
+      ...questions,
+      { ...question, isSelected: true, order: questions.length + 1 },
+    ]);
   }
 
   removeQuestion(questionId: string): void {
-    this.selectedQuestions.update((questions) => questions.filter((question) => question.questionId !== questionId));
+    this.selectedQuestions.update((questions) =>
+      questions.filter((question) => question.questionId !== questionId),
+    );
   }
 
   moveQuestion(questionId: string, direction: -1 | 1): void {
     const currentQuestions = [...this.selectedQuestions()];
-    const currentIndex = currentQuestions.findIndex((question) => question.questionId === questionId);
+    const currentIndex = currentQuestions.findIndex(
+      (question) => question.questionId === questionId,
+    );
     const nextIndex = currentIndex + direction;
     if (currentIndex < 0 || nextIndex < 0 || nextIndex >= currentQuestions.length) {
       return;
@@ -162,8 +194,12 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     }
 
     const currentQuestions = [...this.selectedQuestions()];
-    const draggedIndex = currentQuestions.findIndex((question) => question.questionId === draggedQuestionId);
-    const targetIndex = currentQuestions.findIndex((question) => question.questionId === targetQuestionId);
+    const draggedIndex = currentQuestions.findIndex(
+      (question) => question.questionId === draggedQuestionId,
+    );
+    const targetIndex = currentQuestions.findIndex(
+      (question) => question.questionId === targetQuestionId,
+    );
     if (draggedIndex < 0 || targetIndex < 0) {
       return;
     }
@@ -203,9 +239,29 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     this.selectedQuestions.set(
       this.flattenSelectionQuestions()
         .filter((question) => question.isSelected)
-        .sort((first, second) => (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER)),
+        .sort(
+          (first, second) =>
+            (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
+        ),
     );
     this.initializedTemplateId.set(selection.templateId);
+  }
+
+  answerTypeLabel(type: QuestionAnswerTypeInput): string {
+    const labelKey = questionAnswerTypeLabelKey(type);
+    if (labelKey) {
+      return this.i18n.translate(labelKey);
+    }
+
+    return typeof type === 'string' || typeof type === 'number' ? String(type) : '-';
+  }
+
+  questionText(question: TemplateQuestionManagerItem): string {
+    if (this.i18n.language() === 'ar') {
+      return question.textAr || question.textEn || '-';
+    }
+
+    return question.textEn || question.textAr || '-';
   }
 
   private flattenSelectionQuestions(): readonly TemplateQuestionManagerItem[] {
@@ -267,7 +323,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   private toOriginalSelectedIdsKey(): string {
     return this.allQuestions()
       .filter((question) => question.isSelected)
-      .sort((first, second) => (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER))
+      .sort(
+        (first, second) =>
+          (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
+      )
       .map((question) => question.questionId)
       .join('|');
   }

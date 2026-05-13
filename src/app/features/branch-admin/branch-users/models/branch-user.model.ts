@@ -12,6 +12,7 @@ export interface BranchUser {
   userName: string;
   email: string;
   phoneNumber: string;
+  isActive: boolean;
   createdOnUtc: string;
   roles: readonly BranchUserRole[];
 }
@@ -20,6 +21,7 @@ export interface BranchUsersQuery {
   pageNumber: number;
   pageSize: number;
   searchText: string;
+  isActive: boolean | null;
 }
 
 export interface BranchUsersPageResult {
@@ -44,6 +46,17 @@ export interface CreateBranchUserPayload {
   roleIds: readonly string[];
 }
 
+export interface UpdateBranchUserPayload {
+  nameEn: string;
+  nameAr: string;
+  email: string;
+  phoneNumber: string;
+}
+
+export interface ResetBranchUserPasswordPayload {
+  newPassword: string;
+}
+
 export interface AssignBranchUserRolesPayload {
   roleIds: readonly string[];
 }
@@ -66,6 +79,7 @@ export interface BranchUserApiResponse {
   userName?: string;
   email?: string;
   phoneNumber?: string | null;
+  isActive?: boolean;
   createdOnUtc?: string;
   roles?: readonly BranchUserRoleApiResponse[];
 }

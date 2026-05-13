@@ -77,6 +77,12 @@ export class QuestionGroupsService {
       .pipe(map((response) => this.toQuestionGroup(response)));
   }
 
+  restore(groupId: string): Observable<QuestionGroupListItem> {
+    return this.http
+      .put<QuestionGroupApiResponse>(`${this.questionGroupsUrl}/${groupId}/restore`, {})
+      .pipe(map((response) => this.toQuestionGroup(response)));
+  }
+
   private toPageResult(
     response: QuestionGroupsPageApiResponse | readonly QuestionGroupApiResponse[] | QuestionGroupApiResponse,
     query: QuestionGroupsFilter,

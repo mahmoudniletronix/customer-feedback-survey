@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { toQuestionAnswerOption } from '../../../../shared/models/question-answer.model';
 import {
   BranchTemplate,
   BranchTemplateApiResponse,
@@ -216,13 +217,16 @@ export class BranchTemplatesService {
   private toQuestionSelectionItem(
     response: BranchTemplateQuestionSelectionItemApiResponse,
   ): BranchTemplateQuestionSelectionItem {
+    const questionId = this.readRecordId(response.questionId);
+
     return {
-      questionId: this.readRecordId(response.questionId),
+      questionId,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? '',
       type: response.type !== null && response.type !== undefined ? String(response.type) : '',
       isSelected: response.isSelected ?? false,
       order: response.order ?? null,
+      options: (response.options ?? []).map((option) => toQuestionAnswerOption(option, questionId)),
     };
   }
 

@@ -4,6 +4,17 @@ import { AuthSession, Role, User, UserType } from '../../shared/models/role.mode
 
 const TOKEN_KEY = 'cfs_token';
 const SESSION_KEY = 'cfs_session';
+const LEGACY_AUTH_KEYS = [
+  'token',
+  'authToken',
+  'auth_token',
+  'accessToken',
+  'access_token',
+  'jwt',
+  'session',
+  'authSession',
+  'auth_session',
+];
 
 @Injectable({ providedIn: 'root' })
 export class TokenStorageService {
@@ -40,12 +51,21 @@ export class TokenStorageService {
   }
 
   clear(): void {
-    this.window?.localStorage.removeItem(TOKEN_KEY);
-    this.window?.localStorage.removeItem(SESSION_KEY);
+    const currentWindow = this.window;
+    if (!currentWindow) {
+      return;
+    }
+
+    this.clearStorage(currentWindow.localStorage);
+    this.clearStorage(currentWindow.sessionStorage);
   }
 
   private get window(): Window | null {
     return this.document.defaultView;
+  }
+
+  private clearStorage(storage: Storage): void {
+    [TOKEN_KEY, SESSION_KEY, ...LEGACY_AUTH_KEYS].forEach((key) => storage.removeItem(key));
   }
 
   private isAuthSession(value: unknown): value is AuthSession {
@@ -78,12 +98,19 @@ export class TokenStorageService {
       value === 'SUPER_ADMIN' ||
       value === 'BRANCH_ADMIN' ||
       value === 'DEPARTMENT_ADMIN' ||
-      value === 'BRANCH_USER'
+      value === 'BRANCH_USER' ||
+      value === 'OPERATOR'
     );
   }
 
   private isUserType(value: unknown): value is UserType {
-    return value === 'SuperAdmin' || value === 'BranchAdmin' || value === 'DepartmentAdmin' || value === 'BranchUser';
+    return (
+      value === 'SuperAdmin' ||
+      value === 'BranchAdmin' ||
+      value === 'DepartmentAdmin' ||
+      value === 'BranchUser' ||
+      value === 'Operator'
+    );
   }
 
   private getSessionFromToken(): AuthSession | null {
@@ -112,7 +139,7 @@ export class TokenStorageService {
       userType,
       roles,
       permissions,
-      user
+      user,
     };
 
     this.setSession(session);
@@ -155,7 +182,7 @@ export class TokenStorageService {
       payload,
       'roles',
       'role',
-      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
     );
 
     if (roles.some((role) => role === 'System Administrator' || role === 'SuperAdmin')) {
@@ -169,6 +196,16 @@ export class TokenStorageService {
     }
     if (roles.some((role) => role === 'BranchUser' || role === 'Branch User')) {
       return 'BranchUser';
+    }
+    if (
+      roles.some((role) =>
+        role
+          .replace(/[\s_-]/g, '')
+          .toLowerCase()
+          .includes('operator'),
+      )
+    ) {
+      return 'Operator';
     }
 
     return null;
@@ -184,6 +221,9 @@ export class TokenStorageService {
     if (userType === 'BranchUser') {
       return 'BRANCH_USER';
     }
+    if (userType === 'Operator') {
+      return 'OPERATOR';
+    }
     return 'DEPARTMENT_ADMIN';
   }
 
@@ -195,7 +235,10 @@ export class TokenStorageService {
       'User';
     const email =
       this.readString(payload, 'email') ??
-      this.readString(payload, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress') ??
+      this.readString(
+        payload,
+        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',
+      ) ??
       userName;
 
     return {
@@ -203,12 +246,16 @@ export class TokenStorageService {
       name: userName,
       email,
       role,
-      branchId: this.readString(payload, 'branchId') ?? this.readString(payload, 'BranchId') ?? this.readString(payload, 'branch_id') ?? undefined,
+      branchId:
+        this.readString(payload, 'branchId') ??
+        this.readString(payload, 'BranchId') ??
+        this.readString(payload, 'branch_id') ??
+        undefined,
       departmentId:
         this.readString(payload, 'departmentId') ??
         this.readString(payload, 'DepartmentId') ??
         this.readString(payload, 'department_id') ??
-        undefined
+        undefined,
     };
   }
 
@@ -217,7 +264,10 @@ export class TokenStorageService {
     return typeof value === 'string' && value.length > 0 ? value : null;
   }
 
-  private readStringArray(payload: Record<string, unknown>, ...keys: readonly string[]): readonly string[] {
+  private readStringArray(
+    payload: Record<string, unknown>,
+    ...keys: readonly string[]
+  ): readonly string[] {
     const values = keys.flatMap((key) => {
       const value = payload[key];
       if (typeof value === 'string') {

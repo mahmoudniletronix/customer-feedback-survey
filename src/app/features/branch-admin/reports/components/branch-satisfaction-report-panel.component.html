@@ -1,0 +1,142 @@
+<app-card [title]="'branchReports.title' | t" [subtitle]="'branchReports.subtitle' | t">
+  <form class="grid gap-2 md:grid-cols-[minmax(0,1fr)_8.5rem_8.5rem_auto_auto]" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+    <label class="block">
+      <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'branchReports.templateFilter' | t }}</span>
+      <select
+        class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+        formControlName="templateId"
+      >
+        <option value="">{{ 'branchReports.allTemplates' | t }}</option>
+        @for (template of templates(); track template.templateId) {
+          <option [value]="template.templateId">{{ templateName(template) }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="block">
+      <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'branchReports.from' | t }}</span>
+      <input
+        class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+        type="date"
+        formControlName="from"
+      />
+    </label>
+
+    <label class="block">
+      <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'branchReports.to' | t }}</span>
+      <input
+        class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+        type="date"
+        formControlName="to"
+      />
+    </label>
+
+    <div class="flex items-end">
+      <app-button type="submit" size="sm" [loading]="reportStore.loading()">
+        {{ 'branches.searchAction' | t }}
+      </app-button>
+    </div>
+    <div class="flex items-end">
+      <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
+        {{ 'branches.clearSearch' | t }}
+      </app-button>
+    </div>
+  </form>
+
+  @if (reportStore.loading()) {
+    <div class="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-4 text-center text-xs font-semibold text-slate-500">
+      <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      {{ 'branchReports.loading' | t }}
+    </div>
+  } @else if (reportStore.error()) {
+    <div class="mt-4 rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      {{ reportStore.error() ?? '' | t }}
+    </div>
+  } @else if (reportStore.report(); as report) {
+    <div class="mt-4 space-y-4">
+      <div class="flex flex-col gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase text-slate-400">{{ 'branchReports.customerSatisfaction' | t }}</p>
+          <p
+            class="mt-1 text-4xl font-black"
+            [class.text-emerald-700]="report.overall.score >= 80"
+            [class.text-amber-700]="report.overall.score >= 60 && report.overall.score < 80"
+            [class.text-rose-700]="report.overall.score < 60"
+          >
+            {{ report.overall.score | number: '1.0-1' }}%
+          </p>
+          <p class="mt-1 text-xs font-bold text-slate-500">{{ scoreState(report.overall.score) | t }}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs sm:w-72">
+          <div class="rounded-xl bg-white p-3">
+            <p class="font-bold text-slate-400">{{ 'branchReports.responses' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-slate-900">{{ report.overall.totalResponses }}</p>
+          </div>
+          <div class="rounded-xl bg-white p-3">
+            <p class="font-bold text-slate-400">{{ 'branchReports.scored' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-slate-900">{{ report.overall.scoredResponses }}</p>
+          </div>
+          <div class="rounded-xl bg-white p-3">
+            <p class="font-bold text-slate-400">{{ 'branchReports.complaints' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-slate-900">{{ report.complaints.count }}</p>
+          </div>
+          <div class="rounded-xl bg-white p-3">
+            <p class="font-bold text-slate-400">{{ 'branchReports.voice' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-slate-900">{{ report.overall.voiceAnswersCount }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+        <span class="rounded-full bg-slate-100 px-2.5 py-1">
+          {{ report.period.from || '-' }} / {{ report.period.to || '-' }}
+        </span>
+        <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-[#0d94b3]">
+          {{ report.period.periodSource || '-' }}
+        </span>
+      </div>
+
+      @if (reportStore.isEmpty()) {
+        <div class="rounded-xl border border-slate-100 bg-white p-4 text-center text-xs font-semibold text-slate-500">
+          {{ 'branchReports.empty' | t }}
+        </div>
+      } @else {
+        <div class="grid gap-3 sm:grid-cols-3">
+          <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+            <app-icon class="text-emerald-700" [icon]="smileIcon" [size]="18" />
+            <p class="mt-2 text-xs font-bold text-emerald-700">{{ 'branchReports.satisfied' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-emerald-900">{{ report.overall.satisfiedResponses }}</p>
+          </div>
+          <div class="rounded-xl border border-amber-100 bg-amber-50 p-3">
+            <app-icon class="text-amber-700" [icon]="trendIcon" [size]="18" />
+            <p class="mt-2 text-xs font-bold text-amber-700">{{ 'branchReports.neutral' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-amber-900">{{ report.overall.neutralResponses }}</p>
+          </div>
+          <div class="rounded-xl border border-rose-100 bg-rose-50 p-3">
+            <app-icon class="text-rose-700" [icon]="frownIcon" [size]="18" />
+            <p class="mt-2 text-xs font-bold text-rose-700">{{ 'branchReports.unsatisfied' | t }}</p>
+            <p class="mt-1 text-lg font-extrabold text-rose-900">{{ report.overall.unsatisfiedResponses }}</p>
+          </div>
+        </div>
+
+        <div class="h-56 rounded-xl border border-slate-100 bg-white p-3">
+          <canvas #chartCanvas aria-label="Branch satisfaction trend chart"></canvas>
+        </div>
+
+        <div class="space-y-2">
+          @for (item of report.distribution; track item.value) {
+            <div class="grid grid-cols-[6.5rem_minmax(0,1fr)_3rem] items-center gap-2 text-xs">
+              <p class="truncate font-bold text-slate-600" [title]="distributionLabel(item)">
+                {{ distributionLabel(item) }}
+              </p>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(item.percentage)"></div>
+              </div>
+              <p class="text-end font-bold text-slate-500">{{ item.count }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</app-card>

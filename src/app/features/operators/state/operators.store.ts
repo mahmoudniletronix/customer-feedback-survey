@@ -4,6 +4,7 @@ import { finalize, take } from 'rxjs';
 import {
   CreateOperatorPayload,
   CreateOperatorResponse,
+  OperatorActiveTemplateSelection,
   OperatorDepartmentSelection,
   OperatorListItem,
   OperatorTemplatesSelection,
@@ -37,6 +38,7 @@ export class OperatorsStore {
   private readonly operatorsService = inject(OperatorsService);
   private readonly operatorsSignal = signal<readonly OperatorListItem[]>([]);
   private readonly departmentsSignal = signal<readonly OperatorDepartmentSelection[]>([]);
+  private readonly activeTemplatesSignal = signal<readonly OperatorActiveTemplateSelection[]>([]);
   private readonly createdOperatorSignal = signal<CreateOperatorResponse | null>(null);
   private readonly templatesSelectionSignal = signal<OperatorTemplatesSelection | null>(null);
   private readonly currentPageSignal = signal(this.defaultQuery.pageNumber);
@@ -46,16 +48,19 @@ export class OperatorsStore {
   private readonly departmentIdSignal = signal(this.defaultQuery.departmentId);
   private readonly loadingSignal = signal(false);
   private readonly departmentsLoadingSignal = signal(false);
+  private readonly activeTemplatesLoadingSignal = signal(false);
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
   private readonly templatesSelectionLoadingSignal = signal(false);
   private readonly templatesSelectionSavingSignal = signal(false);
   private readonly templatesSelectionErrorSignal = signal<string | null>(null);
+  private readonly activeTemplatesErrorSignal = signal<string | null>(null);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
 
   readonly operators = this.operatorsSignal.asReadonly();
   readonly departments = this.departmentsSignal.asReadonly();
+  readonly activeTemplates = this.activeTemplatesSignal.asReadonly();
   readonly createdOperator = this.createdOperatorSignal.asReadonly();
   readonly templatesSelection = this.templatesSelectionSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
@@ -65,11 +70,13 @@ export class OperatorsStore {
   readonly departmentId = this.departmentIdSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly departmentsLoading = this.departmentsLoadingSignal.asReadonly();
+  readonly activeTemplatesLoading = this.activeTemplatesLoadingSignal.asReadonly();
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
   readonly templatesSelectionLoading = this.templatesSelectionLoadingSignal.asReadonly();
   readonly templatesSelectionSaving = this.templatesSelectionSavingSignal.asReadonly();
   readonly templatesSelectionError = this.templatesSelectionErrorSignal.asReadonly();
+  readonly activeTemplatesError = this.activeTemplatesErrorSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
@@ -131,6 +138,31 @@ export class OperatorsStore {
         error: (error: unknown) => {
           this.departmentsSignal.set([]);
           this.errorSignal.set(this.readErrorKey(error, 'operators.departmentsLoadError'));
+        },
+      });
+  }
+
+  loadActiveTemplates(): void {
+    if (this.activeTemplatesLoadingSignal()) {
+      return;
+    }
+
+    this.activeTemplatesLoadingSignal.set(true);
+    this.activeTemplatesErrorSignal.set(null);
+
+    this.operatorsService
+      .activeTemplatesSelection()
+      .pipe(
+        take(1),
+        finalize(() => this.activeTemplatesLoadingSignal.set(false)),
+      )
+      .subscribe({
+        next: (templates) => {
+          this.activeTemplatesSignal.set(templates);
+        },
+        error: (error: unknown) => {
+          this.activeTemplatesSignal.set([]);
+          this.activeTemplatesErrorSignal.set(this.readErrorKey(error, 'operators.templatesCatalogLoadError'));
         },
       });
   }
@@ -271,6 +303,7 @@ export class OperatorsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
     this.templatesSelectionErrorSignal.set(null);
+    this.activeTemplatesErrorSignal.set(null);
   }
 
   private readErrorKey(error: unknown, fallbackKey: string): string {

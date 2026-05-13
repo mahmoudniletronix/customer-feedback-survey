@@ -22,7 +22,9 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<AuthSession> {
     return this.http.post<LoginResponse>(this.loginUrl, credentials).pipe(
       switchMap((response) => this.resolveBranchUserRoles(response)),
-      map(({ response, branchUserRoles }) => this.toSession(response, credentials.userNameOrEmail, branchUserRoles)),
+      map(({ response, branchUserRoles }) =>
+        this.toSession(response, credentials.userNameOrEmail, branchUserRoles),
+      ),
       catchError(() => throwError(() => new Error('auth.invalidCredentials'))),
     );
   }
@@ -54,7 +56,10 @@ export class AuthService {
     const role = USER_TYPE_ROLE_MAP[userType];
     const tokenPayload = this.decodeJwtPayload(response.token);
     const user: User = {
-      id: branchUserRoles?.applicationUserId ?? this.readString(tokenPayload, 'sub') ?? userNameOrEmail,
+      id:
+        branchUserRoles?.applicationUserId ??
+        this.readString(tokenPayload, 'sub') ??
+        userNameOrEmail,
       name: this.readString(tokenPayload, 'name') ?? this.displayName(userNameOrEmail),
       email: this.readString(tokenPayload, 'email') ?? userNameOrEmail,
       role,
@@ -118,7 +123,9 @@ export class AuthService {
     branchUserRoles: BranchUserMyRolesResponse | null,
   ): readonly string[] {
     const responseRoles = response.roles ?? [];
-    const assignedRoles = branchUserRoles?.roles?.map((role) => role.name ?? '').filter((role) => role.length > 0) ?? [];
+    const assignedRoles =
+      branchUserRoles?.roles?.map((role) => role.name ?? '').filter((role) => role.length > 0) ??
+      [];
     return [...new Set([...responseRoles, ...assignedRoles])];
   }
 
@@ -141,7 +148,9 @@ export class AuthService {
       const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
       const decoded = globalThis.atob(padded);
       const parsed = JSON.parse(decoded) as unknown;
-      return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : null;
+      return typeof parsed === 'object' && parsed !== null
+        ? (parsed as Record<string, unknown>)
+        : null;
     } catch {
       return null;
     }

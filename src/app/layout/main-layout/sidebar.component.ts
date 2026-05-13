@@ -106,7 +106,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'nav.surveys',
     path: '/survey',
     icon: ClipboardList,
-    roles: ['DEPARTMENT_ADMIN']
+    roles: []
   },
   {
     label: 'Operators',
@@ -134,7 +134,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'nav.reports',
     path: '/reports',
     icon: ChartNoAxesColumnIncreasing,
-    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN'],
+    roles: ['SUPER_ADMIN'],
     feature: 'reports'
   }
 ];

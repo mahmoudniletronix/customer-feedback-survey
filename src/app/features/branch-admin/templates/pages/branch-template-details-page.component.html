@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-5xl space-y-4 px-3 text-sm sm:px-4 lg:px-1">
+<div class="w-full space-y-4 text-sm">
   <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
     <div class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start">
       <app-button type="button" variant="secondary" (pressed)="goBack()">
@@ -289,6 +289,9 @@
                               {{ question.textAr }}
                             </p>
                           }
+                          <div class="mt-2">
+                            <app-question-answer-preview [type]="question.type" [options]="question.options" [compact]="true" />
+                          </div>
                         </div>
                       </div>
 
@@ -296,7 +299,7 @@
                         <span
                           class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600"
                         >
-                          {{ question.type || '-' }}
+                          {{ answerTypeLabel(question.type) }}
                         </span>
                         @if (question.order !== null) {
                           <span

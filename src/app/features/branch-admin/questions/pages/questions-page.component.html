@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-7xl space-y-4 px-1 text-sm">
+<div class="w-full space-y-4 text-sm">
   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
       <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'questions.title' | t }}</h2>
@@ -126,6 +126,9 @@
                     <p class="break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
                       {{ question.textEn }}
                     </p>
+                    <div class="mt-2">
+                      <app-question-answer-preview [type]="question.type" [options]="question.options" [compact]="true" />
+                    </div>
                   </td>
                   <td class="px-4 py-3 text-slate-700">
                     <p class="break-words [overflow-wrap:anywhere]">{{ question.textAr || '-' }}</p>
@@ -136,7 +139,7 @@
                       {{ question.groupNameAr || '-' }}
                     </p>
                   </td>
-                  <td class="px-4 py-3 text-slate-700">{{ question.typeName || question.type }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ answerTypeLabel(question.type, question.typeName) }}</td>
                   <td class="px-4 py-3">
                     <span
                       class="rounded-full px-2.5 py-1 text-xs font-bold"
@@ -173,6 +176,18 @@
                           (pressed)="openDeleteQuestion($event, question)"
                         >
                           <app-icon [icon]="deleteIcon" [size]="15" />
+                        </app-button>
+                      }
+                      @if (canRestore() && !question.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          [disabled]="questionsStore.restoring()"
+                          [loading]="questionsStore.restoring()"
+                          (pressed)="restoreQuestion($event, question)"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="15" />
                         </app-button>
                       }
                     </div>
@@ -212,6 +227,9 @@
                 <p class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]">
                   {{ question.textAr || '-' }}
                 </p>
+                <div class="mt-2">
+                  <app-question-answer-preview [type]="question.type" [options]="question.options" [compact]="true" />
+                </div>
               </div>
             </div>
 
@@ -223,7 +241,7 @@
               </div>
               <div class="rounded-lg bg-slate-50 p-2">
                 <p class="font-bold text-slate-400">{{ 'questions.type' | t }}</p>
-                <p class="mt-1 font-semibold text-slate-800">{{ question.typeName || question.type }}</p>
+                <p class="mt-1 font-semibold text-slate-800">{{ answerTypeLabel(question.type, question.typeName) }}</p>
               </div>
               <div class="rounded-lg bg-slate-50 p-2">
                 <p class="font-bold text-slate-400">{{ 'common.status' | t }}</p>
@@ -268,6 +286,19 @@
                 >
                   <app-icon [icon]="deleteIcon" [size]="15" />
                   {{ 'common.delete' | t }}
+                </app-button>
+              }
+              @if (canRestore() && !question.isActive) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  [disabled]="questionsStore.restoring()"
+                  [loading]="questionsStore.restoring()"
+                  (pressed)="restoreQuestion($event, question)"
+                >
+                  <app-icon [icon]="restoreIcon" [size]="15" />
+                  {{ 'common.restore' | t }}
                 </app-button>
               }
             </div>
@@ -348,13 +379,14 @@
       </label>
 
       <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.type' | t }}</span>
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.answerType' | t }}</span>
         <select
           class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="type"
+          (change)="onCreateQuestionTypeChanged($event)"
         >
           @for (type of questionTypeOptions; track type.value) {
-            <option [value]="type.value">{{ type.label }}</option>
+            <option [value]="type.value">{{ type.labelKey | t }}</option>
           }
         </select>
         @if (questionFieldError('type')) {
@@ -388,6 +420,71 @@
         }
       </label>
     </div>
+
+    @if (createIsSingleChoice()) {
+      <section class="rounded-xl border border-slate-100 bg-slate-50 p-3" formArrayName="options">
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">{{ 'questions.options' | t }}</h3>
+            <p class="mt-1 text-xs font-semibold text-slate-500">{{ 'questions.singleChoiceOptionsHelp' | t }}</p>
+          </div>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="addCreateOption()">
+            <app-icon [icon]="plusIcon" [size]="15" />
+            {{ 'questions.addOption' | t }}
+          </app-button>
+        </div>
+
+        <div class="space-y-3">
+          @for (option of createOptions.controls; track option; let index = $index) {
+            <div class="grid gap-3 rounded-lg border border-slate-100 bg-white p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem_auto]" [formGroupName]="index">
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextEn' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textEn"
+                />
+                @if (questionOptionFieldError(index, 'textEn')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionOptionFieldError(index, 'textEn') | t }}</span>
+                }
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextAr' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textAr"
+                />
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionOrder' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="number"
+                  min="1"
+                  formControlName="order"
+                />
+                @if (questionOptionFieldError(index, 'order')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionOptionFieldError(index, 'order') | t }}</span>
+                }
+              </label>
+
+              <div class="flex items-end justify-end">
+                <app-button type="button" size="sm" variant="danger" [disabled]="!canRemoveCreateOption()" (pressed)="removeCreateOption(index)">
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (createOptionsError()) {
+          <p class="mt-3 text-xs font-semibold text-[#D94B5A]">{{ createOptionsError() | t }}</p>
+        }
+      </section>
+    }
 
     <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
       <app-button type="button" variant="secondary" (pressed)="closeCreateQuestion()">
@@ -439,13 +536,14 @@
       </label>
 
       <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.type' | t }}</span>
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.answerType' | t }}</span>
         <select
           class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="type"
+          (change)="onEditQuestionTypeChanged($event)"
         >
           @for (type of questionTypeOptions; track type.value) {
-            <option [value]="type.value">{{ type.label }}</option>
+            <option [value]="type.value">{{ type.labelKey | t }}</option>
           }
         </select>
         @if (editQuestionFieldError('type')) {
@@ -479,6 +577,71 @@
         }
       </label>
     </div>
+
+    @if (editIsSingleChoice()) {
+      <section class="rounded-xl border border-slate-100 bg-slate-50 p-3" formArrayName="options">
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">{{ 'questions.options' | t }}</h3>
+            <p class="mt-1 text-xs font-semibold text-slate-500">{{ 'questions.singleChoiceOptionsHelp' | t }}</p>
+          </div>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="addEditOption()">
+            <app-icon [icon]="plusIcon" [size]="15" />
+            {{ 'questions.addOption' | t }}
+          </app-button>
+        </div>
+
+        <div class="space-y-3">
+          @for (option of editOptions.controls; track option; let index = $index) {
+            <div class="grid gap-3 rounded-lg border border-slate-100 bg-white p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem_auto]" [formGroupName]="index">
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextEn' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textEn"
+                />
+                @if (editQuestionOptionFieldError(index, 'textEn')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionOptionFieldError(index, 'textEn') | t }}</span>
+                }
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextAr' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textAr"
+                />
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionOrder' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="number"
+                  min="1"
+                  formControlName="order"
+                />
+                @if (editQuestionOptionFieldError(index, 'order')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionOptionFieldError(index, 'order') | t }}</span>
+                }
+              </label>
+
+              <div class="flex items-end justify-end">
+                <app-button type="button" size="sm" variant="danger" [disabled]="!canRemoveEditOption()" (pressed)="removeEditOption(index)">
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (editOptionsError()) {
+          <p class="mt-3 text-xs font-semibold text-[#D94B5A]">{{ editOptionsError() | t }}</p>
+        }
+      </section>
+    }
 
     <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
       <app-button type="button" variant="secondary" (pressed)="closeEditQuestion()">

@@ -6,6 +6,8 @@ import {
   CreateOperatorApiResponse,
   CreateOperatorPayload,
   CreateOperatorResponse,
+  OperatorActiveTemplateSelection,
+  OperatorActiveTemplateSelectionApiResponse,
   OperatorApiResponse,
   OperatorDepartmentSelection,
   OperatorDepartmentSelectionApiResponse,
@@ -30,6 +32,7 @@ export class OperatorsService {
   private readonly http = inject(HttpClient);
   private readonly operatorsUrl = `${environment.apiBaseUrl}/api/operators`;
   private readonly departmentsSelectionUrl = `${environment.apiBaseUrl}/api/departments/selection`;
+  private readonly templatesSelectionUrl = `${environment.apiBaseUrl}/api/templates/selection`;
 
   list(query: OperatorsQuery): Observable<OperatorsPageResult> {
     let params = new HttpParams()
@@ -104,6 +107,18 @@ export class OperatorsService {
       );
   }
 
+  activeTemplatesSelection(): Observable<readonly OperatorActiveTemplateSelection[]> {
+    return this.http
+      .get<readonly OperatorActiveTemplateSelectionApiResponse[]>(this.templatesSelectionUrl)
+      .pipe(
+        map((response) =>
+          response
+            .map((template) => this.toActiveTemplateSelection(template))
+            .filter((template) => template.id.length > 0),
+        ),
+      );
+  }
+
   private toPageResult(
     response: OperatorsPageApiResponse | readonly OperatorApiResponse[] | OperatorApiResponse,
     query: OperatorsQuery,
@@ -160,7 +175,7 @@ export class OperatorsService {
     return {
       applicationUserId: this.readRecordId(response.applicationUserId),
       operatorId: this.readRecordId(response.operatorId),
-      departmentId: this.readRecordId(response.departmentId) || fallbackPayload.departmentId,
+      departmentId: this.readRecordId(response.departmentId) || fallbackPayload.departmentId || '',
       nameEn: response.nameEn ?? fallbackPayload.nameEn,
       userName: response.userName ?? fallbackPayload.userName,
       email: response.email ?? fallbackPayload.email,
@@ -190,6 +205,20 @@ export class OperatorsService {
       id: this.readRecordId(response.id ?? response.departmentId),
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
+    };
+  }
+
+  private toActiveTemplateSelection(
+    response: OperatorActiveTemplateSelectionApiResponse,
+  ): OperatorActiveTemplateSelection {
+    return {
+      id: this.readRecordId(response.id),
+      nameEn: response.nameEn ?? '',
+      nameAr: response.nameAr ?? '',
+      branchId: this.readRecordId(response.branchId),
+      branchNameEn: response.branchNameEn ?? '',
+      branchNameAr: response.branchNameAr ?? '',
+      branchCode: response.branchCode ?? '',
     };
   }
 

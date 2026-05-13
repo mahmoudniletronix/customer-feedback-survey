@@ -96,8 +96,6 @@ export class DashboardPageComponent implements OnInit {
     if (role === 'DEPARTMENT_ADMIN') {
       return [
         { labelKey: 'operators.title', path: '/operators', icon: this.userCogIcon },
-        { labelKey: 'dashboard.actionCreateSurveys', path: '/survey', icon: this.squarePenIcon },
-        { labelKey: 'dashboard.actionReviewFeedback', path: '/reports', icon: this.fileTextIcon },
       ];
     }
 

@@ -3,6 +3,12 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import {
+  QUESTION_ANSWER_TYPE,
+  QuestionAnswerType,
+  toQuestionAnswerOption,
+  toQuestionAnswerType,
+} from '../../../../shared/models/question-answer.model';
+import {
   CreateQuestionRequest,
   QuestionApiResponse,
   QuestionListItem,
@@ -61,6 +67,12 @@ export class QuestionsService {
       .pipe(map((response) => this.toQuestion(response)));
   }
 
+  restore(questionId: string): Observable<QuestionListItem> {
+    return this.http
+      .put<QuestionApiResponse>(`${this.questionsUrl}/${questionId}/restore`, {})
+      .pipe(map((response) => this.toQuestion(response)));
+  }
+
   private toPageResult(
     response: QuestionsPageApiResponse | readonly QuestionApiResponse[] | QuestionApiResponse,
     query: QuestionsFilter,
@@ -95,19 +107,26 @@ export class QuestionsService {
   }
 
   private toQuestion(response: QuestionApiResponse): QuestionListItem {
+    const questionId = this.readRecordId(response.questionId);
+
     return {
-      questionId: this.readRecordId(response.questionId),
+      questionId,
       branchId: this.readRecordId(response.branchId),
       groupId: this.readRecordId(response.groupId),
       groupNameEn: response.groupNameEn ?? '',
       groupNameAr: response.groupNameAr ?? null,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? null,
-      type: response.type ?? 0,
+      type: this.toAnswerType(response.type, response.typeName),
       typeName: response.typeName ?? '',
       isActive: response.isActive ?? true,
       createdOnUtc: response.createdOnUtc ?? '',
+      options: (response.options ?? []).map((option) => toQuestionAnswerOption(option, questionId)),
     };
+  }
+
+  private toAnswerType(type: number | undefined, typeName: string | null | undefined): QuestionAnswerType {
+    return toQuestionAnswerType(type) ?? toQuestionAnswerType(typeName) ?? QUESTION_ANSWER_TYPE.SingleChoice;
   }
 
   private isPageResponse(response: QuestionsPageApiResponse | QuestionApiResponse): response is QuestionsPageApiResponse {

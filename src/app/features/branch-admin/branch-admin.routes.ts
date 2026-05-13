@@ -10,6 +10,8 @@ import { QuestionGroupsStore } from './question-groups/state/question-groups.sto
 import { questionsAccessGuard } from './questions/guards/questions-access.guard';
 import { QuestionsService } from './questions/services/questions.service';
 import { QuestionsStore } from './questions/state/questions.store';
+import { BranchSatisfactionReportService } from './reports/services/branch-satisfaction-report.service';
+import { BranchSatisfactionReportStore } from './reports/state/branch-satisfaction-report.store';
 import { branchTemplateAccessGuard } from './templates/guards/branch-template-access.guard';
 import { BranchTemplatesService } from './templates/services/branch-templates.service';
 import { BranchTemplatesStore } from './templates/state/branch-templates.store';
@@ -17,7 +19,14 @@ import { BranchTemplatesStore } from './templates/state/branch-templates.store';
 export const BRANCH_ADMIN_ROUTES: Routes = [
   {
     path: '',
-    providers: [BranchAdminBranchService, BranchAdminBranchStore, BranchUsersService, BranchUsersStore],
+    providers: [
+      BranchAdminBranchService,
+      BranchAdminBranchStore,
+      BranchUsersService,
+      BranchUsersStore,
+      BranchSatisfactionReportService,
+      BranchSatisfactionReportStore,
+    ],
     children: [
       {
         path: '',
