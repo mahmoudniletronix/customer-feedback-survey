@@ -2,6 +2,10 @@ import {
   QuestionAnswerOption,
   QuestionAnswerOptionApiResponse,
 } from '../../../shared/models/question-answer.model';
+import {
+  QuestionCondition,
+  QuestionConditionApiResponse,
+} from '../../../shared/models/question-condition.model';
 
 export interface OperatorMyTemplates {
   operatorId: string;
@@ -19,10 +23,12 @@ export interface OperatorAssignedTemplate {
   branchNameEn: string;
   branchNameAr: string;
   branchCode: string;
+  isActive: boolean;
   questionsCount: number;
   hasAnswered: boolean;
   latestResponse: OperatorLatestTemplateResponse | null;
   questions: readonly OperatorAssignedTemplateQuestion[];
+  questionConditions: readonly QuestionCondition[];
 }
 
 export interface OperatorLatestTemplateResponse {
@@ -33,6 +39,7 @@ export interface OperatorLatestTemplateResponse {
 }
 
 export interface OperatorLatestTemplateAnswer {
+  templateQuestionId: string;
   questionId: string;
   questionType: string;
   selectedQuestionOptionId: string | null;
@@ -91,10 +98,12 @@ export interface OperatorAssignedTemplateApiResponse {
   branchNameEn?: string;
   branchNameAr?: string | null;
   branchCode?: string | null;
+  isActive?: boolean;
   questionsCount?: number;
   hasAnswered?: boolean;
   latestResponse?: OperatorLatestTemplateResponseApiResponse | null;
   questions?: readonly OperatorAssignedTemplateQuestionApiResponse[];
+  questionConditions?: readonly QuestionConditionApiResponse[];
 }
 
 export interface OperatorLatestTemplateResponseApiResponse {
@@ -105,6 +114,7 @@ export interface OperatorLatestTemplateResponseApiResponse {
 }
 
 export interface OperatorLatestTemplateAnswerApiResponse {
+  templateQuestionId?: string | number;
   questionId?: string | number;
   questionType?: string | null;
   selectedQuestionOptionId?: string | number | null;

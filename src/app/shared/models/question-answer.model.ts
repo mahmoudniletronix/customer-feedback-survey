@@ -22,6 +22,10 @@ export interface QuestionAnswerOptionPayload {
   order: number;
 }
 
+export interface UpdateQuestionAnswerOptionPayload extends QuestionAnswerOptionPayload {
+  optionId?: string | null;
+}
+
 export interface QuestionAnswerOption {
   optionId: string;
   questionId: string;

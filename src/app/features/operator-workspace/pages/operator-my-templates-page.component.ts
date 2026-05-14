@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -32,6 +33,12 @@ import {
   questionAnswerTypeLabelKey,
   toQuestionAnswerType,
 } from '../../../shared/models/question-answer.model';
+import {
+  ConditionalQuestionAnswerState,
+  QuestionCondition,
+  buildVisibleQuestionIds,
+  buildVisibleQuestionOrder,
+} from '../../../shared/models/question-condition.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
@@ -65,10 +72,13 @@ interface OperatorTemplateView {
   branchId: string;
   branchName: string;
   branchCode: string;
+  isActive: boolean;
   questionsCount: number;
   hasAnswered: boolean;
   latestResponse: OperatorLatestResponseView | null;
+  latestResponseSource: OperatorLatestTemplateResponse | null;
   questions: readonly OperatorQuestionView[];
+  questionConditions: readonly QuestionCondition[];
 }
 
 interface OperatorBranchFilterOption {
@@ -87,18 +97,21 @@ interface OperatorLatestResponseView {
 
 interface OperatorLatestAnswerView {
   id: string;
+  templateQuestionId: string;
   questionId: string;
+  questionText: string;
+  questionSecondaryText: string;
+  groupName: string;
   typeLabel: string;
   answer: string;
   voiceFileName: string;
   voiceFileUrl: string;
 }
 
-interface OperatorAnswerDraft {
+interface OperatorAnswerDraft extends ConditionalQuestionAnswerState {
+  templateQuestionId: string;
   questionId: string;
-  selectedQuestionOptionId: string;
-  starRatingValue: number | null;
-  smileValue: number | null;
+  questionType: string;
   textAnswer: string;
   voiceFile: File | null;
 }
@@ -199,6 +212,14 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.filteredTemplates().reduce((total, template) => total + template.questionsCount, 0),
   );
   readonly activeTemplate = signal<OperatorTemplateView | null>(null);
+  readonly pendingRuntimeRefreshTemplateId = signal('');
+  readonly activeTemplateInactive = computed(() => {
+    const template = this.activeTemplate();
+    return (
+      template !== null &&
+      (!template.isActive || this.operatorTemplatesStore.inactiveTemplateIds().has(template.templateId))
+    );
+  });
   readonly selectedBranchId = signal(ALL_BRANCHES_FILTER_ID);
   readonly expandedLatestResponseTemplateIds = signal<ReadonlySet<string>>(new Set());
   readonly currentQuestionIndex = signal(0);
@@ -212,29 +233,44 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   readonly recordingError = signal('');
   readonly voicePreviewUrls = signal<Record<string, string>>({});
   readonly animatedScaleSelection = signal<ScaleSelectionAnimation | null>(null);
-  readonly answeredQuestionsCount = computed(() => {
+  readonly visibleQuestions = computed<readonly OperatorQuestionView[]>(() => {
     const template = this.activeTemplate();
     if (!template) {
-      return 0;
+      return [];
     }
 
-    return template.questions.filter((question) => this.isQuestionValid(question)).length;
+    const questionsByTemplateQuestionId = new Map(
+      template.questions.map((question) => [question.id, question]),
+    );
+    const visibleQuestionIds = buildVisibleQuestionOrder(
+      template.questions.map((question) => ({
+        templateQuestionId: question.id,
+        order: question.order,
+      })),
+      template.questionConditions,
+      this.answers(),
+    );
+
+    return visibleQuestionIds
+      .map((templateQuestionId) => questionsByTemplateQuestionId.get(templateQuestionId))
+      .filter((question): question is OperatorQuestionView => question !== undefined);
+  });
+  readonly answeredQuestionsCount = computed(() => {
+    return this.visibleQuestions().filter((question) => this.isQuestionValid(question)).length;
   });
   readonly allQuestionsValid = computed(() => {
-    const template = this.activeTemplate();
     return (
-      template !== null &&
-      template.questions.length > 0 &&
-      template.questions.every((question) => this.isQuestionValid(question))
+      this.activeTemplate() !== null &&
+      this.visibleQuestions().length > 0 &&
+      this.visibleQuestions().every((question) => this.isQuestionValid(question))
     );
   });
   readonly currentQuestion = computed(() => {
-    const template = this.activeTemplate();
-    if (!template || this.summaryOpen()) {
+    if (!this.activeTemplate() || this.summaryOpen()) {
       return null;
     }
 
-    return template.questions[this.currentQuestionIndex()] ?? null;
+    return this.visibleQuestions()[this.currentQuestionIndex()] ?? null;
   });
   readonly currentQuestionValid = computed(() => {
     const question = this.currentQuestion();
@@ -246,11 +282,36 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return [];
     }
 
-    return template.questions.map((question) => ({
+    return this.visibleQuestions().map((question) => ({
       question,
       answer: this.answerSummary(question),
     }));
   });
+
+  constructor() {
+    effect(() => {
+      const templateId = this.pendingRuntimeRefreshTemplateId();
+      if (templateId.length === 0) {
+        return;
+      }
+
+      if (this.operatorTemplatesStore.loading()) {
+        return;
+      }
+
+      const refreshedTemplate = this.templates().find(
+        (template) => template.templateId === templateId,
+      );
+      if (!refreshedTemplate || !refreshedTemplate.isActive || refreshedTemplate.questions.length === 0) {
+        this.closeRuntimeRefreshTemplate();
+        return;
+      }
+
+      this.activeTemplate.set(refreshedTemplate);
+      this.resetResponseState(refreshedTemplate, false);
+      this.pendingRuntimeRefreshTemplateId.set('');
+    });
+  }
 
   ngOnInit(): void {
     this.operatorTemplatesStore.load();
@@ -291,13 +352,13 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   }
 
   startTemplateResponse(template: OperatorTemplateView): void {
-    if (template.questions.length === 0) {
+    if (!template.isActive || template.questions.length === 0) {
       return;
     }
 
     this.operatorTemplatesStore.clearSubmitState();
     this.activeTemplate.set(template);
-    this.resetResponseState(template);
+    this.resetResponseState(template, false);
   }
 
   closeResponseWizard(): void {
@@ -321,8 +382,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
     if (this.summaryOpen()) {
       this.summaryOpen.set(false);
-      const template = this.activeTemplate();
-      this.currentQuestionIndex.set(Math.max((template?.questions.length ?? 1) - 1, 0));
+      this.currentQuestionIndex.set(Math.max(this.visibleQuestions().length - 1, 0));
       return;
     }
 
@@ -340,13 +400,13 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.markQuestionTouched(question.questionId);
+    this.markQuestionTouched(question.id);
     if (!this.isQuestionValid(question)) {
       return;
     }
 
     const nextIndex = this.currentQuestionIndex() + 1;
-    if (nextIndex >= template.questions.length) {
+    if (nextIndex >= this.visibleQuestions().length) {
       this.summaryOpen.set(true);
       return;
     }
@@ -356,7 +416,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   goToQuestion(index: number): void {
     const template = this.activeTemplate();
-    if (!template || index < 0 || index >= template.questions.length || this.responseSubmitted()) {
+    if (!template || index < 0 || index >= this.visibleQuestions().length || this.responseSubmitted()) {
       return;
     }
 
@@ -369,10 +429,16 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   }
 
   openSummary(): void {
+    const template = this.activeTemplate();
+    if (!template) {
+      return;
+    }
+
     if (this.preventNavigationWhileRecording()) {
       return;
     }
 
+    this.clearHiddenQuestionState(template);
     this.markAllQuestionsTouched();
     if (!this.allQuestionsValid()) {
       return;
@@ -383,7 +449,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   submitResponse(): void {
     const template = this.activeTemplate();
-    if (!template || this.operatorTemplatesStore.submitting() || this.responseSubmitted()) {
+    if (
+      !template ||
+      this.activeTemplateInactive() ||
+      this.operatorTemplatesStore.submitting() ||
+      this.responseSubmitted()
+    ) {
       return;
     }
 
@@ -391,6 +462,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.clearHiddenQuestionState(template);
     this.markAllQuestionsTouched();
     if (!this.allQuestionsValid()) {
       return;
@@ -403,6 +475,16 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         this.submittedResponse.set(response);
         this.responseSubmitted.set(true);
         this.summaryOpen.set(true);
+      },
+      (submitError) => {
+        if (submitError === 'operatorTemplates.templateInactive') {
+          this.closeInactiveTemplateResponse();
+          return;
+        }
+
+        if (this.shouldRefreshRuntimeTemplate(submitError)) {
+          this.pendingRuntimeRefreshTemplateId.set(template.templateId);
+        }
       },
     );
   }
@@ -417,38 +499,38 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.stopRecordingResources();
     this.revokeAllVoicePreviews();
     this.operatorTemplatesStore.clearSubmitState();
-    this.resetResponseState(template);
+    this.resetResponseState(template, false);
   }
 
   selectSingleChoice(question: OperatorQuestionView, optionId: string): void {
-    this.updateAnswer(question.questionId, { selectedQuestionOptionId: optionId });
-    this.markQuestionTouched(question.questionId);
+    this.updateAnswer(question, { selectedQuestionOptionId: optionId });
+    this.markQuestionTouched(question.id);
   }
 
   selectStarRating(question: OperatorQuestionView, value: number): void {
-    this.updateAnswer(question.questionId, { starRatingValue: value });
-    this.markQuestionTouched(question.questionId);
-    this.playScaleSelectionAnimation(question.questionId, value, 'star');
+    this.updateAnswer(question, { starRatingValue: value });
+    this.markQuestionTouched(question.id);
+    this.playScaleSelectionAnimation(question.id, value, 'star');
   }
 
   selectSmileValue(question: OperatorQuestionView, value: number): void {
-    this.updateAnswer(question.questionId, { smileValue: value });
-    this.markQuestionTouched(question.questionId);
-    this.playScaleSelectionAnimation(question.questionId, value, 'smile');
+    this.updateAnswer(question, { smileValue: value });
+    this.markQuestionTouched(question.id);
+    this.playScaleSelectionAnimation(question.id, value, 'smile');
   }
 
   updateTextAnswer(question: OperatorQuestionView, event: Event): void {
     const target = event.target;
     const textAnswer = target instanceof HTMLTextAreaElement ? target.value : '';
-    this.updateAnswer(question.questionId, { textAnswer });
-    this.markQuestionTouched(question.questionId);
+    this.updateAnswer(question, { textAnswer });
+    this.markQuestionTouched(question.id);
   }
 
   updateVoiceFile(question: OperatorQuestionView, event: Event): void {
     const target = event.target;
     const voiceFile = target instanceof HTMLInputElement ? (target.files?.[0] ?? null) : null;
     this.setVoiceFile(question, voiceFile);
-    this.markQuestionTouched(question.questionId);
+    this.markQuestionTouched(question.id);
 
     if (target instanceof HTMLInputElement) {
       target.value = '';
@@ -466,7 +548,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
     if (!mediaDevices?.getUserMedia || !audioContextConstructor) {
       this.recordingError.set('operatorTemplates.recordingNotSupported');
-      this.markQuestionTouched(question.questionId);
+      this.markQuestionTouched(question.id);
       return;
     }
 
@@ -488,7 +570,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       this.audioSource.connect(this.audioProcessor);
       this.audioProcessor.connect(this.silentGain);
       this.silentGain.connect(this.audioContext.destination);
-      this.recordingQuestionId.set(question.questionId);
+      this.recordingQuestionId.set(question.id);
       this.recordingElapsedSeconds.set(0);
       this.recordingStartedAt = Date.now();
       this.recordingTimerId = setInterval(() => {
@@ -497,12 +579,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     } catch {
       this.stopRecordingResources();
       this.recordingError.set('operatorTemplates.microphonePermissionDenied');
-      this.markQuestionTouched(question.questionId);
+      this.markQuestionTouched(question.id);
     }
   }
 
   stopVoiceRecording(question: OperatorQuestionView): void {
-    if (this.recordingQuestionId() !== question.questionId) {
+    if (this.recordingQuestionId() !== question.id) {
       return;
     }
 
@@ -512,26 +594,26 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
     if (buffers.length === 0) {
       this.recordingError.set('operatorTemplates.recordingEmpty');
-      this.markQuestionTouched(question.questionId);
+      this.markQuestionTouched(question.id);
       return;
     }
 
-    const voiceFile = this.toWavFile(buffers, sampleRate, question.questionId);
+    const voiceFile = this.toWavFile(buffers, sampleRate, question.id);
     this.setVoiceFile(question, voiceFile);
-    this.markQuestionTouched(question.questionId);
+    this.markQuestionTouched(question.id);
   }
 
   discardVoiceAnswer(question: OperatorQuestionView): void {
-    if (this.recordingQuestionId() === question.questionId) {
+    if (this.recordingQuestionId() === question.id) {
       this.stopRecordingResources();
     }
 
     this.setVoiceFile(question, null);
-    this.markQuestionTouched(question.questionId);
+    this.markQuestionTouched(question.id);
   }
 
   visibleQuestionError(question: OperatorQuestionView): string {
-    return this.touchedQuestionIds().has(question.questionId) ? this.questionError(question) : '';
+    return this.touchedQuestionIds().has(question.id) ? this.questionError(question) : '';
   }
 
   selectedOptionId(question: OperatorQuestionView): string {
@@ -555,11 +637,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   }
 
   voicePreviewUrl(question: OperatorQuestionView): string {
-    return this.voicePreviewUrls()[question.questionId] ?? '';
+    return this.voicePreviewUrls()[question.id] ?? '';
   }
 
   isRecording(question: OperatorQuestionView): boolean {
-    return this.recordingQuestionId() === question.questionId;
+    return this.recordingQuestionId() === question.id;
   }
 
   recordingDurationLabel(): string {
@@ -576,7 +658,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   ): boolean {
     const animation = this.animatedScaleSelection();
     return (
-      animation?.questionId === question.questionId &&
+      animation?.questionId === question.id &&
       animation.value === value &&
       animation.kind === kind
     );
@@ -623,6 +705,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   private toTemplateView(template: OperatorAssignedTemplate): OperatorTemplateView {
     const isArabic = this.i18n.language() === 'ar';
+    const questions = [...template.questions]
+      .sort(
+        (first, second) =>
+          (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
+      )
+      .map((question) => this.toQuestionView(question, isArabic));
 
     return {
       templateId: template.templateId,
@@ -632,17 +720,20 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       branchId: template.branchId,
       branchName: this.localizedText(template.branchNameEn, template.branchNameAr, isArabic),
       branchCode: template.branchCode,
+      isActive: template.isActive,
       questionsCount: template.questionsCount,
       hasAnswered: template.hasAnswered,
       latestResponse: template.latestResponse
-        ? this.toLatestResponseView(template.latestResponse, isArabic)
+        ? this.toLatestResponseView(
+            template.latestResponse,
+            isArabic,
+            questions,
+            template.questionConditions,
+          )
         : null,
-      questions: [...template.questions]
-        .sort(
-          (first, second) =>
-            (first.order ?? Number.MAX_SAFE_INTEGER) - (second.order ?? Number.MAX_SAFE_INTEGER),
-        )
-        .map((question) => this.toQuestionView(question, isArabic)),
+      latestResponseSource: template.latestResponse,
+      questions,
+      questionConditions: template.questionConditions,
     };
   }
 
@@ -670,13 +761,37 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   private toLatestResponseView(
     response: OperatorLatestTemplateResponse,
     isArabic: boolean,
+    questions: readonly OperatorQuestionView[],
+    conditions: readonly QuestionCondition[],
   ): OperatorLatestResponseView {
+    const questionsByTemplateQuestionId = new Map(
+      questions.map((question) => [question.id, question]),
+    );
+    const visibleQuestionOrder = buildVisibleQuestionOrder(
+      questions.map((question) => ({
+        templateQuestionId: question.id,
+        order: question.order,
+      })),
+      conditions,
+      this.hydrateLatestAnswerDrafts(response, questions),
+    );
+    const answersByTemplateQuestionId = new Map(
+      response.answers
+        .filter((answer) => answer.templateQuestionId.length > 0)
+        .map((answer) => [answer.templateQuestionId, answer]),
+    );
+    const visibleAnswers = visibleQuestionOrder
+      .map((templateQuestionId) => answersByTemplateQuestionId.get(templateQuestionId))
+      .filter(
+        (answer): answer is OperatorLatestTemplateAnswer => answer !== undefined,
+    );
+
     return {
       surveyResponseId: response.surveyResponseId,
       submittedOnUtc: response.submittedOnUtc,
-      answersCount: response.answersCount,
-      answers: response.answers.map((answer, index) =>
-        this.toLatestAnswerView(answer, index, isArabic),
+      answersCount: visibleAnswers.length,
+      answers: visibleAnswers.map((answer, index) =>
+        this.toLatestAnswerView(answer, index, isArabic, questionsByTemplateQuestionId),
       ),
     };
   }
@@ -685,8 +800,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     answer: OperatorLatestTemplateAnswer,
     index: number,
     isArabic: boolean,
+    questionsByTemplateQuestionId: ReadonlyMap<string, OperatorQuestionView>,
   ): OperatorLatestAnswerView {
-    const answerType = toQuestionAnswerType(answer.questionType);
+    const question = questionsByTemplateQuestionId.get(answer.templateQuestionId);
+    const questionType = answer.questionType || question?.type || '';
+    const answerType = toQuestionAnswerType(questionType);
     const fallbackAnswer = this.i18n.translate('operatorTemplates.noAnswer');
     let displayAnswer = fallbackAnswer;
 
@@ -713,23 +831,31 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     }
 
     return {
-      id: answer.questionId || `${answer.questionType}-${index}`,
+      id: answer.templateQuestionId || answer.questionId || `${questionType}-${index}`,
+      templateQuestionId: answer.templateQuestionId,
       questionId: answer.questionId,
-      typeLabel: this.answerTypeLabel(answer.questionType),
+      questionText: question?.text ?? '',
+      questionSecondaryText: question?.secondaryText ?? '',
+      groupName: question?.groupName ?? '',
+      typeLabel: this.answerTypeLabel(questionType),
       answer: displayAnswer,
       voiceFileName: answer.voiceFileName ?? '',
       voiceFileUrl: answer.voiceFileUrl ?? '',
     };
   }
 
-  private resetResponseState(template: OperatorTemplateView): void {
-    const answers = template.questions.reduce<Record<string, OperatorAnswerDraft>>(
-      (drafts, question) => {
-        drafts[question.questionId] = this.createEmptyDraft(question.questionId);
-        return drafts;
-      },
-      {},
-    );
+  private resetResponseState(
+    template: OperatorTemplateView,
+    hydrateLatestResponse = template.latestResponseSource !== null,
+  ): void {
+    const answers = this.createInitialAnswerDrafts(template);
+
+    if (hydrateLatestResponse) {
+      Object.assign(
+        answers,
+        this.hydrateLatestAnswerDrafts(template.latestResponseSource, template.questions),
+      );
+    }
 
     this.answers.set(answers);
     this.touchedQuestionIds.set(new Set());
@@ -737,11 +863,90 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.summaryOpen.set(false);
     this.responseSubmitted.set(false);
     this.submittedResponse.set(null);
+    this.clearHiddenQuestionState(template);
   }
 
-  private createEmptyDraft(questionId: string): OperatorAnswerDraft {
+  private closeInactiveTemplateResponse(): void {
+    this.clearScaleSelectionAnimation();
+    this.stopRecordingResources();
+    this.revokeAllVoicePreviews();
+    this.activeTemplate.set(null);
+    this.currentQuestionIndex.set(0);
+    this.summaryOpen.set(false);
+    this.responseSubmitted.set(false);
+    this.answers.set({});
+    this.touchedQuestionIds.set(new Set());
+    this.submittedResponse.set(null);
+  }
+
+  private closeRuntimeRefreshTemplate(): void {
+    this.clearScaleSelectionAnimation();
+    this.stopRecordingResources();
+    this.revokeAllVoicePreviews();
+    this.activeTemplate.set(null);
+    this.currentQuestionIndex.set(0);
+    this.summaryOpen.set(false);
+    this.responseSubmitted.set(false);
+    this.answers.set({});
+    this.touchedQuestionIds.set(new Set());
+    this.submittedResponse.set(null);
+    this.pendingRuntimeRefreshTemplateId.set('');
+  }
+
+  private shouldRefreshRuntimeTemplate(errorKey: string): boolean {
+    return (
+      errorKey === 'operatorTemplates.visibleQuestionsRequired' ||
+      errorKey === 'operatorTemplates.hiddenQuestionAnswerNotAllowed'
+    );
+  }
+
+  private createInitialAnswerDrafts(
+    template: OperatorTemplateView,
+  ): Record<string, OperatorAnswerDraft> {
+    return template.questions.reduce<Record<string, OperatorAnswerDraft>>((drafts, question) => {
+      drafts[question.id] = this.createEmptyDraft(question);
+      return drafts;
+    }, {});
+  }
+
+  private hydrateLatestAnswerDrafts(
+    latestResponse: OperatorLatestTemplateResponse | null,
+    questions: readonly OperatorQuestionView[],
+  ): Record<string, OperatorAnswerDraft> {
+    if (!latestResponse) {
+      return {};
+    }
+
+    const questionsByTemplateQuestionId = new Map(
+      questions.map((question) => [question.id, question]),
+    );
+
+    return latestResponse.answers.reduce<Record<string, OperatorAnswerDraft>>((drafts, answer) => {
+      const question = questionsByTemplateQuestionId.get(answer.templateQuestionId);
+      if (!question) {
+        return drafts;
+      }
+
+      drafts[answer.templateQuestionId] = {
+        ...this.createEmptyDraft(question),
+        questionId: answer.questionId || question.questionId,
+        questionType: answer.questionType || question.type,
+        selectedQuestionOptionId: answer.selectedQuestionOptionId ?? '',
+        starRatingValue: answer.starRatingValue,
+        smileValue: answer.smileValue,
+        textAnswer: answer.textAnswer ?? '',
+        voiceFile: null,
+      };
+
+      return drafts;
+    }, {});
+  }
+
+  private createEmptyDraft(question: OperatorQuestionView): OperatorAnswerDraft {
     return {
-      questionId,
+      templateQuestionId: question.id,
+      questionId: question.questionId,
+      questionType: question.type,
       selectedQuestionOptionId: '',
       starRatingValue: null,
       smileValue: null,
@@ -750,19 +955,28 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     };
   }
 
-  private updateAnswer(questionId: string, patch: Partial<OperatorAnswerDraft>): void {
-    this.answers.update((answers) => ({
-      ...answers,
-      [questionId]: {
-        ...(answers[questionId] ?? this.createEmptyDraft(questionId)),
-        ...patch,
-      },
-    }));
+  private updateAnswer(question: OperatorQuestionView, patch: Partial<OperatorAnswerDraft>): void {
+    const template = this.activeTemplate();
+    this.answers.update((answers) => {
+      const nextAnswers = {
+        ...answers,
+        [question.id]: {
+          ...(answers[question.id] ?? this.createEmptyDraft(question)),
+          ...patch,
+        },
+      };
+
+      return template ? this.onlyVisibleAnswers(template, nextAnswers) : nextAnswers;
+    });
+    if (template) {
+      this.clearHiddenQuestionSideEffects(template);
+    }
+    this.clampCurrentQuestionIndex();
   }
 
   private setVoiceFile(question: OperatorQuestionView, voiceFile: File | null): void {
-    this.revokeVoicePreview(question.questionId);
-    this.updateAnswer(question.questionId, { voiceFile });
+    this.revokeVoicePreview(question.id);
+    this.updateAnswer(question, { voiceFile });
     this.recordingError.set('');
 
     if (!voiceFile) {
@@ -772,12 +986,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     const previewUrl = URL.createObjectURL(voiceFile);
     this.voicePreviewUrls.update((urls) => ({
       ...urls,
-      [question.questionId]: previewUrl,
+      [question.id]: previewUrl,
     }));
   }
 
   private answerDraft(question: OperatorQuestionView): OperatorAnswerDraft {
-    return this.answers()[question.questionId] ?? this.createEmptyDraft(question.questionId);
+    return this.answers()[question.id] ?? this.createEmptyDraft(question);
   }
 
   private markQuestionTouched(questionId: string): void {
@@ -785,10 +999,61 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   }
 
   private markAllQuestionsTouched(): void {
-    const template = this.activeTemplate();
-    this.touchedQuestionIds.set(
-      new Set(template?.questions.map((question) => question.questionId) ?? []),
+    this.touchedQuestionIds.set(new Set(this.visibleQuestions().map((question) => question.id)));
+  }
+
+  private clearHiddenQuestionState(template: OperatorTemplateView): void {
+    this.answers.update((answers) => this.onlyVisibleAnswers(template, answers));
+    this.clearHiddenQuestionSideEffects(template);
+    this.clampCurrentQuestionIndex();
+  }
+
+  private onlyVisibleAnswers(
+    template: OperatorTemplateView,
+    answers: Record<string, OperatorAnswerDraft>,
+  ): Record<string, OperatorAnswerDraft> {
+    const visibleIds = this.visibleTemplateQuestionIds(template, answers);
+    return Object.fromEntries(
+      Object.entries(answers).filter(([templateQuestionId]) => visibleIds.has(templateQuestionId)),
     );
+  }
+
+  private clearHiddenQuestionSideEffects(template: OperatorTemplateView): void {
+    const visibleIds = this.visibleTemplateQuestionIds(template, this.answers());
+
+    Object.keys(this.voicePreviewUrls())
+      .filter((templateQuestionId) => !visibleIds.has(templateQuestionId))
+      .forEach((templateQuestionId) => this.revokeVoicePreview(templateQuestionId));
+
+    const recordingQuestionId = this.recordingQuestionId();
+    if (recordingQuestionId && !visibleIds.has(recordingQuestionId)) {
+      this.stopRecordingResources();
+    }
+
+    this.touchedQuestionIds.update(
+      (questionIds) => new Set([...questionIds].filter((questionId) => visibleIds.has(questionId))),
+    );
+  }
+
+  private visibleTemplateQuestionIds(
+    template: OperatorTemplateView,
+    answers: Readonly<Record<string, OperatorAnswerDraft>>,
+  ): ReadonlySet<string> {
+    return buildVisibleQuestionIds(
+      template.questions.map((question) => ({
+        templateQuestionId: question.id,
+        order: question.order,
+      })),
+      template.questionConditions,
+      answers,
+    );
+  }
+
+  private clampCurrentQuestionIndex(): void {
+    const lastIndex = Math.max(this.visibleQuestions().length - 1, 0);
+    if (this.currentQuestionIndex() > lastIndex) {
+      this.currentQuestionIndex.set(lastIndex);
+    }
   }
 
   isQuestionValid(question: OperatorQuestionView): boolean {
@@ -846,7 +1111,9 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   private toSubmissions(
     template: OperatorTemplateView,
   ): readonly OperatorTemplateAnswerSubmission[] {
-    return template.questions.map((question) => {
+    this.clearHiddenQuestionState(template);
+
+    return this.visibleQuestions().map((question) => {
       const draft = this.answerDraft(question);
 
       if (this.isSingleChoice(question)) {

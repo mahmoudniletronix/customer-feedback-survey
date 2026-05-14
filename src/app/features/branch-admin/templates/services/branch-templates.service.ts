@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { toQuestionAnswerOption } from '../../../../shared/models/question-answer.model';
+import { toQuestionCondition } from '../../../../shared/models/question-condition.model';
 import {
   BranchTemplate,
   BranchTemplateApiResponse,
@@ -18,6 +19,7 @@ import {
   BranchTemplatesPageResult,
   BranchTemplatesQuery,
   CreateBranchTemplatePayload,
+  UpdateBranchTemplateQuestionConditionsPayload,
   UpdateBranchTemplateQuestionsApiResponse,
   UpdateBranchTemplateQuestionsPayload,
   UpdateBranchTemplateQuestionsResult,
@@ -110,6 +112,15 @@ export class BranchTemplatesService {
       .pipe(map((response) => this.toUpdatedQuestions(response, templateId)));
   }
 
+  updateQuestionConditions(
+    templateId: string,
+    payload: UpdateBranchTemplateQuestionConditionsPayload,
+  ): Observable<void> {
+    return this.http
+      .put<unknown>(`${this.templatesUrl}/${templateId}/question-conditions`, payload)
+      .pipe(map(() => undefined));
+  }
+
   delete(templateId: string): Observable<BranchTemplate> {
     return this.http
       .delete<BranchTemplateApiResponse>(`${this.templatesUrl}/${templateId}`)
@@ -169,6 +180,13 @@ export class BranchTemplatesService {
       isActive: response.isActive ?? true,
       questionsCount: response.questionsCount ?? 0,
       createdOnUtc: response.createdOnUtc ?? '',
+      questionConditions: (response.questionConditions ?? [])
+        .map((condition) => toQuestionCondition(condition))
+        .filter(
+          (condition) =>
+            condition.parentTemplateQuestionId.length > 0 &&
+            condition.childTemplateQuestionId.length > 0,
+        ),
     };
   }
 
@@ -198,6 +216,13 @@ export class BranchTemplatesService {
       status: response.status ?? 'Draft',
       isActive: response.isActive ?? true,
       groups: (response.groups ?? []).map((group) => this.toQuestionSelectionGroup(group)),
+      questionConditions: (response.questionConditions ?? [])
+        .map((condition) => toQuestionCondition(condition))
+        .filter(
+          (condition) =>
+            condition.parentTemplateQuestionId.length > 0 &&
+            condition.childTemplateQuestionId.length > 0,
+        ),
     };
   }
 
@@ -208,6 +233,7 @@ export class BranchTemplatesService {
       groupId: this.readRecordId(response.groupId),
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
+      isActive: response.isActive ?? true,
       questions: (response.questions ?? []).map((question) =>
         this.toQuestionSelectionItem(question),
       ),
@@ -221,10 +247,13 @@ export class BranchTemplatesService {
 
     return {
       questionId,
+      templateQuestionId: this.readNullableRecordId(response.templateQuestionId),
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? '',
       type: response.type !== null && response.type !== undefined ? String(response.type) : '',
+      typeName: response.typeName ?? '',
       isSelected: response.isSelected ?? false,
+      isActive: response.isActive ?? true,
       order: response.order ?? null,
       options: (response.options ?? []).map((option) => toQuestionAnswerOption(option, questionId)),
     };
@@ -246,6 +275,7 @@ export class BranchTemplatesService {
 
   private toUpdatedQuestion(response: UpdatedBranchTemplateQuestionApiResponse): UpdatedBranchTemplateQuestion {
     return {
+      templateQuestionId: this.readRecordId(response.templateQuestionId),
       questionId: this.readRecordId(response.questionId),
       order: response.order ?? 0,
     };
@@ -268,5 +298,9 @@ export class BranchTemplatesService {
 
   private readRecordId(id: string | number | undefined): string {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : '';
+  }
+
+  private readNullableRecordId(id: string | number | null | undefined): string | null {
+    return typeof id === 'string' || typeof id === 'number' ? String(id) : null;
   }
 }

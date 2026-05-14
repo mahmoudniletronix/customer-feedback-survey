@@ -30,6 +30,7 @@ export class OperatorTemplatesStore {
   private readonly errorSignal = signal<string | null>(null);
   private readonly submitErrorSignal = signal<string | null>(null);
   private readonly submitSuccessSignal = signal<string | null>(null);
+  private readonly inactiveTemplateIdsSignal = signal<ReadonlySet<string>>(new Set());
 
   readonly myTemplates = this.myTemplatesSignal.asReadonly();
   readonly submittedResponse = this.submittedResponseSignal.asReadonly();
@@ -38,7 +39,14 @@ export class OperatorTemplatesStore {
   readonly error = this.errorSignal.asReadonly();
   readonly submitError = this.submitErrorSignal.asReadonly();
   readonly submitSuccess = this.submitSuccessSignal.asReadonly();
-  readonly templates = computed(() => this.myTemplatesSignal()?.templates ?? []);
+  readonly inactiveTemplateIds = this.inactiveTemplateIdsSignal.asReadonly();
+  readonly templates = computed(() => {
+    const inactiveTemplateIds = this.inactiveTemplateIdsSignal();
+
+    return (this.myTemplatesSignal()?.templates ?? []).map((template) =>
+      inactiveTemplateIds.has(template.templateId) ? { ...template, isActive: false } : template,
+    );
+  });
   readonly templatesCount = computed(() => this.myTemplatesSignal()?.templatesCount ?? this.templates().length);
   readonly questionsCount = computed(() =>
     this.templates().reduce((total, template) => total + template.questionsCount, 0),
@@ -62,7 +70,13 @@ export class OperatorTemplatesStore {
         next: (myTemplates) => {
           this.myTemplatesSignal.set({
             ...myTemplates,
-            templates: myTemplates.templates.filter((template) => template.templateId.length > 0),
+            templates: myTemplates.templates
+              .filter((template) => template.templateId.length > 0)
+              .map((template) =>
+                this.inactiveTemplateIdsSignal().has(template.templateId)
+                  ? { ...template, isActive: false }
+                  : template,
+              ),
           });
         },
         error: (error: unknown) => {
@@ -76,6 +90,7 @@ export class OperatorTemplatesStore {
     templateId: string,
     answers: readonly OperatorTemplateAnswerSubmission[],
     onSubmitted: (response: OperatorTemplateResponseResult) => void,
+    onRejected?: (errorKey: string) => void,
   ): void {
     if (this.submittingSignal()) {
       return;
@@ -99,7 +114,16 @@ export class OperatorTemplatesStore {
           onSubmitted(response);
         },
         error: (error: unknown) => {
-          this.submitErrorSignal.set(this.readSubmitError(error));
+          const submitError = this.readSubmitError(error);
+          this.submitErrorSignal.set(submitError);
+
+          if (this.shouldRefreshTemplatesAfterSubmitError(submitError)) {
+            if (submitError === 'operatorTemplates.templateInactive') {
+              this.markTemplateInactive(templateId);
+            }
+            this.load();
+          }
+          onRejected?.(submitError);
         },
       });
   }
@@ -152,7 +176,48 @@ export class OperatorTemplatesStore {
     }
 
     const firstError = errorBody.errors?.[0];
+    const marker = [firstError?.code, firstError?.messageName, firstError?.message, errorBody.detail, errorBody.title]
+      .filter((value): value is string => typeof value === 'string')
+      .join(' ');
+    const normalizedMarker = marker.replace(/[\s_.-]/g, '').toLowerCase();
+
+    if (normalizedMarker.includes('templateinactive')) {
+      return 'operatorTemplates.templateInactive';
+    }
+    if (normalizedMarker.includes('visiblequestions') && normalizedMarker.includes('required')) {
+      return 'operatorTemplates.visibleQuestionsRequired';
+    }
+    if (normalizedMarker.includes('hiddenquestionanswer') && normalizedMarker.includes('notallowed')) {
+      return 'operatorTemplates.hiddenQuestionAnswerNotAllowed';
+    }
+
     return firstError?.message ?? errorBody.detail ?? errorBody.title ?? '';
+  }
+
+  private markTemplateInactive(templateId: string): void {
+    if (templateId.length === 0) {
+      return;
+    }
+
+    this.inactiveTemplateIdsSignal.update((templateIds) => new Set(templateIds).add(templateId));
+    this.myTemplatesSignal.update((myTemplates) =>
+      myTemplates
+        ? {
+            ...myTemplates,
+            templates: myTemplates.templates.map((template) =>
+              template.templateId === templateId ? { ...template, isActive: false } : template,
+            ),
+          }
+        : myTemplates,
+    );
+  }
+
+  private shouldRefreshTemplatesAfterSubmitError(errorKey: string): boolean {
+    return (
+      errorKey === 'operatorTemplates.templateInactive' ||
+      errorKey === 'operatorTemplates.visibleQuestionsRequired' ||
+      errorKey === 'operatorTemplates.hiddenQuestionAnswerNotAllowed'
+    );
   }
 
   private isApiErrorResponse(value: unknown): value is ApiErrorResponse {

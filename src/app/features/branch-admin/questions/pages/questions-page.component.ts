@@ -34,6 +34,7 @@ import {
   QuestionAnswerOptionPayload,
   QuestionAnswerType,
   QuestionAnswerTypeInput,
+  UpdateQuestionAnswerOptionPayload,
   isSingleChoiceAnswerType,
   questionAnswerTypeLabelKey,
   toQuestionAnswerType,
@@ -49,6 +50,7 @@ import {
   CreateQuestionRequest,
   QuestionListItem,
   QuestionTypeOption,
+  UpdateQuestionRequest,
 } from '../models/question.model';
 import { QuestionsStore } from '../state/questions.store';
 
@@ -79,6 +81,7 @@ type QuestionMainField = 'groupId' | 'textEn' | 'textAr' | 'type';
 type QuestionOptionField = 'textEn' | 'textAr' | 'order';
 
 interface QuestionOptionFormControls {
+  optionId: FormControl<string>;
   textEn: FormControl<string>;
   textAr: FormControl<string>;
   order: FormControl<string>;
@@ -95,6 +98,7 @@ interface QuestionFormControls {
 type QuestionFormGroup = FormGroup<QuestionFormControls>;
 type QuestionOptionsFormArray = FormArray<FormGroup<QuestionOptionFormControls>>;
 type QuestionFormValue = ReturnType<QuestionFormGroup['getRawValue']>;
+type QuestionOptionFormValue = QuestionFormValue['options'][number];
 
 @Component({
   selector: 'app-questions-page',
@@ -202,7 +206,7 @@ export class QuestionsPageComponent implements OnInit {
       return;
     }
 
-    this.questionsStore.createQuestion(this.toPayload(this.questionForm.getRawValue()), () => {
+    this.questionsStore.createQuestion(this.toCreatePayload(this.questionForm.getRawValue()), () => {
       this.closeCreateQuestion();
     });
   }
@@ -252,7 +256,7 @@ export class QuestionsPageComponent implements OnInit {
 
     this.questionsStore.updateQuestion(
       question.questionId,
-      this.toPayload(this.editQuestionForm.getRawValue()),
+      this.toUpdatePayload(this.editQuestionForm.getRawValue()),
       () => {
         this.closeEditQuestion();
       },
@@ -437,6 +441,7 @@ export class QuestionsPageComponent implements OnInit {
     option?: QuestionAnswerOption,
   ): FormGroup<QuestionOptionFormControls> {
     return this.formBuilder.nonNullable.group({
+      optionId: [option?.optionId ?? ''],
       textEn: [option?.textEn ?? '', [Validators.required]],
       textAr: [option?.textAr ?? ''],
       order: [
@@ -559,7 +564,7 @@ export class QuestionsPageComponent implements OnInit {
       return '';
     }
 
-    const options = this.toOptionPayloads(optionsControl.getRawValue());
+    const options = this.toCreateOptionPayloads(optionsControl.getRawValue());
     const normalizedText = options.map((option) => option.textEn.toLowerCase());
     const orderValues = options.map((option) => option.order);
 
@@ -574,7 +579,31 @@ export class QuestionsPageComponent implements OnInit {
     return '';
   }
 
-  private toPayload(value: QuestionFormValue): CreateQuestionRequest {
+  private toCreatePayload(value: QuestionFormValue): CreateQuestionRequest {
+    const basePayload = this.toQuestionPayloadBase(value);
+
+    return {
+      ...basePayload,
+      options:
+        basePayload.type === QUESTION_ANSWER_TYPE.SingleChoice
+          ? this.toCreateOptionPayloads(value.options)
+          : [],
+    };
+  }
+
+  private toUpdatePayload(value: QuestionFormValue): UpdateQuestionRequest {
+    const basePayload = this.toQuestionPayloadBase(value);
+
+    return {
+      ...basePayload,
+      options:
+        basePayload.type === QUESTION_ANSWER_TYPE.SingleChoice
+          ? this.toUpdateOptionPayloads(value.options)
+          : [],
+    };
+  }
+
+  private toQuestionPayloadBase(value: QuestionFormValue): Omit<CreateQuestionRequest, 'options'> {
     const textAr = value.textAr.trim();
     const answerType = toQuestionAnswerType(value.type) ?? QUESTION_ANSWER_TYPE.SingleChoice;
 
@@ -583,25 +612,36 @@ export class QuestionsPageComponent implements OnInit {
       textEn: value.textEn.trim(),
       textAr: textAr.length > 0 ? textAr : null,
       type: answerType,
-      options:
-        answerType === QUESTION_ANSWER_TYPE.SingleChoice
-          ? this.toOptionPayloads(value.options)
-          : [],
     };
   }
 
-  private toOptionPayloads(
-    options: readonly { textEn: string; textAr: string; order: string }[],
+  private toCreateOptionPayloads(
+    options: readonly QuestionOptionFormValue[],
   ): readonly QuestionAnswerOptionPayload[] {
+    return options.map((option) => this.toQuestionOptionPayload(option));
+  }
+
+  private toUpdateOptionPayloads(
+    options: readonly QuestionOptionFormValue[],
+  ): readonly UpdateQuestionAnswerOptionPayload[] {
     return options.map((option) => {
-      const textAr = option.textAr.trim();
+      const optionId = option.optionId.trim();
 
       return {
-        textEn: option.textEn.trim(),
-        textAr: textAr.length > 0 ? textAr : null,
-        order: Number(option.order),
+        optionId: optionId.length > 0 ? optionId : null,
+        ...this.toQuestionOptionPayload(option),
       };
     });
+  }
+
+  private toQuestionOptionPayload(option: QuestionOptionFormValue): QuestionAnswerOptionPayload {
+    const textAr = option.textAr.trim();
+
+    return {
+      textEn: option.textEn.trim(),
+      textAr: textAr.length > 0 ? textAr : null,
+      order: Number(option.order),
+    };
   }
 
   private readAnswerTypeFromEvent(event: Event): QuestionAnswerType {

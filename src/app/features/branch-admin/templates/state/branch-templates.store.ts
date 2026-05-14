@@ -1,12 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { finalize, take } from 'rxjs';
+import { finalize, map, switchMap, take } from 'rxjs';
+import {
+  QuestionCondition,
+  QuestionConditionPayload,
+  triggerTypeName,
+} from '../../../../shared/models/question-condition.model';
 import {
   BranchTemplate,
   BranchTemplateQuestionSelection,
   BranchTemplateSelection,
   BranchTemplatesQuery,
   CreateBranchTemplatePayload,
+  UpdateBranchTemplateQuestionConditionsPayload,
+  UpdateBranchTemplateQuestionsResult,
   UpdateBranchTemplateQuestionsPayload,
   UpdateBranchTemplatePayload,
 } from '../models/branch-template.model';
@@ -53,6 +60,7 @@ export class BranchTemplatesStore {
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
   private readonly updatingQuestionsSignal = signal(false);
+  private readonly updatingQuestionConditionsSignal = signal(false);
   private readonly deletingSignal = signal(false);
   private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -78,6 +86,7 @@ export class BranchTemplatesStore {
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
   readonly updatingQuestions = this.updatingQuestionsSignal.asReadonly();
+  readonly updatingQuestionConditions = this.updatingQuestionConditionsSignal.asReadonly();
   readonly deleting = this.deletingSignal.asReadonly();
   readonly restoring = this.restoringSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
@@ -306,23 +315,145 @@ export class BranchTemplatesStore {
         finalize(() => this.updatingQuestionsSignal.set(false)),
       )
       .subscribe({
-        next: () => {
+        next: (result) => {
+          const selection = this.mergeUpdatedQuestionsSelection(templateId, payload.questionIds, result);
+          this.questionsSelectionSignal.set(selection);
           this.successSignal.set('branchTemplates.questionsUpdateSuccess');
-          this.loadQuestionsSelection(templateId);
           const selectedTemplate = this.selectedTemplateSignal();
           if (selectedTemplate?.templateId === templateId) {
             this.selectedTemplateSignal.set({
               ...selectedTemplate,
-              questionsCount: payload.questionIds.length,
+              questionsCount: result.questionsCount,
             });
           }
-          this.replaceTemplateQuestionsCount(templateId, payload.questionIds.length);
+          this.replaceTemplateQuestionsCount(templateId, result.questionsCount);
           onUpdated();
         },
         error: (error: unknown) => {
-          this.questionsSelectionErrorSignal.set(
-            this.readErrorKey(error, 'branchTemplates.questionsUpdateError'),
+          const errorKey = this.readErrorKey(error, 'branchTemplates.questionsUpdateError');
+          this.questionsSelectionErrorSignal.set(errorKey);
+          if (this.isInactiveConditionErrorKey(errorKey)) {
+            this.refreshQuestionsSelectionAfterConditionError(templateId);
+          }
+        },
+      });
+  }
+
+  updateTemplateQuestionsAndConditions(
+    templateId: string,
+    questionsPayload: UpdateBranchTemplateQuestionsPayload,
+    conditionsPayloadFactory: (
+      selection: BranchTemplateQuestionSelection,
+    ) => UpdateBranchTemplateQuestionConditionsPayload,
+    questionsChanged: boolean,
+    onUpdated: () => void,
+  ): void {
+    if (this.updatingQuestionsSignal() || this.updatingQuestionConditionsSignal()) {
+      return;
+    }
+
+    this.updatingQuestionsSignal.set(true);
+    this.updatingQuestionConditionsSignal.set(true);
+    this.questionsSelectionErrorSignal.set(null);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    const questionsAndSelection$ = questionsChanged
+      ? this.branchTemplatesService
+          .updateQuestionConditions(templateId, { conditions: [] })
+          .pipe(
+            switchMap(() =>
+              this.branchTemplatesService.updateQuestions(templateId, questionsPayload),
+            ),
+            map((result) => {
+              const selection = this.mergeUpdatedQuestionsSelection(
+                templateId,
+                questionsPayload.questionIds,
+                result,
+                [],
+              );
+              this.questionsSelectionSignal.set(selection);
+              return selection;
+            }),
+          )
+      : this.branchTemplatesService.getQuestionsSelection(templateId);
+
+    questionsAndSelection$
+      .pipe(
+        switchMap((selection) => {
+          const conditionsPayload = conditionsPayloadFactory(selection);
+          const updatedSelection = this.withQuestionConditions(
+            selection,
+            conditionsPayload.conditions,
           );
+
+          return this.branchTemplatesService
+            .updateQuestionConditions(templateId, conditionsPayload)
+            .pipe(map(() => updatedSelection));
+        }),
+        take(1),
+        finalize(() => {
+          this.updatingQuestionsSignal.set(false);
+          this.updatingQuestionConditionsSignal.set(false);
+        }),
+      )
+      .subscribe({
+        next: (selection) => {
+          this.questionsSelectionSignal.set(selection);
+          this.successSignal.set('branchTemplates.questionsUpdateSuccess');
+          const selectedTemplate = this.selectedTemplateSignal();
+          const questionsCount = this.countSelectedQuestions(selection);
+          if (selectedTemplate?.templateId === templateId) {
+            this.selectedTemplateSignal.set({
+              ...selectedTemplate,
+              questionsCount,
+            });
+          }
+          this.replaceTemplateQuestionsCount(templateId, questionsCount);
+          onUpdated();
+        },
+        error: (error: unknown) => {
+          const errorKey = this.readErrorKey(error, 'branchTemplates.questionsUpdateError');
+          this.questionsSelectionErrorSignal.set(errorKey);
+          if (this.isInactiveConditionErrorKey(errorKey)) {
+            this.refreshQuestionsSelectionAfterConditionError(templateId);
+          }
+        },
+      });
+  }
+
+  updateTemplateQuestionConditions(
+    templateId: string,
+    payload: UpdateBranchTemplateQuestionConditionsPayload,
+    onUpdated: () => void,
+  ): void {
+    if (this.updatingQuestionConditionsSignal()) {
+      return;
+    }
+
+    this.updatingQuestionConditionsSignal.set(true);
+    this.questionsSelectionErrorSignal.set(null);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.branchTemplatesService
+      .updateQuestionConditions(templateId, payload)
+      .pipe(
+        take(1),
+        finalize(() => this.updatingQuestionConditionsSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('branchTemplates.conditionsUpdateSuccess');
+          this.loadQuestionsSelection(templateId);
+          onUpdated();
+        },
+        error: (error: unknown) => {
+          const errorKey = this.readErrorKey(error, 'branchTemplates.conditionsUpdateError');
+          this.questionsSelectionErrorSignal.set(errorKey);
+          if (this.isInactiveConditionErrorKey(errorKey)) {
+            this.refreshQuestionsSelectionAfterConditionError(templateId);
+          }
         },
       });
   }
@@ -390,12 +521,114 @@ export class BranchTemplatesStore {
     this.successSignal.set(null);
   }
 
+  private mergeUpdatedQuestionsSelection(
+    templateId: string,
+    requestedQuestionIds: readonly string[],
+    result: UpdateBranchTemplateQuestionsResult,
+    questionConditions = this.questionsSelectionSignal()?.questionConditions ?? [],
+  ): BranchTemplateQuestionSelection {
+    const currentSelection = this.questionsSelectionSignal();
+    const selectedQuestionsByQuestionId = new Map(
+      result.questions
+        .filter((question) => question.questionId.length > 0)
+        .map((question) => [question.questionId, question]),
+    );
+    const requestedOrderByQuestionId = new Map(
+      requestedQuestionIds.map((questionId, index) => [questionId, index + 1]),
+    );
+    const baseSelection: BranchTemplateQuestionSelection =
+      currentSelection ?? {
+        templateId: result.templateId || templateId,
+        branchId: result.branchId,
+        templateNameEn: '',
+        templateNameAr: '',
+        status: 'Draft',
+        isActive: true,
+        groups: [],
+        questionConditions: [],
+      };
+    const groups = baseSelection.groups.map((group) => ({
+      ...group,
+      questions: group.questions.map((question) => {
+        const selectedQuestion = selectedQuestionsByQuestionId.get(question.questionId);
+        if (!selectedQuestion) {
+          return {
+            ...question,
+            isSelected: false,
+            templateQuestionId: null,
+            order: null,
+          };
+        }
+
+        return {
+          ...question,
+          isSelected: true,
+          templateQuestionId:
+            selectedQuestion.templateQuestionId || question.templateQuestionId,
+          order:
+            selectedQuestion.order ||
+            requestedOrderByQuestionId.get(question.questionId) ||
+            question.order,
+        };
+      }),
+    }));
+    const selectedTemplateQuestionIds = new Set(
+      groups
+        .flatMap((group) => group.questions)
+        .filter(
+          (question) =>
+            question.isSelected &&
+            question.templateQuestionId !== null &&
+            question.templateQuestionId.length > 0,
+        )
+        .map((question) => question.templateQuestionId as string),
+    );
+
+    return {
+      ...baseSelection,
+      templateId: result.templateId || baseSelection.templateId || templateId,
+      branchId: result.branchId || baseSelection.branchId,
+      groups,
+      questionConditions: questionConditions.filter(
+        (condition) =>
+          selectedTemplateQuestionIds.has(condition.parentTemplateQuestionId) &&
+          selectedTemplateQuestionIds.has(condition.childTemplateQuestionId),
+      ),
+    };
+  }
+
+  private withQuestionConditions(
+    selection: BranchTemplateQuestionSelection,
+    conditions: readonly QuestionConditionPayload[],
+  ): BranchTemplateQuestionSelection {
+    return {
+      ...selection,
+      questionConditions: conditions.map((condition, index): QuestionCondition => ({
+        conditionId: '',
+        parentTemplateQuestionId: condition.parentTemplateQuestionId,
+        childTemplateQuestionId: condition.childTemplateQuestionId,
+        triggerType: condition.triggerType,
+        triggerTypeName: triggerTypeName(condition.triggerType),
+        selectedQuestionOptionId: condition.selectedQuestionOptionId,
+        triggerValue: condition.triggerValue,
+        order: condition.order || index + 1,
+      })),
+    };
+  }
+
+  private countSelectedQuestions(selection: BranchTemplateQuestionSelection): number {
+    return selection.groups.reduce(
+      (total, group) => total + group.questions.filter((question) => question.isSelected).length,
+      0,
+    );
+  }
+
   private readErrorKey(error: unknown, fallbackKey: string): string {
     if (!(error instanceof HttpErrorResponse)) {
       return fallbackKey;
     }
 
-    const code = this.readFirstErrorCode(error.error).toLowerCase();
+    const code = this.readErrorMarker(error.error).replace(/[\s_.-]/g, '').toLowerCase();
     if (code.includes('namealreadyexists') || code.includes('templatealreadyexists')) {
       return 'branchTemplates.nameAlreadyExists';
     }
@@ -407,6 +640,18 @@ export class BranchTemplatesStore {
     }
     if (code.includes('alreadyactive') || code.includes('templateactive')) {
       return 'branchTemplates.alreadyActive';
+    }
+    if (code.includes('parentquestioninactive')) {
+      return 'branchTemplates.conditionParentQuestionInactive';
+    }
+    if (code.includes('parentquestiongroupinactive')) {
+      return 'branchTemplates.conditionParentQuestionGroupInactive';
+    }
+    if (code.includes('childquestioninactive')) {
+      return 'branchTemplates.conditionChildQuestionInactive';
+    }
+    if (code.includes('childquestiongroupinactive')) {
+      return 'branchTemplates.conditionChildQuestionGroupInactive';
     }
 
     if (error.status === 401) {
@@ -425,13 +670,15 @@ export class BranchTemplatesStore {
     return fallbackKey;
   }
 
-  private readFirstErrorCode(errorBody: unknown): string {
+  private readErrorMarker(errorBody: unknown): string {
     if (!this.isApiErrorResponse(errorBody)) {
       return '';
     }
 
     const firstError = errorBody.errors?.[0];
-    return firstError?.code ?? firstError?.messageName ?? '';
+    return [firstError?.code, firstError?.messageName, firstError?.message, errorBody.detail, errorBody.title]
+      .filter((value): value is string => typeof value === 'string')
+      .join(' ');
   }
 
   private readProblemDetailsMessage(errorBody: unknown): string {
@@ -445,6 +692,34 @@ export class BranchTemplatesStore {
 
   private isApiErrorResponse(value: unknown): value is ApiErrorResponse {
     return typeof value === 'object' && value !== null;
+  }
+
+  private isInactiveConditionErrorKey(errorKey: string): boolean {
+    return (
+      errorKey === 'branchTemplates.conditionParentQuestionInactive' ||
+      errorKey === 'branchTemplates.conditionParentQuestionGroupInactive' ||
+      errorKey === 'branchTemplates.conditionChildQuestionInactive' ||
+      errorKey === 'branchTemplates.conditionChildQuestionGroupInactive'
+    );
+  }
+
+  private refreshQuestionsSelectionAfterConditionError(templateId: string): void {
+    this.questionsSelectionLoadingSignal.set(true);
+
+    this.branchTemplatesService
+      .getQuestionsSelection(templateId)
+      .pipe(
+        take(1),
+        finalize(() => this.questionsSelectionLoadingSignal.set(false)),
+      )
+      .subscribe({
+        next: (selection) => {
+          this.questionsSelectionSignal.set(selection);
+        },
+        error: () => {
+          this.questionsSelectionSignal.set(null);
+        },
+      });
   }
 
   private replaceTemplateInList(template: BranchTemplate): void {
@@ -477,6 +752,7 @@ export class BranchTemplatesStore {
       isActive: template.isActive,
       questionsCount: template.questionsCount || currentTemplate?.questionsCount || 0,
       createdOnUtc: template.createdOnUtc || currentTemplate?.createdOnUtc || '',
+      questionConditions: template.questionConditions ?? currentTemplate?.questionConditions ?? [],
     };
   }
 

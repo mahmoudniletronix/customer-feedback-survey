@@ -11,9 +11,9 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   ArrowLeft,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Eye,
   FileText,
   GripVertical,
   ListChecks,
@@ -27,17 +27,27 @@ import {
   QuestionAnswerTypeInput,
   questionAnswerTypeLabelKey,
 } from '../../../../shared/models/question-answer.model';
+import {
+  QuestionCondition,
+  QuestionConditionPayload,
+} from '../../../../shared/models/question-condition.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
-import { BranchTemplateQuestionSelectionItem } from '../models/branch-template.model';
+import { BranchTemplateConditionalLogicComponent } from '../components/branch-template-conditional-logic.component';
+import { BranchTemplatePreviewComponent } from '../components/branch-template-preview.component';
+import {
+  BranchTemplateQuestionSelection,
+  BranchTemplateQuestionSelectionItem,
+} from '../models/branch-template.model';
 import { BranchTemplatesStore } from '../state/branch-templates.store';
 
 interface TemplateQuestionManagerItem extends BranchTemplateQuestionSelectionItem {
   groupId: string;
   groupNameEn: string;
   groupNameAr: string;
+  groupIsActive: boolean;
 }
 
 interface TemplateQuestionManagerGroup {
@@ -47,10 +57,14 @@ interface TemplateQuestionManagerGroup {
   questions: readonly TemplateQuestionManagerItem[];
 }
 
+type TemplateBuilderTab = 'questions' | 'preview';
+
 @Component({
   selector: 'app-branch-template-questions-page',
   standalone: true,
   imports: [
+    BranchTemplateConditionalLogicComponent,
+    BranchTemplatePreviewComponent,
     ButtonComponent,
     CardComponent,
     IconComponent,
@@ -68,9 +82,9 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly arrowLeftIcon = ArrowLeft;
-  readonly checkIcon = CheckCircle2;
   readonly chevronDownIcon = ChevronDown;
   readonly chevronUpIcon = ChevronUp;
+  readonly eyeIcon = Eye;
   readonly fileTextIcon = FileText;
   readonly gripIcon = GripVertical;
   readonly listChecksIcon = ListChecks;
@@ -80,6 +94,9 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   readonly trashIcon = Trash2;
 
   readonly selectedQuestions = signal<readonly TemplateQuestionManagerItem[]>([]);
+  readonly draftConditions = signal<readonly QuestionCondition[]>([]);
+  readonly conditionsDirty = signal(false);
+  readonly activeTab = signal<TemplateBuilderTab>('questions');
   readonly searchText = signal('');
   readonly initializedTemplateId = signal('');
   readonly draggingQuestionId = signal<string | null>(null);
@@ -89,11 +106,27 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     () => new Set(this.selectedQuestions().map((question) => question.questionId)),
   );
   readonly allQuestions = computed(() => this.flattenSelectionQuestions());
+  readonly activeQuestions = computed(() =>
+    this.allQuestions().filter((question) => this.isActiveQuestion(question)),
+  );
+  readonly conditionQuestions = computed(() => {
+    const questionsByQuestionId = new Map(
+      this.allQuestions().map((question) => [question.questionId, question]),
+    );
+
+    return this.selectedQuestions().map(
+      (question) => questionsByQuestionId.get(question.questionId) ?? question,
+    );
+  });
   readonly filteredAvailableGroups = computed(() => this.toFilteredAvailableGroups());
   readonly hasAvailableQuestions = computed(() =>
     this.filteredAvailableGroups().some((group) => group.questions.length > 0),
   );
   readonly isDirty = computed(() => this.toSelectedIdsKey() !== this.toOriginalSelectedIdsKey());
+  readonly hasPendingChanges = computed(() => this.isDirty() || this.conditionsDirty());
+  readonly savingTemplateFlow = computed(
+    () => this.templatesStore.updatingQuestions() || this.templatesStore.updatingQuestionConditions(),
+  );
   readonly templateName = computed(() => {
     const selection = this.templatesStore.questionsSelection();
     const template = this.templatesStore.selectedTemplate();
@@ -139,6 +172,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     this.location.back();
   }
 
+  setActiveTab(tab: TemplateBuilderTab): void {
+    this.activeTab.set(tab);
+  }
+
   updateSearchText(event: Event): void {
     const input = event.target;
     this.searchText.set(input instanceof HTMLInputElement ? input.value : '');
@@ -159,6 +196,17 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     this.selectedQuestions.update((questions) =>
       questions.filter((question) => question.questionId !== questionId),
     );
+  }
+
+  addRelatedQuestion(question: TemplateQuestionManagerItem): void {
+    if (this.selectedQuestionIds().has(question.questionId)) {
+      return;
+    }
+
+    this.selectedQuestions.update((questions) => [
+      ...questions,
+      { ...question, isSelected: true, order: questions.length + 1 },
+    ]);
   }
 
   moveQuestion(questionId: string, direction: -1 | 1): void {
@@ -215,15 +263,20 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
   saveQuestions(): void {
     const templateId = this.templateId();
-    if (templateId.length === 0 || this.templatesStore.updatingQuestions()) {
+    if (templateId.length === 0 || this.savingTemplateFlow() || !this.hasPendingChanges()) {
       return;
     }
 
-    this.templatesStore.updateTemplateQuestions(
+    this.templatesStore.updateTemplateQuestionsAndConditions(
       templateId,
       { questionIds: this.selectedQuestions().map((question) => question.questionId) },
+      (selection) => ({
+        conditions: this.toResolvedConditionPayload(selection),
+      }),
+      this.isDirty(),
       () => {
         this.initializedTemplateId.set('');
+        this.conditionsDirty.set(false);
       },
     );
   }
@@ -264,6 +317,14 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     return question.textEn || question.textAr || '-';
   }
 
+  updateDraftConditions(conditions: readonly QuestionCondition[]): void {
+    this.draftConditions.set(conditions);
+  }
+
+  updateConditionsDirty(isDirty: boolean): void {
+    this.conditionsDirty.set(isDirty);
+  }
+
   private flattenSelectionQuestions(): readonly TemplateQuestionManagerItem[] {
     return (
       this.templatesStore.questionsSelection()?.groups.flatMap((group) =>
@@ -272,6 +333,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
           groupId: group.groupId,
           groupNameEn: group.nameEn,
           groupNameAr: group.nameAr,
+          groupIsActive: group.isActive,
         })),
       ) ?? []
     );
@@ -284,8 +346,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
     return (
       selection?.groups
+        .filter((group) => group.isActive)
         .map((group) => {
           const questions = group.questions
+            .filter((question) => question.isActive)
             .filter((question) => !selectedIds.has(question.questionId))
             .filter((question) => {
               if (normalizedSearch.length === 0) {
@@ -301,6 +365,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
               groupId: group.groupId,
               groupNameEn: group.nameEn,
               groupNameAr: group.nameAr,
+              groupIsActive: group.isActive,
             }));
 
           return {
@@ -329,5 +394,73 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
       )
       .map((question) => question.questionId)
       .join('|');
+  }
+
+  private toResolvedConditionPayload(
+    selection: BranchTemplateQuestionSelection,
+  ): readonly QuestionConditionPayload[] {
+    const savedQuestionsByQuestionId = new Map(
+      selection.groups
+        .filter((group) => group.isActive)
+        .flatMap((group) => group.questions)
+        .filter(
+          (question) =>
+            question.isSelected &&
+            question.isActive &&
+            question.templateQuestionId !== null &&
+            question.templateQuestionId.length > 0,
+        )
+        .map((question) => [question.questionId, question.templateQuestionId as string]),
+    );
+    const latestQuestionsByQuestionId = new Map(
+      this.conditionQuestions().map((question) => [question.questionId, question]),
+    );
+    const draftQuestionsByLogicId = new Map<string, TemplateQuestionManagerItem>();
+    for (const draftQuestion of this.selectedQuestions()) {
+      const resolvedQuestion =
+        latestQuestionsByQuestionId.get(draftQuestion.questionId) ?? draftQuestion;
+
+      draftQuestionsByLogicId.set(this.logicQuestionId(draftQuestion), resolvedQuestion);
+      if (
+        resolvedQuestion.templateQuestionId !== null &&
+        resolvedQuestion.templateQuestionId.length > 0
+      ) {
+        draftQuestionsByLogicId.set(resolvedQuestion.templateQuestionId, resolvedQuestion);
+      }
+    }
+
+    return this.draftConditions()
+      .map((condition): QuestionConditionPayload | null => {
+        const parentQuestion = draftQuestionsByLogicId.get(condition.parentTemplateQuestionId);
+        const childQuestion = draftQuestionsByLogicId.get(condition.childTemplateQuestionId);
+        const parentTemplateQuestionId = parentQuestion
+          ? savedQuestionsByQuestionId.get(parentQuestion.questionId)
+          : null;
+        const childTemplateQuestionId = childQuestion
+          ? savedQuestionsByQuestionId.get(childQuestion.questionId)
+          : null;
+
+        if (!parentTemplateQuestionId || !childTemplateQuestionId) {
+          return null;
+        }
+
+        return {
+          parentTemplateQuestionId,
+          childTemplateQuestionId,
+          triggerType: condition.triggerType,
+          selectedQuestionOptionId: condition.selectedQuestionOptionId,
+          triggerValue: condition.triggerValue,
+          order: condition.order,
+        };
+      })
+      .filter((condition): condition is QuestionConditionPayload => condition !== null);
+  }
+
+  private logicQuestionId(question: TemplateQuestionManagerItem): string {
+    return question.templateQuestionId ?? `draft:${question.questionId}`;
+  }
+
+  private isActiveQuestion(question: TemplateQuestionManagerItem): boolean {
+    return question.isActive && question.groupIsActive;
   }
 }

@@ -3,6 +3,7 @@ import {
   QuestionAnswerOptionApiResponse,
   QuestionAnswerOptionPayload,
   QuestionAnswerType,
+  UpdateQuestionAnswerOptionPayload,
 } from '../../../../shared/models/question-answer.model';
 
 export interface QuestionListItem {
@@ -28,7 +29,9 @@ export interface CreateQuestionRequest {
   options: readonly QuestionAnswerOptionPayload[];
 }
 
-export interface UpdateQuestionRequest extends CreateQuestionRequest {}
+export interface UpdateQuestionRequest extends Omit<CreateQuestionRequest, 'options'> {
+  options: readonly UpdateQuestionAnswerOptionPayload[];
+}
 
 export interface QuestionsFilter {
   pageNumber: number;
