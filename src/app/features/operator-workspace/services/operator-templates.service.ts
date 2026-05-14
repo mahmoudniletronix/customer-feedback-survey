@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { toQuestionAnswerOption } from '../../../shared/models/question-answer.model';
+import { toQuestionCondition } from '../../../shared/models/question-condition.model';
 import {
   OperatorAssignedTemplate,
   OperatorAssignedTemplateApiResponse,
@@ -65,12 +66,20 @@ export class OperatorTemplatesService {
       branchNameEn: response.branchNameEn ?? '',
       branchNameAr: response.branchNameAr ?? '',
       branchCode: response.branchCode ?? '',
+      isActive: response.isActive ?? true,
       questionsCount: response.questionsCount ?? questions.length,
       hasAnswered: response.hasAnswered ?? Boolean(response.latestResponse),
       latestResponse: response.latestResponse
         ? this.toLatestResponse(response.latestResponse)
         : null,
       questions,
+      questionConditions: (response.questionConditions ?? [])
+        .map((condition) => toQuestionCondition(condition))
+        .filter(
+          (condition) =>
+            condition.parentTemplateQuestionId.length > 0 &&
+            condition.childTemplateQuestionId.length > 0,
+        ),
     };
   }
 
@@ -91,6 +100,7 @@ export class OperatorTemplatesService {
     response: OperatorLatestTemplateAnswerApiResponse,
   ): OperatorLatestTemplateAnswer {
     return {
+      templateQuestionId: this.readRecordId(response.templateQuestionId),
       questionId: this.readRecordId(response.questionId),
       questionType: response.questionType ?? '',
       selectedQuestionOptionId: this.readNullableRecordId(response.selectedQuestionOptionId),

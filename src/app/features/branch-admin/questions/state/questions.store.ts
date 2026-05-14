@@ -321,6 +321,26 @@ export class QuestionsStore {
     if (normalized.includes('invalidquestiontype') || normalized.includes('invalidtype')) {
       return 'questions.invalidType';
     }
+    if (
+      normalized.includes('optionusedincondition') ||
+      (normalized.includes('option') && normalized.includes('used') && normalized.includes('condition'))
+    ) {
+      return 'questions.optionUsedInCondition';
+    }
+    if (
+      normalized.includes('optionnotbelongtoquestion') ||
+      (normalized.includes('option') && normalized.includes('belong') && normalized.includes('question'))
+    ) {
+      return 'questions.optionNotBelongToQuestion';
+    }
+    if (
+      normalized.includes('optionidduplicated') ||
+      normalized.includes('duplicateoptionid') ||
+      (normalized.includes('optionid') &&
+        (normalized.includes('duplicated') || normalized.includes('duplicate')))
+    ) {
+      return 'questions.optionIdDuplicated';
+    }
     if (normalized.includes('singlechoice') && normalized.includes('option') && normalized.includes('least')) {
       return 'questions.singleChoiceMinOptions';
     }

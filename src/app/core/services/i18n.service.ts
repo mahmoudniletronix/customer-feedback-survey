@@ -216,6 +216,11 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'operatorTemplates.submitForbidden': 'You do not have permission to submit template responses.',
     'operatorTemplates.templateNotAssigned':
       'This template is not assigned to the current operator.',
+    'operatorTemplates.templateInactive':
+      'This template is inactive. Please refresh your templates.',
+    'operatorTemplates.visibleQuestionsRequired': 'Answer all visible questions before submitting.',
+    'operatorTemplates.hiddenQuestionAnswerNotAllowed':
+      'A hidden question answer cannot be submitted.',
     'operatorTemplates.responseSubmittedTitle': 'Response submitted',
     'operatorTemplates.responseSubmittedDescription':
       'The response was saved. You can submit another response for the same template or return to the templates list.',
@@ -352,6 +357,49 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.noQuestionsInGroup': 'No questions are available in this group.',
     'branchTemplates.noQuestionGroupsSelection':
       'No question groups are available for this template.',
+    'branchTemplates.builderTabBasicInfo': 'Basic info',
+    'branchTemplates.builderTabQuestions': 'Questions',
+    'branchTemplates.builderTabConditionalLogic': 'Conditional logic',
+    'branchTemplates.builderTabPreview': 'Preview',
+    'branchTemplates.conditionalLogicTitle': 'Conditional logic',
+    'branchTemplates.conditionalLogicSubtitle':
+      'Show related questions when a selected template question matches a configured answer.',
+    'branchTemplates.clearConditions': 'Clear all',
+    'branchTemplates.saveConditions': 'Save logic',
+    'branchTemplates.conditionsNeedSelectedQuestions':
+      'Add questions to the template and save them before configuring conditional logic.',
+    'branchTemplates.conditionsConfigured': 'conditions configured',
+    'branchTemplates.conditionsNotAllowedForType':
+      'Conditional questions are not allowed for this question type.',
+    'branchTemplates.selectRelatedQuestion': 'Select related question',
+    'branchTemplates.addRelatedQuestion': 'Add related question',
+    'branchTemplates.noRelatedQuestionCandidates':
+      'No valid related questions are available for this trigger.',
+    'branchTemplates.removeCondition': 'Remove',
+    'branchTemplates.conditionsUpdateSuccess': 'Conditional logic updated successfully.',
+    'branchTemplates.conditionsUpdateError':
+      'Conditional logic could not be updated. Please try again later.',
+    'branchTemplates.conditionParentQuestionInactive':
+      'Conditional logic cannot be saved because the parent question is inactive.',
+    'branchTemplates.conditionParentQuestionGroupInactive':
+      'Conditional logic cannot be saved because the parent question group is inactive.',
+    'branchTemplates.conditionChildQuestionInactive':
+      'Conditional logic cannot be saved because the child question is inactive.',
+    'branchTemplates.conditionChildQuestionGroupInactive':
+      'Conditional logic cannot be saved because the child question group is inactive.',
+    'branchTemplates.rootQuestion': 'Root',
+    'branchTemplates.followUpQuestion': 'Follow-up',
+    'branchTemplates.ifAnswer': 'If',
+    'branchTemplates.thenShow': 'Then show',
+    'branchTemplates.stars': 'stars',
+    'branchTemplates.previewTitle': 'Preview',
+    'branchTemplates.previewSubtitle':
+      'Test the template flow with the same conditional behavior used by operators.',
+    'branchTemplates.previewVisibleQuestions': 'visible questions',
+    'branchTemplates.resetPreview': 'Reset preview',
+    'branchTemplates.previewNeedSelectedQuestions':
+      'Add questions to the template before previewing the conditional flow.',
+    'branchTemplates.previewHiddenQuestions': 'questions are hidden until their trigger answers match.',
     'branchTemplates.totalItems': 'templates',
     'branchTemplates.loading': 'Loading templates...',
     'branchTemplates.createSuccess': 'Template created successfully.',
@@ -474,6 +522,10 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'questions.singleChoiceMinOptions': 'SingleChoice question must have at least two options.',
     'questions.optionTextEnUnique': 'Option English text must be unique inside the same question.',
     'questions.optionOrderUnique': 'Option order must be unique inside the same question.',
+    'questions.optionUsedInCondition':
+      'This option is used in template conditional logic and cannot be deleted.',
+    'questions.optionNotBelongToQuestion': 'One option does not belong to this question.',
+    'questions.optionIdDuplicated': 'The same option was submitted more than once.',
     'questions.optionsOnlySingleChoice': 'Options are allowed only for Multi choice questions.',
     'questions.typeChangeBlockedByTemplate':
       'Question type cannot be changed because this question is already linked to a template.',
@@ -1024,6 +1076,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'operatorTemplates.submitError': 'إرسال الاستجابة غير متاح مؤقتًا. حاول مرة أخرى لاحقًا.',
     'operatorTemplates.submitForbidden': 'ليس لديك صلاحية لإرسال استجابات القوالب.',
     'operatorTemplates.templateNotAssigned': 'هذا القالب غير معين للمشغل الحالي.',
+    'operatorTemplates.templateInactive': 'هذا القالب غير نشط. يرجى تحديث القوالب.',
+    'operatorTemplates.visibleQuestionsRequired': 'أجب عن كل الأسئلة الظاهرة قبل الإرسال.',
+    'operatorTemplates.hiddenQuestionAnswerNotAllowed': 'لا يمكن إرسال إجابة سؤال مخفي.',
     'operatorTemplates.responseSubmittedTitle': 'تم إرسال الاستجابة',
     'operatorTemplates.responseSubmittedDescription':
       'تم حفظ الاستجابة. يمكنك إرسال استجابة أخرى لنفس القالب أو العودة لقائمة القوالب.',
@@ -1152,6 +1207,49 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.questionOrder': 'الترتيب',
     'branchTemplates.noQuestionsInGroup': 'لا توجد أسئلة متاحة داخل هذه المجموعة.',
     'branchTemplates.noQuestionGroupsSelection': 'لا توجد مجموعات أسئلة متاحة لهذا القالب.',
+    'branchTemplates.builderTabBasicInfo': 'البيانات الأساسية',
+    'branchTemplates.builderTabQuestions': 'الأسئلة',
+    'branchTemplates.builderTabConditionalLogic': 'المنطق الشرطي',
+    'branchTemplates.builderTabPreview': 'المعاينة',
+    'branchTemplates.conditionalLogicTitle': 'المنطق الشرطي',
+    'branchTemplates.conditionalLogicSubtitle':
+      'اعرض أسئلة مرتبطة عندما تطابق إجابة سؤال داخل القالب شرطا محددا.',
+    'branchTemplates.clearConditions': 'مسح الكل',
+    'branchTemplates.saveConditions': 'حفظ المنطق',
+    'branchTemplates.conditionsNeedSelectedQuestions':
+      'أضف الأسئلة إلى القالب واحفظها قبل إعداد المنطق الشرطي.',
+    'branchTemplates.conditionsConfigured': 'شروط مضافة',
+    'branchTemplates.conditionsNotAllowedForType':
+      'الأسئلة الشرطية غير مسموحة لهذا النوع من الأسئلة.',
+    'branchTemplates.selectRelatedQuestion': 'اختر سؤالا مرتبطا',
+    'branchTemplates.addRelatedQuestion': 'إضافة سؤال مرتبط',
+    'branchTemplates.noRelatedQuestionCandidates':
+      'لا توجد أسئلة مرتبطة صالحة لهذا الشرط.',
+    'branchTemplates.removeCondition': 'إزالة',
+    'branchTemplates.conditionsUpdateSuccess': 'تم تحديث المنطق الشرطي بنجاح.',
+    'branchTemplates.conditionsUpdateError':
+      'تعذر تحديث المنطق الشرطي. حاول مرة أخرى لاحقا.',
+    'branchTemplates.conditionParentQuestionInactive':
+      'لا يمكن حفظ المنطق الشرطي لأن السؤال الأساسي غير نشط.',
+    'branchTemplates.conditionParentQuestionGroupInactive':
+      'لا يمكن حفظ المنطق الشرطي لأن مجموعة السؤال الأساسي غير نشطة.',
+    'branchTemplates.conditionChildQuestionInactive':
+      'لا يمكن حفظ المنطق الشرطي لأن السؤال التابع غير نشط.',
+    'branchTemplates.conditionChildQuestionGroupInactive':
+      'لا يمكن حفظ المنطق الشرطي لأن مجموعة السؤال التابع غير نشطة.',
+    'branchTemplates.rootQuestion': 'رئيسي',
+    'branchTemplates.followUpQuestion': 'تابع',
+    'branchTemplates.ifAnswer': 'إذا',
+    'branchTemplates.thenShow': 'اعرض',
+    'branchTemplates.stars': 'نجوم',
+    'branchTemplates.previewTitle': 'المعاينة',
+    'branchTemplates.previewSubtitle':
+      'اختبر تدفق القالب بنفس سلوك الأسئلة الشرطية الذي يستخدمه المشغلون.',
+    'branchTemplates.previewVisibleQuestions': 'أسئلة ظاهرة',
+    'branchTemplates.resetPreview': 'إعادة ضبط المعاينة',
+    'branchTemplates.previewNeedSelectedQuestions':
+      'أضف أسئلة إلى القالب قبل معاينة التدفق الشرطي.',
+    'branchTemplates.previewHiddenQuestions': 'أسئلة مخفية حتى تطابق إجابات التفعيل.',
     'branchTemplates.totalItems': 'قالب',
     'branchTemplates.loading': 'جاري تحميل القوالب...',
     'branchTemplates.createSuccess': 'تم إنشاء القالب بنجاح.',
@@ -1264,6 +1362,10 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'questions.singleChoiceMinOptions': 'سؤال SingleChoice يجب أن يحتوي على اختيارين على الأقل.',
     'questions.optionTextEnUnique': 'نص الاختيار بالإنجليزية يجب أن يكون غير مكرر داخل نفس السؤال.',
     'questions.optionOrderUnique': 'ترتيب الاختيار يجب أن يكون غير مكرر داخل نفس السؤال.',
+    'questions.optionUsedInCondition':
+      'هذا الاختيار مستخدم في شرط داخل قالب ولا يمكن حذفه.',
+    'questions.optionNotBelongToQuestion': 'يوجد اختيار لا يتبع هذا السؤال.',
+    'questions.optionIdDuplicated': 'تم إرسال نفس الاختيار أكثر من مرة.',
     'questions.optionsOnlySingleChoice': 'الاختيارات مسموحة فقط لأسئلة الاختيارات المتعددة.',
     'questions.typeChangeBlockedByTemplate': 'لا يمكن تغيير نوع السؤال لأنه مرتبط بالفعل بقالب.',
     'questions.voicePlaceholder': 'مكان إدخال الصوت',
