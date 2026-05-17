@@ -1,0 +1,41 @@
+<div
+  class="pointer-events-none fixed inset-x-3 top-3 z-[1000] flex flex-col gap-3 sm:inset-x-auto sm:right-4 sm:top-4 sm:w-[24rem]"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  @for (toast of toastService.toasts(); track toast.id) {
+    <article
+      [class]="'pointer-events-auto relative overflow-hidden rounded-xl border p-3 pr-11 shadow-2xl backdrop-blur-xl transition ' + shellClass(toast)"
+      role="status"
+    >
+      <span [class]="'absolute inset-y-0 left-0 w-1.5 ' + accentClass(toast)"></span>
+
+      <div class="flex gap-3">
+        <span
+          [class]="'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ring-1 ' + iconClass(toast)"
+        >
+          <app-icon [icon]="iconFor(toast)" [size]="18" />
+        </span>
+        <div class="min-w-0 flex-1">
+          <p class="break-words text-sm font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+            {{ toast.title }}
+          </p>
+          @if (toast.description) {
+            <p class="mt-1 break-words text-xs font-semibold leading-5 text-slate-600 [overflow-wrap:anywhere]">
+              {{ toast.description }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+        [attr.aria-label]="'Dismiss notification'"
+        (click)="toastService.dismiss(toast.id)"
+      >
+        <app-icon [icon]="closeIcon" [size]="15" />
+      </button>
+    </article>
+  }
+</div>

@@ -16,6 +16,7 @@ interface LocalizedAnswerOption {
   label: string;
   secondaryLabel: string;
   order: number;
+  value: number | null;
 }
 
 @Component({
@@ -56,6 +57,7 @@ export class QuestionAnswerPreviewComponent {
         label: this.localizedText(option.textEn, option.textAr ?? '', isArabic),
         secondaryLabel: this.secondaryLocalizedText(option.textEn, option.textAr ?? '', isArabic),
         order: option.order,
+        value: option.value,
       }));
   });
 

@@ -76,6 +76,14 @@
   opacity: 0.8;
 }
 
+.header-badges {
+  margin-bottom: 0.25rem;
+}
+
+.header-badges .role-badge {
+  margin-bottom: 0;
+}
+
 .page-title {
   font-size: 1.25rem;
   font-weight: 800;

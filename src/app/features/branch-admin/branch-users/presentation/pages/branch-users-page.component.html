@@ -1,0 +1,627 @@
+<div class="w-full space-y-4 text-sm">
+  <div>
+    <!-- <p
+      class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
+    >
+      {{ 'common.branchAdmin' | t }}
+    </p>
+    <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'branchUsers.title' | t }}</h2>
+    <p class="mt-1 text-xs text-slate-500">{{ 'branchUsers.subtitle' | t }}</p>
+  </div> -->
+
+    @if (branchUsersStore.success()) {
+      <div
+        class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      >
+        {{ branchUsersStore.success() ?? '' | t }}
+      </div>
+    }
+
+    @if (branchUsersStore.error()) {
+      <div
+        class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+      >
+        {{ branchUsersStore.error() ?? '' | t }}
+      </div>
+    }
+
+    <app-card [title]="'branchUsers.title' | t" [subtitle]="'branchUsers.subtitle' | t">
+      <div card-actions>
+        <app-button
+          type="button"
+          size="sm"
+          [disabled]="branchUsersStore.roles().length === 0 || branchUsersStore.rolesLoading()"
+          (pressed)="openCreateBranchUser()"
+        >
+          <app-icon [icon]="userPlusIcon" [size]="15" />
+          {{ 'branchUsers.createUser' | t }}
+        </app-button>
+      </div>
+
+      <form
+        class="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_10rem_auto]"
+        [formGroup]="searchForm"
+        (ngSubmit)="searchBranchUsers()"
+      >
+        <app-input
+          [label]="'branchUsers.search' | t"
+          [placeholder]="'branchUsers.searchPlaceholder' | t"
+          formControlName="searchText"
+        />
+        <label class="block">
+          <span class="mb-1.5 block text-xs font-semibold text-slate-700">
+            {{ 'branchUsers.isActiveFilter' | t }}
+          </span>
+          <select
+            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            formControlName="isActive"
+          >
+            <option value="">{{ 'branchUsers.allUsers' | t }}</option>
+            <option value="true">{{ 'common.active' | t }}</option>
+            <option value="false">{{ 'branches.inactive' | t }}</option>
+          </select>
+        </label>
+        <div class="flex flex-wrap items-end gap-2 md:col-span-2 lg:col-span-1 lg:justify-end">
+          <app-button type="submit" [loading]="branchUsersStore.loading()">
+            <app-icon [icon]="searchIcon" [size]="17" />
+            {{ 'branches.searchAction' | t }}
+          </app-button>
+          <app-button type="button" variant="secondary" (pressed)="clearBranchUserSearch()">
+            {{ 'branches.clearSearch' | t }}
+          </app-button>
+        </div>
+      </form>
+
+      <div class="hidden overflow-hidden rounded-xl border border-slate-100 xl:block">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-100 text-sm table-fixed">
+            <thead
+              class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+            >
+              <tr>
+                <th class="w-[16%] px-4 py-3">{{ 'common.name' | t }}</th>
+                <th class="w-[14%] px-4 py-3">{{ 'branches.userName' | t }}</th>
+                <th class="w-[22%] px-4 py-3">{{ 'common.email' | t }}</th>
+                <th class="w-[24%] px-4 py-3">{{ 'common.role' | t }}</th>
+                <th class="w-[12%] px-4 py-3">{{ 'branches.createdOn' | t }}</th>
+                <th class="w-[12%] px-4 py-3 text-end">{{ 'branches.actions' | t }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              @if (branchUsersStore.loading()) {
+                <tr>
+                  <td class="px-4 py-8 text-center text-slate-500" colspan="6">
+                    <span
+                      class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                    ></span>
+                    {{ 'branchUsers.subtitle' | t }}
+                  </td>
+                </tr>
+              } @else {
+                @for (user of branchUsersStore.users(); track user.applicationUserId) {
+                  <tr>
+                    <td class="px-4 py-3">
+                      <p class="truncate font-semibold text-slate-800">{{ user.nameEn }}</p>
+                      @if (user.nameAr) {
+                        <p class="mt-1 truncate text-xs text-slate-500">{{ user.nameAr }}</p>
+                      }
+                      @if (!user.isActive) {
+                        <span
+                          class="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-500"
+                        >
+                          {{ 'branches.inactive' | t }}
+                        </span>
+                      }
+                    </td>
+                    <td class="px-4 py-3 text-slate-700">
+                      <p class="truncate">{{ user.userName }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-slate-700">
+                      <p class="truncate">{{ user.email }}</p>
+                      @if (user.phoneNumber) {
+                        <p class="mt-1 truncate text-xs text-slate-500">{{ user.phoneNumber }}</p>
+                      }
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex flex-wrap gap-1.5">
+                        @for (role of user.roles; track role.roleId) {
+                          <span
+                            class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
+                          >
+                            {{ role.name }}
+                          </span>
+                        } @empty {
+                          <span class="text-xs text-slate-500">{{ 'common.noRecords' | t }}</span>
+                        }
+                      </div>
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-3 text-slate-700">
+                      {{ user.createdOnUtc ? (user.createdOnUtc | date: 'mediumDate') : '-' }}
+                    </td>
+                    <td class="whitespace-nowrap px-4 py-3">
+                      <div class="flex justify-end gap-1.5">
+                        @if (user.isActive) {
+                          <button
+                            type="button"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3]"
+                            [title]="'branchUsers.assignRoles' | t"
+                            [attr.aria-label]="'branchUsers.assignRoles' | t"
+                            (click)="openAssignRoles(user)"
+                          >
+                            <app-icon [icon]="usersIcon" [size]="15" />
+                          </button>
+                          <button
+                            type="button"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3]"
+                            [title]="'common.edit' | t"
+                            [attr.aria-label]="'common.edit' | t"
+                            (click)="openEditBranchUser(user)"
+                          >
+                            <app-icon [icon]="editIcon" [size]="15" />
+                          </button>
+                          <button
+                            type="button"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3]"
+                            [title]="'branchUsers.resetPassword' | t"
+                            [attr.aria-label]="'branchUsers.resetPassword' | t"
+                            (click)="openResetPassword(user)"
+                          >
+                            <app-icon [icon]="resetPasswordIcon" [size]="15" />
+                          </button>
+                          <button
+                            type="button"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#D94B5A] text-white shadow-sm transition hover:bg-[#c43e4d] disabled:cursor-not-allowed disabled:opacity-60"
+                            [title]="'common.delete' | t"
+                            [attr.aria-label]="'common.delete' | t"
+                            [disabled]="branchUsersStore.deleting()"
+                            (click)="deleteBranchUser(user)"
+                          >
+                            <app-icon [icon]="deleteIcon" [size]="15" />
+                          </button>
+                        } @else {
+                          <button
+                            type="button"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3] disabled:cursor-not-allowed disabled:opacity-60"
+                            [title]="'common.restore' | t"
+                            [attr.aria-label]="'common.restore' | t"
+                            [disabled]="branchUsersStore.restoring()"
+                            (click)="restoreBranchUser(user)"
+                          >
+                            <app-icon [icon]="restoreIcon" [size]="15" />
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td class="px-4 py-8 text-center text-slate-500" colspan="6">
+                      <app-icon
+                        class="mx-auto mb-2 text-slate-300"
+                        [icon]="usersIcon"
+                        [size]="24"
+                      />
+                      {{ 'common.noRecords' | t }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="space-y-3 xl:hidden">
+        @if (branchUsersStore.loading()) {
+          <div class="rounded-xl border border-slate-100 bg-white p-5 text-center text-slate-500">
+            <span
+              class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+            ></span>
+            {{ 'branchUsers.subtitle' | t }}
+          </div>
+        } @else {
+          @for (user of branchUsersStore.users(); track user.applicationUserId) {
+            <article
+              class="rounded-xl border border-slate-100 bg-white p-4 shadow-sm shadow-slate-200/50"
+            >
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
+                    {{ user.nameEn }}
+                  </p>
+                  @if (user.nameAr) {
+                    <p
+                      class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                    >
+                      {{ user.nameAr }}
+                    </p>
+                  }
+                  @if (!user.isActive) {
+                    <span
+                      class="mt-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-500"
+                    >
+                      {{ 'branches.inactive' | t }}
+                    </span>
+                  }
+                </div>
+                <p class="shrink-0 text-xs font-semibold text-slate-500">
+                  {{ user.createdOnUtc ? (user.createdOnUtc | date: 'mediumDate') : '-' }}
+                </p>
+              </div>
+
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div class="rounded-lg bg-slate-50 p-3">
+                  <p class="text-[11px] font-bold uppercase text-slate-400">
+                    {{ 'branches.userName' | t }}
+                  </p>
+                  <p
+                    class="mt-1 break-words text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                  >
+                    {{ user.userName }}
+                  </p>
+                </div>
+                <div class="rounded-lg bg-slate-50 p-3">
+                  <p class="text-[11px] font-bold uppercase text-slate-400">
+                    {{ 'common.email' | t }}
+                  </p>
+                  <p
+                    class="mt-1 break-words text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                  >
+                    {{ user.email }}
+                  </p>
+                  @if (user.phoneNumber) {
+                    <p class="mt-1 text-xs text-slate-500">{{ user.phoneNumber }}</p>
+                  }
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <p class="text-[11px] font-bold uppercase text-slate-400">
+                  {{ 'common.role' | t }}
+                </p>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  @for (role of user.roles; track role.roleId) {
+                    <span
+                      class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
+                    >
+                      {{ role.name }}
+                    </span>
+                  } @empty {
+                    <span class="text-xs text-slate-500">{{ 'common.noRecords' | t }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                @if (user.isActive) {
+                  <app-button
+                    size="sm"
+                    variant="secondary"
+                    [fullWidth]="true"
+                    (pressed)="openAssignRoles(user)"
+                  >
+                    <app-icon [icon]="usersIcon" [size]="15" />
+                    {{ 'branchUsers.assignRoles' | t }}
+                  </app-button>
+                  <app-button
+                    size="sm"
+                    variant="secondary"
+                    [fullWidth]="true"
+                    (pressed)="openEditBranchUser(user)"
+                  >
+                    <app-icon [icon]="editIcon" [size]="15" />
+                    {{ 'common.edit' | t }}
+                  </app-button>
+                  <app-button
+                    size="sm"
+                    variant="secondary"
+                    [fullWidth]="true"
+                    (pressed)="openResetPassword(user)"
+                  >
+                    <app-icon [icon]="resetPasswordIcon" [size]="15" />
+                    {{ 'branchUsers.resetPassword' | t }}
+                  </app-button>
+                  <app-button
+                    size="sm"
+                    variant="danger"
+                    [fullWidth]="true"
+                    [loading]="branchUsersStore.deleting()"
+                    (pressed)="deleteBranchUser(user)"
+                  >
+                    <app-icon [icon]="deleteIcon" [size]="15" />
+                    {{ 'common.delete' | t }}
+                  </app-button>
+                } @else {
+                  <app-button
+                    size="sm"
+                    variant="secondary"
+                    [fullWidth]="true"
+                    [loading]="branchUsersStore.restoring()"
+                    (pressed)="restoreBranchUser(user)"
+                  >
+                    <app-icon [icon]="restoreIcon" [size]="15" />
+                    {{ 'common.restore' | t }}
+                  </app-button>
+                }
+              </div>
+            </article>
+          } @empty {
+            <div class="rounded-xl border border-slate-100 bg-white p-8 text-center text-slate-500">
+              <app-icon class="mx-auto mb-2 text-slate-300" [icon]="usersIcon" [size]="24" />
+              {{ 'common.noRecords' | t }}
+            </div>
+          }
+        }
+      </div>
+
+      <div
+        class="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
+      >
+        <p class="text-sm font-semibold text-slate-500">
+          {{ 'branches.paginationSummary' | t }}
+          {{ branchUsersStore.currentPage() }} / {{ branchUsersStore.totalPages() }}
+          -
+          {{ branchUsersStore.totalItems() }} {{ 'branchUsers.totalItems' | t }}
+        </p>
+        <div class="flex gap-2">
+          <app-button
+            size="sm"
+            type="button"
+            variant="secondary"
+            [disabled]="!branchUsersStore.hasPreviousPage() || branchUsersStore.loading()"
+            (pressed)="goToPreviousBranchUsersPage()"
+          >
+            <app-icon [icon]="chevronLeftIcon" [size]="15" />
+            {{ 'branches.previousPage' | t }}
+          </app-button>
+          <app-button
+            size="sm"
+            type="button"
+            variant="secondary"
+            [disabled]="!branchUsersStore.hasNextPage() || branchUsersStore.loading()"
+            (pressed)="goToNextBranchUsersPage()"
+          >
+            {{ 'branches.nextPage' | t }}
+            <app-icon [icon]="chevronRightIcon" [size]="15" />
+          </app-button>
+        </div>
+      </div>
+    </app-card>
+  </div>
+
+  <app-modal
+    [title]="'branchUsers.createUser' | t"
+    [open]="createUserModalOpen()"
+    (closed)="closeCreateBranchUser()"
+  >
+    <form class="space-y-3" [formGroup]="branchUserForm" (ngSubmit)="createBranchUser()">
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'branches.adminNameEn' | t"
+          [placeholder]="'branches.adminNameEnPlaceholder' | t"
+          formControlName="nameEn"
+          [error]="branchUserFieldError('nameEn') | t"
+        />
+        <app-input
+          [label]="'branches.adminNameAr' | t"
+          [placeholder]="'branches.adminNameArPlaceholder' | t"
+          formControlName="nameAr"
+          [error]="branchUserFieldError('nameAr') | t"
+        />
+      </div>
+
+      <app-input
+        [label]="'branches.userName' | t"
+        [placeholder]="'branches.userNamePlaceholder' | t"
+        formControlName="userName"
+        [error]="branchUserFieldError('userName') | t"
+      />
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'common.email' | t"
+          type="email"
+          [placeholder]="'branches.emailPlaceholder' | t"
+          formControlName="email"
+          [error]="branchUserFieldError('email') | t"
+        />
+        <app-input
+          [label]="'branches.phoneNumber' | t"
+          [placeholder]="'branches.phoneNumberPlaceholder' | t"
+          formControlName="phoneNumber"
+          [error]="branchUserFieldError('phoneNumber') | t"
+        />
+      </div>
+
+      <app-input
+        [label]="'common.password' | t"
+        type="password"
+        [placeholder]="'departmentAdmins.passwordPlaceholder' | t"
+        formControlName="password"
+        [error]="branchUserFieldError('password') | t"
+      />
+
+      <div class="space-y-2">
+        <p class="text-xs font-bold text-slate-600">{{ 'branchUsers.assignableRoles' | t }}</p>
+        <div class="grid gap-2 sm:grid-cols-2">
+          @for (role of branchUsersStore.roles(); track role.id) {
+            <label
+              class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-100 p-3 text-xs font-semibold text-slate-700"
+            >
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-slate-300 text-[#11A7C9]"
+                [checked]="isCreateRoleSelected(role.id)"
+                (change)="toggleCreateRole(role.id)"
+              />
+              {{ role.name }}
+            </label>
+          } @empty {
+            <p class="text-xs text-slate-500">{{ 'branchUsers.noAssignableRoles' | t }}</p>
+          }
+        </div>
+        @if (createRolesError()) {
+          <p class="text-xs font-semibold text-[#D94B5A]">{{ createRolesError() | t }}</p>
+        }
+      </div>
+
+      <app-button type="submit" [fullWidth]="true" [loading]="branchUsersStore.creating()">
+        <app-icon [icon]="userPlusIcon" [size]="17" />
+        {{ 'branchUsers.createUser' | t }}
+      </app-button>
+    </form>
+  </app-modal>
+
+  <app-modal
+    [title]="'branchUsers.updateUser' | t"
+    [open]="editUserModalOpen()"
+    (closed)="closeEditBranchUser()"
+  >
+    <form class="space-y-3" [formGroup]="editBranchUserForm" (ngSubmit)="updateBranchUser()">
+      @if (selectedBranchUser(); as user) {
+        <div
+          class="rounded-xl border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700"
+        >
+          {{ 'branchUsers.selectedUser' | t }}:
+          <span class="text-[#0d94b3]">{{ user.nameEn }} - {{ user.userName }}</span>
+        </div>
+      }
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'branches.adminNameEn' | t"
+          formControlName="nameEn"
+          [error]="editBranchUserFieldError('nameEn') | t"
+        />
+        <app-input
+          [label]="'branches.adminNameAr' | t"
+          formControlName="nameAr"
+          [error]="editBranchUserFieldError('nameAr') | t"
+        />
+      </div>
+
+      @if (selectedBranchUser(); as user) {
+        <div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
+          <p class="text-xs font-bold text-slate-500">{{ 'branches.userName' | t }}</p>
+          <p class="mt-1 break-words text-sm font-semibold text-slate-800 [overflow-wrap:anywhere]">
+            {{ user.userName }}
+          </p>
+        </div>
+      }
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <app-input
+          [label]="'common.email' | t"
+          type="email"
+          formControlName="email"
+          [error]="editBranchUserFieldError('email') | t"
+        />
+        <app-input
+          [label]="'branches.phoneNumber' | t"
+          formControlName="phoneNumber"
+          [error]="editBranchUserFieldError('phoneNumber') | t"
+        />
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <app-button type="button" variant="secondary" (pressed)="closeEditBranchUser()">
+          {{ 'common.cancel' | t }}
+        </app-button>
+        <app-button type="submit" [loading]="branchUsersStore.updating()">
+          <app-icon [icon]="editIcon" [size]="17" />
+          {{ 'common.save' | t }}
+        </app-button>
+      </div>
+    </form>
+  </app-modal>
+
+  <app-modal
+    [title]="'branchUsers.resetPassword' | t"
+    [open]="resetPasswordModalOpen()"
+    (closed)="closeResetPassword()"
+  >
+    <form class="space-y-3" [formGroup]="resetPasswordForm" (ngSubmit)="resetPassword()">
+      @if (selectedBranchUser(); as user) {
+        <div
+          class="rounded-xl border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700"
+        >
+          {{ 'branchUsers.selectedUser' | t }}:
+          <span class="text-[#0d94b3]">{{ user.nameEn }} - {{ user.userName }}</span>
+        </div>
+      }
+
+      <app-input
+        [label]="'branchUsers.newPassword' | t"
+        type="password"
+        [placeholder]="'departmentAdmins.passwordPlaceholder' | t"
+        formControlName="newPassword"
+        [error]="resetPasswordFieldError() | t"
+      />
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <app-button type="button" variant="secondary" (pressed)="closeResetPassword()">
+          {{ 'common.cancel' | t }}
+        </app-button>
+        <app-button type="submit" [loading]="branchUsersStore.resettingPassword()">
+          <app-icon [icon]="resetPasswordIcon" [size]="17" />
+          {{ 'common.save' | t }}
+        </app-button>
+      </div>
+    </form>
+  </app-modal>
+
+  <app-modal
+    [title]="'branchUsers.assignRoles' | t"
+    [open]="assignRolesModalOpen()"
+    (closed)="closeAssignRoles()"
+  >
+    <div class="space-y-3">
+      @if (selectedBranchUser(); as user) {
+        <div
+          class="rounded-xl border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700"
+        >
+          {{ 'branchUsers.selectedUser' | t }}:
+          <span class="text-[#0d94b3]">{{ user.nameEn }} - {{ user.userName }}</span>
+        </div>
+      }
+
+      <div class="space-y-2">
+        <p class="text-xs font-bold text-slate-600">{{ 'branchUsers.assignableRoles' | t }}</p>
+        <div class="grid gap-2 sm:grid-cols-2">
+          @for (role of branchUsersStore.roles(); track role.id) {
+            <label
+              class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-100 p-3 text-xs font-semibold text-slate-700"
+            >
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-slate-300 text-[#11A7C9]"
+                [checked]="isAssignRoleSelected(role.id)"
+                (change)="toggleAssignRole(role.id)"
+              />
+              {{ role.name }}
+            </label>
+          } @empty {
+            <p class="text-xs text-slate-500">{{ 'branchUsers.noAssignableRoles' | t }}</p>
+          }
+        </div>
+        @if (assignRolesError()) {
+          <p class="text-xs font-semibold text-[#D94B5A]">{{ assignRolesError() | t }}</p>
+        }
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <app-button type="button" variant="secondary" (pressed)="closeAssignRoles()">
+          {{ 'common.cancel' | t }}
+        </app-button>
+        <app-button
+          type="button"
+          [loading]="branchUsersStore.assigningRoles()"
+          (pressed)="assignRoles()"
+        >
+          <app-icon [icon]="usersIcon" [size]="17" />
+          {{ 'common.save' | t }}
+        </app-button>
+      </div>
+    </div>
+  </app-modal>
+</div>

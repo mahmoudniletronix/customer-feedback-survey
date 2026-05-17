@@ -6,7 +6,7 @@
           class="flex min-w-0 items-start gap-2 rounded-lg bg-slate-50 px-2 py-1.5 text-slate-700"
         >
           <input type="radio" class="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[#11A7C9]" disabled />
-          <span class="min-w-0">
+          <span class="min-w-0 flex-1">
             <span class="block break-words font-semibold [overflow-wrap:anywhere]">{{
               option.label
             }}</span>
@@ -16,6 +16,11 @@
               </span>
             }
           </span>
+          @if (option.value !== null) {
+            <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+              {{ 'questions.optionValue' | t }} {{ option.value }}
+            </span>
+          }
         </label>
       }
     </div>

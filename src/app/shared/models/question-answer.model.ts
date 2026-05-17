@@ -20,6 +20,7 @@ export interface QuestionAnswerOptionPayload {
   textEn: string;
   textAr?: string | null;
   order: number;
+  value: AnswerScaleValue;
 }
 
 export interface UpdateQuestionAnswerOptionPayload extends QuestionAnswerOptionPayload {
@@ -32,6 +33,7 @@ export interface QuestionAnswerOption {
   textEn: string;
   textAr: string | null;
   order: number;
+  value: AnswerScaleValue | null;
   isActive: boolean;
 }
 
@@ -41,6 +43,7 @@ export interface QuestionAnswerOptionApiResponse {
   textEn?: string;
   textAr?: string | null;
   order?: number | null;
+  value?: number | null;
   isActive?: boolean;
 }
 
@@ -81,7 +84,12 @@ export function toQuestionAnswerType(value: QuestionAnswerTypeInput): QuestionAn
     if (normalized === 'starrating' || normalized === 'rating') {
       return QUESTION_ANSWER_TYPE.StarRating;
     }
-    if (normalized === 'complain' || normalized === 'complaint') {
+    if (
+      normalized === 'complain' ||
+      normalized === 'complaint' ||
+      normalized === 'freetext' ||
+      normalized === 'textarea'
+    ) {
       return QUESTION_ANSWER_TYPE.Complain;
     }
     if (normalized === 'smiles' || normalized === 'smile') {
@@ -111,8 +119,24 @@ export function toQuestionAnswerOption(
     textEn: response.textEn ?? '',
     textAr: response.textAr ?? null,
     order: response.order ?? 0,
+    value: toAnswerScaleValue(response.value),
     isActive: response.isActive ?? true,
   };
+}
+
+export function toAnswerScaleValue(value: number | string | null | undefined): AnswerScaleValue | null {
+  const numericValue = typeof value === 'string' ? Number(value) : value;
+  if (
+    numericValue === 1 ||
+    numericValue === 2 ||
+    numericValue === 3 ||
+    numericValue === 4 ||
+    numericValue === 5
+  ) {
+    return numericValue;
+  }
+
+  return null;
 }
 
 function isQuestionAnswerType(value: number): value is QuestionAnswerType {

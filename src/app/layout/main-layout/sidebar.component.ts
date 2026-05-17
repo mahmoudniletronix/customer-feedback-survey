@@ -16,7 +16,7 @@ import {
   UsersRound
 } from 'lucide-angular';
 import { Role } from '../../shared/models/role.model';
-import { AuthStore } from '../../features/auth/state/auth.store';
+import { AuthStore } from '../../features/auth/presentation/state/auth.store';
 import { I18nService } from '../../core/services/i18n.service';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';

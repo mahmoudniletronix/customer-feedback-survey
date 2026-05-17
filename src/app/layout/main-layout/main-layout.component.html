@@ -34,9 +34,20 @@
             <app-icon [icon]="roleIcon()" [size]="20" />
           </div>
           <div class="page-meta min-w-0">
-            <div class="role-badge flex items-center gap-1.5">
-              <app-icon [icon]="roleIcon()" [size]="10" />
-              <span>{{ roleBadgeLabel() }}</span>
+            <div class="header-badges flex min-w-0 flex-wrap items-center gap-1.5">
+              <div class="role-badge flex items-center gap-1.5">
+                <app-icon [icon]="roleIcon()" [size]="10" />
+                <span>{{ roleBadgeLabel() }}</span>
+              </div>
+              @if (branchDisplayName(); as branchName) {
+                <div
+                  class="flex min-w-0 max-w-[12rem] items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2 py-0.5 text-[0.7rem] font-extrabold text-slate-600 shadow-sm sm:max-w-[16rem]"
+                  [title]="branchName"
+                >
+                  <app-icon [icon]="branchIcon" [size]="10" />
+                  <span class="truncate">{{ branchName }}</span>
+                </div>
+              }
             </div>
             <h1 class="page-title truncate">{{ pageTitle() }}</h1>
           </div>

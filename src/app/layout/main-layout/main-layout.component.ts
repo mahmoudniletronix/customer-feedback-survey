@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {
   Bell,
@@ -11,7 +11,8 @@ import {
   Store,
   UserRound,
 } from 'lucide-angular';
-import { AuthStore } from '../../features/auth/state/auth.store';
+import { AuthStore } from '../../features/auth/presentation/state/auth.store';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { SidebarComponent } from './sidebar.component';
@@ -27,6 +28,7 @@ import { IconComponent } from '../../shared/ui/icon/icon.component';
 })
 export class MainLayoutComponent {
   readonly authStore = inject(AuthStore);
+  readonly branchContext = inject(BranchContextService);
   readonly i18n = inject(I18nService);
   readonly sidebarCollapsed = signal(false);
   readonly mobileSidebarOpen = signal(false);
@@ -36,12 +38,51 @@ export class MainLayoutComponent {
   readonly userIcon = UserRound;
   readonly notificationIcon = Bell;
   readonly chevronDownIcon = ChevronDown;
+  readonly branchIcon = Store;
 
   readonly userInitial = computed(
     () => this.authStore.user()?.name?.charAt(0).toUpperCase() ?? 'U',
   );
   readonly userDisplayName = computed(() => this.authStore.user()?.name ?? 'User');
   readonly userEmail = computed(() => this.authStore.user()?.email ?? '');
+  readonly branchDisplayName = computed(() => {
+    const branch = this.branchContext.branch();
+    if (branch) {
+      const branchName = this.localizedText(branch.nameEn, branch.nameAr);
+      if (branchName.length > 0) {
+        return branchName;
+      }
+    }
+
+    const user = this.authStore.user();
+    if (!user) {
+      return '';
+    }
+
+    return this.localizedText(user.branchNameEn ?? '', user.branchNameAr ?? '');
+  });
+
+  constructor() {
+    effect(() => {
+      const user = this.authStore.user();
+      const role = this.authStore.role();
+
+      if (!user || role === 'SUPER_ADMIN') {
+        this.branchContext.clear();
+        return;
+      }
+
+      this.branchContext.loadCurrentBranch(user.branchId, role);
+    });
+  }
+
+  private localizedText(englishText: string, arabicText: string): string {
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || '';
+    }
+
+    return englishText || arabicText || '';
+  }
 
   readonly roleIcon = computed(() => {
     const role = this.authStore.role();

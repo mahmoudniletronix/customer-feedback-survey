@@ -7,6 +7,8 @@ export interface User {
   email: string;
   role: Role;
   branchId?: string;
+  branchNameEn?: string;
+  branchNameAr?: string;
   departmentId?: string;
 }
 

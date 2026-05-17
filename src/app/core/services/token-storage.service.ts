@@ -35,7 +35,7 @@ export class TokenStorageService {
       try {
         const parsed = JSON.parse(rawSession) as unknown;
         if (this.isAuthSession(parsed)) {
-          return parsed;
+          return this.enrichSession(parsed);
         }
       } catch {
         return this.getSessionFromToken();
@@ -85,12 +85,18 @@ export class TokenStorageService {
       typeof user['id'] === 'string' &&
       typeof user['name'] === 'string' &&
       typeof user['email'] === 'string' &&
-      this.isRole(user['role'])
+      this.isRole(user['role']) &&
+      this.isOptionalString(user['branchNameEn']) &&
+      this.isOptionalString(user['branchNameAr'])
     );
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
+  }
+
+  private isOptionalString(value: unknown): boolean {
+    return value === undefined || typeof value === 'string';
   }
 
   private isRole(value: unknown): value is Role {
@@ -251,6 +257,8 @@ export class TokenStorageService {
         this.readString(payload, 'BranchId') ??
         this.readString(payload, 'branch_id') ??
         undefined,
+      branchNameEn: this.readBranchNameEn(payload) ?? undefined,
+      branchNameAr: this.readBranchNameAr(payload) ?? undefined,
       departmentId:
         this.readString(payload, 'departmentId') ??
         this.readString(payload, 'DepartmentId') ??
@@ -262,6 +270,51 @@ export class TokenStorageService {
   private readString(payload: Record<string, unknown>, key: string): string | null {
     const value = payload[key];
     return typeof value === 'string' && value.length > 0 ? value : null;
+  }
+
+  private enrichSession(session: AuthSession): AuthSession {
+    const payload = this.decodeJwtPayload(session.token);
+    if (!payload) {
+      return session;
+    }
+
+    const branchNameEn = session.user.branchNameEn ?? this.readBranchNameEn(payload) ?? undefined;
+    const branchNameAr = session.user.branchNameAr ?? this.readBranchNameAr(payload) ?? undefined;
+
+    if (
+      branchNameEn === session.user.branchNameEn &&
+      branchNameAr === session.user.branchNameAr
+    ) {
+      return session;
+    }
+
+    return {
+      ...session,
+      user: {
+        ...session.user,
+        branchNameEn,
+        branchNameAr,
+      },
+    };
+  }
+
+  private readBranchNameEn(payload: Record<string, unknown>): string | null {
+    return (
+      this.readString(payload, 'branchNameEn') ??
+      this.readString(payload, 'BranchNameEn') ??
+      this.readString(payload, 'branch_name_en') ??
+      this.readString(payload, 'branchName') ??
+      this.readString(payload, 'BranchName') ??
+      this.readString(payload, 'branch_name')
+    );
+  }
+
+  private readBranchNameAr(payload: Record<string, unknown>): string | null {
+    return (
+      this.readString(payload, 'branchNameAr') ??
+      this.readString(payload, 'BranchNameAr') ??
+      this.readString(payload, 'branch_name_ar')
+    );
   }
 
   private readStringArray(

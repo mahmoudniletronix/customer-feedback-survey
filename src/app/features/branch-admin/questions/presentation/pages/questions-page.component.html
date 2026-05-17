@@ -1,0 +1,708 @@
+<div class="w-full space-y-4 text-sm">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'questions.title' | t }}</h2>
+      <p class="mt-1 text-xs text-slate-500">{{ 'questions.description' | t }}</p>
+    </div>
+    @if (canCreate()) {
+      <app-button type="button" (pressed)="openCreateQuestion()">
+        <app-icon [icon]="plusIcon" [size]="17" />
+        {{ 'questions.createAction' | t }}
+      </app-button>
+    }
+  </div>
+
+  @if (questionsStore.success()) {
+    <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+      {{ questionsStore.success() ?? '' | t }}
+    </div>
+  }
+
+  @if (questionsStore.error()) {
+    <div class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      {{ questionsStore.error() ?? '' | t }}
+    </div>
+  }
+
+  <app-card [title]="'questions.listTitle' | t" [subtitle]="'questions.listSubtitle' | t">
+    <form
+      class="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_8rem_10rem_auto]"
+      [formGroup]="searchForm"
+      (ngSubmit)="searchQuestions()"
+    >
+      <app-input
+        [label]="'questions.search' | t"
+        [placeholder]="'questions.searchPlaceholder' | t"
+        formControlName="searchText"
+      />
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
+          {{ 'questions.isActiveFilter' | t }}
+        </span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="isActive"
+        >
+          <option value="">{{ 'questions.allQuestions' | t }}</option>
+          <option value="true">{{ 'common.active' | t }}</option>
+          <option value="false">{{ 'branches.inactive' | t }}</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
+          {{ 'questions.pageSize' | t }}
+        </span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="pageSize"
+        >
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
+          {{ 'questions.orderSort' | t }}
+        </span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="orderSort"
+        >
+          <option value="">{{ 'questions.defaultSort' | t }}</option>
+          <option value="Newest">{{ 'questions.newest' | t }}</option>
+          <option value="Oldest">{{ 'questions.oldest' | t }}</option>
+        </select>
+      </label>
+      <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
+        <app-button type="submit" [loading]="questionsStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="17" />
+          {{ 'branches.searchAction' | t }}
+        </app-button>
+        <app-button type="button" variant="secondary" (pressed)="clearQuestionSearch()">
+          {{ 'branches.clearSearch' | t }}
+        </app-button>
+      </div>
+    </form>
+
+    <div class="hidden overflow-hidden rounded-xl border border-slate-100 lg:block">
+      <div class="overflow-x-auto">
+        <table class="w-full table-fixed divide-y divide-slate-100 text-sm">
+          <colgroup>
+            <col class="w-[22%]" />
+            <col class="w-[17%]" />
+            <col class="w-[18%]" />
+            <col class="w-[10%]" />
+            <col class="w-[11%]" />
+            <col class="w-[11%]" />
+            <col class="w-[11%]" />
+          </colgroup>
+          <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-4 py-3">{{ 'questions.textEn' | t }}</th>
+              <th class="px-4 py-3">{{ 'questions.textAr' | t }}</th>
+              <th class="px-4 py-3">{{ 'questions.group' | t }}</th>
+              <th class="px-4 py-3">{{ 'questions.type' | t }}</th>
+              <th class="px-4 py-3">{{ 'common.status' | t }}</th>
+              <th class="px-4 py-3">{{ 'branches.createdOn' | t }}</th>
+              <th class="px-4 py-3 text-end">{{ 'branches.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
+            @if (questionsStore.loading()) {
+              <tr>
+                <td class="px-4 py-8 text-center text-slate-500" colspan="7">
+                  <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                  {{ 'questions.loading' | t }}
+                </td>
+              </tr>
+            } @else {
+              @for (question of questionsStore.questions(); track question.questionId) {
+                <tr class="align-top transition hover:bg-slate-50">
+                  <td class="px-4 py-3">
+                    <p class="break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
+                      {{ question.textEn }}
+                    </p>
+                    <div class="mt-2">
+                      <app-question-answer-preview [type]="question.type" [options]="question.options" [compact]="true" />
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    <p class="break-words [overflow-wrap:anywhere]">{{ question.textAr || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    <p class="break-words font-semibold [overflow-wrap:anywhere]">{{ question.groupNameEn || '-' }}</p>
+                    <p class="mt-1 break-words text-xs text-slate-500 [overflow-wrap:anywhere]">
+                      {{ question.groupNameAr || '-' }}
+                    </p>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">{{ answerTypeLabel(question.type, question.typeName) }}</td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="rounded-full px-2.5 py-1 text-xs font-bold"
+                      [class.bg-emerald-50]="question.isActive"
+                      [class.text-emerald-700]="question.isActive"
+                      [class.bg-slate-100]="!question.isActive"
+                      [class.text-slate-500]="!question.isActive"
+                    >
+                      {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">
+                    {{ question.createdOnUtc ? (question.createdOnUtc | date: 'mediumDate') : '-' }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex justify-end gap-2">
+                      @if (canUpdate()) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          (pressed)="openEditQuestion($event, question)"
+                        >
+                          <app-icon [icon]="editIcon" [size]="15" />
+                        </app-button>
+                      }
+                      @if (canDelete() && question.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="danger"
+                          [disabled]="questionsStore.deleting()"
+                          [loading]="questionsStore.deleting()"
+                          (pressed)="openDeleteQuestion($event, question)"
+                        >
+                          <app-icon [icon]="deleteIcon" [size]="15" />
+                        </app-button>
+                      }
+                      @if (canRestore() && !question.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          [disabled]="questionsStore.restoring()"
+                          [loading]="questionsStore.restoring()"
+                          (pressed)="restoreQuestion($event, question)"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="15" />
+                        </app-button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td class="px-4 py-8 text-center text-slate-500" colspan="7">
+                    <app-icon class="mx-auto mb-2 text-slate-300" [icon]="questionIcon" [size]="24" />
+                    {{ 'common.noRecords' | t }}
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="space-y-3 lg:hidden">
+      @if (questionsStore.loading()) {
+        <div class="rounded-xl border border-slate-100 bg-white p-4 text-center text-slate-500">
+          <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+          {{ 'questions.loading' | t }}
+        </div>
+      } @else {
+        @for (question of questionsStore.questions(); track question.questionId) {
+          <article class="rounded-xl border border-slate-100 bg-white p-4 transition hover:border-cyan-100 hover:bg-slate-50">
+            <div class="flex items-start gap-3">
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]">
+                <app-icon [icon]="questionIcon" [size]="18" />
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
+                  {{ question.textEn }}
+                </p>
+                <p class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]">
+                  {{ question.textAr || '-' }}
+                </p>
+                <div class="mt-2">
+                  <app-question-answer-preview [type]="question.type" [options]="question.options" [compact]="true" />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'questions.group' | t }}</p>
+                <p class="mt-1 font-semibold text-slate-800">{{ question.groupNameEn || '-' }}</p>
+                <p class="mt-1 text-slate-500">{{ question.groupNameAr || '-' }}</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'questions.type' | t }}</p>
+                <p class="mt-1 font-semibold text-slate-800">{{ answerTypeLabel(question.type, question.typeName) }}</p>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'common.status' | t }}</p>
+                <span
+                  class="mt-1 inline-flex rounded-full px-2 py-1 font-bold"
+                  [class.bg-emerald-50]="question.isActive"
+                  [class.text-emerald-700]="question.isActive"
+                  [class.bg-slate-100]="!question.isActive"
+                  [class.text-slate-500]="!question.isActive"
+                >
+                  {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
+                </span>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-2">
+                <p class="font-bold text-slate-400">{{ 'branches.createdOn' | t }}</p>
+                <p class="mt-1 font-semibold text-slate-800">
+                  {{ question.createdOnUtc ? (question.createdOnUtc | date: 'mediumDate') : '-' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
+              @if (canUpdate()) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  (pressed)="openEditQuestion($event, question)"
+                >
+                  <app-icon [icon]="editIcon" [size]="15" />
+                  {{ 'common.edit' | t }}
+                </app-button>
+              }
+              @if (canDelete() && question.isActive) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="danger"
+                  [disabled]="questionsStore.deleting()"
+                  [loading]="questionsStore.deleting()"
+                  (pressed)="openDeleteQuestion($event, question)"
+                >
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                  {{ 'common.delete' | t }}
+                </app-button>
+              }
+              @if (canRestore() && !question.isActive) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  [disabled]="questionsStore.restoring()"
+                  [loading]="questionsStore.restoring()"
+                  (pressed)="restoreQuestion($event, question)"
+                >
+                  <app-icon [icon]="restoreIcon" [size]="15" />
+                  {{ 'common.restore' | t }}
+                </app-button>
+              }
+            </div>
+          </article>
+        } @empty {
+          <div class="rounded-xl border border-slate-100 bg-white p-6 text-center text-slate-500">
+            <app-icon class="mx-auto mb-2 text-slate-300" [icon]="questionIcon" [size]="24" />
+            {{ 'common.noRecords' | t }}
+          </div>
+        }
+      }
+    </div>
+
+    <div class="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between">
+      <p class="text-sm font-semibold text-slate-500">
+        {{ 'branches.paginationSummary' | t }}
+        {{ questionsStore.currentPage() }} / {{ questionsStore.totalPages() }}
+        -
+        {{ questionsStore.totalItems() }} {{ 'questions.totalItems' | t }}
+      </p>
+      <div class="flex gap-2">
+        <app-button
+          size="sm"
+          type="button"
+          variant="secondary"
+          [disabled]="!questionsStore.hasPreviousPage() || questionsStore.loading()"
+          (pressed)="goToPreviousQuestionsPage()"
+        >
+          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          {{ 'branches.previousPage' | t }}
+        </app-button>
+        <app-button
+          size="sm"
+          type="button"
+          variant="secondary"
+          [disabled]="!questionsStore.hasNextPage() || questionsStore.loading()"
+          (pressed)="goToNextQuestionsPage()"
+        >
+          {{ 'branches.nextPage' | t }}
+          <app-icon [icon]="chevronRightIcon" [size]="15" />
+        </app-button>
+      </div>
+    </div>
+  </app-card>
+</div>
+
+<app-modal [title]="'questions.createTitle' | t" [open]="createModalOpen()" (closed)="closeCreateQuestion()" size="lg">
+  <form class="space-y-4" [formGroup]="questionForm" (ngSubmit)="createQuestion()">
+    @if (!questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
+      <div class="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700">
+        {{ 'questions.noActiveGroupsHelp' | t }}
+      </div>
+    }
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.group' | t }}</span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100"
+          formControlName="groupId"
+          [disabled]="questionsStore.groupsLoading()"
+        >
+          @if (!questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
+            <option value="">{{ 'questions.noGroupsSelection' | t }}</option>
+          } @else {
+            <option value="">{{ 'questions.selectGroup' | t }}</option>
+          }
+          @for (group of questionsStore.groupsSelection(); track group.id) {
+            <option [value]="group.id">{{ group.nameEn }}{{ group.nameAr ? ' - ' + group.nameAr : '' }}</option>
+          }
+        </select>
+        @if (questionFieldError('groupId')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionFieldError('groupId') | t }}</span>
+        }
+        @if (!questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
+          <span class="mt-2 block text-xs font-medium text-amber-700">{{ 'questions.noGroupsSelection' | t }}</span>
+        }
+      </label>
+
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.answerType' | t }}</span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="type"
+          (change)="onCreateQuestionTypeChanged($event)"
+        >
+          @for (type of questionTypeOptions; track type.value) {
+            <option [value]="type.value">{{ type.labelKey | t }}</option>
+          }
+        </select>
+        @if (questionFieldError('type')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionFieldError('type') | t }}</span>
+        }
+      </label>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.textEn' | t }}</span>
+        <textarea
+          class="min-h-32 w-full resize-y rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+          [placeholder]="'questions.textEnPlaceholder' | t"
+          formControlName="textEn"
+        ></textarea>
+        @if (questionFieldError('textEn')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionFieldError('textEn') | t }}</span>
+        }
+      </label>
+
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.textAr' | t }}</span>
+        <textarea
+          class="min-h-32 w-full resize-y rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+          [placeholder]="'questions.textArPlaceholder' | t"
+          formControlName="textAr"
+        ></textarea>
+        @if (questionFieldError('textAr')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionFieldError('textAr') | t }}</span>
+        }
+      </label>
+    </div>
+
+    @if (createIsSingleChoice()) {
+      <section class="rounded-xl border border-slate-100 bg-slate-50 p-3" formArrayName="options">
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">{{ 'questions.options' | t }}</h3>
+            <p class="mt-1 text-xs font-semibold text-slate-500">{{ 'questions.singleChoiceOptionsHelp' | t }}</p>
+          </div>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="addCreateOption()">
+            <app-icon [icon]="plusIcon" [size]="15" />
+            {{ 'questions.addOption' | t }}
+          </app-button>
+        </div>
+
+        <div class="space-y-3">
+          @for (option of createOptions.controls; track option; let index = $index) {
+            <div class="grid gap-3 rounded-lg border border-slate-100 bg-white p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem_7rem_auto]" [formGroupName]="index">
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextEn' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textEn"
+                />
+                @if (questionOptionFieldError(index, 'textEn')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionOptionFieldError(index, 'textEn') | t }}</span>
+                }
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextAr' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textAr"
+                />
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionOrder' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="number"
+                  min="1"
+                  formControlName="order"
+                />
+                @if (questionOptionFieldError(index, 'order')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionOptionFieldError(index, 'order') | t }}</span>
+                }
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionValue' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="number"
+                  min="1"
+                  max="5"
+                  formControlName="value"
+                />
+                @if (questionOptionFieldError(index, 'value')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ questionOptionFieldError(index, 'value') | t }}</span>
+                }
+              </label>
+
+              <div class="flex items-end justify-end">
+                <app-button type="button" size="sm" variant="danger" [disabled]="!canRemoveCreateOption()" (pressed)="removeCreateOption(index)">
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (createOptionsError()) {
+          <p class="mt-3 text-xs font-semibold text-[#D94B5A]">{{ createOptionsError() | t }}</p>
+        }
+      </section>
+    }
+
+    <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+      <app-button type="button" variant="secondary" (pressed)="closeCreateQuestion()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button
+        type="submit"
+        [loading]="questionsStore.creating()"
+        [disabled]="questionsStore.groupsSelection().length === 0"
+      >
+        <app-icon [icon]="plusIcon" [size]="17" />
+        {{ 'questions.createAction' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
+<app-modal [title]="'questions.updateTitle' | t" [open]="editModalOpen()" (closed)="closeEditQuestion()" size="lg">
+  <form class="space-y-4" [formGroup]="editQuestionForm" (ngSubmit)="updateSelectedQuestion()">
+    @if (!questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
+      <div class="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700">
+        {{ 'questions.noActiveGroupsHelp' | t }}
+      </div>
+    }
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.group' | t }}</span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100"
+          formControlName="groupId"
+          [disabled]="questionsStore.groupsLoading()"
+        >
+          @if (!questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
+            <option value="">{{ 'questions.noGroupsSelection' | t }}</option>
+          } @else {
+            <option value="">{{ 'questions.selectGroup' | t }}</option>
+          }
+          @for (group of questionsStore.groupsSelection(); track group.id) {
+            <option [value]="group.id">{{ group.nameEn }}{{ group.nameAr ? ' - ' + group.nameAr : '' }}</option>
+          }
+        </select>
+        @if (editQuestionFieldError('groupId')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionFieldError('groupId') | t }}</span>
+        }
+        @if (!questionsStore.groupsLoading() && questionsStore.groupsSelection().length === 0) {
+          <span class="mt-2 block text-xs font-medium text-amber-700">{{ 'questions.noGroupsSelection' | t }}</span>
+        }
+      </label>
+
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.answerType' | t }}</span>
+        <select
+          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="type"
+          (change)="onEditQuestionTypeChanged($event)"
+        >
+          @for (type of questionTypeOptions; track type.value) {
+            <option [value]="type.value">{{ type.labelKey | t }}</option>
+          }
+        </select>
+        @if (editQuestionFieldError('type')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionFieldError('type') | t }}</span>
+        }
+      </label>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.textEn' | t }}</span>
+        <textarea
+          class="min-h-32 w-full resize-y rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+          [placeholder]="'questions.textEnPlaceholder' | t"
+          formControlName="textEn"
+        ></textarea>
+        @if (editQuestionFieldError('textEn')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionFieldError('textEn') | t }}</span>
+        }
+      </label>
+
+      <label class="block">
+        <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.textAr' | t }}</span>
+        <textarea
+          class="min-h-32 w-full resize-y rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+          [placeholder]="'questions.textArPlaceholder' | t"
+          formControlName="textAr"
+        ></textarea>
+        @if (editQuestionFieldError('textAr')) {
+          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionFieldError('textAr') | t }}</span>
+        }
+      </label>
+    </div>
+
+    @if (editIsSingleChoice()) {
+      <section class="rounded-xl border border-slate-100 bg-slate-50 p-3" formArrayName="options">
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">{{ 'questions.options' | t }}</h3>
+            <p class="mt-1 text-xs font-semibold text-slate-500">{{ 'questions.singleChoiceOptionsHelp' | t }}</p>
+          </div>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="addEditOption()">
+            <app-icon [icon]="plusIcon" [size]="15" />
+            {{ 'questions.addOption' | t }}
+          </app-button>
+        </div>
+
+        <div class="space-y-3">
+          @for (option of editOptions.controls; track option; let index = $index) {
+            <div class="grid gap-3 rounded-lg border border-slate-100 bg-white p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem_7rem_auto]" [formGroupName]="index">
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextEn' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textEn"
+                />
+                @if (editQuestionOptionFieldError(index, 'textEn')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionOptionFieldError(index, 'textEn') | t }}</span>
+                }
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionTextAr' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="text"
+                  formControlName="textAr"
+                />
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionOrder' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="number"
+                  min="1"
+                  formControlName="order"
+                />
+                @if (editQuestionOptionFieldError(index, 'order')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionOptionFieldError(index, 'order') | t }}</span>
+                }
+              </label>
+
+              <label class="block">
+                <span class="mb-1.5 block text-xs font-semibold text-slate-700">{{ 'questions.optionValue' | t }}</span>
+                <input
+                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  type="number"
+                  min="1"
+                  max="5"
+                  formControlName="value"
+                />
+                @if (editQuestionOptionFieldError(index, 'value')) {
+                  <span class="mt-2 block text-xs font-medium text-[#D94B5A]">{{ editQuestionOptionFieldError(index, 'value') | t }}</span>
+                }
+              </label>
+
+              <div class="flex items-end justify-end">
+                <app-button type="button" size="sm" variant="danger" [disabled]="!canRemoveEditOption()" (pressed)="removeEditOption(index)">
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (editOptionsError()) {
+          <p class="mt-3 text-xs font-semibold text-[#D94B5A]">{{ editOptionsError() | t }}</p>
+        }
+      </section>
+    }
+
+    <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+      <app-button type="button" variant="secondary" (pressed)="closeEditQuestion()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button
+        type="submit"
+        [loading]="questionsStore.updating()"
+        [disabled]="questionsStore.groupsSelection().length === 0"
+      >
+        <app-icon [icon]="editIcon" [size]="17" />
+        {{ 'common.save' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
+<app-modal [title]="'questions.deleteTitle' | t" [open]="deleteModalOpen()" (closed)="closeDeleteQuestion()">
+  @if (questionPendingDelete(); as question) {
+    <div class="space-y-4">
+      <p class="text-sm font-semibold text-slate-700">{{ 'questions.deleteConfirm' | t }}</p>
+      <div class="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
+        <p class="font-bold text-slate-900">{{ question.textEn }}</p>
+        <p class="mt-1">{{ question.textAr || '-' }}</p>
+        <p class="mt-2 font-semibold text-slate-500">{{ question.groupNameEn || '-' }}</p>
+      </div>
+      <div class="flex flex-wrap justify-end gap-2">
+        <app-button type="button" variant="secondary" (pressed)="closeDeleteQuestion()">
+          {{ 'common.cancel' | t }}
+        </app-button>
+        <app-button type="button" variant="danger" [loading]="questionsStore.deleting()" (pressed)="deleteSelectedQuestion()">
+          <app-icon [icon]="deleteIcon" [size]="17" />
+          {{ 'common.delete' | t }}
+        </app-button>
+      </div>
+    </div>
+  }
+</app-modal>
