@@ -215,7 +215,7 @@ export class QuestionsPageComponent implements OnInit {
 
   openEditQuestion(event: MouseEvent, question: QuestionListItem): void {
     event.stopPropagation();
-    if (!this.canUpdate()) {
+    if (!this.canEditQuestion(question)) {
       return;
     }
 
@@ -251,7 +251,7 @@ export class QuestionsPageComponent implements OnInit {
       this.editQuestionForm.invalid ||
       this.editOptionsError().length > 0 ||
       this.questionsStore.updating() ||
-      !this.canUpdate()
+      !this.canEditQuestion(question)
     ) {
       return;
     }
@@ -267,7 +267,7 @@ export class QuestionsPageComponent implements OnInit {
 
   openDeleteQuestion(event: MouseEvent, question: QuestionListItem): void {
     event.stopPropagation();
-    if (!question.isActive || !this.canDelete()) {
+    if (!this.canDeleteQuestion(question)) {
       return;
     }
 
@@ -283,7 +283,7 @@ export class QuestionsPageComponent implements OnInit {
 
   deleteSelectedQuestion(): void {
     const question = this.questionPendingDelete();
-    if (!question || this.questionsStore.deleting() || !this.canDelete()) {
+    if (!question || this.questionsStore.deleting() || !this.canDeleteQuestion(question)) {
       return;
     }
 
@@ -294,11 +294,23 @@ export class QuestionsPageComponent implements OnInit {
 
   restoreQuestion(event: MouseEvent, question: QuestionListItem): void {
     event.stopPropagation();
-    if (question.isActive || this.questionsStore.restoring() || !this.canRestore()) {
+    if (!this.canRestoreQuestion(question) || this.questionsStore.restoring()) {
       return;
     }
 
     this.questionsStore.restoreQuestion(question.questionId, () => undefined);
+  }
+
+  canEditQuestion(question: QuestionListItem): boolean {
+    return question.isEditable && this.canUpdate();
+  }
+
+  canDeleteQuestion(question: QuestionListItem): boolean {
+    return question.isEditable && question.isActive && this.canDelete();
+  }
+
+  canRestoreQuestion(question: QuestionListItem): boolean {
+    return question.isEditable && !question.isActive && this.canRestore();
   }
 
   searchQuestions(): void {

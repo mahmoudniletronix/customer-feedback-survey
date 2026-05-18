@@ -154,7 +154,7 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex justify-end gap-2">
-                      @if (canUpdate()) {
+                      @if (canEditQuestion(question)) {
                         <app-button
                           size="sm"
                           type="button"
@@ -164,7 +164,7 @@
                           <app-icon [icon]="editIcon" [size]="15" />
                         </app-button>
                       }
-                      @if (canDelete() && question.isActive) {
+                      @if (canDeleteQuestion(question)) {
                         <app-button
                           size="sm"
                           type="button"
@@ -176,7 +176,7 @@
                           <app-icon [icon]="deleteIcon" [size]="15" />
                         </app-button>
                       }
-                      @if (canRestore() && !question.isActive) {
+                      @if (canRestoreQuestion(question)) {
                         <app-button
                           size="sm"
                           type="button"
@@ -262,7 +262,7 @@
             </div>
 
             <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
-              @if (canUpdate()) {
+              @if (canEditQuestion(question)) {
                 <app-button
                   size="sm"
                   type="button"
@@ -273,7 +273,7 @@
                   {{ 'common.edit' | t }}
                 </app-button>
               }
-              @if (canDelete() && question.isActive) {
+              @if (canDeleteQuestion(question)) {
                 <app-button
                   size="sm"
                   type="button"
@@ -286,7 +286,7 @@
                   {{ 'common.delete' | t }}
                 </app-button>
               }
-              @if (canRestore() && !question.isActive) {
+              @if (canRestoreQuestion(question)) {
                 <app-button
                   size="sm"
                   type="button"

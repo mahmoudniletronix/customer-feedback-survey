@@ -6,6 +6,10 @@ import {
   QuestionCondition,
   QuestionConditionApiResponse,
 } from '../../../shared/models/question-condition.model';
+import {
+  ScopeApiFields,
+  ScopeState,
+} from '../../../shared/models/resource-scope.model';
 
 export interface OperatorMyTemplates {
   operatorId: string;
@@ -61,14 +65,16 @@ export interface OperatorLatestTemplateAnswer {
   voiceFileUrl: string | null;
 }
 
-export interface OperatorAssignedTemplateQuestion {
+export interface OperatorAssignedTemplateQuestion extends ScopeState {
   templateQuestionId: string;
   questionId: string;
+  questionBranchId: string | null;
   order: number | null;
   textEn: string;
   textAr: string;
   type: string;
   groupId: string;
+  groupBranchId: string | null;
   groupNameEn: string;
   groupNameAr: string;
   options: readonly QuestionAnswerOption[];
@@ -148,15 +154,17 @@ export interface OperatorLatestTemplateAnswerApiResponse {
   voiceFileUrl?: string | null;
 }
 
-export interface OperatorAssignedTemplateQuestionApiResponse {
+export interface OperatorAssignedTemplateQuestionApiResponse extends ScopeApiFields {
   templateQuestionId?: string | number;
   questionId?: string | number;
+  questionBranchId?: string | number | null;
   order?: number | null;
   textEn?: string;
   textAr?: string | null;
   type?: string | number | null;
   typeName?: string | null;
   groupId?: string | number;
+  groupBranchId?: string | number | null;
   groupNameEn?: string;
   groupNameAr?: string | null;
   options?: readonly QuestionAnswerOptionApiResponse[];

@@ -1,13 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
+import { GlobalQuestionGroupsService } from '../../data/global-question-groups.service';
 import {
-  CreateQuestionGroupRequest,
-  QuestionGroupListItem,
-  QuestionGroupsFilter,
-  UpdateQuestionGroupRequest,
-} from '../../domain/question-group.model';
-import { QuestionGroupsService } from '../../data/question-groups.service';
+  CreateGlobalQuestionGroupRequest,
+  GlobalQuestionGroupListItem,
+  GlobalQuestionGroupsFilter,
+  UpdateGlobalQuestionGroupRequest,
+} from '../../domain/global-question-group.model';
 
 interface ApiErrorItem {
   code?: string;
@@ -22,8 +22,8 @@ interface ApiErrorResponse {
 }
 
 @Injectable()
-export class QuestionGroupsStore {
-  private readonly defaultQuery: QuestionGroupsFilter = {
+export class GlobalQuestionGroupsStore {
+  private readonly defaultQuery: GlobalQuestionGroupsFilter = {
     pageNumber: 1,
     pageSize: 10,
     searchText: '',
@@ -31,9 +31,8 @@ export class QuestionGroupsStore {
     isActive: null,
   };
 
-  private readonly questionGroupsService = inject(QuestionGroupsService);
-  private readonly groupsSignal = signal<readonly QuestionGroupListItem[]>([]);
-  private readonly createdGroupSignal = signal<QuestionGroupListItem | null>(null);
+  private readonly globalQuestionGroupsService = inject(GlobalQuestionGroupsService);
+  private readonly groupsSignal = signal<readonly GlobalQuestionGroupListItem[]>([]);
   private readonly currentPageSignal = signal(this.defaultQuery.pageNumber);
   private readonly pageSizeSignal = signal(this.defaultQuery.pageSize);
   private readonly totalItemsSignal = signal(0);
@@ -49,7 +48,6 @@ export class QuestionGroupsStore {
   private readonly successSignal = signal<string | null>(null);
 
   readonly groups = this.groupsSignal.asReadonly();
-  readonly createdGroup = this.createdGroupSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
   readonly pageSize = this.pageSizeSignal.asReadonly();
   readonly totalItems = this.totalItemsSignal.asReadonly();
@@ -67,8 +65,8 @@ export class QuestionGroupsStore {
   readonly hasPreviousPage = computed(() => this.currentPageSignal() > 1);
   readonly hasNextPage = computed(() => this.currentPageSignal() < this.totalPages());
 
-  load(query: Partial<QuestionGroupsFilter> = {}): void {
-    const nextQuery: QuestionGroupsFilter = {
+  load(query: Partial<GlobalQuestionGroupsFilter> = {}): void {
+    const nextQuery: GlobalQuestionGroupsFilter = {
       pageNumber: query.pageNumber ?? this.currentPageSignal(),
       pageSize: query.pageSize ?? this.pageSizeSignal(),
       searchText: query.searchText ?? this.searchTextSignal(),
@@ -82,7 +80,7 @@ export class QuestionGroupsStore {
     this.orderSortSignal.set(nextQuery.orderSort);
     this.isActiveSignal.set(nextQuery.isActive);
 
-    this.questionGroupsService
+    this.globalQuestionGroupsService
       .list(nextQuery)
       .pipe(
         take(1),
@@ -98,7 +96,7 @@ export class QuestionGroupsStore {
         error: (error: unknown) => {
           this.groupsSignal.set([]);
           this.totalItemsSignal.set(0);
-          this.errorSignal.set(this.readErrorKey(error, 'questionGroups.loadError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestionGroups.loadError'));
         },
       });
   }
@@ -125,7 +123,7 @@ export class QuestionGroupsStore {
     }
   }
 
-  createGroup(payload: CreateQuestionGroupRequest, onCreated: () => void): void {
+  createGroup(payload: CreateGlobalQuestionGroupRequest, onCreated: () => void): void {
     if (this.creatingSignal()) {
       return;
     }
@@ -134,26 +132,29 @@ export class QuestionGroupsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionGroupsService
+    this.globalQuestionGroupsService
       .create(payload)
       .pipe(
         take(1),
         finalize(() => this.creatingSignal.set(false)),
       )
       .subscribe({
-        next: (group) => {
-          this.createdGroupSignal.set(group);
-          this.successSignal.set('questionGroups.createSuccess');
+        next: () => {
+          this.successSignal.set('globalQuestionGroups.createSuccess');
           this.load({ pageNumber: this.defaultQuery.pageNumber });
           onCreated();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questionGroups.createError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestionGroups.createError'));
         },
       });
   }
 
-  updateGroup(groupId: string, payload: UpdateQuestionGroupRequest, onUpdated: () => void): void {
+  updateGroup(
+    groupId: string,
+    payload: UpdateGlobalQuestionGroupRequest,
+    onUpdated: () => void,
+  ): void {
     if (this.updatingSignal()) {
       return;
     }
@@ -162,7 +163,7 @@ export class QuestionGroupsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionGroupsService
+    this.globalQuestionGroupsService
       .update(groupId, payload)
       .pipe(
         take(1),
@@ -171,11 +172,11 @@ export class QuestionGroupsStore {
       .subscribe({
         next: (group) => {
           this.replaceGroupInList(this.mergeGroup(groupId, group));
-          this.successSignal.set('questionGroups.updateSuccess');
+          this.successSignal.set('globalQuestionGroups.updateSuccess');
           onUpdated();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questionGroups.updateError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestionGroups.updateError'));
         },
       });
   }
@@ -189,7 +190,7 @@ export class QuestionGroupsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionGroupsService
+    this.globalQuestionGroupsService
       .delete(groupId)
       .pipe(
         take(1),
@@ -198,11 +199,11 @@ export class QuestionGroupsStore {
       .subscribe({
         next: (group) => {
           this.replaceGroupInList(this.mergeGroup(groupId, group));
-          this.successSignal.set('questionGroups.deleteSuccess');
+          this.successSignal.set('globalQuestionGroups.deleteSuccess');
           onDeleted();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questionGroups.deleteError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestionGroups.deleteError'));
         },
       });
   }
@@ -216,7 +217,7 @@ export class QuestionGroupsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionGroupsService
+    this.globalQuestionGroupsService
       .restore(groupId)
       .pipe(
         take(1),
@@ -225,11 +226,11 @@ export class QuestionGroupsStore {
       .subscribe({
         next: (group) => {
           this.replaceGroupInList(this.mergeGroup(groupId, group));
-          this.successSignal.set('questionGroups.restoreSuccess');
+          this.successSignal.set('globalQuestionGroups.restoreSuccess');
           onRestored();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questionGroups.restoreError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestionGroups.restoreError'));
         },
       });
   }
@@ -239,27 +240,23 @@ export class QuestionGroupsStore {
     this.successSignal.set(null);
   }
 
-  private replaceGroupInList(group: QuestionGroupListItem): void {
-    this.groupsSignal.update((groups) => {
-      if (!this.matchesActiveFilter(group)) {
-        if (groups.some((currentGroup) => currentGroup.groupId === group.groupId)) {
-          this.totalItemsSignal.update((totalItems) => Math.max(0, totalItems - 1));
-        }
-        return groups.filter((currentGroup) => currentGroup.groupId !== group.groupId);
-      }
-
-      return groups.map((currentGroup) => (currentGroup.groupId === group.groupId ? group : currentGroup));
-    });
+  private replaceGroupInList(group: GlobalQuestionGroupListItem): void {
+    this.groupsSignal.update((groups) =>
+      groups.map((currentGroup) => (currentGroup.groupId === group.groupId ? group : currentGroup)),
+    );
   }
 
-  private mergeGroup(groupId: string, group: QuestionGroupListItem): QuestionGroupListItem {
+  private mergeGroup(
+    groupId: string,
+    group: GlobalQuestionGroupListItem,
+  ): GlobalQuestionGroupListItem {
     const currentGroup = this.groupsSignal().find((current) => current.groupId === groupId);
 
     return {
       groupId: group.groupId || currentGroup?.groupId || groupId,
-      branchId: group.branchId ?? currentGroup?.branchId ?? null,
-      scope: group.scope ?? currentGroup?.scope ?? null,
-      scopeName: group.scopeName || currentGroup?.scopeName || 'Branch',
+      branchId: null,
+      scope: group.scope ?? currentGroup?.scope ?? 2,
+      scopeName: group.scopeName || currentGroup?.scopeName || 'Global',
       isGlobal: group.isGlobal,
       isEditable: group.isEditable,
       nameEn: group.nameEn || currentGroup?.nameEn || '',
@@ -268,11 +265,6 @@ export class QuestionGroupsStore {
       questionsCount: group.questionsCount || currentGroup?.questionsCount || 0,
       createdOnUtc: group.createdOnUtc || currentGroup?.createdOnUtc || '',
     };
-  }
-
-  private matchesActiveFilter(group: QuestionGroupListItem): boolean {
-    const isActive = this.isActiveSignal();
-    return isActive === null || group.isActive === isActive;
   }
 
   private readErrorKey(error: unknown, fallbackKey: string): string {
@@ -287,16 +279,13 @@ export class QuestionGroupsStore {
     }
 
     if (error.status === 401) {
-      return 'questionGroups.unauthorized';
+      return 'globalQuestionGroups.unauthorized';
     }
     if (error.status === 403) {
-      return 'questionGroups.forbidden';
-    }
-    if (error.status === 404) {
-      return 'questionGroups.notFound';
+      return 'globalQuestionGroups.forbidden';
     }
     if (error.status === 400 || error.status === 422) {
-      return this.readProblemDetailsMessage(error.error) || 'questionGroups.validationError';
+      return this.readProblemDetailsMessage(error.error) || 'globalQuestionGroups.validationError';
     }
 
     return fallbackKey;
@@ -305,36 +294,36 @@ export class QuestionGroupsStore {
   private mapBackendError(marker: string): string {
     const normalized = marker.replace(/[\s_-]/g, '').toLowerCase();
     if (normalized.includes('nameenrequired') || normalized.includes('englishnameisrequired')) {
-      return 'questionGroups.nameEnRequired';
+      return 'globalQuestionGroups.nameEnRequired';
     }
     if (normalized.includes('nameenmaxlength') || normalized.includes('englishnamemaxlength')) {
-      return 'questionGroups.nameEnMaxLength';
+      return 'globalQuestionGroups.nameEnMaxLength';
     }
     if (normalized.includes('namearmaxlength') || normalized.includes('arabicnamemaxlength')) {
-      return 'questionGroups.nameArMaxLength';
+      return 'globalQuestionGroups.nameArMaxLength';
     }
     if (
       normalized.includes('namealreadyexists') ||
       normalized.includes('questiongroupalreadyexists') ||
       normalized.includes('sameenglishnameexists')
     ) {
-      return 'questionGroups.nameAlreadyExists';
-    }
-    if (normalized.includes('currentbranchactor') || normalized.includes('currentuserisnotvalid')) {
-      return 'questionGroups.currentBranchActorNotFound';
+      return 'globalQuestionGroups.nameAlreadyExists';
     }
     if (normalized.includes('questiongroupnotfound') || normalized.includes('notfound')) {
-      return 'questionGroups.notFound';
+      return 'globalQuestionGroups.notFound';
     }
     if (normalized.includes('alreadyinactive')) {
-      return 'questionGroups.alreadyInactive';
+      return 'globalQuestionGroups.alreadyInactive';
+    }
+    if (normalized.includes('alreadyactive')) {
+      return 'globalQuestionGroups.alreadyActive';
     }
     if (
       normalized.includes('hasquestions') ||
       normalized.includes('relatedquestions') ||
       normalized.includes('cannotbedeleted')
     ) {
-      return 'questionGroups.hasQuestions';
+      return 'globalQuestionGroups.hasQuestions';
     }
     return '';
   }

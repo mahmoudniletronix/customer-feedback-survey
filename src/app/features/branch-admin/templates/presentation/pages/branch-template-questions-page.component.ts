@@ -48,12 +48,17 @@ interface TemplateQuestionManagerItem extends BranchTemplateQuestionSelectionIte
   groupNameEn: string;
   groupNameAr: string;
   groupIsActive: boolean;
+  groupIsGlobal: boolean;
+  groupScopeName: string;
+  groupIsSelectable: boolean;
 }
 
 interface TemplateQuestionManagerGroup {
   groupId: string;
   nameEn: string;
   nameAr: string;
+  isGlobal: boolean;
+  scopeName: string;
   questions: readonly TemplateQuestionManagerItem[];
 }
 
@@ -128,7 +133,8 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   readonly isDirty = computed(() => this.toSelectedIdsKey() !== this.toOriginalSelectedIdsKey());
   readonly hasPendingChanges = computed(() => this.isDirty() || this.conditionsDirty());
   readonly savingTemplateFlow = computed(
-    () => this.templatesStore.updatingQuestions() || this.templatesStore.updatingQuestionConditions(),
+    () =>
+      this.templatesStore.updatingQuestions() || this.templatesStore.updatingQuestionConditions(),
   );
   readonly templateName = computed(() => {
     const selection = this.templatesStore.questionsSelection();
@@ -185,7 +191,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   }
 
   addQuestion(question: TemplateQuestionManagerItem): void {
-    if (this.selectedQuestionIds().has(question.questionId)) {
+    if (
+      !this.isSelectableQuestion(question) ||
+      this.selectedQuestionIds().has(question.questionId)
+    ) {
       return;
     }
 
@@ -202,7 +211,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   }
 
   addRelatedQuestion(question: TemplateQuestionManagerItem): void {
-    if (this.selectedQuestionIds().has(question.questionId)) {
+    if (
+      !this.isSelectableQuestion(question) ||
+      this.selectedQuestionIds().has(question.questionId)
+    ) {
       return;
     }
 
@@ -337,6 +349,9 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
           groupNameEn: group.nameEn,
           groupNameAr: group.nameAr,
           groupIsActive: group.isActive,
+          groupIsGlobal: group.isGlobal,
+          groupScopeName: group.scopeName,
+          groupIsSelectable: group.isSelectable,
         })),
       ) ?? []
     );
@@ -349,10 +364,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
     return (
       selection?.groups
-        .filter((group) => group.isActive)
+        .filter((group) => group.isActive && group.isSelectable)
         .map((group) => {
           const questions = group.questions
-            .filter((question) => question.isActive)
+            .filter((question) => question.isActive && question.isSelectable)
             .filter((question) => !selectedIds.has(question.questionId))
             .filter((question) => {
               if (normalizedSearch.length === 0) {
@@ -369,12 +384,17 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
               groupNameEn: group.nameEn,
               groupNameAr: group.nameAr,
               groupIsActive: group.isActive,
+              groupIsGlobal: group.isGlobal,
+              groupScopeName: group.scopeName,
+              groupIsSelectable: group.isSelectable,
             }));
 
           return {
             groupId: group.groupId,
             nameEn: group.nameEn,
             nameAr: group.nameAr,
+            isGlobal: group.isGlobal,
+            scopeName: group.scopeName,
             questions,
           };
         })
@@ -465,6 +485,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
   private isActiveQuestion(question: TemplateQuestionManagerItem): boolean {
     return question.isActive && question.groupIsActive;
+  }
+
+  isSelectableQuestion(question: TemplateQuestionManagerItem): boolean {
+    return question.isSelectable && question.groupIsSelectable;
   }
 
   private hasTemplateQuestionId(question: TemplateQuestionManagerItem): boolean {

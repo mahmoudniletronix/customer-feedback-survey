@@ -5,11 +5,16 @@ import {
   QuestionAnswerType,
   UpdateQuestionAnswerOptionPayload,
 } from '../../../../shared/models/question-answer.model';
+import {
+  EditableScopeApiFields,
+  EditableScopeState,
+} from '../../../../shared/models/resource-scope.model';
 
-export interface QuestionListItem {
+export interface QuestionListItem extends EditableScopeState {
   questionId: string;
-  branchId: string;
+  branchId: string | null;
   groupId: string;
+  groupBranchId: string | null;
   groupNameEn: string;
   groupNameAr: string | null;
   textEn: string;
@@ -53,10 +58,11 @@ export interface QuestionTypeOption {
   labelKey: string;
 }
 
-export interface QuestionApiResponse {
+export interface QuestionApiResponse extends EditableScopeApiFields {
   questionId?: string | number;
-  branchId?: string | number;
+  branchId?: string | number | null;
   groupId?: string | number;
+  groupBranchId?: string | number | null;
   groupNameEn?: string;
   groupNameAr?: string | null;
   textEn?: string;

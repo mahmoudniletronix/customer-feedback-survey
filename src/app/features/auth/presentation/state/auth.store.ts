@@ -133,6 +133,26 @@ export class AuthStore {
     );
   }
 
+  canAccessGlobalQuestionGroups(): boolean {
+    return this.role() === 'SUPER_ADMIN' || this.hasPermission('GlobalQuestionGroups.ViewAll');
+  }
+
+  canManageGlobalQuestionGroups(
+    action: 'Create' | 'Update' | 'Delete' | 'ViewAll' | 'Restore',
+  ): boolean {
+    return this.role() === 'SUPER_ADMIN' || this.hasPermission(`GlobalQuestionGroups.${action}`);
+  }
+
+  canAccessGlobalQuestions(): boolean {
+    return this.role() === 'SUPER_ADMIN' || this.hasPermission('GlobalQuestions.ViewAll');
+  }
+
+  canManageGlobalQuestions(
+    action: 'Create' | 'Update' | 'Delete' | 'ViewAll' | 'Restore',
+  ): boolean {
+    return this.role() === 'SUPER_ADMIN' || this.hasPermission(`GlobalQuestions.${action}`);
+  }
+
   canAccessReports(): boolean {
     const role = this.role();
     return (

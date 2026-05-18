@@ -27,7 +27,13 @@ interface MenuItem {
   path: string;
   icon: LucideIconData;
   roles: readonly Role[];
-  feature?: 'templates' | 'questionGroups' | 'questions' | 'reports';
+  feature?:
+    | 'templates'
+    | 'questionGroups'
+    | 'questions'
+    | 'globalQuestionGroups'
+    | 'globalQuestions'
+    | 'reports';
   exact?: boolean;
   child?: boolean;
 }
@@ -100,6 +106,22 @@ const MENU_ITEMS: readonly MenuItem[] = [
     path: '/departments',
     icon: Network,
     roles: ['SUPER_ADMIN']
+  },
+  {
+    label: 'Global question groups',
+    labelKey: 'nav.globalQuestionGroups',
+    path: '/global-question-groups',
+    icon: ClipboardList,
+    roles: [],
+    feature: 'globalQuestionGroups'
+  },
+  {
+    label: 'Global questions',
+    labelKey: 'nav.globalQuestions',
+    path: '/global-questions',
+    icon: HelpCircle,
+    roles: [],
+    feature: 'globalQuestions'
   },
   {
     label: 'Surveys',
@@ -175,6 +197,12 @@ export class SidebarComponent {
     }
     if (feature === 'questions') {
       return this.authStore.canAccessQuestions();
+    }
+    if (feature === 'globalQuestionGroups') {
+      return this.authStore.canAccessGlobalQuestionGroups();
+    }
+    if (feature === 'globalQuestions') {
+      return this.authStore.canAccessGlobalQuestions();
     }
     if (feature === 'reports') {
       return this.authStore.canAccessReports();

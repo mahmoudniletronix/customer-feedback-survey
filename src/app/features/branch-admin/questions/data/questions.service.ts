@@ -8,6 +8,7 @@ import {
   toQuestionAnswerOption,
   toQuestionAnswerType,
 } from '../../../../shared/models/question-answer.model';
+import { toEditableScopeState } from '../../../../shared/models/resource-scope.model';
 import {
   CreateQuestionRequest,
   QuestionApiResponse,
@@ -110,9 +111,11 @@ export class QuestionsService {
     const questionId = this.readRecordId(response.questionId);
 
     return {
+      ...toEditableScopeState(response),
       questionId,
-      branchId: this.readRecordId(response.branchId),
+      branchId: this.readNullableRecordId(response.branchId),
       groupId: this.readRecordId(response.groupId),
+      groupBranchId: this.readNullableRecordId(response.groupBranchId),
       groupNameEn: response.groupNameEn ?? '',
       groupNameAr: response.groupNameAr ?? null,
       textEn: response.textEn ?? '',
@@ -139,7 +142,11 @@ export class QuestionsService {
     return Array.isArray(response);
   }
 
-  private readRecordId(id: string | number | undefined): string {
+  private readRecordId(id: string | number | null | undefined): string {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : '';
+  }
+
+  private readNullableRecordId(id: string | number | null | undefined): string | null {
+    return typeof id === 'string' || typeof id === 'number' ? String(id) : null;
   }
 }

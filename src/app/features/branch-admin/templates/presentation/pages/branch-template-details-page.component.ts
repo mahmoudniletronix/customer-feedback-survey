@@ -34,6 +34,8 @@ interface TemplateDetailsQuestionGroupView {
   groupId: string;
   nameEn: string;
   nameAr: string;
+  isGlobal: boolean;
+  scopeName: string;
   questions: readonly TemplateDetailsQuestionView[];
 }
 
@@ -42,6 +44,9 @@ interface TemplateDetailsQuestionView {
   textEn: string;
   textAr: string;
   type: string;
+  scopeName: string;
+  isGlobal: boolean;
+  isEditable: boolean;
   isSelected: boolean;
   isActive: boolean;
   order: number | null;
@@ -90,6 +95,8 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         groupId: group.groupId,
         nameEn: group.nameEn,
         nameAr: group.nameAr,
+        isGlobal: group.isGlobal,
+        scopeName: group.scopeName,
         questions: group.questions,
       }));
     }
@@ -284,6 +291,9 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         textEn: question.textEn,
         textAr: question.textAr,
         type: question.type,
+        scopeName: question.scopeName,
+        isGlobal: question.isGlobal,
+        isEditable: question.isEditable,
         isSelected: true,
         isActive: question.isActive,
         order: question.order,
@@ -302,6 +312,8 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         groupId,
         nameEn: question.groupNameEn,
         nameAr: question.groupNameAr,
+        isGlobal: question.isGlobal,
+        scopeName: question.scopeName,
         questions: [nextQuestion],
       });
     }

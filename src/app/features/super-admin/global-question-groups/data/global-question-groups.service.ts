@@ -7,24 +7,23 @@ import {
   toSelectableScopeState,
 } from '../../../../shared/models/resource-scope.model';
 import {
-  CreateQuestionGroupRequest,
-  QuestionGroupApiResponse,
-  QuestionGroupListItem,
-  QuestionGroupSelectionApiResponse,
-  QuestionGroupSelectionItem,
-  QuestionGroupsFilter,
-  QuestionGroupsPageApiResponse,
-  QuestionGroupsPageResult,
-  UpdateQuestionGroupRequest,
-} from '../domain/question-group.model';
+  CreateGlobalQuestionGroupRequest,
+  GlobalQuestionGroupApiResponse,
+  GlobalQuestionGroupListItem,
+  GlobalQuestionGroupSelectionApiResponse,
+  GlobalQuestionGroupSelectionItem,
+  GlobalQuestionGroupsFilter,
+  GlobalQuestionGroupsPageApiResponse,
+  GlobalQuestionGroupsPageResult,
+  UpdateGlobalQuestionGroupRequest,
+} from '../domain/global-question-group.model';
 
 @Injectable()
-export class QuestionGroupsService {
+export class GlobalQuestionGroupsService {
   private readonly http = inject(HttpClient);
-  private readonly questionGroupsUrl = `${environment.apiBaseUrl}/api/question-groups`;
-  private readonly questionGroupsSelectionUrl = `${this.questionGroupsUrl}/selection`;
+  private readonly globalQuestionGroupsUrl = `${environment.apiBaseUrl}/api/global-question-groups`;
 
-  list(query: QuestionGroupsFilter): Observable<QuestionGroupsPageResult> {
+  list(query: GlobalQuestionGroupsFilter): Observable<GlobalQuestionGroupsPageResult> {
     let params = new HttpParams()
       .set('pageNumber', query.pageNumber)
       .set('pageSize', Math.min(query.pageSize, 100));
@@ -45,56 +44,64 @@ export class QuestionGroupsService {
 
     return this.http
       .get<
-        | QuestionGroupsPageApiResponse
-        | readonly QuestionGroupApiResponse[]
-        | QuestionGroupApiResponse
-      >(this.questionGroupsUrl, { params })
+        | GlobalQuestionGroupsPageApiResponse
+        | readonly GlobalQuestionGroupApiResponse[]
+        | GlobalQuestionGroupApiResponse
+      >(this.globalQuestionGroupsUrl, { params })
       .pipe(map((response) => this.toPageResult(response, query)));
   }
 
-  create(payload: CreateQuestionGroupRequest): Observable<QuestionGroupListItem> {
+  selection(): Observable<readonly GlobalQuestionGroupSelectionItem[]> {
     return this.http
-      .post<QuestionGroupApiResponse>(this.questionGroupsUrl, payload)
-      .pipe(map((response) => this.toQuestionGroup(response)));
-  }
-
-  selection(): Observable<readonly QuestionGroupSelectionItem[]> {
-    return this.http
-      .get<readonly QuestionGroupSelectionApiResponse[]>(this.questionGroupsSelectionUrl)
+      .get<readonly GlobalQuestionGroupSelectionApiResponse[]>(
+        `${this.globalQuestionGroupsUrl}/selection`,
+      )
       .pipe(
         map((response) =>
           response
-            .map((group) => this.toSelectionItem(group))
-            .filter((group) => group.id.length > 0 && group.isSelectable && !group.isGlobal),
+            .map((group) => this.toSelectionGroup(group))
+            .filter((group) => group.groupId.length > 0 && group.isGlobal && group.isSelectable),
         ),
       );
   }
 
-  update(groupId: string, payload: UpdateQuestionGroupRequest): Observable<QuestionGroupListItem> {
+  create(payload: CreateGlobalQuestionGroupRequest): Observable<GlobalQuestionGroupListItem> {
     return this.http
-      .put<QuestionGroupApiResponse>(`${this.questionGroupsUrl}/${groupId}`, payload)
+      .post<GlobalQuestionGroupApiResponse>(this.globalQuestionGroupsUrl, payload)
       .pipe(map((response) => this.toQuestionGroup(response)));
   }
 
-  delete(groupId: string): Observable<QuestionGroupListItem> {
+  update(
+    groupId: string,
+    payload: UpdateGlobalQuestionGroupRequest,
+  ): Observable<GlobalQuestionGroupListItem> {
     return this.http
-      .delete<QuestionGroupApiResponse>(`${this.questionGroupsUrl}/${groupId}`)
+      .put<GlobalQuestionGroupApiResponse>(`${this.globalQuestionGroupsUrl}/${groupId}`, payload)
       .pipe(map((response) => this.toQuestionGroup(response)));
   }
 
-  restore(groupId: string): Observable<QuestionGroupListItem> {
+  delete(groupId: string): Observable<GlobalQuestionGroupListItem> {
     return this.http
-      .put<QuestionGroupApiResponse>(`${this.questionGroupsUrl}/${groupId}/restore`, {})
+      .delete<GlobalQuestionGroupApiResponse>(`${this.globalQuestionGroupsUrl}/${groupId}`)
+      .pipe(map((response) => this.toQuestionGroup(response)));
+  }
+
+  restore(groupId: string): Observable<GlobalQuestionGroupListItem> {
+    return this.http
+      .put<GlobalQuestionGroupApiResponse>(
+        `${this.globalQuestionGroupsUrl}/${groupId}/restore`,
+        {},
+      )
       .pipe(map((response) => this.toQuestionGroup(response)));
   }
 
   private toPageResult(
     response:
-      | QuestionGroupsPageApiResponse
-      | readonly QuestionGroupApiResponse[]
-      | QuestionGroupApiResponse,
-    query: QuestionGroupsFilter,
-  ): QuestionGroupsPageResult {
+      | GlobalQuestionGroupsPageApiResponse
+      | readonly GlobalQuestionGroupApiResponse[]
+      | GlobalQuestionGroupApiResponse,
+    query: GlobalQuestionGroupsFilter,
+  ): GlobalQuestionGroupsPageResult {
     if (this.isGroupsArray(response)) {
       const groups = response.map((group) => this.toQuestionGroup(group));
       return {
@@ -124,11 +131,11 @@ export class QuestionGroupsService {
     };
   }
 
-  private toQuestionGroup(response: QuestionGroupApiResponse): QuestionGroupListItem {
+  private toQuestionGroup(response: GlobalQuestionGroupApiResponse): GlobalQuestionGroupListItem {
     return {
       ...toEditableScopeState(response),
       groupId: this.readRecordId(response.groupId),
-      branchId: this.readNullableRecordId(response.branchId),
+      branchId: null,
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? null,
       isActive: response.isActive ?? true,
@@ -137,36 +144,34 @@ export class QuestionGroupsService {
     };
   }
 
-  private toSelectionItem(response: QuestionGroupSelectionApiResponse): QuestionGroupSelectionItem {
+  private toSelectionGroup(
+    response: GlobalQuestionGroupSelectionApiResponse,
+  ): GlobalQuestionGroupSelectionItem {
     return {
       ...toSelectableScopeState(response),
-      id: this.readRecordId(response.id),
-      branchId: this.readNullableRecordId(response.branchId),
+      groupId: this.readRecordId(response.id),
+      branchId: null,
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? null,
     };
   }
 
   private isPageResponse(
-    response: QuestionGroupsPageApiResponse | QuestionGroupApiResponse,
-  ): response is QuestionGroupsPageApiResponse {
+    response: GlobalQuestionGroupsPageApiResponse | GlobalQuestionGroupApiResponse,
+  ): response is GlobalQuestionGroupsPageApiResponse {
     return 'data' in response || 'currentPage' in response || 'totalItems' in response;
   }
 
   private isGroupsArray(
     response:
-      | QuestionGroupsPageApiResponse
-      | readonly QuestionGroupApiResponse[]
-      | QuestionGroupApiResponse,
-  ): response is readonly QuestionGroupApiResponse[] {
+      | GlobalQuestionGroupsPageApiResponse
+      | readonly GlobalQuestionGroupApiResponse[]
+      | GlobalQuestionGroupApiResponse,
+  ): response is readonly GlobalQuestionGroupApiResponse[] {
     return Array.isArray(response);
   }
 
   private readRecordId(id: string | number | null | undefined): string {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : '';
-  }
-
-  private readNullableRecordId(id: string | number | null | undefined): string | null {
-    return typeof id === 'string' || typeof id === 'number' ? String(id) : null;
   }
 }

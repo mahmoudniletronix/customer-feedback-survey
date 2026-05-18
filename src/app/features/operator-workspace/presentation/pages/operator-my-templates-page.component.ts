@@ -57,12 +57,17 @@ import { OperatorTemplatesStore } from '../state/operator-templates.store';
 interface OperatorQuestionView {
   id: string;
   questionId: string;
+  questionBranchId: string | null;
   order: number | null;
   text: string;
   secondaryText: string;
   type: string;
+  scopeName: string;
+  isGlobal: boolean;
   answerType: QuestionAnswerType | null;
   options: readonly QuestionAnswerOption[];
+  groupId: string;
+  groupBranchId: string | null;
   groupName: string;
 }
 
@@ -757,12 +762,17 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     return {
       id: question.templateQuestionId,
       questionId: question.questionId,
+      questionBranchId: question.questionBranchId,
       order: question.order,
       text: this.localizedText(question.textEn, question.textAr, isArabic),
       secondaryText: this.secondaryLocalizedText(question.textEn, question.textAr, isArabic),
       type: question.type,
+      scopeName: question.scopeName,
+      isGlobal: question.isGlobal,
       answerType: toQuestionAnswerType(question.type),
       options: question.options,
+      groupId: question.groupId,
+      groupBranchId: question.groupBranchId,
       groupName: this.localizedText(question.groupNameEn, question.groupNameAr, isArabic),
     };
   }

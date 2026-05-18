@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { toQuestionAnswerOption } from '../../../shared/models/question-answer.model';
 import { toQuestionCondition } from '../../../shared/models/question-condition.model';
+import { toScopeState } from '../../../shared/models/resource-scope.model';
 import {
   OperatorAssignedTemplate,
   OperatorAssignedTemplateApiResponse,
@@ -134,8 +135,10 @@ export class OperatorTemplatesService {
     const questionId = this.readRecordId(response.questionId);
 
     return {
+      ...toScopeState(response),
       templateQuestionId: this.readRecordId(response.templateQuestionId),
       questionId,
+      questionBranchId: this.readNullableRecordId(response.questionBranchId),
       order: response.order ?? null,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? '',
@@ -144,6 +147,7 @@ export class OperatorTemplatesService {
           ? String(response.type)
           : response.typeName ?? '',
       groupId: this.readRecordId(response.groupId),
+      groupBranchId: this.readNullableRecordId(response.groupBranchId),
       groupNameEn: response.groupNameEn ?? '',
       groupNameAr: response.groupNameAr ?? '',
       options: (response.options ?? []).map((option) => toQuestionAnswerOption(option, questionId)),
@@ -193,7 +197,7 @@ export class OperatorTemplatesService {
     };
   }
 
-  private readRecordId(id: string | number | undefined): string {
+  private readRecordId(id: string | number | null | undefined): string {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : '';
   }
 

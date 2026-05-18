@@ -38,6 +38,9 @@ interface ConditionalLogicQuestionInput extends BranchTemplateQuestionSelectionI
   groupNameEn: string;
   groupNameAr: string;
   groupIsActive: boolean;
+  groupIsGlobal: boolean;
+  groupScopeName: string;
+  groupIsSelectable: boolean;
 }
 
 interface ConditionalLogicQuestion
@@ -275,6 +278,9 @@ export class BranchTemplateConditionalLogicComponent {
             groupNameEn: group.nameEn,
             groupNameAr: group.nameAr,
             groupIsActive: group.isActive,
+            groupIsGlobal: group.isGlobal,
+            groupScopeName: group.scopeName,
+            groupIsSelectable: group.isSelectable,
           })),
         )
         .filter(
@@ -629,6 +635,12 @@ export class BranchTemplateConditionalLogicComponent {
     return {
       questionId: question.questionId,
       templateQuestionId: question.persistedTemplateQuestionId,
+      branchId: question.branchId,
+      scope: question.scope,
+      scopeName: question.scopeName,
+      isGlobal: question.isGlobal,
+      isSelectable: question.isSelectable,
+      isEditable: question.isEditable,
       textEn: question.textEn,
       textAr: question.textAr,
       type: question.type,
@@ -641,6 +653,9 @@ export class BranchTemplateConditionalLogicComponent {
       groupNameEn: question.groupNameEn,
       groupNameAr: question.groupNameAr,
       groupIsActive: question.groupIsActive,
+      groupIsGlobal: question.groupIsGlobal,
+      groupScopeName: question.groupScopeName,
+      groupIsSelectable: question.groupIsSelectable,
     };
   }
 

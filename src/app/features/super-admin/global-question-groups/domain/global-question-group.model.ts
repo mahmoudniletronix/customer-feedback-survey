@@ -5,9 +5,9 @@ import {
   SelectableScopeState,
 } from '../../../../shared/models/resource-scope.model';
 
-export interface QuestionGroupListItem extends EditableScopeState {
+export interface GlobalQuestionGroupListItem extends EditableScopeState {
   groupId: string;
-  branchId: string | null;
+  branchId: null;
   nameEn: string;
   nameAr: string | null;
   isActive: boolean;
@@ -15,24 +15,14 @@ export interface QuestionGroupListItem extends EditableScopeState {
   createdOnUtc: string;
 }
 
-export interface QuestionGroupSelectionItem extends SelectableScopeState {
-  id: string;
-  branchId: string | null;
+export interface GlobalQuestionGroupSelectionItem extends SelectableScopeState {
+  groupId: string;
+  branchId: null;
   nameEn: string;
   nameAr: string | null;
 }
 
-export interface CreateQuestionGroupRequest {
-  nameEn: string;
-  nameAr?: string | null;
-}
-
-export interface UpdateQuestionGroupRequest {
-  nameEn: string;
-  nameAr?: string | null;
-}
-
-export interface QuestionGroupsFilter {
+export interface GlobalQuestionGroupsFilter {
   pageNumber: number;
   pageSize: number;
   searchText: string;
@@ -40,14 +30,21 @@ export interface QuestionGroupsFilter {
   isActive: boolean | null;
 }
 
-export interface QuestionGroupsPageResult {
+export interface UpdateGlobalQuestionGroupRequest {
+  nameEn: string;
+  nameAr?: string | null;
+}
+
+export interface CreateGlobalQuestionGroupRequest extends UpdateGlobalQuestionGroupRequest {}
+
+export interface GlobalQuestionGroupsPageResult {
   currentPage: number;
   pageSize: number;
   totalItems: number;
-  data: readonly QuestionGroupListItem[];
+  data: readonly GlobalQuestionGroupListItem[];
 }
 
-export interface QuestionGroupApiResponse extends EditableScopeApiFields {
+export interface GlobalQuestionGroupApiResponse extends EditableScopeApiFields {
   groupId?: string | number;
   branchId?: string | number | null;
   nameEn?: string;
@@ -57,17 +54,17 @@ export interface QuestionGroupApiResponse extends EditableScopeApiFields {
   createdOnUtc?: string;
 }
 
-export interface QuestionGroupSelectionApiResponse extends SelectableScopeApiFields {
+export interface GlobalQuestionGroupSelectionApiResponse extends SelectableScopeApiFields {
   id?: string | number;
   branchId?: string | number | null;
   nameEn?: string;
   nameAr?: string | null;
 }
 
-export interface QuestionGroupsPageApiResponse {
+export interface GlobalQuestionGroupsPageApiResponse {
   currentPage?: number;
   pageSize?: number;
   totalItems?: number;
   totalPages?: number;
-  data?: readonly QuestionGroupApiResponse[];
+  data?: readonly GlobalQuestionGroupApiResponse[];
 }

@@ -37,6 +37,20 @@ export const routes: Routes = [
           import('./features/super-admin/departments/departments.routes').then((m) => m.DEPARTMENTS_ROUTES)
       },
       {
+        path: 'global-question-groups',
+        loadChildren: () =>
+          import('./features/super-admin/global-question-groups/global-question-groups.routes').then(
+            (m) => m.GLOBAL_QUESTION_GROUPS_ROUTES,
+          )
+      },
+      {
+        path: 'global-questions',
+        loadChildren: () =>
+          import('./features/super-admin/global-questions/global-questions.routes').then(
+            (m) => m.GLOBAL_QUESTIONS_ROUTES,
+          )
+      },
+      {
         path: 'branch-admin',
         loadChildren: () =>
           import('./features/branch-admin/branch-admin.routes').then((m) => m.BRANCH_ADMIN_ROUTES)

@@ -1,17 +1,10 @@
 import { DatePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ChevronLeft,
   ChevronRight,
-  FileText,
+  ClipboardList,
   Pencil,
   Plus,
   RotateCcw,
@@ -26,13 +19,13 @@ import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import {
-  CreateQuestionGroupRequest,
-  QuestionGroupListItem,
-} from '../../domain/question-group.model';
-import { QuestionGroupsStore } from '../state/question-groups.store';
+  CreateGlobalQuestionGroupRequest,
+  GlobalQuestionGroupListItem,
+} from '../../domain/global-question-group.model';
+import { GlobalQuestionGroupsStore } from '../state/global-question-groups.store';
 
 @Component({
-  selector: 'app-question-groups-page',
+  selector: 'app-global-question-groups-page',
   standalone: true,
   imports: [
     ButtonComponent,
@@ -44,12 +37,12 @@ import { QuestionGroupsStore } from '../state/question-groups.store';
     ReactiveFormsModule,
     TranslatePipe,
   ],
-  templateUrl: './question-groups-page.component.html',
-  styleUrl: './question-groups-page.component.css',
+  templateUrl: './global-question-groups-page.component.html',
+  styleUrl: './global-question-groups-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class QuestionGroupsPageComponent implements OnInit {
-  readonly questionGroupsStore = inject(QuestionGroupsStore);
+export class GlobalQuestionGroupsPageComponent implements OnInit {
+  readonly globalQuestionGroupsStore = inject(GlobalQuestionGroupsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
 
@@ -57,21 +50,18 @@ export class QuestionGroupsPageComponent implements OnInit {
   readonly chevronRightIcon = ChevronRight;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
-  readonly groupIcon = FileText;
+  readonly groupIcon = ClipboardList;
   readonly plusIcon = Plus;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
 
   readonly createModalOpen = signal(false);
-  readonly editModalOpen = signal(false);
   readonly deleteModalOpen = signal(false);
-  readonly selectedGroup = signal<QuestionGroupListItem | null>(null);
-  readonly groupPendingDelete = signal<QuestionGroupListItem | null>(null);
+  readonly editModalOpen = signal(false);
+  readonly groupPendingDelete = signal<GlobalQuestionGroupListItem | null>(null);
+  readonly selectedGroup = signal<GlobalQuestionGroupListItem | null>(null);
 
-  readonly canCreate = computed(() => this.canUseQuestionGroups('QuestionGroups.Create'));
-  readonly canUpdate = computed(() => this.canUseQuestionGroups('QuestionGroups.Update'));
-  readonly canDelete = computed(() => this.canUseQuestionGroups('QuestionGroups.Delete'));
-  readonly canRestore = computed(() => this.canUseQuestionGroups('QuestionGroups.Update'));
+  readonly canCreate = computed(() => this.authStore.canManageGlobalQuestionGroups('Create'));
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -91,12 +81,12 @@ export class QuestionGroupsPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.questionGroupsStore.load();
+    this.globalQuestionGroupsStore.load();
   }
 
   searchGroups(): void {
     const formValue = this.searchForm.getRawValue();
-    this.questionGroupsStore.search(
+    this.globalQuestionGroupsStore.search(
       formValue.searchText,
       this.toIsActiveFilter(formValue.isActive),
       this.toPageSize(formValue.pageSize),
@@ -111,15 +101,15 @@ export class QuestionGroupsPageComponent implements OnInit {
       pageSize: '10',
       orderSort: '',
     });
-    this.questionGroupsStore.search('', null, 10, '');
+    this.globalQuestionGroupsStore.search('', null, 10, '');
   }
 
   goToPreviousGroupsPage(): void {
-    this.questionGroupsStore.previousPage();
+    this.globalQuestionGroupsStore.previousPage();
   }
 
   goToNextGroupsPage(): void {
-    this.questionGroupsStore.nextPage();
+    this.globalQuestionGroupsStore.nextPage();
   }
 
   openCreateGroup(): void {
@@ -127,7 +117,7 @@ export class QuestionGroupsPageComponent implements OnInit {
       return;
     }
 
-    this.questionGroupsStore.clearMessages();
+    this.globalQuestionGroupsStore.clearMessages();
     this.createModalOpen.set(true);
   }
 
@@ -138,22 +128,22 @@ export class QuestionGroupsPageComponent implements OnInit {
 
   createGroup(): void {
     this.groupForm.markAllAsTouched();
-    if (this.groupForm.invalid || this.questionGroupsStore.creating() || !this.canCreate()) {
+    if (this.groupForm.invalid || this.globalQuestionGroupsStore.creating() || !this.canCreate()) {
       return;
     }
 
-    this.questionGroupsStore.createGroup(this.toPayload(this.groupForm.getRawValue()), () => {
+    this.globalQuestionGroupsStore.createGroup(this.toPayload(this.groupForm.getRawValue()), () => {
       this.closeCreateGroup();
     });
   }
 
-  openEditGroup(event: MouseEvent, group: QuestionGroupListItem): void {
+  openEditGroup(event: MouseEvent, group: GlobalQuestionGroupListItem): void {
     event.stopPropagation();
     if (!this.canEditGroup(group)) {
       return;
     }
 
-    this.questionGroupsStore.clearMessages();
+    this.globalQuestionGroupsStore.clearMessages();
     this.selectedGroup.set(group);
     this.editGroupForm.setValue({
       nameEn: group.nameEn,
@@ -175,13 +165,13 @@ export class QuestionGroupsPageComponent implements OnInit {
     if (
       !group ||
       this.editGroupForm.invalid ||
-      this.questionGroupsStore.updating() ||
+      this.globalQuestionGroupsStore.updating() ||
       !this.canEditGroup(group)
     ) {
       return;
     }
 
-    this.questionGroupsStore.updateGroup(
+    this.globalQuestionGroupsStore.updateGroup(
       group.groupId,
       this.toPayload(this.editGroupForm.getRawValue()),
       () => {
@@ -190,13 +180,17 @@ export class QuestionGroupsPageComponent implements OnInit {
     );
   }
 
-  openDeleteGroup(event: MouseEvent, group: QuestionGroupListItem): void {
+  canEditGroup(group: GlobalQuestionGroupListItem): boolean {
+    return group.isEditable && this.authStore.canManageGlobalQuestionGroups('Update');
+  }
+
+  openDeleteGroup(event: MouseEvent, group: GlobalQuestionGroupListItem): void {
     event.stopPropagation();
     if (!this.canDeleteGroup(group)) {
       return;
     }
 
-    this.questionGroupsStore.clearMessages();
+    this.globalQuestionGroupsStore.clearMessages();
     this.groupPendingDelete.set(group);
     this.deleteModalOpen.set(true);
   }
@@ -208,34 +202,31 @@ export class QuestionGroupsPageComponent implements OnInit {
 
   deleteSelectedGroup(): void {
     const group = this.groupPendingDelete();
-    if (!group || this.questionGroupsStore.deleting() || !this.canDeleteGroup(group)) {
+    if (!group || this.globalQuestionGroupsStore.deleting() || !this.canDeleteGroup(group)) {
       return;
     }
 
-    this.questionGroupsStore.deleteGroup(group.groupId, () => {
+    this.globalQuestionGroupsStore.deleteGroup(group.groupId, () => {
       this.closeDeleteGroup();
     });
   }
 
-  restoreGroup(event: MouseEvent, group: QuestionGroupListItem): void {
+  canDeleteGroup(group: GlobalQuestionGroupListItem): boolean {
+    return group.isEditable && group.isActive && this.authStore.canManageGlobalQuestionGroups('Delete');
+  }
+
+  restoreGroup(event: MouseEvent, group: GlobalQuestionGroupListItem): void {
     event.stopPropagation();
-    if (!this.canRestoreGroup(group) || this.questionGroupsStore.restoring()) {
+    if (!this.canRestoreGroup(group) || this.globalQuestionGroupsStore.restoring()) {
       return;
     }
 
-    this.questionGroupsStore.restoreGroup(group.groupId, () => undefined);
+    this.globalQuestionGroupsStore.clearMessages();
+    this.globalQuestionGroupsStore.restoreGroup(group.groupId, () => undefined);
   }
 
-  canEditGroup(group: QuestionGroupListItem): boolean {
-    return group.isEditable && this.canUpdate();
-  }
-
-  canDeleteGroup(group: QuestionGroupListItem): boolean {
-    return group.isEditable && group.isActive && this.canDelete();
-  }
-
-  canRestoreGroup(group: QuestionGroupListItem): boolean {
-    return group.isEditable && !group.isActive && this.canRestore();
+  canRestoreGroup(group: GlobalQuestionGroupListItem): boolean {
+    return group.isEditable && !group.isActive && this.authStore.canManageGlobalQuestionGroups('Restore');
   }
 
   groupFieldError(field: keyof typeof this.groupForm.controls): string {
@@ -259,22 +250,12 @@ export class QuestionGroupsPageComponent implements OnInit {
     }
 
     if (required) {
-      return 'questionGroups.nameEnRequired';
+      return 'globalQuestionGroups.nameEnRequired';
     }
 
-    if (field === 'nameEn') {
-      return 'questionGroups.nameEnMaxLength';
-    }
-
-    return 'questionGroups.nameArMaxLength';
-  }
-
-  private toPayload(value: { nameEn: string; nameAr: string }): CreateQuestionGroupRequest {
-    const nameAr = value.nameAr.trim();
-    return {
-      nameEn: value.nameEn.trim(),
-      nameAr: nameAr.length > 0 ? nameAr : null,
-    };
+    return field === 'nameEn'
+      ? 'globalQuestionGroups.nameEnMaxLength'
+      : 'globalQuestionGroups.nameArMaxLength';
   }
 
   private toIsActiveFilter(value: string): boolean | null {
@@ -295,12 +276,11 @@ export class QuestionGroupsPageComponent implements OnInit {
     return Math.min(Math.max(pageSize, 1), 100);
   }
 
-  private canUseQuestionGroups(permission: string): boolean {
-    const action = permission.replace('QuestionGroups.', '') as
-      | 'Create'
-      | 'Update'
-      | 'Delete'
-      | 'ViewAll';
-    return this.authStore.canManageQuestionGroups(action);
+  private toPayload(value: { nameEn: string; nameAr: string }): CreateGlobalQuestionGroupRequest {
+    const nameAr = value.nameAr.trim();
+    return {
+      nameEn: value.nameEn.trim(),
+      nameAr: nameAr.length > 0 ? nameAr : null,
+    };
   }
 }

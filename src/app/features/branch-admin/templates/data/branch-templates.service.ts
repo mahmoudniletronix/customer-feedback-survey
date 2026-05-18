@@ -5,6 +5,12 @@ import { environment } from '../../../../../environments/environment';
 import { toQuestionAnswerOption } from '../../../../shared/models/question-answer.model';
 import { toQuestionCondition } from '../../../../shared/models/question-condition.model';
 import {
+  toEditableScopeState,
+  toScopeState,
+  toSelectableEditableScopeState,
+  toSelectableScopeState,
+} from '../../../../shared/models/resource-scope.model';
+import {
   BranchTemplate,
   BranchTemplateApiResponse,
   BranchTemplateDetailsQuestion,
@@ -243,8 +249,10 @@ export class BranchTemplatesService {
     const questionId = this.readRecordId(response.questionId);
 
     return {
+      ...toEditableScopeState(response),
       templateQuestionId: this.readRecordId(response.templateQuestionId),
       questionId,
+      questionBranchId: this.readNullableRecordId(response.questionBranchId),
       order: response.order ?? null,
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? '',
@@ -252,6 +260,7 @@ export class BranchTemplatesService {
       typeName: response.typeName ?? '',
       isActive: response.isActive ?? true,
       groupId: this.readRecordId(response.groupId),
+      groupBranchId: this.readNullableRecordId(response.groupBranchId),
       groupNameEn: response.groupNameEn ?? '',
       groupNameAr: response.groupNameAr ?? '',
       options: (response.options ?? []).map((option) => toQuestionAnswerOption(option, questionId)),
@@ -272,7 +281,9 @@ export class BranchTemplatesService {
     response: BranchTemplateQuestionGroupSelectionApiResponse,
   ): BranchTemplateQuestionGroupSelection {
     return {
+      ...toSelectableScopeState(response),
       groupId: this.readRecordId(response.groupId),
+      branchId: this.readNullableRecordId(response.branchId),
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
       isActive: response.isActive ?? true,
@@ -301,7 +312,9 @@ export class BranchTemplatesService {
       }
 
       groupsById.set(groupId, {
+        ...toSelectableScopeState(question),
         groupId,
+        branchId: this.readNullableRecordId(question.branchId),
         nameEn: question.groupNameEn ?? '',
         nameAr: question.groupNameAr ?? '',
         isActive: true,
@@ -318,8 +331,11 @@ export class BranchTemplatesService {
     const questionId = this.readRecordId(response.questionId);
 
     return {
+      ...toSelectableEditableScopeState(response),
       questionId,
       templateQuestionId: this.readNullableRecordId(response.templateQuestionId),
+      branchId: this.readNullableRecordId(response.branchId),
+      groupId: this.readRecordId(response.groupId),
       textEn: response.textEn ?? '',
       textAr: response.textAr ?? '',
       type: response.type !== null && response.type !== undefined ? String(response.type) : '',
@@ -347,8 +363,11 @@ export class BranchTemplatesService {
 
   private toUpdatedQuestion(response: UpdatedBranchTemplateQuestionApiResponse): UpdatedBranchTemplateQuestion {
     return {
+      ...toScopeState(response),
       templateQuestionId: this.readRecordId(response.templateQuestionId),
       questionId: this.readRecordId(response.questionId),
+      questionBranchId: this.readNullableRecordId(response.questionBranchId),
+      groupId: this.readRecordId(response.groupId),
       order: response.order ?? 0,
     };
   }
@@ -368,7 +387,7 @@ export class BranchTemplatesService {
     return Array.isArray(response);
   }
 
-  private readRecordId(id: string | number | undefined): string {
+  private readRecordId(id: string | number | null | undefined): string {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : '';
   }
 

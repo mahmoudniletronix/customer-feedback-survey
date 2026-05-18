@@ -1,62 +1,65 @@
 <div class="w-full space-y-4 text-sm">
   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
-      <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'questionGroups.title' | t }}</h2>
-      <p class="mt-1 text-xs text-slate-500">{{ 'questionGroups.description' | t }}</p>
+      <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'globalQuestionGroups.title' | t }}</h2>
+      <p class="mt-1 text-xs text-slate-500">{{ 'globalQuestionGroups.description' | t }}</p>
     </div>
     @if (canCreate()) {
       <div class="flex justify-end sm:shrink-0">
         <app-button type="button" (pressed)="openCreateGroup()">
           <app-icon [icon]="plusIcon" [size]="17" />
-          {{ 'questionGroups.createAction' | t }}
+          {{ 'globalQuestionGroups.createAction' | t }}
         </app-button>
       </div>
     }
   </div>
 
-  @if (questionGroupsStore.success()) {
+  @if (globalQuestionGroupsStore.success()) {
     <div
       class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
     >
-      {{ questionGroupsStore.success() ?? '' | t }}
+      {{ globalQuestionGroupsStore.success() ?? '' | t }}
     </div>
   }
 
-  @if (questionGroupsStore.error()) {
+  @if (globalQuestionGroupsStore.error()) {
     <div
       class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
     >
-      {{ questionGroupsStore.error() ?? '' | t }}
+      {{ globalQuestionGroupsStore.error() ?? '' | t }}
     </div>
   }
 
-  <app-card [title]="'questionGroups.listTitle' | t" [subtitle]="'questionGroups.listSubtitle' | t">
+  <app-card
+    [title]="'globalQuestionGroups.listTitle' | t"
+    [subtitle]="'globalQuestionGroups.listSubtitle' | t"
+  >
     <form
       class="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_8rem_10rem_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchGroups()"
     >
       <app-input
-        [label]="'questionGroups.search' | t"
-        [placeholder]="'questionGroups.searchPlaceholder' | t"
+        [label]="'globalQuestionGroups.search' | t"
+        [placeholder]="'globalQuestionGroups.searchPlaceholder' | t"
         formControlName="searchText"
       />
       <label class="block">
         <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'questionGroups.isActiveFilter' | t }}
+          {{ 'globalQuestionGroups.isActiveFilter' | t }}
         </span>
         <select
           class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="isActive"
         >
-          <option value="">{{ 'questionGroups.allGroups' | t }}</option>
+          <option value="">{{ 'globalQuestionGroups.allGroups' | t }}</option>
           <option value="true">{{ 'common.active' | t }}</option>
           <option value="false">{{ 'branches.inactive' | t }}</option>
         </select>
       </label>
       <label class="block">
         <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'questionGroups.pageSize' | t }}
+          {{ 'globalQuestionGroups.pageSize' | t }}
         </span>
         <select
           class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
@@ -70,19 +73,19 @@
       </label>
       <label class="block">
         <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'questionGroups.orderSort' | t }}
+          {{ 'globalQuestionGroups.orderSort' | t }}
         </span>
         <select
           class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="orderSort"
         >
-          <option value="">{{ 'questionGroups.defaultSort' | t }}</option>
-          <option value="Newest">{{ 'questionGroups.newest' | t }}</option>
-          <option value="Oldest">{{ 'questionGroups.oldest' | t }}</option>
+          <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
+          <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
+          <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
         </select>
       </label>
       <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
-        <app-button type="submit" [loading]="questionGroupsStore.loading()">
+        <app-button type="submit" [loading]="globalQuestionGroupsStore.loading()">
           <app-icon [icon]="searchIcon" [size]="17" />
           {{ 'branches.searchAction' | t }}
         </app-button>
@@ -96,19 +99,21 @@
       <div class="overflow-x-auto">
         <table class="w-full table-fixed divide-y divide-slate-100 text-sm">
           <colgroup>
-            <col class="w-[20%]" />
-            <col class="w-[18%]" />
+            <col class="w-[19%]" />
+            <col class="w-[17%]" />
+            <col class="w-[12%]" />
             <col class="w-[14%]" />
             <col class="w-[14%]" />
-            <col class="w-[16%]" />
-            <col class="w-[18%]" />
+            <col class="w-[14%]" />
+            <col class="w-[10%]" />
           </colgroup>
           <thead
             class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
           >
             <tr>
-              <th class="px-4 py-3">{{ 'questionGroups.nameEn' | t }}</th>
-              <th class="px-4 py-3">{{ 'questionGroups.nameAr' | t }}</th>
+              <th class="px-4 py-3">{{ 'globalQuestionGroups.nameEn' | t }}</th>
+              <th class="px-4 py-3">{{ 'globalQuestionGroups.nameAr' | t }}</th>
+              <th class="px-4 py-3">{{ 'common.scope' | t }}</th>
               <th class="px-4 py-3">{{ 'common.status' | t }}</th>
               <th class="px-4 py-3">{{ 'branches.questionsCount' | t }}</th>
               <th class="px-4 py-3">{{ 'branches.createdOn' | t }}</th>
@@ -116,18 +121,21 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
-            @if (questionGroupsStore.loading()) {
+            @if (globalQuestionGroupsStore.loading()) {
               <tr>
-                <td class="px-4 py-8 text-center text-slate-500" colspan="6">
+                <td class="px-4 py-8 text-center text-slate-500" colspan="7">
                   <span
                     class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
                   ></span>
-                  {{ 'questionGroups.loading' | t }}
+                  {{ 'globalQuestionGroups.loading' | t }}
                 </td>
               </tr>
             } @else {
-              @for (group of questionGroupsStore.groups(); track group.groupId) {
-                <tr class="align-top transition hover:bg-slate-50">
+              @for (group of globalQuestionGroupsStore.groups(); track group.groupId) {
+                <tr
+                  class="align-top transition hover:bg-slate-50"
+                  [class.bg-slate-50]="!group.isActive"
+                >
                   <td class="px-4 py-3">
                     <p class="break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
                       {{ group.nameEn }}
@@ -135,6 +143,13 @@
                   </td>
                   <td class="px-4 py-3 text-slate-700">
                     <p class="break-words [overflow-wrap:anywhere]">{{ group.nameAr || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-700"
+                    >
+                      {{ 'globalQuestionGroups.globalBadge' | t }}
+                    </span>
                   </td>
                   <td class="px-4 py-3">
                     <span
@@ -158,6 +173,8 @@
                           size="sm"
                           type="button"
                           variant="secondary"
+                          [disabled]="globalQuestionGroupsStore.updating()"
+                          [loading]="globalQuestionGroupsStore.updating()"
                           (pressed)="openEditGroup($event, group)"
                         >
                           <app-icon [icon]="editIcon" [size]="15" />
@@ -168,8 +185,8 @@
                           size="sm"
                           type="button"
                           variant="danger"
-                          [disabled]="questionGroupsStore.deleting()"
-                          [loading]="questionGroupsStore.deleting()"
+                          [disabled]="globalQuestionGroupsStore.deleting()"
+                          [loading]="globalQuestionGroupsStore.deleting()"
                           (pressed)="openDeleteGroup($event, group)"
                         >
                           <app-icon [icon]="deleteIcon" [size]="15" />
@@ -180,8 +197,8 @@
                           size="sm"
                           type="button"
                           variant="secondary"
-                          [disabled]="questionGroupsStore.restoring()"
-                          [loading]="questionGroupsStore.restoring()"
+                          [disabled]="globalQuestionGroupsStore.restoring()"
+                          [loading]="globalQuestionGroupsStore.restoring()"
                           (pressed)="restoreGroup($event, group)"
                         >
                           <app-icon [icon]="restoreIcon" [size]="15" />
@@ -192,7 +209,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td class="px-4 py-8 text-center text-slate-500" colspan="6">
+                  <td class="px-4 py-8 text-center text-slate-500" colspan="7">
                     <app-icon class="mx-auto mb-2 text-slate-300" [icon]="groupIcon" [size]="24" />
                     {{ 'common.noRecords' | t }}
                   </td>
@@ -205,17 +222,18 @@
     </div>
 
     <div class="space-y-3 lg:hidden">
-      @if (questionGroupsStore.loading()) {
+      @if (globalQuestionGroupsStore.loading()) {
         <div class="rounded-xl border border-slate-100 bg-white p-4 text-center text-slate-500">
           <span
             class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
           ></span>
-          {{ 'questionGroups.loading' | t }}
+          {{ 'globalQuestionGroups.loading' | t }}
         </div>
       } @else {
-        @for (group of questionGroupsStore.groups(); track group.groupId) {
+        @for (group of globalQuestionGroupsStore.groups(); track group.groupId) {
           <article
             class="rounded-xl border border-slate-100 bg-white p-4 transition hover:border-cyan-100 hover:bg-slate-50"
+            [class.opacity-80]="!group.isActive"
           >
             <div class="flex items-start gap-3">
               <span
@@ -224,9 +242,16 @@
                 <app-icon [icon]="groupIcon" [size]="18" />
               </span>
               <div class="min-w-0 flex-1">
-                <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
-                  {{ group.nameEn }}
-                </p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
+                    {{ group.nameEn }}
+                  </p>
+                  <span
+                    class="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700"
+                  >
+                    {{ 'globalQuestionGroups.globalBadge' | t }}
+                  </span>
+                </div>
                 <p
                   class="mt-1 break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]"
                 >
@@ -260,53 +285,49 @@
               </div>
             </div>
 
-            <div
-              class="mt-4 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 sm:flex sm:flex-wrap sm:justify-end"
-            >
-              @if (canEditGroup(group)) {
-                <div class="flex justify-end">
+            @if (canEditGroup(group) || canDeleteGroup(group) || canRestoreGroup(group)) {
+              <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
+                @if (canEditGroup(group)) {
                   <app-button
                     size="sm"
                     type="button"
                     variant="secondary"
+                    [disabled]="globalQuestionGroupsStore.updating()"
+                    [loading]="globalQuestionGroupsStore.updating()"
                     (pressed)="openEditGroup($event, group)"
                   >
                     <app-icon [icon]="editIcon" [size]="15" />
                     {{ 'common.edit' | t }}
                   </app-button>
-                </div>
-              }
-              @if (canDeleteGroup(group)) {
-                <div class="flex justify-end">
+                }
+                @if (canDeleteGroup(group)) {
                   <app-button
                     size="sm"
                     type="button"
                     variant="danger"
-                    [disabled]="questionGroupsStore.deleting()"
-                    [loading]="questionGroupsStore.deleting()"
+                    [disabled]="globalQuestionGroupsStore.deleting()"
+                    [loading]="globalQuestionGroupsStore.deleting()"
                     (pressed)="openDeleteGroup($event, group)"
                   >
                     <app-icon [icon]="deleteIcon" [size]="15" />
                     {{ 'common.delete' | t }}
                   </app-button>
-                </div>
-              }
-              @if (canRestoreGroup(group)) {
-                <div class="flex justify-end">
+                }
+                @if (canRestoreGroup(group)) {
                   <app-button
                     size="sm"
                     type="button"
                     variant="secondary"
-                    [disabled]="questionGroupsStore.restoring()"
-                    [loading]="questionGroupsStore.restoring()"
+                    [disabled]="globalQuestionGroupsStore.restoring()"
+                    [loading]="globalQuestionGroupsStore.restoring()"
                     (pressed)="restoreGroup($event, group)"
                   >
                     <app-icon [icon]="restoreIcon" [size]="15" />
                     {{ 'common.restore' | t }}
                   </app-button>
-                </div>
-              }
-            </div>
+                }
+              </div>
+            }
           </article>
         } @empty {
           <div class="rounded-xl border border-slate-100 bg-white p-6 text-center text-slate-500">
@@ -322,16 +343,18 @@
     >
       <p class="text-sm font-semibold text-slate-500">
         {{ 'branches.paginationSummary' | t }}
-        {{ questionGroupsStore.currentPage() }} / {{ questionGroupsStore.totalPages() }}
+        {{ globalQuestionGroupsStore.currentPage() }} / {{ globalQuestionGroupsStore.totalPages() }}
         -
-        {{ questionGroupsStore.totalItems() }} {{ 'questionGroups.totalItems' | t }}
+        {{ globalQuestionGroupsStore.totalItems() }} {{ 'globalQuestionGroups.totalItems' | t }}
       </p>
       <div class="flex flex-wrap gap-2">
         <app-button
           size="sm"
           type="button"
           variant="secondary"
-          [disabled]="!questionGroupsStore.hasPreviousPage() || questionGroupsStore.loading()"
+          [disabled]="
+            !globalQuestionGroupsStore.hasPreviousPage() || globalQuestionGroupsStore.loading()
+          "
           (pressed)="goToPreviousGroupsPage()"
         >
           <app-icon [icon]="chevronLeftIcon" [size]="15" />
@@ -341,7 +364,9 @@
           size="sm"
           type="button"
           variant="secondary"
-          [disabled]="!questionGroupsStore.hasNextPage() || questionGroupsStore.loading()"
+          [disabled]="
+            !globalQuestionGroupsStore.hasNextPage() || globalQuestionGroupsStore.loading()
+          "
           (pressed)="goToNextGroupsPage()"
         >
           {{ 'branches.nextPage' | t }}
@@ -350,130 +375,33 @@
       </div>
     </div>
   </app-card>
-
-  @if (questionGroupsStore.createdGroup(); as group) {
-    <app-card [title]="'questionGroups.createdGroup' | t">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <span
-              class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
-            >
-              <app-icon [icon]="groupIcon" [size]="18" />
-            </span>
-            <div class="min-w-0">
-              <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
-                {{ group.nameEn }}
-              </p>
-              <p class="break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]">
-                {{ group.nameAr || '-' }}
-              </p>
-            </div>
-          </div>
-          <p class="mt-2 break-words text-xs font-semibold text-slate-400 [overflow-wrap:anywhere]">
-            {{ 'questionGroups.groupId' | t }}: {{ group.groupId }}
-          </p>
-        </div>
-        <span
-          class="rounded-full px-2.5 py-1 text-xs font-bold"
-          [class.bg-emerald-50]="group.isActive"
-          [class.text-emerald-700]="group.isActive"
-          [class.bg-slate-100]="!group.isActive"
-          [class.text-slate-500]="!group.isActive"
-        >
-          {{ (group.isActive ? 'common.active' : 'branches.inactive') | t }}
-        </span>
-      </div>
-    </app-card>
-  }
 </div>
 
 <app-modal
-  [title]="'questionGroups.createTitle' | t"
-  [open]="createModalOpen()"
-  (closed)="closeCreateGroup()"
-  size="lg"
->
-  <p class="mb-4 text-xs font-semibold text-slate-500">
-    {{ 'questionGroups.createSubtitle' | t }}
-  </p>
-  <form class="space-y-3" [formGroup]="groupForm" (ngSubmit)="createGroup()">
-    <div class="grid gap-3 md:grid-cols-2">
-      <app-input
-        [label]="'questionGroups.nameEn' | t"
-        [placeholder]="'questionGroups.nameEnPlaceholder' | t"
-        formControlName="nameEn"
-        [error]="groupFieldError('nameEn') | t"
-      />
-      <app-input
-        [label]="'questionGroups.nameAr' | t"
-        [placeholder]="'questionGroups.nameArPlaceholder' | t"
-        formControlName="nameAr"
-        [error]="groupFieldError('nameAr') | t"
-      />
-    </div>
-
-    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-      <app-button type="button" variant="secondary" (pressed)="closeCreateGroup()">
-        {{ 'common.cancel' | t }}
-      </app-button>
-      <app-button type="submit" [loading]="questionGroupsStore.creating()">
-        <app-icon [icon]="plusIcon" [size]="17" />
-        {{ 'questionGroups.createAction' | t }}
-      </app-button>
-    </div>
-  </form>
-</app-modal>
-
-<app-modal
-  [title]="'questionGroups.updateTitle' | t"
-  [open]="editModalOpen()"
-  (closed)="closeEditGroup()"
->
-  <form class="space-y-3" [formGroup]="editGroupForm" (ngSubmit)="updateSelectedGroup()">
-    <div class="grid gap-3 md:grid-cols-2">
-      <app-input
-        [label]="'questionGroups.nameEn' | t"
-        [placeholder]="'questionGroups.nameEnPlaceholder' | t"
-        formControlName="nameEn"
-        [error]="editGroupFieldError('nameEn') | t"
-      />
-      <app-input
-        [label]="'questionGroups.nameAr' | t"
-        [placeholder]="'questionGroups.nameArPlaceholder' | t"
-        formControlName="nameAr"
-        [error]="editGroupFieldError('nameAr') | t"
-      />
-    </div>
-
-    <div class="flex flex-wrap justify-end gap-2">
-      <app-button type="button" variant="secondary" (pressed)="closeEditGroup()">
-        {{ 'common.cancel' | t }}
-      </app-button>
-      <app-button type="submit" [loading]="questionGroupsStore.updating()">
-        <app-icon [icon]="editIcon" [size]="17" />
-        {{ 'common.save' | t }}
-      </app-button>
-    </div>
-  </form>
-</app-modal>
-
-<app-modal
-  [title]="'questionGroups.deleteTitle' | t"
+  [title]="'globalQuestionGroups.deleteTitle' | t"
   [open]="deleteModalOpen()"
   (closed)="closeDeleteGroup()"
 >
   @if (groupPendingDelete(); as group) {
     <div class="space-y-4">
-      <p class="text-sm font-semibold text-slate-700">{{ 'questionGroups.deleteConfirm' | t }}</p>
+      <p class="text-sm font-semibold text-slate-700">
+        {{ 'globalQuestionGroups.deleteConfirm' | t }}
+      </p>
       <div class="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
-        <p class="font-bold text-slate-900">{{ group.nameEn }}</p>
-        <p class="mt-1">{{ group.nameAr || '-' }}</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
+            {{ group.nameEn }}
+          </p>
+          <span class="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700">
+            {{ 'globalQuestionGroups.globalBadge' | t }}
+          </span>
+        </div>
+        <p class="mt-1 break-words [overflow-wrap:anywhere]">{{ group.nameAr || '-' }}</p>
         @if (group.questionsCount > 0) {
           <p
             class="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-2 font-semibold text-amber-700"
           >
-            {{ 'questionGroups.hasQuestionsWarning' | t }}
+            {{ 'globalQuestionGroups.hasQuestionsWarning' | t }}
           </p>
         }
       </div>
@@ -484,7 +412,7 @@
         <app-button
           type="button"
           variant="danger"
-          [loading]="questionGroupsStore.deleting()"
+          [loading]="globalQuestionGroupsStore.deleting()"
           (pressed)="deleteSelectedGroup()"
         >
           <app-icon [icon]="deleteIcon" [size]="17" />
@@ -493,4 +421,74 @@
       </div>
     </div>
   }
+</app-modal>
+
+<app-modal
+  [title]="'globalQuestionGroups.createTitle' | t"
+  [open]="createModalOpen()"
+  (closed)="closeCreateGroup()"
+  size="lg"
+>
+  <p class="mb-4 text-xs font-semibold text-slate-500">
+    {{ 'globalQuestionGroups.createSubtitle' | t }}
+  </p>
+  <form class="space-y-3" [formGroup]="groupForm" (ngSubmit)="createGroup()">
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'globalQuestionGroups.nameEn' | t"
+        [placeholder]="'globalQuestionGroups.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="groupFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'globalQuestionGroups.nameAr' | t"
+        [placeholder]="'globalQuestionGroups.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="groupFieldError('nameAr') | t"
+      />
+    </div>
+
+    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+      <app-button type="button" variant="secondary" (pressed)="closeCreateGroup()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="globalQuestionGroupsStore.creating()">
+        <app-icon [icon]="plusIcon" [size]="17" />
+        {{ 'globalQuestionGroups.createAction' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
+<app-modal
+  [title]="'globalQuestionGroups.updateTitle' | t"
+  [open]="editModalOpen()"
+  (closed)="closeEditGroup()"
+>
+  <form class="space-y-3" [formGroup]="editGroupForm" (ngSubmit)="updateSelectedGroup()">
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'globalQuestionGroups.nameEn' | t"
+        [placeholder]="'globalQuestionGroups.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="editGroupFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'globalQuestionGroups.nameAr' | t"
+        [placeholder]="'globalQuestionGroups.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="editGroupFieldError('nameAr') | t"
+      />
+    </div>
+
+    <div class="flex flex-wrap justify-end gap-2">
+      <app-button type="button" variant="secondary" (pressed)="closeEditGroup()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button type="submit" [loading]="globalQuestionGroupsStore.updating()">
+        <app-icon [icon]="editIcon" [size]="17" />
+        {{ 'common.save' | t }}
+      </app-button>
+    </div>
+  </form>
 </app-modal>

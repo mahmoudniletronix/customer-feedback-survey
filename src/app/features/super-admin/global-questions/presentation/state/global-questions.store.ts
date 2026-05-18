@@ -1,15 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
-import { QuestionGroupSelectionItem } from '../../../question-groups/domain/question-group.model';
-import { QuestionGroupsService } from '../../../question-groups/data/question-groups.service';
+import { GlobalQuestionGroupsService } from '../../../global-question-groups/data/global-question-groups.service';
+import { GlobalQuestionGroupSelectionItem } from '../../../global-question-groups/domain/global-question-group.model';
+import { GlobalQuestionsService } from '../../data/global-questions.service';
 import {
-  CreateQuestionRequest,
-  QuestionListItem,
-  QuestionsFilter,
-  UpdateQuestionRequest,
-} from '../../domain/question.model';
-import { QuestionsService } from '../../data/questions.service';
+  CreateGlobalQuestionRequest,
+  GLOBAL_QUESTION_TYPE,
+  GlobalQuestionListItem,
+  GlobalQuestionsFilter,
+  UpdateGlobalQuestionRequest,
+} from '../../domain/global-question.model';
 
 interface ApiErrorItem {
   code?: string;
@@ -24,26 +25,30 @@ interface ApiErrorResponse {
 }
 
 @Injectable()
-export class QuestionsStore {
-  private readonly defaultQuery: QuestionsFilter = {
+export class GlobalQuestionsStore {
+  private readonly defaultQuery: GlobalQuestionsFilter = {
     pageNumber: 1,
     pageSize: 10,
     searchText: '',
+    groupId: '',
     orderSort: '',
     isActive: null,
   };
 
-  private readonly questionsService = inject(QuestionsService);
-  private readonly questionGroupsService = inject(QuestionGroupsService);
-  private readonly questionsSignal = signal<readonly QuestionListItem[]>([]);
-  private readonly groupsSelectionSignal = signal<readonly QuestionGroupSelectionItem[]>([]);
+  private readonly globalQuestionsService = inject(GlobalQuestionsService);
+  private readonly globalQuestionGroupsService = inject(GlobalQuestionGroupsService);
+  private readonly questionsSignal = signal<readonly GlobalQuestionListItem[]>([]);
+  private readonly groupsSelectionSignal = signal<readonly GlobalQuestionGroupSelectionItem[]>([]);
+  private readonly createdQuestionSignal = signal<GlobalQuestionListItem | null>(null);
   private readonly currentPageSignal = signal(this.defaultQuery.pageNumber);
   private readonly pageSizeSignal = signal(this.defaultQuery.pageSize);
   private readonly totalItemsSignal = signal(0);
   private readonly searchTextSignal = signal(this.defaultQuery.searchText);
+  private readonly groupIdSignal = signal(this.defaultQuery.groupId);
   private readonly orderSortSignal = signal(this.defaultQuery.orderSort);
   private readonly isActiveSignal = signal<boolean | null>(this.defaultQuery.isActive);
   private readonly loadingSignal = signal(false);
+  private readonly detailsLoadingSignal = signal(false);
   private readonly groupsLoadingSignal = signal(false);
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
@@ -54,13 +59,16 @@ export class QuestionsStore {
 
   readonly questions = this.questionsSignal.asReadonly();
   readonly groupsSelection = this.groupsSelectionSignal.asReadonly();
+  readonly createdQuestion = this.createdQuestionSignal.asReadonly();
   readonly currentPage = this.currentPageSignal.asReadonly();
   readonly pageSize = this.pageSizeSignal.asReadonly();
   readonly totalItems = this.totalItemsSignal.asReadonly();
   readonly searchText = this.searchTextSignal.asReadonly();
+  readonly groupId = this.groupIdSignal.asReadonly();
   readonly orderSort = this.orderSortSignal.asReadonly();
   readonly isActive = this.isActiveSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
+  readonly detailsLoading = this.detailsLoadingSignal.asReadonly();
   readonly groupsLoading = this.groupsLoadingSignal.asReadonly();
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
@@ -72,11 +80,12 @@ export class QuestionsStore {
   readonly hasPreviousPage = computed(() => this.currentPageSignal() > 1);
   readonly hasNextPage = computed(() => this.currentPageSignal() < this.totalPages());
 
-  load(query: Partial<QuestionsFilter> = {}): void {
-    const nextQuery: QuestionsFilter = {
+  load(query: Partial<GlobalQuestionsFilter> = {}): void {
+    const nextQuery: GlobalQuestionsFilter = {
       pageNumber: query.pageNumber ?? this.currentPageSignal(),
       pageSize: query.pageSize ?? this.pageSizeSignal(),
       searchText: query.searchText ?? this.searchTextSignal(),
+      groupId: query.groupId ?? this.groupIdSignal(),
       orderSort: query.orderSort ?? this.orderSortSignal(),
       isActive: query.isActive !== undefined ? query.isActive : this.isActiveSignal(),
     };
@@ -84,10 +93,11 @@ export class QuestionsStore {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
     this.searchTextSignal.set(nextQuery.searchText);
+    this.groupIdSignal.set(nextQuery.groupId);
     this.orderSortSignal.set(nextQuery.orderSort);
     this.isActiveSignal.set(nextQuery.isActive);
 
-    this.questionsService
+    this.globalQuestionsService
       .list(nextQuery)
       .pipe(
         take(1),
@@ -103,7 +113,7 @@ export class QuestionsStore {
         error: (error: unknown) => {
           this.questionsSignal.set([]);
           this.totalItemsSignal.set(0);
-          this.errorSignal.set(this.readErrorKey(error, 'questions.loadError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.loadError'));
         },
       });
   }
@@ -116,7 +126,7 @@ export class QuestionsStore {
     this.groupsLoadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.questionGroupsService
+    this.globalQuestionGroupsService
       .selection()
       .pipe(
         take(1),
@@ -128,16 +138,25 @@ export class QuestionsStore {
         },
         error: (error: unknown) => {
           this.groupsSelectionSignal.set([]);
-          this.errorSignal.set(this.readErrorKey(error, 'questions.groupsSelectionLoadError'));
+          this.errorSignal.set(
+            this.readErrorKey(error, 'globalQuestions.groupsSelectionLoadError'),
+          );
         },
       });
   }
 
-  search(searchText: string, isActive: boolean | null, pageSize: number, orderSort: string): void {
+  search(
+    searchText: string,
+    groupId: string,
+    isActive: boolean | null,
+    pageSize: number,
+    orderSort: string,
+  ): void {
     this.load({
       pageNumber: this.defaultQuery.pageNumber,
       pageSize,
       searchText,
+      groupId,
       isActive,
       orderSort,
     });
@@ -155,7 +174,7 @@ export class QuestionsStore {
     }
   }
 
-  createQuestion(payload: CreateQuestionRequest, onCreated: () => void): void {
+  createQuestion(payload: CreateGlobalQuestionRequest, onCreated: () => void): void {
     if (this.creatingSignal()) {
       return;
     }
@@ -164,25 +183,60 @@ export class QuestionsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionsService
+    this.globalQuestionsService
       .create(payload)
       .pipe(
         take(1),
         finalize(() => this.creatingSignal.set(false)),
       )
       .subscribe({
-        next: () => {
-          this.successSignal.set('questions.createSuccess');
-          this.load();
+        next: (question) => {
+          this.createdQuestionSignal.set(question);
+          this.successSignal.set('globalQuestions.createSuccess');
+          this.load({ pageNumber: this.defaultQuery.pageNumber });
           onCreated();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questions.createError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.createError'));
         },
       });
   }
 
-  updateQuestion(questionId: string, payload: UpdateQuestionRequest, onUpdated: () => void): void {
+  loadQuestionDetails(
+    questionId: string,
+    onLoaded: (question: GlobalQuestionListItem) => void,
+  ): void {
+    if (this.detailsLoadingSignal()) {
+      return;
+    }
+
+    this.detailsLoadingSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.globalQuestionsService
+      .getById(questionId)
+      .pipe(
+        take(1),
+        finalize(() => this.detailsLoadingSignal.set(false)),
+      )
+      .subscribe({
+        next: (question) => {
+          const mergedQuestion = this.mergeQuestion(questionId, question);
+          this.replaceQuestionInList(mergedQuestion);
+          onLoaded(mergedQuestion);
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.detailsLoadError'));
+        },
+      });
+  }
+
+  updateQuestion(
+    questionId: string,
+    payload: UpdateGlobalQuestionRequest,
+    onUpdated: () => void,
+  ): void {
     if (this.updatingSignal()) {
       return;
     }
@@ -191,20 +245,20 @@ export class QuestionsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionsService
+    this.globalQuestionsService
       .update(questionId, payload)
       .pipe(
         take(1),
         finalize(() => this.updatingSignal.set(false)),
       )
       .subscribe({
-        next: () => {
-          this.successSignal.set('questions.updateSuccess');
-          this.load();
+        next: (question) => {
+          this.replaceQuestionInList(this.mergeQuestion(questionId, question));
+          this.successSignal.set('globalQuestions.updateSuccess');
           onUpdated();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questions.updateError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.updateError'));
         },
       });
   }
@@ -218,7 +272,7 @@ export class QuestionsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionsService
+    this.globalQuestionsService
       .delete(questionId)
       .pipe(
         take(1),
@@ -227,11 +281,11 @@ export class QuestionsStore {
       .subscribe({
         next: (question) => {
           this.replaceQuestionInList(this.mergeQuestion(questionId, question));
-          this.successSignal.set('questions.deleteSuccess');
+          this.successSignal.set('globalQuestions.deleteSuccess');
           onDeleted();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questions.deleteError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.deleteError'));
         },
       });
   }
@@ -245,7 +299,7 @@ export class QuestionsStore {
     this.errorSignal.set(null);
     this.successSignal.set(null);
 
-    this.questionsService
+    this.globalQuestionsService
       .restore(questionId)
       .pipe(
         take(1),
@@ -254,11 +308,11 @@ export class QuestionsStore {
       .subscribe({
         next: (question) => {
           this.replaceQuestionInList(this.mergeQuestion(questionId, question));
-          this.successSignal.set('questions.restoreSuccess');
+          this.successSignal.set('globalQuestions.restoreSuccess');
           onRestored();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error, 'questions.restoreError'));
+          this.errorSignal.set(this.readErrorKey(error, 'globalQuestions.restoreError'));
         },
       });
   }
@@ -268,48 +322,45 @@ export class QuestionsStore {
     this.successSignal.set(null);
   }
 
-  private replaceQuestionInList(question: QuestionListItem): void {
-    this.questionsSignal.update((questions) => {
-      if (!this.matchesActiveFilter(question)) {
-        if (questions.some((currentQuestion) => currentQuestion.questionId === question.questionId)) {
-          this.totalItemsSignal.update((totalItems) => Math.max(0, totalItems - 1));
-        }
-        return questions.filter((currentQuestion) => currentQuestion.questionId !== question.questionId);
-      }
-
-      return questions.map((currentQuestion) =>
+  private replaceQuestionInList(question: GlobalQuestionListItem): void {
+    this.questionsSignal.update((questions) =>
+      questions.map((currentQuestion) =>
         currentQuestion.questionId === question.questionId ? question : currentQuestion,
-      );
-    });
+      ),
+    );
   }
 
-  private mergeQuestion(questionId: string, question: QuestionListItem): QuestionListItem {
+  private mergeQuestion(
+    questionId: string,
+    question: GlobalQuestionListItem,
+  ): GlobalQuestionListItem {
     const currentQuestion = this.questionsSignal().find((current) => current.questionId === questionId);
 
     return {
       questionId: question.questionId || currentQuestion?.questionId || questionId,
-      branchId: question.branchId ?? currentQuestion?.branchId ?? null,
+      branchId: null,
       groupId: question.groupId || currentQuestion?.groupId || '',
-      groupBranchId: question.groupBranchId ?? currentQuestion?.groupBranchId ?? null,
-      scope: question.scope ?? currentQuestion?.scope ?? null,
-      scopeName: question.scopeName || currentQuestion?.scopeName || 'Branch',
+      groupBranchId: null,
+      scope: question.scope ?? currentQuestion?.scope ?? 2,
+      scopeName: question.scopeName || currentQuestion?.scopeName || 'Global',
       isGlobal: question.isGlobal,
       isEditable: question.isEditable,
       groupNameEn: question.groupNameEn || currentQuestion?.groupNameEn || '',
-      groupNameAr: question.groupNameAr !== null ? question.groupNameAr : currentQuestion?.groupNameAr ?? null,
+      groupNameAr:
+        question.groupNameAr !== null ? question.groupNameAr : currentQuestion?.groupNameAr ?? null,
       textEn: question.textEn || currentQuestion?.textEn || '',
       textAr: question.textAr !== null ? question.textAr : currentQuestion?.textAr ?? null,
       type: question.typeName.length > 0 ? question.type : currentQuestion?.type ?? question.type,
       typeName: question.typeName || currentQuestion?.typeName || '',
       isActive: question.isActive,
       createdOnUtc: question.createdOnUtc || currentQuestion?.createdOnUtc || '',
-      options: question.options.length > 0 ? question.options : currentQuestion?.options ?? [],
+      options:
+        question.type === GLOBAL_QUESTION_TYPE.SingleChoice
+          ? question.options.length > 0
+            ? question.options
+            : currentQuestion?.options ?? []
+          : [],
     };
-  }
-
-  private matchesActiveFilter(question: QuestionListItem): boolean {
-    const isActive = this.isActiveSignal();
-    return isActive === null || question.isActive === isActive;
   }
 
   private readErrorKey(error: unknown, fallbackKey: string): string {
@@ -324,16 +375,16 @@ export class QuestionsStore {
     }
 
     if (error.status === 401) {
-      return 'questions.unauthorized';
+      return 'globalQuestions.unauthorized';
     }
     if (error.status === 403) {
-      return 'questions.forbidden';
+      return 'globalQuestions.forbidden';
     }
     if (error.status === 404) {
-      return 'questions.notFound';
+      return 'globalQuestions.notFound';
     }
     if (error.status === 400 || error.status === 422) {
-      return this.readProblemDetailsMessage(error.error) || 'questions.validationError';
+      return this.readProblemDetailsMessage(error.error) || 'globalQuestions.validationError';
     }
 
     return fallbackKey;
@@ -341,41 +392,82 @@ export class QuestionsStore {
 
   private mapBackendError(marker: string): string {
     const normalized = marker.replace(/[\s_-]/g, '').toLowerCase();
-    if (normalized.includes('currentbranchactor') || normalized.includes('actorprofilenotfound')) {
-      return 'questions.currentBranchActorNotFound';
+
+    if (normalized.includes('groupid') && normalized.includes('required')) {
+      return 'globalQuestions.groupRequired';
     }
-    if (normalized.includes('groupnotfound') || normalized.includes('invalidgroupid')) {
-      return 'questions.groupNotFound';
+    if (
+      normalized.includes('globalgroupnotfound') ||
+      normalized.includes('groupnotfound') ||
+      normalized.includes('invalidgroupid')
+    ) {
+      return 'globalQuestions.groupNotFound';
     }
-    if (normalized.includes('inactivegroup')) {
-      return 'questions.inactiveGroup';
-    }
-    if (normalized.includes('questionnotfound') || normalized.includes('invalidquestionid')) {
-      return 'questions.notFound';
-    }
-    if (normalized.includes('alreadyinactive')) {
-      return 'questions.alreadyInactive';
+    if (normalized.includes('inactivegroup') || normalized.includes('groupinactive')) {
+      return 'globalQuestions.groupInactive';
     }
     if (normalized.includes('textenrequired') || normalized.includes('invalidtexten')) {
-      return 'questions.textEnRequired';
+      return 'globalQuestions.textEnRequired';
     }
     if (normalized.includes('textenmaxlength') || normalized.includes('textarmaxlength')) {
-      return 'questions.textMaxLength';
+      return 'globalQuestions.textMaxLength';
     }
     if (normalized.includes('invalidquestiontype') || normalized.includes('invalidtype')) {
-      return 'questions.invalidType';
+      return 'globalQuestions.invalidType';
+    }
+    if (normalized.includes('alreadyinactive')) {
+      return 'globalQuestions.alreadyInactive';
+    }
+    if (normalized.includes('alreadyactive')) {
+      return 'globalQuestions.alreadyActive';
     }
     if (
-      normalized.includes('optionusedincondition') ||
-      (normalized.includes('option') && normalized.includes('used') && normalized.includes('condition'))
+      normalized.includes('globalquestionnotfound') ||
+      normalized.includes('questionnotfound') ||
+      normalized.includes('invalidquestionid')
     ) {
-      return 'questions.optionUsedInCondition';
+      return 'globalQuestions.notFound';
     }
     if (
-      normalized.includes('optionnotbelongtoquestion') ||
-      (normalized.includes('option') && normalized.includes('belong') && normalized.includes('question'))
+      normalized.includes('singlechoice') &&
+      normalized.includes('option') &&
+      (normalized.includes('required') || normalized.includes('least'))
     ) {
-      return 'questions.optionNotBelongToQuestion';
+      return 'globalQuestions.singleChoiceOptionsRequired';
+    }
+    if (
+      normalized.includes('nonsinglechoice') ||
+      (normalized.includes('options') && normalized.includes('only') && normalized.includes('singlechoice')) ||
+      (normalized.includes('options') && normalized.includes('notallowed'))
+    ) {
+      return 'globalQuestions.optionsOnlySingleChoice';
+    }
+    if (normalized.includes('optiontexten') && normalized.includes('required')) {
+      return 'globalQuestions.optionTextEnRequired';
+    }
+    if (normalized.includes('optiontexten') && normalized.includes('maxlength')) {
+      return 'globalQuestions.optionTextMaxLength';
+    }
+    if (normalized.includes('optiontextar') && normalized.includes('maxlength')) {
+      return 'globalQuestions.optionTextMaxLength';
+    }
+    if (normalized.includes('optionorder') && normalized.includes('required')) {
+      return 'globalQuestions.optionOrderRequired';
+    }
+    if (normalized.includes('optionorder') && (normalized.includes('positive') || normalized.includes('greater'))) {
+      return 'globalQuestions.optionOrderPositive';
+    }
+    if (
+      (normalized.includes('optionvalue') || normalized.includes('value')) &&
+      (normalized.includes('range') || normalized.includes('between') || normalized.includes('1') || normalized.includes('5'))
+    ) {
+      return 'globalQuestions.optionValueScaleRange';
+    }
+    if (normalized.includes('optionorder') && normalized.includes('unique')) {
+      return 'globalQuestions.optionOrderUnique';
+    }
+    if (normalized.includes('optiontexten') && normalized.includes('unique')) {
+      return 'globalQuestions.optionTextEnUnique';
     }
     if (
       normalized.includes('optionidduplicated') ||
@@ -383,42 +475,28 @@ export class QuestionsStore {
       (normalized.includes('optionid') &&
         (normalized.includes('duplicated') || normalized.includes('duplicate')))
     ) {
-      return 'questions.optionIdDuplicated';
-    }
-    if (normalized.includes('singlechoice') && normalized.includes('option') && normalized.includes('least')) {
-      return 'questions.singleChoiceMinOptions';
-    }
-    if (normalized.includes('options') && normalized.includes('only') && normalized.includes('singlechoice')) {
-      return 'questions.optionsOnlySingleChoice';
-    }
-    if (normalized.includes('optiontexten') && normalized.includes('required')) {
-      return 'questions.optionTextEnRequired';
-    }
-    if (normalized.includes('optionorder') && normalized.includes('required')) {
-      return 'questions.optionOrderRequired';
-    }
-    if (normalized.includes('optionorder') && (normalized.includes('greater') || normalized.includes('positive'))) {
-      return 'questions.optionOrderPositive';
+      return 'globalQuestions.optionIdDuplicated';
     }
     if (
-      (normalized.includes('optionvalue') || normalized.includes('value')) &&
-      (normalized.includes('1') || normalized.includes('5') || normalized.includes('range'))
+      normalized.includes('optionnotbelongtoquestion') ||
+      (normalized.includes('option') && normalized.includes('belong') && normalized.includes('question'))
     ) {
-      return 'questions.optionValueScaleRange';
+      return 'globalQuestions.optionNotBelongToQuestion';
     }
-    if (normalized.includes('optionorder') && normalized.includes('unique')) {
-      return 'questions.optionOrderUnique';
-    }
-    if (normalized.includes('optiontexten') && normalized.includes('unique')) {
-      return 'questions.optionTextEnUnique';
+    if (
+      normalized.includes('optionusedincondition') ||
+      (normalized.includes('option') && normalized.includes('used') && normalized.includes('condition'))
+    ) {
+      return 'globalQuestions.optionUsedInCondition';
     }
     if (
       normalized.includes('template') &&
       normalized.includes('type') &&
       (normalized.includes('change') || normalized.includes('linked'))
     ) {
-      return 'questions.typeChangeBlockedByTemplate';
+      return 'globalQuestions.typeChangeBlockedByTemplate';
     }
+
     return '';
   }
 
@@ -428,7 +506,13 @@ export class QuestionsStore {
     }
 
     const firstError = errorBody.errors?.[0];
-    return [firstError?.code, firstError?.messageName, firstError?.message, errorBody.detail, errorBody.title]
+    return [
+      firstError?.code,
+      firstError?.messageName,
+      firstError?.message,
+      errorBody.detail,
+      errorBody.title,
+    ]
       .filter((value): value is string => typeof value === 'string')
       .join(' ');
   }

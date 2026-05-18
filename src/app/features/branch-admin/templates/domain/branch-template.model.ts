@@ -7,6 +7,16 @@ import {
   QuestionConditionApiResponse,
   UpdateQuestionConditionsPayload,
 } from '../../../../shared/models/question-condition.model';
+import {
+  EditableScopeApiFields,
+  EditableScopeState,
+  ScopeApiFields,
+  ScopeState,
+  SelectableEditableScopeApiFields,
+  SelectableEditableScopeState,
+  SelectableScopeApiFields,
+  SelectableScopeState,
+} from '../../../../shared/models/resource-scope.model';
 
 export type BranchTemplateStatus = 'Draft' | 'Published' | 'Archived' | string;
 
@@ -26,9 +36,10 @@ export interface BranchTemplate {
   questionConditions: readonly QuestionCondition[];
 }
 
-export interface BranchTemplateDetailsQuestion {
+export interface BranchTemplateDetailsQuestion extends EditableScopeState {
   templateQuestionId: string;
   questionId: string;
+  questionBranchId: string | null;
   order: number | null;
   textEn: string;
   textAr: string;
@@ -36,6 +47,7 @@ export interface BranchTemplateDetailsQuestion {
   typeName: string;
   isActive: boolean;
   groupId: string;
+  groupBranchId: string | null;
   groupNameEn: string;
   groupNameAr: string;
   options: readonly QuestionAnswerOption[];
@@ -79,17 +91,20 @@ export interface BranchTemplateQuestionSelection {
   questionConditions: readonly QuestionCondition[];
 }
 
-export interface BranchTemplateQuestionGroupSelection {
+export interface BranchTemplateQuestionGroupSelection extends SelectableScopeState {
   groupId: string;
+  branchId: string | null;
   nameEn: string;
   nameAr: string;
   isActive: boolean;
   questions: readonly BranchTemplateQuestionSelectionItem[];
 }
 
-export interface BranchTemplateQuestionSelectionItem {
+export interface BranchTemplateQuestionSelectionItem extends SelectableEditableScopeState {
   questionId: string;
   templateQuestionId: string | null;
+  branchId: string | null;
+  groupId: string;
   textEn: string;
   textAr: string;
   type: string;
@@ -113,9 +128,11 @@ export interface UpdateBranchTemplateQuestionsResult {
   questions: readonly UpdatedBranchTemplateQuestion[];
 }
 
-export interface UpdatedBranchTemplateQuestion {
+export interface UpdatedBranchTemplateQuestion extends ScopeState {
   templateQuestionId: string;
   questionId: string;
+  questionBranchId: string | null;
+  groupId: string;
   order: number;
 }
 
@@ -146,9 +163,10 @@ export interface BranchTemplateApiResponse {
   questionConditions?: readonly QuestionConditionApiResponse[];
 }
 
-export interface BranchTemplateDetailsQuestionApiResponse {
+export interface BranchTemplateDetailsQuestionApiResponse extends EditableScopeApiFields {
   templateQuestionId?: string | number;
   questionId?: string | number;
+  questionBranchId?: string | number | null;
   order?: number | null;
   textEn?: string;
   textAr?: string | null;
@@ -156,6 +174,7 @@ export interface BranchTemplateDetailsQuestionApiResponse {
   typeName?: string | null;
   isActive?: boolean;
   groupId?: string | number;
+  groupBranchId?: string | number | null;
   groupNameEn?: string;
   groupNameAr?: string | null;
   options?: readonly QuestionAnswerOptionApiResponse[];
@@ -192,17 +211,20 @@ export interface BranchTemplateQuestionSelectionApiResponse {
   questionConditions?: readonly QuestionConditionApiResponse[];
 }
 
-export interface BranchTemplateQuestionGroupSelectionApiResponse {
+export interface BranchTemplateQuestionGroupSelectionApiResponse extends SelectableScopeApiFields {
   groupId?: string | number;
+  branchId?: string | number | null;
   nameEn?: string;
   nameAr?: string | null;
   isActive?: boolean;
   questions?: readonly BranchTemplateQuestionSelectionItemApiResponse[];
 }
 
-export interface BranchTemplateQuestionSelectionItemApiResponse {
+export interface BranchTemplateQuestionSelectionItemApiResponse
+  extends SelectableEditableScopeApiFields {
   questionId?: string | number;
   templateQuestionId?: string | number | null;
+  branchId?: string | number | null;
   groupId?: string | number;
   groupNameEn?: string;
   groupNameAr?: string | null;
@@ -223,8 +245,10 @@ export interface UpdateBranchTemplateQuestionsApiResponse {
   questions?: readonly UpdatedBranchTemplateQuestionApiResponse[];
 }
 
-export interface UpdatedBranchTemplateQuestionApiResponse {
+export interface UpdatedBranchTemplateQuestionApiResponse extends ScopeApiFields {
   templateQuestionId?: string | number;
   questionId?: string | number;
+  questionBranchId?: string | number | null;
+  groupId?: string | number;
   order?: number;
 }
