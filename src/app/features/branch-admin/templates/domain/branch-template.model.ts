@@ -17,6 +17,7 @@ import {
   SelectableScopeApiFields,
   SelectableScopeState,
 } from '../../../../shared/models/resource-scope.model';
+import { CreatedByUser, CreatedByUserApiResponse } from '../../../../shared/models/audit.model';
 
 export type BranchTemplateStatus = 'Draft' | 'Published' | 'Archived' | string;
 
@@ -31,9 +32,31 @@ export interface BranchTemplate {
   status: BranchTemplateStatus;
   isActive: boolean;
   questionsCount: number;
+  groupsCount: number;
+  customInputsCount: number;
+  createdBy: CreatedByUser | null;
   createdOnUtc: string;
+  customInputs: readonly BranchTemplateCustomInput[];
   questions: readonly BranchTemplateDetailsQuestion[];
   questionConditions: readonly QuestionCondition[];
+}
+
+export type BranchTemplateCustomInputType = 1 | 2;
+
+export interface BranchTemplateCustomInput {
+  customInputId: string;
+  name: string;
+  labelEn: string | null;
+  labelAr: string | null;
+  type: BranchTemplateCustomInputType;
+  typeName: string;
+  isRequired: boolean;
+  minLength: number | null;
+  maxLength: number | null;
+  minValue: number | null;
+  maxValue: number | null;
+  order: number;
+  isActive: boolean;
 }
 
 export interface BranchTemplateDetailsQuestion extends EditableScopeState {
@@ -142,9 +165,34 @@ export interface CreateBranchTemplatePayload {
   description: string;
   activeFrom: string;
   expireTo: string | null;
+  customInputs: readonly CreateBranchTemplateCustomInputPayload[];
 }
 
-export interface UpdateBranchTemplatePayload extends CreateBranchTemplatePayload {}
+export interface UpdateBranchTemplatePayload {
+  nameEn: string;
+  nameAr: string;
+  description: string;
+  activeFrom: string;
+  expireTo: string | null;
+  customInputs: readonly UpdateBranchTemplateCustomInputPayload[];
+}
+
+export interface CreateBranchTemplateCustomInputPayload {
+  name: string;
+  labelEn: string | null;
+  labelAr: string | null;
+  type: BranchTemplateCustomInputType;
+  isRequired: boolean;
+  minLength: number | null;
+  maxLength: number | null;
+  minValue: number | null;
+  maxValue: number | null;
+  order: number;
+}
+
+export interface UpdateBranchTemplateCustomInputPayload extends CreateBranchTemplateCustomInputPayload {
+  customInputId: string | null;
+}
 
 export interface BranchTemplateApiResponse {
   templateId?: string | number;
@@ -158,9 +206,35 @@ export interface BranchTemplateApiResponse {
   statusName?: BranchTemplateStatus;
   isActive?: boolean;
   questionsCount?: number;
+  customInputsCount?: number;
+  summary?: BranchTemplateSummaryApiResponse | null;
+  createdBy?: CreatedByUserApiResponse | null;
   createdOnUtc?: string;
+  customInputs?: readonly BranchTemplateCustomInputApiResponse[];
   questions?: readonly BranchTemplateDetailsQuestionApiResponse[];
   questionConditions?: readonly QuestionConditionApiResponse[];
+}
+
+export interface BranchTemplateCustomInputApiResponse {
+  customInputId?: string | number;
+  name?: string | null;
+  labelEn?: string | null;
+  labelAr?: string | null;
+  type?: number | string | null;
+  typeName?: string | null;
+  isRequired?: boolean;
+  minLength?: number | null;
+  maxLength?: number | null;
+  minValue?: number | null;
+  maxValue?: number | null;
+  order?: number | null;
+  isActive?: boolean;
+}
+
+export interface BranchTemplateSummaryApiResponse {
+  questionsCount?: number | null;
+  groupsCount?: number | null;
+  customInputsCount?: number | null;
 }
 
 export interface BranchTemplateDetailsQuestionApiResponse extends EditableScopeApiFields {
@@ -220,8 +294,7 @@ export interface BranchTemplateQuestionGroupSelectionApiResponse extends Selecta
   questions?: readonly BranchTemplateQuestionSelectionItemApiResponse[];
 }
 
-export interface BranchTemplateQuestionSelectionItemApiResponse
-  extends SelectableEditableScopeApiFields {
+export interface BranchTemplateQuestionSelectionItemApiResponse extends SelectableEditableScopeApiFields {
   questionId?: string | number;
   templateQuestionId?: string | number | null;
   branchId?: string | number | null;

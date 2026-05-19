@@ -153,6 +153,18 @@ export class DepartmentsPageComponent implements OnInit {
     });
   }
 
+  createdByName(department: Department): string {
+    if (!department.createdBy) {
+      return '-';
+    }
+
+    if (this.i18n.language() === 'ar') {
+      return department.createdBy.nameAr || department.createdBy.nameEn || '-';
+    }
+
+    return department.createdBy.nameEn || department.createdBy.nameAr || '-';
+  }
+
   fieldError(field: keyof typeof this.createForm.controls): string {
     const control = this.createForm.controls[field];
     if (!control.touched || control.valid) {

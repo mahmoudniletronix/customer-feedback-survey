@@ -414,6 +414,18 @@ export class QuestionsPageComponent implements OnInit {
     );
   }
 
+  createdByName(question: QuestionListItem): string {
+    if (!question.createdBy) {
+      return '-';
+    }
+
+    if (this.i18n.language() === 'ar') {
+      return question.createdBy.nameAr || question.createdBy.nameEn || '-';
+    }
+
+    return question.createdBy.nameEn || question.createdBy.nameAr || '-';
+  }
+
   private fieldError(
     field: QuestionMainField,
     touched: boolean,

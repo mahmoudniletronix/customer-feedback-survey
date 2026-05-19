@@ -2,8 +2,8 @@ import { Routes } from '@angular/router';
 import { roleGuard } from '../../core/guards/role.guard';
 import { BranchAdminBranchService } from './branch/data/branch-admin-branch.service';
 import { BranchAdminBranchStore } from './branch/presentation/state/branch-admin-branch.store';
-import { BranchUsersService } from './branch-users/data/branch-users.service';
-import { BranchUsersStore } from './branch-users/presentation/state/branch-users.store';
+import { BranchUsersService } from '../branch-user/branch-users/data/branch-users.service';
+import { BranchUsersStore } from '../branch-user/branch-users/presentation/state/branch-users.store';
 import { questionGroupsAccessGuard } from './question-groups/presentation/guards/question-groups-access.guard';
 import { QuestionGroupsService } from './question-groups/data/question-groups.service';
 import { QuestionGroupsStore } from './question-groups/presentation/state/question-groups.store';
@@ -40,7 +40,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         path: 'users',
         canActivate: [roleGuard(['BRANCH_ADMIN'])],
         loadComponent: () =>
-          import('./branch-users/presentation/pages/branch-users-page.component').then(
+          import('../branch-user/branch-users/presentation/pages/branch-users-page.component').then(
             (m) => m.BranchUsersPageComponent,
           ),
       },

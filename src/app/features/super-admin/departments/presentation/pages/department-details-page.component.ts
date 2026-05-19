@@ -10,7 +10,7 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
-import { DepartmentAdminsStore } from '../../../department-admins/presentation/state/department-admins.store';
+import { DepartmentAdminsStore } from '../../../../department-admin/department-admins/presentation/state/department-admins.store';
 import { DepartmentsStore } from '../state/departments.store';
 
 @Component({

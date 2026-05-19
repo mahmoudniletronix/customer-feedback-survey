@@ -120,11 +120,14 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     );
 
     return this.selectedQuestions()
-      .map((question) => questionsByQuestionId.get(question.questionId) ?? question)
-      .filter((question) => this.hasTemplateQuestionId(question));
+      .map((question) => ({
+        ...(questionsByQuestionId.get(question.questionId) ?? question),
+        ...question,
+      }))
+      .filter((question) => this.isActiveQuestion(question));
   });
   readonly conditionCandidateQuestions = computed(() =>
-    this.conditionQuestions().filter((question) => this.isActiveQuestion(question)),
+    this.activeQuestions().filter((question) => this.isSelectableQuestion(question)),
   );
   readonly filteredAvailableGroups = computed(() => this.toFilteredAvailableGroups());
   readonly hasAvailableQuestions = computed(() =>
@@ -491,7 +494,4 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     return question.isSelectable && question.groupIsSelectable;
   }
 
-  private hasTemplateQuestionId(question: TemplateQuestionManagerItem): boolean {
-    return question.templateQuestionId !== null && question.templateQuestionId.length > 0;
-  }
 }

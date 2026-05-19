@@ -11,7 +11,7 @@ import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { BranchAdminsStore } from '../../../branch-admins/presentation/state/branch-admins.store';
-import { DepartmentAdminsStore } from '../../../department-admins/presentation/state/department-admins.store';
+import { DepartmentAdminsStore } from '../../../../department-admin/department-admins/presentation/state/department-admins.store';
 import { DepartmentsStore } from '../../../departments/presentation/state/departments.store';
 import { BranchDetailsBranchAdmin, BranchDetailsDepartment } from '../../domain/branch.model';
 import { BranchesStore } from '../state/branches.store';

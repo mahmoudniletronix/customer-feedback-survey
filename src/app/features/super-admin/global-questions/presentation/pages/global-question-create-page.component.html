@@ -1,7 +1,7 @@
-<div class="w-full space-y-4 text-sm">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+<div class="w-full space-y-5">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
-      <h2 class="mt-2 text-xl font-bold text-slate-900">{{ 'globalQuestions.title' | t }}</h2>
+      <h2 class="mt-2 text-lg font-bold text-slate-900">{{ 'globalQuestions.title' | t }}</h2>
       <p class="mt-1 text-xs text-slate-500">{{ 'globalQuestions.description' | t }}</p>
     </div>
     @if (canCreate()) {
@@ -16,7 +16,7 @@
 
   @if (globalQuestionsStore.success()) {
     <div
-      class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
+      class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700"
     >
       {{ globalQuestionsStore.success() ?? '' | t }}
     </div>
@@ -24,7 +24,7 @@
 
   @if (globalQuestionsStore.error()) {
     <div
-      class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+      class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
     >
       {{ globalQuestionsStore.error() ?? '' | t }}
     </div>
@@ -35,7 +35,7 @@
     [subtitle]="'globalQuestions.listSubtitle' | t"
   >
     <form
-      class="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_14rem_10rem_8rem_10rem_auto]"
+      class="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_14rem_10rem_8rem_10rem_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchQuestions()"
     >
@@ -50,7 +50,7 @@
           {{ 'globalQuestions.groupFilter' | t }}
         </span>
         <select
-          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100"
+          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100"
           formControlName="groupId"
           [disabled]="globalQuestionsStore.groupsLoading()"
         >
@@ -68,7 +68,7 @@
           {{ 'globalQuestions.isActiveFilter' | t }}
         </span>
         <select
-          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="isActive"
         >
           <option value="">{{ 'globalQuestions.allQuestions' | t }}</option>
@@ -82,7 +82,7 @@
           {{ 'globalQuestions.pageSize' | t }}
         </span>
         <select
-          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="pageSize"
         >
           <option value="10">10</option>
@@ -97,7 +97,7 @@
           {{ 'globalQuestions.orderSort' | t }}
         </span>
         <select
-          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="orderSort"
         >
           <option value="">{{ 'globalQuestions.defaultSort' | t }}</option>
@@ -117,9 +117,9 @@
       </div>
     </form>
 
-    <div class="hidden overflow-hidden rounded-xl border border-slate-100 lg:block">
+    <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white lg:block">
       <div class="overflow-x-auto">
-        <table class="w-full table-fixed divide-y divide-slate-100 text-sm">
+        <table class="w-full table-fixed divide-y divide-slate-100">
           <colgroup>
             <col class="w-[22%]" />
             <col class="w-[17%]" />
@@ -168,7 +168,7 @@
                       {{ question.textAr || '-' }}
                     </p>
                   </td>
-                  <td class="px-4 py-3 text-slate-700">
+                  <td class="text-slate-700">
                     <p class="break-words font-semibold [overflow-wrap:anywhere]">
                       {{ question.groupNameEn || '-' }}
                     </p>
@@ -176,7 +176,7 @@
                       {{ question.groupNameAr || '-' }}
                     </p>
                   </td>
-                  <td class="px-4 py-3 text-slate-700">
+                  <td class="text-slate-700">
                     {{ answerTypeLabel(question.type, question.typeName) | t }}
                   </td>
                   <td class="px-4 py-3">
@@ -197,10 +197,10 @@
                       {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-slate-700">
+                  <td class="text-slate-700">
                     {{ question.createdOnUtc ? (question.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
-                  <td class="px-4 py-3 text-slate-700">
+                  <td class="text-slate-700">
                     @if (question.options.length > 0) {
                       <div class="space-y-1">
                         @for (option of question.options; track option.optionId) {
@@ -276,7 +276,7 @@
 
     <div class="space-y-3 lg:hidden">
       @if (globalQuestionsStore.loading()) {
-        <div class="rounded-xl border border-slate-100 bg-white p-4 text-center text-slate-500">
+        <div class="rounded-lg border border-slate-100 bg-white p-6 text-center text-slate-500">
           <span
             class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
           ></span>
@@ -285,18 +285,18 @@
       } @else {
         @for (question of globalQuestionsStore.questions(); track question.questionId) {
           <article
-            class="rounded-xl border border-slate-100 bg-white p-4 transition hover:border-cyan-100 hover:bg-slate-50"
+            class="rounded-lg border border-slate-100 bg-white p-4 transition hover:border-cyan-100 hover:bg-slate-50"
             [class.opacity-80]="!question.isActive"
           >
             <div class="flex items-start gap-3">
               <span
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+                class="flex shrink-0 items-center justify-center bg-cyan-50 text-[#11A7C9]"
               >
                 <app-icon [icon]="questionIcon" [size]="18" />
               </span>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                  <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
+                  <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
                     {{ question.textEn }}
                   </p>
                   <span
@@ -345,14 +345,20 @@
               </div>
             </div>
 
-            @if (canEditQuestion(question) || canDeleteQuestion(question) || canRestoreQuestion(question)) {
+            @if (
+              canEditQuestion(question) ||
+              canDeleteQuestion(question) ||
+              canRestoreQuestion(question)
+            ) {
               <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
                 @if (canEditQuestion(question)) {
                   <app-button
                     size="sm"
                     type="button"
                     variant="secondary"
-                    [disabled]="globalQuestionsStore.updating() || globalQuestionsStore.detailsLoading()"
+                    [disabled]="
+                      globalQuestionsStore.updating() || globalQuestionsStore.detailsLoading()
+                    "
                     [loading]="globalQuestionsStore.detailsLoading()"
                     (pressed)="openEditQuestion($event, question)"
                   >
@@ -390,7 +396,7 @@
             }
           </article>
         } @empty {
-          <div class="rounded-xl border border-slate-100 bg-white p-6 text-center text-slate-500">
+          <div class="rounded-lg border border-slate-100 bg-white p-6 text-center text-slate-500">
             <app-icon class="mx-auto mb-2 text-slate-300" [icon]="questionIcon" [size]="24" />
             {{ 'common.noRecords' | t }}
           </div>
@@ -399,9 +405,9 @@
     </div>
 
     <div
-      class="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
+      class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
     >
-      <p class="text-sm font-semibold text-slate-500">
+      <p class="font-semibold text-slate-500">
         {{ 'branches.paginationSummary' | t }}
         {{ globalQuestionsStore.currentPage() }} / {{ globalQuestionsStore.totalPages() }}
         -
@@ -438,12 +444,12 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <span
-              class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+              class="flex items-center justify-center bg-cyan-50 text-[#11A7C9]"
             >
               <app-icon [icon]="questionIcon" [size]="18" />
             </span>
             <div class="min-w-0">
-              <p class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
+              <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
                 {{ question.textEn }}
               </p>
               <p class="break-words text-xs font-semibold text-slate-500 [overflow-wrap:anywhere]">
@@ -474,11 +480,11 @@
   (closed)="closeDeleteQuestion()"
 >
   @if (questionPendingDelete(); as question) {
-    <div class="space-y-4">
-      <p class="text-sm font-semibold text-slate-700">
+    <div class="space-y-3">
+      <p class="font-semibold text-slate-700">
         {{ 'globalQuestions.deleteConfirm' | t }}
       </p>
-      <div class="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
+      <div class="border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
         <div class="flex flex-wrap items-center gap-2">
           <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
             {{ question.textEn }}
@@ -516,24 +522,24 @@
   (closed)="closeQuestionModal()"
   size="lg"
 >
-  <form class="space-y-4" [formGroup]="questionForm" (ngSubmit)="submitQuestionModal()">
+  <form class="space-y-3" [formGroup]="questionForm" (ngSubmit)="submitQuestionModal()">
     @if (
       !globalQuestionsStore.groupsLoading() && globalQuestionsStore.groupsSelection().length === 0
     ) {
       <div
-        class="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700"
+        class="border border-amber-100 bg-amber-50 p-3 text-xs font-semibold text-amber-700"
       >
         {{ 'globalQuestions.noActiveGroupsHelp' | t }}
       </div>
     }
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="grid md:grid-cols-2">
       <label class="block">
         <span class="mb-1.5 block text-xs font-semibold text-slate-700">
           {{ 'globalQuestions.group' | t }}
         </span>
         <select
-          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100"
+          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100"
           formControlName="groupId"
           [disabled]="globalQuestionsStore.groupsLoading()"
         >
@@ -563,7 +569,7 @@
           {{ 'globalQuestions.answerType' | t }}
         </span>
         <select
-          class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="type"
           (change)="onQuestionTypeChanged($event)"
         >
@@ -579,13 +585,13 @@
       </label>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="grid md:grid-cols-2">
       <label class="block">
         <span class="mb-1.5 block text-xs font-semibold text-slate-700">
           {{ 'globalQuestions.textEn' | t }}
         </span>
         <textarea
-          class="min-h-32 w-full resize-y rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+          class="min-h-32 w-full resize-y border border-slate-200 px-3.5 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
           [placeholder]="'globalQuestions.textEnPlaceholder' | t"
           formControlName="textEn"
         ></textarea>
@@ -601,7 +607,7 @@
           {{ 'globalQuestions.textAr' | t }}
         </span>
         <textarea
-          class="min-h-32 w-full resize-y rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+          class="min-h-32 w-full resize-y border border-slate-200 px-3.5 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
           [placeholder]="'globalQuestions.textArPlaceholder' | t"
           formControlName="textAr"
         ></textarea>
@@ -614,10 +620,10 @@
     </div>
 
     @if (isSingleChoice()) {
-      <section class="rounded-xl border border-slate-100 bg-slate-50 p-3" formArrayName="options">
+      <section class="border border-slate-100 bg-slate-50 p-3" formArrayName="options">
         <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 class="text-sm font-bold text-slate-900">{{ 'globalQuestions.options' | t }}</h3>
+            <h3 class="font-bold text-slate-900">{{ 'globalQuestions.options' | t }}</h3>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'globalQuestions.singleChoiceOptionsHelp' | t }}
             </p>
@@ -639,7 +645,7 @@
                   {{ 'globalQuestions.optionTextEn' | t }}
                 </span>
                 <input
-                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  class="w-full border border-slate-200 px-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
                   type="text"
                   formControlName="textEn"
                 />
@@ -655,7 +661,7 @@
                   {{ 'globalQuestions.optionTextAr' | t }}
                 </span>
                 <input
-                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  class="w-full border border-slate-200 px-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
                   type="text"
                   formControlName="textAr"
                 />
@@ -671,7 +677,7 @@
                   {{ 'globalQuestions.optionOrder' | t }}
                 </span>
                 <input
-                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  class="w-full border border-slate-200 px-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
                   type="number"
                   min="1"
                   formControlName="order"
@@ -688,7 +694,7 @@
                   {{ 'globalQuestions.optionValue' | t }}
                 </span>
                 <input
-                  class="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+                  class="w-full border border-slate-200 px-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
                   type="number"
                   min="1"
                   max="5"
@@ -723,7 +729,7 @@
     }
 
     <div
-      class="grid grid-cols-1 gap-2 border-t border-slate-100 pt-4 sm:flex sm:flex-wrap sm:justify-end"
+      class="grid grid-cols-1 gap-2 border-t border-slate-100 sm:flex sm:flex-wrap sm:justify-end"
     >
       <app-button type="button" variant="secondary" (pressed)="closeQuestionModal()">
         {{ 'common.cancel' | t }}

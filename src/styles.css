@@ -48,6 +48,83 @@ textarea {
   font: inherit;
 }
 
+/* Enterprise spacing defaults for hand-built feature templates. */
+:where(.grid) {
+  gap: 1rem;
+}
+
+:where(table) {
+  font-size: 0.8125rem;
+}
+
+:where(th, td) {
+  padding: 0.8rem 1rem;
+}
+
+:where(select, textarea, input) {
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+:where(select, input) {
+  min-height: 2.5rem;
+}
+
+:where(textarea) {
+  padding-block: 0.75rem;
+}
+
+main :where(
+  article[class*="border-slate-100"][class*="bg-white"],
+  article[class*="border-slate-200"][class*="bg-white"],
+  section[class*="border-slate-100"][class*="bg-white"],
+  section[class*="border-slate-200"][class*="bg-white"],
+  div[class*="border-slate-100"][class*="bg-white"],
+  div[class*="border-slate-200"][class*="bg-white"]
+) {
+  border-radius: 0.625rem;
+  padding: 1rem;
+}
+
+main :where([class*="bg-slate-50"], [class*="bg-cyan-50"], [class*="bg-emerald-50"], [class*="bg-rose-50"], [class*="bg-amber-50"], [class*="bg-violet-50"]) {
+  border-radius: 0.5rem;
+}
+
+main :where([class*="items-center"][class*="justify-center"][class*="bg-cyan-50"]) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+
+/* Management screens use many hand-built tables with explicit compact utilities.
+   These guardrails keep the global density readable without changing component logic. */
+app-card form.grid {
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+main :is(div[class*="overflow-hidden"][class*="border-slate-100"], div[class*="overflow-hidden"][class*="border-slate-200"]) {
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+main table :is(th[class], td[class]) {
+  padding: 0.8rem 1rem;
+  line-height: 1.5;
+}
+
+main table thead {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+main table tbody tr {
+  min-height: 3rem;
+}
+
+app-card :is(div[class*="border-t"][class*="border-slate-100"], div[class*="border-t"][class*="border-slate-200"]) {
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
 img,
 svg,
 video,

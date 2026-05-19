@@ -4,6 +4,10 @@ import {
   SelectableScopeApiFields,
   SelectableScopeState,
 } from '../../../../shared/models/resource-scope.model';
+import {
+  CreatedByUser,
+  CreatedByUserApiResponse,
+} from '../../../../shared/models/audit.model';
 
 export interface QuestionGroupListItem extends EditableScopeState {
   groupId: string;
@@ -12,6 +16,7 @@ export interface QuestionGroupListItem extends EditableScopeState {
   nameAr: string | null;
   isActive: boolean;
   questionsCount: number;
+  createdBy: CreatedByUser | null;
   createdOnUtc: string;
 }
 
@@ -54,6 +59,7 @@ export interface QuestionGroupApiResponse extends EditableScopeApiFields {
   nameAr?: string | null;
   isActive?: boolean;
   questionsCount?: number;
+  createdBy?: CreatedByUserApiResponse | null;
   createdOnUtc?: string;
 }
 

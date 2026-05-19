@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { Pencil, Trash2 } from 'lucide-angular';
+import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -15,6 +16,8 @@ import { Branch } from '../../domain/branch.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BranchTableComponent {
+  private readonly i18n = inject(I18nService);
+
   readonly branches = input<readonly Branch[]>([]);
   readonly editBranch = output<Branch>();
   readonly deleteBranch = output<Branch>();
@@ -34,5 +37,17 @@ export class BranchTableComponent {
   deleteSelectedBranch(branch: Branch, event: MouseEvent): void {
     event.stopPropagation();
     this.deleteBranch.emit(branch);
+  }
+
+  createdByName(branch: Branch): string {
+    if (!branch.createdBy) {
+      return '-';
+    }
+
+    if (this.i18n.language() === 'ar') {
+      return branch.createdBy.nameAr || branch.createdBy.nameEn || '-';
+    }
+
+    return branch.createdBy.nameEn || branch.createdBy.nameAr || '-';
   }
 }

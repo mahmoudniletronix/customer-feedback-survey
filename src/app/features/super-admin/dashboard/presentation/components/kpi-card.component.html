@@ -1,0 +1,16 @@
+<article class="border border-slate-100 bg-white shadow-sm shadow-slate-200/70">
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3">
+      <span class="flex w-11 shrink-0 items-center justify-center" [class]="iconClasses()">
+        <app-icon [icon]="icons[kpi().icon]" [size]="20" />
+      </span>
+      <div>
+        <p class="font-semibold text-slate-500">{{ kpi().labelKey | t }}</p>
+        <p class="mt-2 font-bold text-slate-900">{{ kpi().value }}</p>
+      </div>
+    </div>
+    <span class="px-3 py-1 text-xs font-bold" [class]="badgeClasses()">
+      {{ kpi().deltaKey | t }}
+    </span>
+  </div>
+</article>

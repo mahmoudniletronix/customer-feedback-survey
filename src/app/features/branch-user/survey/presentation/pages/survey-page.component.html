@@ -1,0 +1,109 @@
+<div class="space-y-3">
+  <div class="flex flex-col justify-between md:flex-row md:items-center">
+    <div>
+      <h2 class="font-bold text-slate-900">{{ 'survey.title' | t }}</h2>
+      <p class="mt-2 text-slate-500">{{ 'survey.description' | t }}</p>
+    </div>
+    <app-button (pressed)="createModalOpen.set(true)">
+      <app-icon [icon]="plusIcon" [size]="17" />
+      {{ 'survey.createSurvey' | t }}
+    </app-button>
+  </div>
+
+  <div class="grid md:grid-cols-3">
+    <app-card [title]="'survey.activeSurveys' | t">
+      <div class="flex items-center gap-3">
+        <span class="flex w-11 items-center justify-center bg-cyan-50 text-[#11A7C9]">
+          <app-icon [icon]="clipboardIcon" [size]="20" />
+        </span>
+        <p class="font-bold text-[#11A7C9]">{{ surveyStore.activeCount() }}</p>
+      </div>
+    </app-card>
+    <app-card [title]="'survey.responses' | t">
+      <div class="flex items-center gap-3">
+        <span class="flex w-11 items-center justify-center bg-slate-100 text-slate-600">
+          <app-icon [icon]="messageIcon" [size]="20" />
+        </span>
+        <p class="font-bold text-slate-900">{{ surveyStore.totalResponses() }}</p>
+      </div>
+    </app-card>
+    <app-card [title]="'survey.questions' | t">
+      <div class="flex items-center gap-3">
+        <span class="flex w-11 items-center justify-center bg-rose-50 text-[#D94B5A]">
+          <app-icon [icon]="squarePenIcon" [size]="20" />
+        </span>
+        <p class="font-bold text-[#D94B5A]">{{ surveyStore.totalQuestions() }}</p>
+      </div>
+    </app-card>
+  </div>
+
+  <div class="grid xl:grid-cols-[0.9fr_1.1fr]">
+    <app-card [title]="'survey.surveys' | t" [subtitle]="'survey.assignments' | t">
+      <div class="space-y-3">
+        @for (survey of surveyStore.surveys(); track survey.id) {
+          <button
+            type="button"
+            class="w-full border text-left transition hover:border-[#11A7C9]"
+            [class.border-[#11A7C9]]="isSelected(survey.id)"
+            [class.bg-cyan-50]="isSelected(survey.id)"
+            [class.border-slate-100]="!isSelected(survey.id)"
+            [class.bg-white]="!isSelected(survey.id)"
+            (click)="surveyStore.selectSurvey(survey.id)"
+          >
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="font-bold text-slate-900">{{ survey.title }}</p>
+                <p class="mt-1 text-slate-500">{{ survey.department }} - {{ survey.assignedBranch }}</p>
+              </div>
+              <span class="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500">{{ survey.status }}</span>
+            </div>
+          </button>
+        }
+      </div>
+    </app-card>
+
+    <app-card [title]="selectedSurveyTitle()" [subtitle]="selectedSurveySubtitle()">
+      @if (surveyStore.selectedSurvey(); as survey) {
+        <div class="mb-5 flex flex-wrap gap-3">
+          <app-button variant="secondary" size="sm" (pressed)="questionModalOpen.set(true)">
+            <app-icon [icon]="circlePlusIcon" [size]="16" />
+            {{ 'survey.addQuestion' | t }}
+          </app-button>
+          <app-button variant="ghost" size="sm" (pressed)="surveyStore.toggleStatus(survey.id)">
+            <app-icon [icon]="refreshIcon" [size]="16" />
+            {{ 'survey.toggleStatus' | t }}
+          </app-button>
+        </div>
+        <app-question-list [questions]="survey.questions" />
+      }
+    </app-card>
+  </div>
+</div>
+
+<app-modal [title]="'survey.createSurvey' | t" [open]="createModalOpen()" (closed)="createModalOpen.set(false)">
+  <form class="space-y-3" [formGroup]="surveyForm" (ngSubmit)="createSurvey()">
+    <input class="w-full border border-slate-200" [placeholder]="'survey.surveyTitle' | t" formControlName="title" />
+    <input class="w-full border border-slate-200" [placeholder]="'survey.department' | t" formControlName="department" />
+    <input class="w-full border border-slate-200" [placeholder]="'survey.assignedBranch' | t" formControlName="assignedBranch" />
+    <app-button type="submit" [fullWidth]="true">
+      <app-icon [icon]="plusIcon" [size]="17" />
+      {{ 'common.create' | t }}
+    </app-button>
+  </form>
+</app-modal>
+
+<app-modal [title]="'survey.addQuestion' | t" [open]="questionModalOpen()" (closed)="questionModalOpen.set(false)">
+  <form class="space-y-3" [formGroup]="questionForm" (ngSubmit)="addQuestion()">
+    <input class="w-full border border-slate-200" [placeholder]="'survey.questionText' | t" formControlName="text" />
+    <select class="w-full border border-slate-200" formControlName="type">
+      @for (type of questionTypes; track type) {
+        <option [value]="type">{{ type }}</option>
+      }
+    </select>
+    <input class="w-full border border-slate-200" [placeholder]="'survey.mcqOptions' | t" formControlName="options" />
+    <app-button type="submit" [fullWidth]="true">
+      <app-icon [icon]="circlePlusIcon" [size]="17" />
+      {{ 'survey.addQuestion' | t }}
+    </app-button>
+  </form>
+</app-modal>

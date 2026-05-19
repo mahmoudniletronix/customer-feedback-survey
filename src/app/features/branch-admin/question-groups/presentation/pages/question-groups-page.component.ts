@@ -19,6 +19,7 @@ import {
   Trash2,
 } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
+import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
@@ -52,6 +53,7 @@ export class QuestionGroupsPageComponent implements OnInit {
   readonly questionGroupsStore = inject(QuestionGroupsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -236,6 +238,18 @@ export class QuestionGroupsPageComponent implements OnInit {
 
   canRestoreGroup(group: QuestionGroupListItem): boolean {
     return group.isEditable && !group.isActive && this.canRestore();
+  }
+
+  createdByName(group: QuestionGroupListItem): string {
+    if (!group.createdBy) {
+      return '-';
+    }
+
+    if (this.i18n.language() === 'ar') {
+      return group.createdBy.nameAr || group.createdBy.nameEn || '-';
+    }
+
+    return group.createdBy.nameEn || group.createdBy.nameAr || '-';
   }
 
   groupFieldError(field: keyof typeof this.groupForm.controls): string {

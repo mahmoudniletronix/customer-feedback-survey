@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { toCreatedByUser } from '../../../../shared/models/audit.model';
 import {
   QUESTION_ANSWER_TYPE,
   QuestionAnswerType,
@@ -123,6 +124,7 @@ export class QuestionsService {
       type: this.toAnswerType(response.type, response.typeName),
       typeName: response.typeName ?? '',
       isActive: response.isActive ?? true,
+      createdBy: toCreatedByUser(response.createdBy),
       createdOnUtc: response.createdOnUtc ?? '',
       options: (response.options ?? []).map((option) => toQuestionAnswerOption(option, questionId)),
     };

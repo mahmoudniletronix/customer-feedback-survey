@@ -266,6 +266,7 @@ export class QuestionGroupsStore {
       nameAr: group.nameAr !== null ? group.nameAr : currentGroup?.nameAr ?? null,
       isActive: group.isActive,
       questionsCount: group.questionsCount || currentGroup?.questionsCount || 0,
+      createdBy: group.createdBy ?? currentGroup?.createdBy ?? null,
       createdOnUtc: group.createdOnUtc || currentGroup?.createdOnUtc || '',
     };
   }

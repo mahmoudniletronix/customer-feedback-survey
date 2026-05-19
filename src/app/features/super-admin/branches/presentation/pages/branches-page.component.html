@@ -1,8 +1,8 @@
-<div class="w-full space-y-4 text-sm sm:space-y-5">
-  <div class="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
+<div class="w-full space-y-5">
+  <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
     <div class="min-w-0">
-      <h2 class="text-xl font-bold text-slate-900 sm:text-2xl">{{ 'branches.title' | t }}</h2>
-      <p class="mt-1 text-xs text-slate-500 sm:text-sm">{{ 'branches.description' | t }}</p>
+      <h2 class="text-lg font-bold text-slate-900">{{ 'branches.title' | t }}</h2>
+      <p class="mt-1 text-xs text-slate-500">{{ 'branches.description' | t }}</p>
     </div>
 
     <div class="grid gap-2 sm:flex sm:flex-wrap sm:justify-end">
@@ -30,49 +30,41 @@
   </div>
 
   @if (branchesStore.success()) {
-    <div
-      class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700"
-    >
+    <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
       {{ branchesStore.success() ?? '' | t }}
     </div>
   }
 
   @if (branchesStore.error()) {
-    <div
-      class="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-[#D94B5A]"
-    >
+    <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
       {{ branchesStore.error() ?? '' | t }}
     </div>
   }
 
   @if (departmentsStore.success()) {
-    <div
-      class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700"
-    >
+    <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
       {{ departmentsStore.success() ?? '' | t }}
     </div>
   }
 
   @if (departmentsStore.error()) {
-    <div
-      class="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-[#D94B5A]"
-    >
+    <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
       {{ departmentsStore.error() ?? '' | t }}
     </div>
   }
 
-  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
     <app-card
       [title]="'branches.createdBranches' | t"
       [subtitle]="'branches.createdBranchesSubtitle' | t"
     >
       <div class="flex items-center gap-3">
         <span
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
         >
           <app-icon [icon]="buildingIcon" [size]="18" />
         </span>
-        <p class="text-2xl font-bold text-slate-900">{{ branchesStore.totalBranches() }}</p>
+        <p class="font-bold text-slate-900">{{ branchesStore.totalBranches() }}</p>
       </div>
     </app-card>
 
@@ -82,7 +74,7 @@
     >
       <div class="flex items-center gap-3">
         <span
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-[#D94B5A]"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-[#D94B5A]"
         >
           <app-icon [icon]="userPlusIcon" [size]="18" />
         </span>
@@ -98,7 +90,7 @@
     >
       <div class="flex items-center gap-3">
         <span
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-[#11A7C9]"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
         >
           <app-icon [icon]="departmentIcon" [size]="18" />
         </span>
@@ -138,10 +130,8 @@
       (branchSelected)="openBranchDetails($event)"
     />
 
-    <div
-      class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between"
-    >
-      <p class="text-xs font-semibold text-slate-500 sm:text-sm">
+    <div class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between">
+      <p class="text-xs font-semibold text-slate-500">
         {{ 'branches.paginationSummary' | t }}
         {{ branchesStore.currentPage() }} / {{ branchesStore.totalPages() }}
         -
@@ -181,7 +171,7 @@
 >
   @if (branchesStore.detailsLoading()) {
     <div
-      class="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-semibold text-slate-600"
+      class="flex items-center gap-3 border border-slate-100 bg-slate-50 font-semibold text-slate-600"
     >
       <span
         class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
@@ -190,22 +180,22 @@
     </div>
   } @else if (branchesStore.detailsError()) {
     <div
-      class="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-[#D94B5A]"
+      class="border border-rose-100 bg-rose-50 font-semibold text-[#D94B5A]"
     >
       {{ branchesStore.detailsError() ?? '' | t }}
     </div>
   } @else if (branchesStore.selectedBranchDetails(); as branch) {
-    <div class="max-h-[72vh] space-y-4 overflow-y-auto pe-1 sm:space-y-5">
-      <div class="rounded-2xl border border-slate-100 bg-slate-50 p-3 sm:p-4">
+    <div class="max-h-[72vh] overflow-y-auto pe-1">
+      <div class="border border-slate-100 bg-slate-50 p-3">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
             <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
               {{ 'branches.code' | t }}
             </p>
-            <h3 class="mt-1 break-words text-xl font-bold text-slate-900 sm:text-2xl">{{ branch.code }}</h3>
-            <p class="mt-2 text-sm font-semibold text-slate-700">{{ branch.nameEn }}</p>
+            <h3 class="mt-1 break-words font-bold text-slate-900">{{ branch.code }}</h3>
+            <p class="mt-2 font-semibold text-slate-700">{{ branch.nameEn }}</p>
             @if (branch.nameAr) {
-              <p class="mt-1 text-sm text-slate-500">{{ branch.nameAr }}</p>
+              <p class="mt-1 text-slate-500">{{ branch.nameAr }}</p>
             }
           </div>
           <div class="flex flex-wrap gap-2">
@@ -223,67 +213,67 @@
       </div>
 
       <dl class="grid gap-3 sm:grid-cols-2">
-        <div class="rounded-2xl border border-slate-100 p-4">
+        <div class="border border-slate-100">
           <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">
             {{ 'branches.address' | t }}
           </dt>
-          <dd class="mt-2 text-sm font-semibold text-slate-900">{{ branch.address || '-' }}</dd>
+          <dd class="mt-2 font-semibold text-slate-900">{{ branch.address || '-' }}</dd>
         </div>
-        <div class="rounded-2xl border border-slate-100 p-4">
+        <div class="border border-slate-100">
           <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">
             {{ 'branches.createdOn' | t }}
           </dt>
-          <dd class="mt-2 text-sm font-semibold text-slate-900">
+          <dd class="mt-2 font-semibold text-slate-900">
             {{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'medium') : '-' }}
           </dd>
         </div>
       </dl>
 
       <section class="space-y-3">
-        <h3 class="text-sm font-bold text-slate-900">{{ 'branches.summary' | t }}</h3>
+        <h3 class="font-bold text-slate-900">{{ 'branches.summary' | t }}</h3>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">{{ branch.summary.branchAdminsCount }}</p>
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">{{ branch.summary.branchAdminsCount }}</p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.branchAdminsCount' | t }}
             </p>
           </div>
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">{{ branch.summary.departmentsCount }}</p>
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">{{ branch.summary.departmentsCount }}</p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.departmentsCount' | t }}
             </p>
           </div>
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">
               {{ branch.summary.departmentAdminsCount }}
             </p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.departmentAdminsCount' | t }}
             </p>
           </div>
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">{{ branch.summary.branchUsersCount }}</p>
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">{{ branch.summary.branchUsersCount }}</p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.branchUsersCount' | t }}
             </p>
           </div>
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">{{ branch.summary.templatesCount }}</p>
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">{{ branch.summary.templatesCount }}</p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.templatesCount' | t }}
             </p>
           </div>
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">
               {{ branch.summary.questionGroupsCount }}
             </p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.questionGroupsCount' | t }}
             </p>
           </div>
-          <div class="rounded-2xl border border-slate-100 p-4">
-            <p class="text-2xl font-bold text-slate-900">{{ branch.summary.questionsCount }}</p>
+          <div class="border border-slate-100">
+            <p class="font-bold text-slate-900">{{ branch.summary.questionsCount }}</p>
             <p class="mt-1 text-xs font-semibold text-slate-500">
               {{ 'branches.questionsCount' | t }}
             </p>
@@ -292,18 +282,18 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="text-sm font-bold text-slate-900">{{ 'branches.branchAdmins' | t }}</h3>
+        <h3 class="font-bold text-slate-900">{{ 'branches.branchAdmins' | t }}</h3>
         <div class="space-y-2">
           @for (admin of branch.branchAdmins; track admin.branchAdminId) {
-            <div class="rounded-2xl border border-slate-100 p-4">
-              <p class="text-sm font-bold text-slate-900">{{ admin.nameEn }}</p>
+            <div class="border border-slate-100">
+              <p class="font-bold text-slate-900">{{ admin.nameEn }}</p>
               <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
               @if (admin.phoneNumber) {
                 <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
               }
             </div>
           } @empty {
-            <p class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-500">
+            <p class="border border-slate-100 text-slate-500">
               {{ 'common.noRecords' | t }}
             </p>
           }
@@ -311,13 +301,13 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="text-sm font-bold text-slate-900">{{ 'common.departments' | t }}</h3>
+        <h3 class="font-bold text-slate-900">{{ 'common.departments' | t }}</h3>
         <div class="space-y-2">
           @for (department of branch.departments; track department.departmentId) {
-            <div class="rounded-2xl border border-slate-100 p-4">
+            <div class="border border-slate-100">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p class="text-sm font-bold text-slate-900">
+                  <p class="font-bold text-slate-900">
                     {{ department.nameEn }}{{ department.code ? ' - ' + department.code : '' }}
                   </p>
                   @if (department.nameAr) {
@@ -342,7 +332,7 @@
               }
             </div>
           } @empty {
-            <p class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-500">
+            <p class="border border-slate-100 text-slate-500">
               {{ 'common.noRecords' | t }}
             </p>
           }
@@ -350,11 +340,11 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="text-sm font-bold text-slate-900">{{ 'branches.branchUsers' | t }}</h3>
+        <h3 class="font-bold text-slate-900">{{ 'branches.branchUsers' | t }}</h3>
         <div class="space-y-2">
           @for (user of branch.branchUsers; track user.branchUserId) {
-            <div class="rounded-2xl border border-slate-100 p-4">
-              <p class="text-sm font-bold text-slate-900">{{ user.nameEn }}</p>
+            <div class="border border-slate-100">
+              <p class="font-bold text-slate-900">{{ user.nameEn }}</p>
               <p class="mt-1 text-xs text-slate-500">{{ user.userName }} - {{ user.email }}</p>
               @if (user.roles.length > 0) {
                 <div class="mt-2 flex flex-wrap gap-2">
@@ -369,7 +359,7 @@
               }
             </div>
           } @empty {
-            <p class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-500">
+            <p class="border border-slate-100 text-slate-500">
               {{ 'common.noRecords' | t }}
             </p>
           }
@@ -377,13 +367,13 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="text-sm font-bold text-slate-900">{{ 'branches.templates' | t }}</h3>
+        <h3 class="font-bold text-slate-900">{{ 'branches.templates' | t }}</h3>
         <div class="space-y-2">
           @for (template of branch.templates; track template.templateId) {
-            <div class="rounded-2xl border border-slate-100 p-4">
+            <div class="border border-slate-100">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p class="text-sm font-bold text-slate-900">{{ template.nameEn }}</p>
+                  <p class="font-bold text-slate-900">{{ template.nameEn }}</p>
                   @if (template.description) {
                     <p class="mt-1 text-xs text-slate-500">{{ template.description }}</p>
                   }
@@ -395,7 +385,7 @@
               </div>
             </div>
           } @empty {
-            <p class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-500">
+            <p class="border border-slate-100 text-slate-500">
               {{ 'common.noRecords' | t }}
             </p>
           }
@@ -403,13 +393,13 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="text-sm font-bold text-slate-900">{{ 'branches.questionGroups' | t }}</h3>
+        <h3 class="font-bold text-slate-900">{{ 'branches.questionGroups' | t }}</h3>
         <div class="space-y-2">
           @for (group of branch.questionGroups; track group.groupId) {
-            <div class="rounded-2xl border border-slate-100 p-4">
-              <p class="text-sm font-bold text-slate-900">{{ group.nameEn }}</p>
+            <div class="border border-slate-100">
+              <p class="font-bold text-slate-900">{{ group.nameEn }}</p>
               @for (question of group.questions; track question.questionId) {
-                <div class="mt-2 rounded-xl bg-slate-50 p-3">
+                <div class="mt-2 bg-slate-50 p-3">
                   <p class="text-xs font-semibold text-slate-700">
                     {{ question.textEn }} - {{ question.type }}
                   </p>
@@ -422,18 +412,18 @@
               }
             </div>
           } @empty {
-            <p class="rounded-2xl border border-slate-100 p-4 text-sm text-slate-500">
+            <p class="border border-slate-100 text-slate-500">
               {{ 'common.noRecords' | t }}
             </p>
           }
         </div>
       </section>
 
-      <div class="rounded-2xl border border-slate-100 p-4">
+      <div class="border border-slate-100">
         <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
           {{ 'common.id' | t }}
         </p>
-        <p class="mt-2 break-all text-sm font-semibold text-slate-900">{{ branch.id }}</p>
+        <p class="mt-2 break-all font-semibold text-slate-900">{{ branch.id }}</p>
       </div>
     </div>
   }
@@ -444,9 +434,9 @@
   [open]="editBranchModalOpen()"
   (closed)="closeEditBranch()"
 >
-  <form class="space-y-4" [formGroup]="editBranchForm" (ngSubmit)="updateBranch()">
+  <form class="space-y-3" [formGroup]="editBranchForm" (ngSubmit)="updateBranch()">
     @if (selectedBranchForEdit(); as branch) {
-      <div class="rounded-2xl border border-cyan-100 bg-cyan-50 p-4 text-sm font-semibold text-slate-700">
+      <div class="border border-cyan-100 bg-cyan-50 font-semibold text-slate-700">
         {{ 'branches.selectedBranch' | t }}:
         <span class="text-[#0d94b3]">{{ branch.nameEn }} - {{ branch.code }}</span>
       </div>
@@ -502,7 +492,7 @@
   [open]="createModalOpen()"
   (closed)="createModalOpen.set(false)"
 >
-  <form class="space-y-4" [formGroup]="branchForm" (ngSubmit)="createBranch()">
+  <form class="space-y-3" [formGroup]="branchForm" (ngSubmit)="createBranch()">
     <app-input
       [label]="'branches.nameEn' | t"
       [placeholder]="'branches.nameEnPlaceholder' | t"
@@ -540,7 +530,7 @@
   [open]="createDepartmentModalOpen()"
   (closed)="closeCreateDepartmentModal()"
 >
-  <form class="space-y-4" [formGroup]="departmentForm" (ngSubmit)="createDepartment()">
+  <form class="space-y-3" [formGroup]="departmentForm" (ngSubmit)="createDepartment()">
     <div class="grid gap-3 md:grid-cols-2">
       <app-input
         [label]="'departments.nameEn' | t"
@@ -568,13 +558,13 @@
   [open]="createAdminModalOpen()"
   (closed)="createAdminModalOpen.set(false)"
 >
-  <form class="space-y-4" [formGroup]="branchAdminForm" (ngSubmit)="createBranchAdmin()">
+  <form class="space-y-3" [formGroup]="branchAdminForm" (ngSubmit)="createBranchAdmin()">
     <label class="block">
-      <span class="mb-2 block text-sm font-semibold text-slate-700">{{
+      <span class="mb-2 block font-semibold text-slate-700">{{
         'branches.selectBranch' | t
       }}</span>
       <select
-        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
+        class="w-full border border-slate-200 bg-white text-slate-900 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10"
         formControlName="branchId"
       >
         <option value="">{{ 'branches.selectBranchPlaceholder' | t }}</option>
@@ -611,7 +601,7 @@
       [error]="branchAdminFieldError('userName')"
     />
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="grid md:grid-cols-2">
       <app-input
         [label]="'common.email' | t"
         type="email"

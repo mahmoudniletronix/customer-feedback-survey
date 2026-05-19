@@ -1,34 +1,34 @@
 <main class="auth-page grid min-h-screen bg-[#F7F9FC] lg:grid-cols-[1.05fr_0.95fr]">
   <section
-    class="auth-hero hidden overflow-hidden bg-[#1F3A56] p-10 text-white lg:flex lg:flex-col lg:justify-between"
+    class="auth-hero hidden overflow-hidden bg-[#1F3A56] p-8 text-white lg:flex lg:flex-col lg:justify-between"
   >
     <div class="auth-hero-content">
-      <div class="hero-logo mb-14 inline-flex rounded-2xl px-6 py-4 shadow-slate-950/15">
+      <div class="hero-logo mb-8 inline-flex rounded-lg px-4 py-3 shadow-slate-950/15">
         <img class="h-14 w-auto" src="images/nile.png" alt="NILETRONIX" />
       </div>
-      <h1 class="hero-title max-w-xl text-4xl font-bold leading-tight">
+      <h1 class="hero-title max-w-xl text-3xl font-bold leading-tight">
         {{ 'app.authHeroTitle' | t }}
       </h1>
-      <p class="hero-description mt-5 max-w-lg text-base leading-7 text-cyan-50/80">
+      <p class="hero-description mt-4 max-w-lg text-sm leading-6 text-cyan-50/80">
         {{ 'app.authHeroDescription' | t }}
       </p>
     </div>
-    <!-- <div class="hero-stats grid grid-cols-3 gap-4 text-sm">
-      <div class="stat-card rounded-2xl bg-white/10 p-4">
-        <span class="block text-2xl font-bold">18</span>
+    <!-- <div class="hero-stats grid grid-cols-3">
+      <div class="stat-card bg-white/10">
+        <span class="block font-bold">18</span>
         {{ 'common.branches' | t }}
       </div>
-      <div class="stat-card rounded-2xl bg-white/10 p-4">
-        <span class="block text-2xl font-bold">64</span>
+      <div class="stat-card bg-white/10">
+        <span class="block font-bold">64</span>
         {{ 'common.departments' | t }}
       </div>
-      <div class="stat-card rounded-2xl bg-white/10 p-4">
-        <span class="block text-2xl font-bold">92%</span>
+      <div class="stat-card bg-white/10">
+        <span class="block font-bold">92%</span>
         {{ 'common.sla' | t }}
       </div>
     </div> -->
   </section>
-  <section class="login-stage flex items-center justify-center p-3 sm:p-6">
+  <section class="login-stage flex items-center justify-center p-3 sm:p-4">
     <router-outlet />
   </section>
 </main>

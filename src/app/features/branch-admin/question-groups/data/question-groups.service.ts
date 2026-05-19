@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { toCreatedByUser } from '../../../../shared/models/audit.model';
 import {
   toEditableScopeState,
   toSelectableScopeState,
@@ -133,6 +134,7 @@ export class QuestionGroupsService {
       nameAr: response.nameAr ?? null,
       isActive: response.isActive ?? true,
       questionsCount: response.questionsCount ?? 0,
+      createdBy: toCreatedByUser(response.createdBy),
       createdOnUtc: response.createdOnUtc ?? '',
     };
   }

@@ -370,6 +370,7 @@ export class BranchesStore {
           ? {
               ...branch,
               ...normalizedBranch,
+              createdBy: normalizedBranch.createdBy ?? branch.createdBy,
               createdOnUtc: normalizedBranch.createdOnUtc || branch.createdOnUtc,
             }
           : branch

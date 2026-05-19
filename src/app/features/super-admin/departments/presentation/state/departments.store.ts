@@ -182,6 +182,7 @@ export class DepartmentsStore {
             nameEn: department.nameEn,
             nameAr: department.nameAr ?? '',
             isActive: department.isActive ?? true,
+            createdBy: null,
             createdOnUtc: '',
           });
           this.successSignal.set('departments.createSuccess');
@@ -212,6 +213,7 @@ export class DepartmentsStore {
             nameEn: department.nameEn ?? payload.nameEn,
             nameAr: department.nameAr ?? payload.nameAr,
             isActive: department.isActive ?? true,
+            createdBy: null,
             createdOnUtc: '',
           });
           this.successSignal.set('departments.updateSuccess');

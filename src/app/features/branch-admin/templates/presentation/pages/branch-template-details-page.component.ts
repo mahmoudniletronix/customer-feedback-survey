@@ -1,6 +1,14 @@
 import { DatePipe, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   ArrowLeft,
@@ -12,9 +20,12 @@ import {
   Save,
   Trash2,
   X,
+  Plus,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import {
+  isSingleChoiceAnswerType,
+  QuestionAnswerOption,
   QuestionAnswerTypeInput,
   questionAnswerTypeLabelKey,
 } from '../../../../../shared/models/question-answer.model';
@@ -25,10 +36,42 @@ import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { QuestionAnswerPreviewComponent } from '../../../../../shared/ui/question-answer-preview/question-answer-preview.component';
 import {
+  BranchTemplate,
   BranchTemplateDetailsQuestion,
   BranchTemplateQuestionSelectionItem,
 } from '../../domain/branch-template.model';
 import { BranchTemplatesStore } from '../state/branch-templates.store';
+
+type CustomInputTypeFormValue = '1' | '2';
+type TemplateFieldName = 'nameEn' | 'nameAr' | 'description' | 'activeFrom' | 'expireTo';
+type CustomInputFieldName =
+  | 'name'
+  | 'labelEn'
+  | 'labelAr'
+  | 'type'
+  | 'isRequired'
+  | 'minLength'
+  | 'maxLength'
+  | 'minValue'
+  | 'maxValue'
+  | 'order';
+
+interface CustomInputFormControls {
+  customInputId: FormControl<string | null>;
+  originalType: FormControl<CustomInputTypeFormValue | null>;
+  name: FormControl<string>;
+  labelEn: FormControl<string>;
+  labelAr: FormControl<string>;
+  type: FormControl<CustomInputTypeFormValue>;
+  isRequired: FormControl<boolean>;
+  minLength: FormControl<number | null>;
+  maxLength: FormControl<number | null>;
+  minValue: FormControl<number | null>;
+  maxValue: FormControl<number | null>;
+  order: FormControl<number>;
+}
+
+type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
 
 interface TemplateDetailsQuestionGroupView {
   groupId: string;
@@ -85,6 +128,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   readonly editIcon = Pencil;
   readonly fileTextIcon = FileText;
   readonly listChecksIcon = ListChecks;
+  readonly plusIcon = Plus;
   readonly saveIcon = Save;
   readonly unselectedIcon = Circle;
   readonly editMode = signal(false);
@@ -112,6 +156,11 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   readonly displayTotalQuestionsCount = computed(() =>
     this.questionGroups().reduce((total, group) => total + group.questions.length, 0),
   );
+  readonly activeCustomInputs = computed(() =>
+    [...(this.templatesStore.selectedTemplate()?.customInputs ?? [])]
+      .filter((customInput) => customInput.isActive)
+      .sort((first, second) => first.order - second.order),
+  );
 
   readonly templateForm = this.formBuilder.nonNullable.group({
     nameEn: ['', [Validators.required, Validators.maxLength(200)]],
@@ -119,6 +168,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     description: ['', [Validators.required, Validators.maxLength(1000)]],
     activeFrom: ['', [Validators.required]],
     expireTo: [''],
+    customInputs: this.formBuilder.array<CustomInputFormGroup>([]),
   });
 
   private patchedTemplateId = '';
@@ -130,7 +180,17 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         return;
       }
 
-      this.templateForm.setValue({
+      this.patchTemplateForm(template);
+      this.patchedTemplateId = template.templateId;
+    });
+  }
+
+  get customInputsArray(): FormArray<CustomInputFormGroup> {
+    return this.templateForm.controls.customInputs;
+  }
+
+  private patchTemplateForm(template: BranchTemplate): void {
+    this.templateForm.patchValue({
         nameEn: template.nameEn,
         nameAr: template.nameAr,
         description: template.description,
@@ -139,8 +199,13 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
           : this.toDateTimeLocalValue(new Date()),
         expireTo: template.expireTo ? this.toDateTimeLocalValue(new Date(template.expireTo)) : '',
       });
-      this.patchedTemplateId = template.templateId;
-    });
+    this.customInputsArray.clear();
+    [...template.customInputs]
+      .filter((customInput) => customInput.isActive)
+      .sort((first, second) => first.order - second.order)
+      .forEach((customInput) =>
+        this.customInputsArray.push(this.createCustomInputGroup(customInput.order, customInput)),
+      );
   }
 
   ngOnInit(): void {
@@ -159,21 +224,17 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   enableEdit(): void {
+    const template = this.templatesStore.selectedTemplate();
+    if (template) {
+      this.patchTemplateForm(template);
+    }
     this.editMode.set(true);
   }
 
   cancelEdit(): void {
     const template = this.templatesStore.selectedTemplate();
     if (template) {
-      this.templateForm.setValue({
-        nameEn: template.nameEn,
-        nameAr: template.nameAr,
-        description: template.description,
-        activeFrom: template.activeFrom
-          ? this.toDateTimeLocalValue(new Date(template.activeFrom))
-          : this.toDateTimeLocalValue(new Date()),
-        expireTo: template.expireTo ? this.toDateTimeLocalValue(new Date(template.expireTo)) : '',
-      });
+      this.patchTemplateForm(template);
     }
     this.editMode.set(false);
   }
@@ -182,6 +243,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     const template = this.templatesStore.selectedTemplate();
     this.templateForm.markAllAsTouched();
     this.validateTemplateDates();
+    this.validateCustomInputs();
 
     if (!template || this.templateForm.invalid || this.templatesStore.updating()) {
       return;
@@ -194,9 +256,81 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       description: formValue.description,
       activeFrom: this.toUtcIsoDateTime(formValue.activeFrom),
       expireTo: formValue.expireTo ? this.toUtcIsoDateTime(formValue.expireTo) : null,
+      customInputs: this.toUpdateCustomInputsPayload(),
     }, () => {
       this.editMode.set(false);
     });
+  }
+
+  addCustomInput(): void {
+    this.customInputsArray.push(this.createCustomInputGroup(this.customInputsArray.length + 1));
+  }
+
+  removeCustomInput(index: number): void {
+    this.customInputsArray.removeAt(index);
+    this.validateCustomInputs();
+  }
+
+  changeCustomInputType(inputGroup: CustomInputFormGroup): void {
+    const originalType = inputGroup.controls.originalType.value;
+    if (inputGroup.controls.customInputId.value && originalType) {
+      inputGroup.controls.type.setValue(originalType, { emitEvent: false });
+      return;
+    }
+
+    const type = inputGroup.controls.type.value;
+    if (type === '1') {
+      inputGroup.controls.minValue.setValue(null);
+      inputGroup.controls.maxValue.setValue(null);
+    } else {
+      inputGroup.controls.minLength.setValue(null);
+      inputGroup.controls.maxLength.setValue(null);
+    }
+
+    this.validateCustomInputs();
+  }
+
+  customInputFieldError(index: number, field: CustomInputFieldName): string {
+    const group = this.customInputsArray.at(index);
+    const control = group.controls[field];
+
+    if (!control.touched || control.valid) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return `branchTemplates.customInput${this.capitalizeField(field)}Required`;
+    }
+
+    if (control.hasError('maxlength')) {
+      return `branchTemplates.customInput${this.capitalizeField(field)}MaxLength`;
+    }
+
+    if (control.hasError('min') || control.hasError('invalidOrder')) {
+      return 'branchTemplates.customInputOrderInvalid';
+    }
+
+    if (control.hasError('duplicatedName')) {
+      return 'branchTemplates.customInputNameDuplicated';
+    }
+
+    if (control.hasError('duplicatedOrder')) {
+      return 'branchTemplates.customInputOrderDuplicated';
+    }
+
+    if (control.hasError('typeCannotBeChanged')) {
+      return 'branchTemplates.customInputTypeCannotBeChanged';
+    }
+
+    if (control.hasError('stringValidation') || control.hasError('max')) {
+      return 'branchTemplates.customInputStringValidationInvalid';
+    }
+
+    if (control.hasError('integerValidation')) {
+      return 'branchTemplates.customInputIntegerValidationInvalid';
+    }
+
+    return 'branchTemplates.fieldRequired';
   }
 
   deleteTemplate(): void {
@@ -233,7 +367,53 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     return typeof type === 'string' || typeof type === 'number' ? String(type) : '-';
   }
 
-  templateFieldError(field: keyof typeof this.templateForm.controls): string {
+  isSingleChoiceQuestion(question: TemplateDetailsQuestionView): boolean {
+    return isSingleChoiceAnswerType(question.type);
+  }
+
+  activeOptions(question: TemplateDetailsQuestionView): readonly QuestionAnswerOption[] {
+    return [...question.options]
+      .filter((option) => option.isActive)
+      .sort((first, second) => first.order - second.order);
+  }
+
+  customInputTypeLabel(type: BranchTemplate['customInputs'][number]['type']): string {
+    return type === 2
+      ? this.i18n.translate('branchTemplates.customInputTypeInteger')
+      : this.i18n.translate('branchTemplates.customInputTypeString');
+  }
+
+  customInputValidationLabel(customInput: BranchTemplate['customInputs'][number]): string {
+    if (customInput.type === 1) {
+      const minLength = customInput.minLength ?? '-';
+      const maxLength = customInput.maxLength ?? '-';
+      return `${this.i18n.translate('branchTemplates.customInputMinLength')}: ${minLength} / ${this.i18n.translate('branchTemplates.customInputMaxLength')}: ${maxLength}`;
+    }
+
+    const minValue = customInput.minValue ?? '-';
+    const maxValue = customInput.maxValue ?? '-';
+    return `${this.i18n.translate('branchTemplates.customInputMinValue')}: ${minValue} / ${this.i18n.translate('branchTemplates.customInputMaxValue')}: ${maxValue}`;
+  }
+
+  optionPrimaryText(option: QuestionAnswerOption): string {
+    const isArabic = this.i18n.language() === 'ar';
+    if (isArabic && option.textAr) {
+      return option.textAr;
+    }
+
+    return option.textEn || option.textAr || '-';
+  }
+
+  optionSecondaryText(option: QuestionAnswerOption): string {
+    const isArabic = this.i18n.language() === 'ar';
+    if (isArabic) {
+      return option.textEn;
+    }
+
+    return option.textAr ?? '';
+  }
+
+  templateFieldError(field: TemplateFieldName): string {
     const control = this.templateForm.controls[field];
     if (!control.touched || control.valid) {
       return '';
@@ -254,8 +434,8 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     return 'branchTemplates.fieldRequired';
   }
 
-  private requiredErrorKey(field: keyof typeof this.templateForm.controls): string {
-    const errorKeys: Record<keyof typeof this.templateForm.controls, string> = {
+  private requiredErrorKey(field: TemplateFieldName): string {
+    const errorKeys: Record<TemplateFieldName, string> = {
       nameEn: 'branchTemplates.nameEnRequired',
       nameAr: 'branchTemplates.nameArRequired',
       description: 'branchTemplates.descriptionRequired',
@@ -266,8 +446,8 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     return errorKeys[field];
   }
 
-  private maxLengthErrorKey(field: keyof typeof this.templateForm.controls): string {
-    const errorKeys: Record<keyof typeof this.templateForm.controls, string> = {
+  private maxLengthErrorKey(field: TemplateFieldName): string {
+    const errorKeys: Record<TemplateFieldName, string> = {
       nameEn: 'branchTemplates.nameEnMaxLength',
       nameAr: 'branchTemplates.nameArMaxLength',
       description: 'branchTemplates.descriptionMaxLength',
@@ -319,6 +499,194 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     }
 
     return [...groupsById.values()];
+  }
+
+  private createCustomInputGroup(
+    order: number,
+    customInput: BranchTemplate['customInputs'][number] | null = null,
+  ): CustomInputFormGroup {
+    const type: CustomInputTypeFormValue = customInput?.type === 2 ? '2' : '1';
+
+    return this.formBuilder.group<CustomInputFormControls>({
+      customInputId: new FormControl<string | null>(customInput?.customInputId || null),
+      originalType: new FormControl<CustomInputTypeFormValue | null>(customInput ? type : null),
+      name: this.formBuilder.nonNullable.control(customInput?.name ?? '', [
+        Validators.required,
+        Validators.maxLength(100),
+      ]),
+      labelEn: this.formBuilder.nonNullable.control(customInput?.labelEn ?? '', [
+        Validators.maxLength(200),
+      ]),
+      labelAr: this.formBuilder.nonNullable.control(customInput?.labelAr ?? '', [
+        Validators.maxLength(200),
+      ]),
+      type: this.formBuilder.nonNullable.control<CustomInputTypeFormValue>(type, [
+        Validators.required,
+      ]),
+      isRequired: this.formBuilder.nonNullable.control(customInput?.isRequired ?? true),
+      minLength: new FormControl<number | null>(customInput?.minLength ?? null, [
+        Validators.max(3000),
+      ]),
+      maxLength: new FormControl<number | null>(customInput?.maxLength ?? null, [
+        Validators.max(3000),
+      ]),
+      minValue: new FormControl<number | null>(customInput?.minValue ?? null),
+      maxValue: new FormControl<number | null>(customInput?.maxValue ?? null),
+      order: this.formBuilder.nonNullable.control(customInput?.order ?? order, [
+        Validators.required,
+        Validators.min(1),
+      ]),
+    });
+  }
+
+  private validateCustomInputs(): void {
+    const names = new Map<string, number[]>();
+    const orders = new Map<number, number[]>();
+
+    this.customInputsArray.controls.forEach((inputGroup, index) => {
+      this.clearCustomInputManualErrors(inputGroup);
+
+      const value = inputGroup.getRawValue();
+      if (value.customInputId && value.originalType && value.type !== value.originalType) {
+        this.setControlError(inputGroup.controls.type, 'typeCannotBeChanged');
+      }
+
+      const name = value.name.trim().toLowerCase();
+      if (name.length === 0) {
+        this.setControlError(inputGroup.controls.name, 'required');
+      } else {
+        names.set(name, [...(names.get(name) ?? []), index]);
+      }
+
+      if (!Number.isInteger(value.order) || value.order <= 0) {
+        this.setControlError(inputGroup.controls.order, 'invalidOrder');
+      } else {
+        orders.set(value.order, [...(orders.get(value.order) ?? []), index]);
+      }
+
+      if (value.type === '1') {
+        inputGroup.controls.minValue.setValue(null, { emitEvent: false });
+        inputGroup.controls.maxValue.setValue(null, { emitEvent: false });
+        this.validateStringCustomInput(inputGroup);
+      } else {
+        inputGroup.controls.minLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
+        this.validateIntegerCustomInput(inputGroup);
+      }
+    });
+
+    names.forEach((indexes) => {
+      if (indexes.length <= 1) {
+        return;
+      }
+      indexes.forEach((index) =>
+        this.setControlError(this.customInputsArray.at(index).controls.name, 'duplicatedName'),
+      );
+    });
+
+    orders.forEach((indexes) => {
+      if (indexes.length <= 1) {
+        return;
+      }
+      indexes.forEach((index) =>
+        this.setControlError(this.customInputsArray.at(index).controls.order, 'duplicatedOrder'),
+      );
+    });
+  }
+
+  private validateStringCustomInput(inputGroup: CustomInputFormGroup): void {
+    const minLength = inputGroup.controls.minLength.value;
+    const maxLength = inputGroup.controls.maxLength.value;
+
+    if (minLength !== null && minLength < 0) {
+      this.setControlError(inputGroup.controls.minLength, 'stringValidation');
+    }
+
+    if (maxLength !== null && maxLength > 3000) {
+      this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
+    }
+
+    if (minLength !== null && maxLength !== null && maxLength < minLength) {
+      this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
+    }
+  }
+
+  private validateIntegerCustomInput(inputGroup: CustomInputFormGroup): void {
+    const minValue = inputGroup.controls.minValue.value;
+    const maxValue = inputGroup.controls.maxValue.value;
+
+    if (minValue !== null && maxValue !== null && maxValue < minValue) {
+      this.setControlError(inputGroup.controls.maxValue, 'integerValidation');
+    }
+  }
+
+  private clearCustomInputManualErrors(inputGroup: CustomInputFormGroup): void {
+    Object.values(inputGroup.controls).forEach((control) => {
+      const errors = control.errors;
+      if (!errors) {
+        return;
+      }
+
+      const {
+        duplicatedName: _duplicatedName,
+        duplicatedOrder: _duplicatedOrder,
+        invalidOrder: _invalidOrder,
+        typeCannotBeChanged: _typeCannotBeChanged,
+        stringValidation: _stringValidation,
+        integerValidation: _integerValidation,
+        required: _manualRequired,
+        ...remainingErrors
+      } = errors;
+
+      const shouldKeepRequired =
+        control.hasValidator(Validators.required) &&
+        (control.value === null ||
+          (typeof control.value === 'string' && control.value.trim().length === 0));
+
+      control.setErrors({
+        ...(shouldKeepRequired ? { required: true } : {}),
+        ...remainingErrors,
+      });
+
+      if (control.errors && Object.keys(control.errors).length === 0) {
+        control.setErrors(null);
+      }
+    });
+  }
+
+  private setControlError(control: AbstractControl, errorKey: string): void {
+    control.setErrors({ ...(control.errors ?? {}), [errorKey]: true });
+    control.markAsTouched();
+  }
+
+  private toUpdateCustomInputsPayload() {
+    return this.customInputsArray.controls.map((inputGroup) => {
+      const value = inputGroup.getRawValue();
+      const type: 1 | 2 = Number(value.type) === 2 ? 2 : 1;
+
+      return {
+        customInputId: value.customInputId,
+        name: value.name.trim(),
+        labelEn: this.toNullableTrimmedText(value.labelEn),
+        labelAr: this.toNullableTrimmedText(value.labelAr),
+        type,
+        isRequired: value.isRequired,
+        minLength: type === 1 ? value.minLength : null,
+        maxLength: type === 1 ? value.maxLength : null,
+        minValue: type === 2 ? value.minValue : null,
+        maxValue: type === 2 ? value.maxValue : null,
+        order: value.order,
+      };
+    });
+  }
+
+  private toNullableTrimmedText(value: string): string | null {
+    const trimmedValue = value.trim();
+    return trimmedValue.length > 0 ? trimmedValue : null;
+  }
+
+  private capitalizeField(field: CustomInputFieldName): string {
+    return `${field.charAt(0).toUpperCase()}${field.slice(1)}`;
   }
 
   private validateTemplateDates(): void {

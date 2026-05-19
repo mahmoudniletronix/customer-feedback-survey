@@ -1,3 +1,8 @@
+import {
+  CreatedByUser,
+  CreatedByUserApiResponse,
+} from '../../../../shared/models/audit.model';
+
 export interface Branch {
   id: string;
   nameEn: string;
@@ -5,6 +10,7 @@ export interface Branch {
   code: string;
   address: string;
   isActive: boolean;
+  createdBy: CreatedByUser | null;
   createdOnUtc: string;
 }
 
@@ -156,6 +162,7 @@ export interface BranchApiResponse {
   code?: string;
   address?: string;
   isActive?: boolean;
+  createdBy?: CreatedByUserApiResponse | null;
   createdOnUtc?: string;
 }
 

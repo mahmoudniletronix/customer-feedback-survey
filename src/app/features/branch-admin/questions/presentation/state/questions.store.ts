@@ -302,6 +302,7 @@ export class QuestionsStore {
       type: question.typeName.length > 0 ? question.type : currentQuestion?.type ?? question.type,
       typeName: question.typeName || currentQuestion?.typeName || '',
       isActive: question.isActive,
+      createdBy: question.createdBy ?? currentQuestion?.createdBy ?? null,
       createdOnUtc: question.createdOnUtc || currentQuestion?.createdOnUtc || '',
       options: question.options.length > 0 ? question.options : currentQuestion?.options ?? [],
     };

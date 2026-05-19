@@ -153,6 +153,40 @@ export class AuthStore {
     return this.role() === 'SUPER_ADMIN' || this.hasPermission(`GlobalQuestions.${action}`);
   }
 
+  canAccessAnonymousTemplates(): boolean {
+    return (
+      this.role() === 'SUPER_ADMIN' ||
+      this.role() === 'BRANCH_ADMIN' ||
+      this.hasApiRole('Template Editor') ||
+      this.hasPermission('AnonymousTemplates.Create') ||
+      this.hasPermission('AnonymousTemplates.ViewAll') ||
+      this.hasPermission('AnonymousTemplates.ViewDetails') ||
+      this.hasPermission('AnonymousTemplates.AssignQuestions') ||
+      this.hasPermission('AnonymousTemplates.ManageQuestionConditions') ||
+      this.hasPermission('AnonymousTemplates.ViewResponses')
+    );
+  }
+
+  canManageAnonymousTemplates(
+    action:
+      | 'Create'
+      | 'Update'
+      | 'Delete'
+      | 'Restore'
+      | 'ViewAll'
+      | 'ViewDetails'
+      | 'AssignQuestions'
+      | 'ManageQuestionConditions'
+      | 'ViewResponses',
+  ): boolean {
+    return (
+      this.role() === 'SUPER_ADMIN' ||
+      this.role() === 'BRANCH_ADMIN' ||
+      this.hasApiRole('Template Editor') ||
+      this.hasPermission(`AnonymousTemplates.${action}`)
+    );
+  }
+
   canAccessReports(): boolean {
     const role = this.role();
     return (

@@ -1,8 +1,14 @@
+import {
+  CreatedByUser,
+  CreatedByUserApiResponse,
+} from '../../../../shared/models/audit.model';
+
 export interface Department {
   id: string;
   nameEn: string;
   nameAr: string;
   isActive: boolean;
+  createdBy: CreatedByUser | null;
   createdOnUtc: string;
 }
 
@@ -89,6 +95,7 @@ export interface DepartmentApiResponse {
   nameEn?: string;
   nameAr?: string | null;
   isActive?: boolean;
+  createdBy?: CreatedByUserApiResponse | null;
   createdOnUtc?: string;
 }
 

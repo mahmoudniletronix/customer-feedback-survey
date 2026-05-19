@@ -94,6 +94,7 @@
 .premium-card ::ng-deep section {
   background: transparent !important;
   border: none !important;
+  padding: 1.25rem !important;
   box-shadow: none !important;
 }
 

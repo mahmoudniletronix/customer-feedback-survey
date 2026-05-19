@@ -9,7 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { Ban, GitBranch, Plus, RotateCcw, Trash2 } from 'lucide-angular';
+import { ArrowLeft, Ban, GitBranch, Plus, RotateCcw, Trash2 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -54,6 +54,7 @@ interface ConditionTriggerBaseView {
   key: string;
   label: string;
   secondaryLabel: string;
+  valueLabel: string;
   triggerType: QuestionConditionTriggerType;
   selectedQuestionOptionId: string | null;
   triggerValue: number | null;
@@ -104,6 +105,7 @@ export class BranchTemplateConditionalLogicComponent {
 
   readonly blockedIcon = Ban;
   readonly branchIcon = GitBranch;
+  readonly backIcon = ArrowLeft;
   readonly plusIcon = Plus;
   readonly resetIcon = RotateCcw;
   readonly trashIcon = Trash2;
@@ -111,6 +113,7 @@ export class BranchTemplateConditionalLogicComponent {
   readonly originalConditions = signal<readonly QuestionCondition[]>([]);
   readonly draftConditions = signal<readonly QuestionCondition[]>([]);
   readonly selectedChildByTrigger = signal<Record<string, string>>({});
+  readonly focusedQuestionPathIds = signal<readonly string[]>([]);
   private readonly initializedSelectionKey = signal('');
 
   readonly selectedQuestions = computed<readonly ConditionalLogicQuestion[]>(() =>
@@ -120,6 +123,35 @@ export class BranchTemplateConditionalLogicComponent {
     this.toLogicQuestions(this.candidateQuestions(), false),
   );
   readonly rootNodes = computed<readonly ConditionTreeNodeView[]>(() => this.toRootTreeNodes());
+  readonly focusedQuestionPath = computed<readonly ConditionalLogicQuestion[]>(() =>
+    this.focusedQuestionPathIds().reduce<ConditionalLogicQuestion[]>((path, questionId) => {
+      const question = this.findQuestion(questionId);
+      if (question) {
+        path.push(question);
+      }
+      return path;
+    }, []),
+  );
+  readonly focusedQuestion = computed(() => {
+    const path = this.focusedQuestionPath();
+    return path.length > 0 ? path[path.length - 1] : null;
+  });
+  readonly focusedParentQuestion = computed(() => {
+    const path = this.focusedQuestionPath();
+    return path.length > 1 ? path[path.length - 2] : null;
+  });
+  readonly visibleNodes = computed<readonly ConditionTreeNodeView[]>(() => {
+    const focusedQuestion = this.focusedQuestion();
+    const focusedPath = this.focusedQuestionPath();
+    const focusedDepth = Math.max(focusedPath.length - 1, 0);
+    const parentPath = focusedPath
+      .slice(0, -1)
+      .map((question) => question.templateQuestionId);
+
+    return focusedQuestion
+      ? [this.toTreeNode(focusedQuestion, focusedDepth, parentPath)]
+      : this.rootNodes();
+  });
   readonly configuredConditionsCount = computed(() => this.normalizedDraftConditions().length);
   readonly isDirty = computed(
     () =>
@@ -134,6 +166,7 @@ export class BranchTemplateConditionalLogicComponent {
         this.originalConditions.set([]);
         this.draftConditions.set([]);
         this.selectedChildByTrigger.set({});
+        this.focusedQuestionPathIds.set([]);
         this.initializedSelectionKey.set('');
         return;
       }
@@ -154,6 +187,7 @@ export class BranchTemplateConditionalLogicComponent {
       this.originalConditions.set(conditions);
       this.draftConditions.set(conditions);
       this.selectedChildByTrigger.set({});
+      this.focusedQuestionPathIds.set([]);
       this.initializedSelectionKey.set(selectionKey);
     });
 
@@ -222,6 +256,58 @@ export class BranchTemplateConditionalLogicComponent {
     this.selectedChildByTrigger.set({});
   }
 
+  focusQuestion(
+    question: ConditionalLogicQuestion,
+    parentQuestion: ConditionalLogicQuestion | null = null,
+  ): void {
+    const questionId = question.templateQuestionId;
+    const parentQuestionId = parentQuestion?.templateQuestionId ?? null;
+    const currentPath = this.focusedQuestionPathIds();
+
+    if (!parentQuestionId) {
+      const existingQuestionIndex = currentPath.indexOf(questionId);
+      this.focusedQuestionPathIds.set(
+        existingQuestionIndex >= 0
+          ? currentPath.slice(0, existingQuestionIndex + 1)
+          : [questionId],
+      );
+      return;
+    }
+
+    const parentIndex = currentPath.indexOf(parentQuestionId);
+    const basePath =
+      parentIndex >= 0 ? currentPath.slice(0, parentIndex + 1) : [parentQuestionId];
+    const existingQuestionIndex = basePath.indexOf(questionId);
+
+    this.focusedQuestionPathIds.set(
+      existingQuestionIndex >= 0
+        ? basePath.slice(0, existingQuestionIndex + 1)
+        : [...basePath, questionId],
+    );
+  }
+
+  clearFocusedQuestion(): void {
+    this.focusedQuestionPathIds.set([]);
+  }
+
+  focusPathQuestion(pathIndex: number): void {
+    const path = this.focusedQuestionPathIds();
+    if (pathIndex < 0 || pathIndex >= path.length) {
+      return;
+    }
+
+    this.focusedQuestionPathIds.set(path.slice(0, pathIndex + 1));
+  }
+
+  backOneFocusedQuestion(): void {
+    const path = this.focusedQuestionPathIds();
+    this.focusedQuestionPathIds.set(path.slice(0, -1));
+  }
+
+  canConfigureQuestion(question: ConditionalLogicQuestion): boolean {
+    return this.canBeParent(question);
+  }
+
   questionText(question: ConditionalLogicQuestion): string {
     const isArabic = this.i18n.language() === 'ar';
     return this.localizedText(question.textEn, question.textAr, isArabic) || '-';
@@ -260,8 +346,8 @@ export class BranchTemplateConditionalLogicComponent {
 
   treeNodeContainerClass(node: ConditionTreeNodeView): string {
     return node.depth === 0
-      ? 'relative overflow-hidden rounded-xl border border-cyan-200 bg-white p-4 pt-5 shadow-sm shadow-cyan-100/70'
-      : 'relative overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/25 p-3 pt-5 shadow-sm shadow-emerald-100/60';
+      ? 'relative overflow-hidden rounded-lg border border-cyan-200 bg-white p-2.5 pt-3 shadow-sm shadow-cyan-100/60'
+      : 'relative overflow-hidden rounded-lg border border-emerald-200 bg-emerald-50/25 p-2.5 pt-3 shadow-sm shadow-emerald-100/50';
   }
 
   nodeConditionsCount(node: ConditionTreeNodeView): number {
@@ -309,9 +395,10 @@ export class BranchTemplateConditionalLogicComponent {
         (question) =>
           question.isActive &&
           question.groupIsActive &&
-          question.templateQuestionId !== null &&
-          question.templateQuestionId.length > 0 &&
-          (!selectedOnly || question.isSelected),
+          this.hasLogicQuestionId(question) &&
+          (selectedOnly
+            ? question.isSelected
+            : question.isSelectable && question.groupIsSelectable),
       )
       .map((question) => this.toLogicQuestion(question))
       .sort(
@@ -342,6 +429,7 @@ export class BranchTemplateConditionalLogicComponent {
             null,
             this.optionLabel(option),
             this.optionSecondaryLabel(option),
+            this.triggerValueLabel(option.value),
           ),
         );
     }
@@ -355,6 +443,7 @@ export class BranchTemplateConditionalLogicComponent {
           value,
           `${value} ${this.i18n.translate('branchTemplates.stars')}`,
           '',
+          this.triggerValueLabel(value),
         ),
       );
     }
@@ -369,6 +458,7 @@ export class BranchTemplateConditionalLogicComponent {
           value,
           `${value} ${smileLevel?.emoji ?? ''}`,
           smileLevel ? this.i18n.translate(smileLevel.labelKey) : '',
+          this.triggerValueLabel(value),
         );
       });
     }
@@ -422,15 +512,11 @@ export class BranchTemplateConditionalLogicComponent {
     path: readonly string[],
   ): ConditionTreeConditionView {
     const childQuestion = this.findQuestion(condition.childTemplateQuestionId);
-    const childNode =
-      childQuestion && !path.includes(childQuestion.templateQuestionId)
-        ? this.toTreeNode(childQuestion, depth, path)
-        : null;
 
     return {
       condition,
       childQuestion,
-      childNode,
+      childNode: null,
     };
   }
 
@@ -441,6 +527,7 @@ export class BranchTemplateConditionalLogicComponent {
     triggerValue: number | null,
     label: string,
     secondaryLabel: string,
+    valueLabel: string,
   ): ConditionTriggerView {
     const key = this.triggerKey(
       parent.templateQuestionId,
@@ -462,6 +549,7 @@ export class BranchTemplateConditionalLogicComponent {
       key,
       label,
       secondaryLabel,
+      valueLabel,
       triggerType,
       selectedQuestionOptionId,
       triggerValue,
@@ -663,6 +751,13 @@ export class BranchTemplateConditionalLogicComponent {
     return question.templateQuestionId ?? `draft:${question.questionId}`;
   }
 
+  private hasLogicQuestionId(question: ConditionalLogicQuestionInput): boolean {
+    return (
+      question.questionId.length > 0 ||
+      (question.templateQuestionId !== null && question.templateQuestionId.length > 0)
+    );
+  }
+
   private conditionsFingerprint(conditions: readonly QuestionCondition[]): string {
     return conditions
       .map((condition) => `${questionConditionKey(condition)}|${condition.order}`)
@@ -682,6 +777,10 @@ export class BranchTemplateConditionalLogicComponent {
       selectedQuestionOptionId ?? '',
       triggerValue ?? '',
     ].join('|');
+  }
+
+  private triggerValueLabel(value: number | null): string {
+    return value === null ? '' : `${this.i18n.translate('branchTemplates.triggerValue')} ${value}`;
   }
 
   private localizedText(englishText: string, arabicText: string, isArabic: boolean): string {

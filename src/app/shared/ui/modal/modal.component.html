@@ -1,26 +1,26 @@
 @if (open()) {
   <div
-    class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-2 backdrop-blur-[2px] sm:items-center sm:p-4"
+    class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-2 backdrop-blur-[2px] sm:items-center"
   >
     <section
-      class="max-h-[calc(100dvh-1rem)] w-full overflow-hidden rounded-2xl border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[calc(100dvh-2rem)]"
+      class="max-h-[calc(100dvh-1rem)] w-full overflow-hidden rounded-lg border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[calc(100dvh-2rem)]"
       [class.max-w-xl]="size() === 'md'"
       [class.max-w-4xl]="size() === 'lg'"
     >
       <header
-        class="flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3.5 sm:px-6"
+        class="flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3"
       >
-        <h2 class="min-w-0 text-base font-bold leading-6 text-slate-900">{{ title() }}</h2>
+        <h2 class="min-w-0 text-sm font-bold leading-5 text-slate-900">{{ title() }}</h2>
         <button
           type="button"
-          class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/30"
+          class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/30"
           [attr.aria-label]="'common.closeModal' | t"
           (click)="closed.emit()"
         >
-          ×
+          &times;
         </button>
       </header>
-      <div class="max-h-[calc(100dvh-5.5rem)] overflow-y-auto p-4 sm:p-6">
+      <div class="max-h-[calc(100dvh-5.5rem)] overflow-y-auto p-4">
         <ng-content />
       </div>
     </section>

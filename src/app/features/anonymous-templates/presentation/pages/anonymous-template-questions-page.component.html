@@ -1,0 +1,326 @@
+<div class="w-full space-y-3 text-xs">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
+      <app-button type="button" variant="secondary" (pressed)="goBack()">
+        <app-icon [icon]="arrowLeftIcon" [size]="15" />
+        {{ 'common.back' | t }}
+      </app-button>
+      <div class="min-w-0">
+        <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]">
+          {{ 'anonymousTemplates.questionsSelectionEyebrow' | t }}
+        </p>
+        <h2 class="mt-1 break-words text-lg font-bold text-slate-900 [overflow-wrap:anywhere]">
+          {{ pageTitle() || ('anonymousTemplates.questionsSelectionTitle' | t) }}
+        </h2>
+        @if (pageSubtitle()) {
+          <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
+            {{ pageSubtitle() }}
+          </p>
+        }
+      </div>
+    </div>
+
+    <div class="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:w-auto">
+      <app-button type="button" variant="secondary" [routerLink]="['../']">
+        <app-icon [icon]="fileTextIcon" [size]="15" />
+        {{ 'anonymousTemplates.detailsTitle' | t }}
+      </app-button>
+      <app-button
+        type="button"
+        variant="secondary"
+        [disabled]="!hasPendingChanges() || savingTemplateFlow()"
+        (pressed)="resetSelection()"
+      >
+        {{ 'anonymousTemplates.resetQuestions' | t }}
+      </app-button>
+      <app-button
+        type="button"
+        [disabled]="!canSave()"
+        [loading]="savingTemplateFlow()"
+        (pressed)="saveQuestions()"
+      >
+        <app-icon [icon]="saveIcon" [size]="15" />
+        {{ 'anonymousTemplates.saveQuestions' | t }}
+      </app-button>
+    </div>
+  </div>
+
+  @if (anonymousTemplatesStore.success()) {
+    <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+      {{ anonymousTemplatesStore.success() ?? '' | t }}
+    </div>
+  }
+
+  @if (anonymousTemplatesStore.questionsSelectionError()) {
+    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+      {{ anonymousTemplatesStore.questionsSelectionError() ?? '' | t }}
+    </div>
+  }
+
+  @if (anonymousTemplatesStore.questionsSelection(); as selection) {
+    <div class="rounded-lg border border-slate-100 bg-white p-3 shadow-sm shadow-slate-200/50">
+      <div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span
+              class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+              [class.bg-violet-50]="selection.isGlobal"
+              [class.text-violet-700]="selection.isGlobal"
+              [class.bg-cyan-50]="!selection.isGlobal"
+              [class.text-[#0d94b3]]="!selection.isGlobal"
+            >
+              {{ selection.scopeName }}
+            </span>
+            <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#0d94b3]">
+              {{ selectedQuestions().length }} {{ 'anonymousTemplates.selectedShort' | t }}
+            </span>
+            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+              {{ availableQuestionsCount() }} {{ 'anonymousTemplates.availableShort' | t }}
+            </span>
+          </div>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ 'anonymousTemplates.questionsSelectionSubtitle' | t }}
+          </p>
+        </div>
+
+        <div class="grid min-w-0 gap-2 sm:grid-cols-[minmax(14rem,1fr)_auto_auto]">
+          <label class="flex h-8 min-w-0 items-center gap-2 rounded-md border border-slate-200 bg-white px-2 shadow-sm shadow-slate-200/60 transition focus-within:border-[#11A7C9] focus-within:ring-2 focus-within:ring-[#11A7C9]/15">
+            <app-icon class="text-slate-400" [icon]="searchIcon" [size]="14" />
+            <input
+              class="min-w-0 flex-1 bg-transparent text-[11px] font-semibold text-slate-700 outline-none placeholder:text-slate-400"
+              type="search"
+              [placeholder]="'anonymousTemplates.questionsSelectionSearchPlaceholder' | t"
+              [value]="searchText()"
+              (input)="updateSearchText($event)"
+              (keydown.enter)="searchQuestions()"
+            />
+          </label>
+          <app-button
+            type="button"
+            size="sm"
+            [loading]="anonymousTemplatesStore.questionsSelectionLoading()"
+            (pressed)="searchQuestions()"
+          >
+            <app-icon [icon]="searchIcon" [size]="14" />
+            {{ 'common.search' | t }}
+          </app-button>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="clearSearch()">
+            {{ 'common.clear' | t }}
+          </app-button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (anonymousTemplatesStore.detailsLoading() || anonymousTemplatesStore.questionsSelectionLoading()) {
+    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-white p-3 text-[11px] font-semibold text-slate-600">
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      {{ 'anonymousTemplates.questionsSelectionLoading' | t }}
+    </div>
+  } @else {
+    <div class="grid min-w-0 gap-3 xl:grid-cols-[minmax(18rem,0.85fr)_minmax(26rem,1.15fr)]">
+      <app-card
+        [title]="'anonymousTemplates.availableQuestionsTitle' | t"
+        [subtitle]="'anonymousTemplates.availableQuestionsSubtitle' | t"
+      >
+        @if (availableGroups().length > 0) {
+          <div class="space-y-2">
+            @for (group of availableGroups(); track group.groupId) {
+              <section class="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <h3 class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+                        {{ group.nameEn }}
+                      </h3>
+                      @if (group.isGlobal) {
+                        <span class="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-700">
+                          {{ group.scopeName }}
+                        </span>
+                      }
+                    </div>
+                    @if (group.nameAr) {
+                      <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
+                        {{ group.nameAr }}
+                      </p>
+                    }
+                  </div>
+                  <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                    {{ group.questions.length }}
+                  </span>
+                </div>
+
+                <div class="space-y-1.5">
+                  @for (question of group.questions; track question.questionId) {
+                    <article class="rounded-md border border-slate-100 bg-white px-2.5 py-2">
+                      <div class="flex min-w-0 items-center justify-between gap-2">
+                        <div class="min-w-0">
+                          <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+                            {{ questionText(question) }}
+                          </p>
+                          <div class="mt-1 flex flex-wrap gap-1">
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                              {{ questionTypeLabel(question) }}
+                            </span>
+                            @if (question.isGlobal) {
+                              <span class="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                                {{ question.scopeName }}
+                              </span>
+                            }
+                          </div>
+                        </div>
+                        <app-button
+                          type="button"
+                          size="sm"
+                          [disabled]="!canAssignQuestions()"
+                          (pressed)="addQuestion(question)"
+                        >
+                          <app-icon [icon]="plusIcon" [size]="13" />
+                          {{ 'branchTemplates.addQuestion' | t }}
+                        </app-button>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+            }
+          </div>
+        } @else {
+          <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-[11px] font-semibold text-slate-500">
+            {{ 'anonymousTemplates.noAvailableQuestions' | t }}
+          </div>
+        }
+      </app-card>
+
+      <app-card
+        [title]="'anonymousTemplates.selectedQuestionsTitle' | t"
+        [subtitle]="'anonymousTemplates.selectedQuestionsSubtitle' | t"
+      >
+        <div card-actions class="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold text-[#0d94b3]">
+          <app-icon [icon]="listChecksIcon" [size]="14" />
+          {{ selectedQuestions().length }} {{ 'anonymousTemplates.selectedShort' | t }}
+        </div>
+
+        @if (selectedQuestions().length > 0) {
+          <div class="space-y-2">
+            @for (
+              question of selectedQuestions();
+              track question.questionId;
+              let index = $index;
+              let first = $first;
+              let last = $last
+            ) {
+              <article
+                class="rounded-lg border border-cyan-100 bg-white p-2.5 shadow-sm shadow-slate-200/50 transition"
+                draggable="true"
+                [class.opacity-60]="draggingQuestionId() === question.questionId"
+                (dragstart)="startDrag(question.questionId)"
+                (dragover)="allowDrop($event)"
+                (drop)="dropOnQuestion($event, question.questionId)"
+                (dragend)="endDrag()"
+              >
+                <div class="flex min-w-0 items-start gap-2">
+                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-xs font-bold text-[#0d94b3]">
+                    {{ question.selectedOrder ?? index + 1 }}
+                  </span>
+                  <app-icon class="mt-1 shrink-0 cursor-grab text-slate-300" [icon]="gripIcon" [size]="13" />
+                  <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+                        {{ questionText(question) }}
+                      </p>
+                      <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                        {{ questionTypeLabel(question) }}
+                      </span>
+                      @if (question.isGlobal) {
+                        <span class="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700">
+                          {{ question.scopeName }}
+                        </span>
+                      }
+                    </div>
+                    @if (question.textAr) {
+                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
+                        {{ question.textAr }}
+                      </p>
+                    }
+                    <div class="mt-1 flex flex-wrap gap-1 text-[10px] font-bold text-slate-500">
+                      <span class="rounded-full bg-slate-50 px-2 py-0.5">{{ question.groupNameEn }}</span>
+                      @if (question.anonymousTemplateQuestionId) {
+                        <span class="rounded-full bg-slate-50 px-2 py-0.5">
+                          {{ 'anonymousTemplates.instanceId' | t }} {{ question.anonymousTemplateQuestionId }}
+                        </span>
+                      }
+                    </div>
+
+                    @if (question.options.length > 0) {
+                      <div class="mt-2 grid gap-1.5 md:grid-cols-2">
+                        @for (option of question.options; track option.optionId) {
+                          <div class="rounded-md bg-slate-50 px-2 py-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                              <span class="break-words text-[11px] font-bold text-slate-700 [overflow-wrap:anywhere]">
+                                {{ option.textEn }}
+                              </span>
+                              <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                                {{ 'anonymousTemplates.value' | t }} {{ option.value ?? '-' }}
+                              </span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <div class="grid shrink-0 grid-cols-3 gap-1">
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      [disabled]="first || !canAssignQuestions()"
+                      (pressed)="moveQuestion(question.questionId, -1)"
+                    >
+                      <app-icon [icon]="chevronUpIcon" [size]="13" />
+                    </app-button>
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      [disabled]="last || !canAssignQuestions()"
+                      (pressed)="moveQuestion(question.questionId, 1)"
+                    >
+                      <app-icon [icon]="chevronDownIcon" [size]="13" />
+                    </app-button>
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="danger"
+                      [disabled]="!canAssignQuestions()"
+                      (pressed)="removeQuestion(question.questionId)"
+                    >
+                      <app-icon [icon]="trashIcon" [size]="13" />
+                    </app-button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-[11px] font-semibold text-slate-500">
+            {{ 'anonymousTemplates.noSelectedQuestions' | t }}
+          </div>
+        }
+
+        @if (selectedQuestions().length > 0 && canManageQuestionConditions()) {
+          <div class="mt-3 border-t border-slate-100 pt-3">
+            <app-anonymous-template-conditional-logic
+              [questions]="conditionQuestions()"
+              [candidateQuestions]="conditionCandidateQuestions()"
+              [conditions]="templateConditions()"
+              (conditionsChanged)="updateDraftConditions($event)"
+              (dirtyChanged)="updateConditionsDirty($event)"
+              (relatedQuestionSelected)="addRelatedQuestion($event)"
+            />
+          </div>
+        }
+      </app-card>
+    </div>
+  }
+</div>

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { toCreatedByUser } from '../../../../shared/models/audit.model';
 import { toQuestionAnswerOption } from '../../../../shared/models/question-answer.model';
 import { toQuestionCondition } from '../../../../shared/models/question-condition.model';
 import {
@@ -13,6 +14,9 @@ import {
 import {
   BranchTemplate,
   BranchTemplateApiResponse,
+  BranchTemplateCustomInput,
+  BranchTemplateCustomInputApiResponse,
+  BranchTemplateCustomInputType,
   BranchTemplateDetailsQuestion,
   BranchTemplateDetailsQuestionApiResponse,
   BranchTemplateQuestionGroupSelection,
@@ -181,6 +185,10 @@ export class BranchTemplatesService {
     const questions = (response.questions ?? []).map((question) =>
       this.toTemplateDetailsQuestion(question),
     );
+    const customInputs = (response.customInputs ?? [])
+      .map((customInput) => this.toCustomInput(customInput))
+      .sort((first, second) => first.order - second.order);
+    const summary = response.summary ?? null;
 
     return {
       templateId: this.readRecordId(response.templateId),
@@ -192,8 +200,15 @@ export class BranchTemplatesService {
       expireTo: response.expireTo ?? null,
       status: response.statusName ?? response.status ?? 'Draft',
       isActive: response.isActive ?? true,
-      questionsCount: response.questionsCount ?? questions.length,
+      questionsCount: summary?.questionsCount ?? response.questionsCount ?? questions.length,
+      groupsCount: summary?.groupsCount ?? this.countQuestionGroups(questions),
+      customInputsCount:
+        summary?.customInputsCount ??
+        response.customInputsCount ??
+        customInputs.filter((customInput) => customInput.isActive).length,
+      createdBy: toCreatedByUser(response.createdBy),
       createdOnUtc: response.createdOnUtc ?? '',
+      customInputs,
       questions,
       questionConditions: (response.questionConditions ?? [])
         .map((condition) => toQuestionCondition(condition))
@@ -240,6 +255,26 @@ export class BranchTemplatesService {
             condition.parentTemplateQuestionId.length > 0 &&
             condition.childTemplateQuestionId.length > 0,
         ),
+    };
+  }
+
+  private toCustomInput(response: BranchTemplateCustomInputApiResponse): BranchTemplateCustomInput {
+    const type = this.toCustomInputType(response.type ?? response.typeName);
+
+    return {
+      customInputId: this.readRecordId(response.customInputId),
+      name: response.name ?? '',
+      labelEn: response.labelEn ?? null,
+      labelAr: response.labelAr ?? null,
+      type,
+      typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
+      isRequired: response.isRequired ?? false,
+      minLength: response.minLength ?? null,
+      maxLength: response.maxLength ?? null,
+      minValue: response.minValue ?? null,
+      maxValue: response.maxValue ?? null,
+      order: response.order ?? 0,
+      isActive: response.isActive ?? true,
     };
   }
 
@@ -351,7 +386,9 @@ export class BranchTemplatesService {
     response: UpdateBranchTemplateQuestionsApiResponse,
     fallbackTemplateId: string,
   ): UpdateBranchTemplateQuestionsResult {
-    const questions = (response.questions ?? []).map((question) => this.toUpdatedQuestion(question));
+    const questions = (response.questions ?? []).map((question) =>
+      this.toUpdatedQuestion(question),
+    );
 
     return {
       templateId: this.readRecordId(response.templateId) || fallbackTemplateId,
@@ -361,7 +398,9 @@ export class BranchTemplatesService {
     };
   }
 
-  private toUpdatedQuestion(response: UpdatedBranchTemplateQuestionApiResponse): UpdatedBranchTemplateQuestion {
+  private toUpdatedQuestion(
+    response: UpdatedBranchTemplateQuestionApiResponse,
+  ): UpdatedBranchTemplateQuestion {
     return {
       ...toScopeState(response),
       templateQuestionId: this.readRecordId(response.templateQuestionId),
@@ -393,5 +432,20 @@ export class BranchTemplatesService {
 
   private readNullableRecordId(id: string | number | null | undefined): string | null {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : null;
+  }
+
+  private toCustomInputType(
+    type: number | string | null | undefined,
+  ): BranchTemplateCustomInputType {
+    const normalizedType = String(type ?? '')
+      .trim()
+      .toLowerCase();
+    return normalizedType === '2' || normalizedType === 'integer' ? 2 : 1;
+  }
+
+  private countQuestionGroups(questions: readonly BranchTemplateDetailsQuestion[]): number {
+    return new Set(
+      questions.map((question) => question.groupId).filter((groupId) => groupId.length > 0),
+    ).size;
   }
 }

@@ -9,6 +9,10 @@ import {
   EditableScopeApiFields,
   EditableScopeState,
 } from '../../../../shared/models/resource-scope.model';
+import {
+  CreatedByUser,
+  CreatedByUserApiResponse,
+} from '../../../../shared/models/audit.model';
 
 export interface QuestionListItem extends EditableScopeState {
   questionId: string;
@@ -22,6 +26,7 @@ export interface QuestionListItem extends EditableScopeState {
   type: QuestionAnswerType;
   typeName: string;
   isActive: boolean;
+  createdBy: CreatedByUser | null;
   createdOnUtc: string;
   options: readonly QuestionAnswerOption[];
 }
@@ -70,6 +75,7 @@ export interface QuestionApiResponse extends EditableScopeApiFields {
   type?: number;
   typeName?: string | null;
   isActive?: boolean;
+  createdBy?: CreatedByUserApiResponse | null;
   createdOnUtc?: string;
   options?: readonly QuestionAnswerOptionApiResponse[];
 }

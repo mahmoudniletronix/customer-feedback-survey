@@ -1,0 +1,256 @@
+<div class="w-full space-y-3 text-xs">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
+      <app-button type="button" variant="secondary" (pressed)="goBack()">
+        <app-icon [icon]="arrowLeftIcon" [size]="15" />
+        {{ 'common.back' | t }}
+      </app-button>
+      <div class="min-w-0">
+        <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]">
+          {{ 'anonymousTemplates.responsesEyebrow' | t }}
+        </p>
+        <h2 class="mt-1 break-words text-lg font-bold text-slate-900 [overflow-wrap:anywhere]">
+          {{ anonymousTemplatesStore.selectedTemplate()?.nameEn || ('anonymousTemplates.responsesTitle' | t) }}
+        </h2>
+        @if (anonymousTemplatesStore.selectedTemplate()?.nameAr; as nameAr) {
+          <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
+            {{ nameAr }}
+          </p>
+        }
+      </div>
+    </div>
+
+    <app-button type="button" variant="secondary" [routerLink]="['/anonymous-templates', anonymousTemplateId]">
+      <app-icon [icon]="fileTextIcon" [size]="15" />
+      {{ 'anonymousTemplates.detailsTitle' | t }}
+    </app-button>
+  </div>
+
+  @if (!canViewResponses()) {
+    <div class="rounded-md border border-amber-100 bg-amber-50 p-3 text-[11px] font-semibold text-amber-700">
+      {{ 'anonymousTemplates.noResponsesPermission' | t }}
+    </div>
+  } @else {
+    <app-card
+      [title]="'anonymousTemplates.responsesFiltersTitle' | t"
+      [subtitle]="'anonymousTemplates.responsesFiltersSubtitle' | t"
+    >
+      <form
+        class="grid gap-2 md:grid-cols-2 xl:grid-cols-[8.5rem_8.5rem_8rem_8rem_8rem_8rem_auto]"
+        [formGroup]="filtersForm"
+        (ngSubmit)="applyFilters()"
+      >
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'anonymousTemplates.fromDate' | t }}
+          </span>
+          <input
+            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            type="date"
+            formControlName="fromDate"
+          />
+        </label>
+
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'anonymousTemplates.toDate' | t }}
+          </span>
+          <input
+            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            type="date"
+            formControlName="toDate"
+          />
+        </label>
+
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'anonymousTemplates.minScore' | t }}
+          </span>
+          <input
+            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            type="number"
+            min="0"
+            max="100"
+            formControlName="minScorePercentage"
+          />
+        </label>
+
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'anonymousTemplates.maxScore' | t }}
+          </span>
+          <input
+            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            type="number"
+            min="0"
+            max="100"
+            formControlName="maxScorePercentage"
+          />
+        </label>
+
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'globalQuestionGroups.pageSize' | t }}
+          </span>
+          <select
+            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            formControlName="pageSize"
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+            {{ 'globalQuestionGroups.orderSort' | t }}
+          </span>
+          <select
+            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            formControlName="orderSort"
+          >
+            <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
+            <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
+            <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
+          </select>
+        </label>
+
+        <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
+          <app-button size="sm" type="submit" [loading]="anonymousTemplatesStore.responsesLoading()">
+            <app-icon [icon]="searchIcon" [size]="14" />
+            {{ 'branches.searchAction' | t }}
+          </app-button>
+          <app-button size="sm" type="button" variant="secondary" (pressed)="clearFilters()">
+            {{ 'branches.clearSearch' | t }}
+          </app-button>
+        </div>
+      </form>
+    </app-card>
+
+    @if (anonymousTemplatesStore.responsesError()) {
+      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+        {{ anonymousTemplatesStore.responsesError() ?? '' | t }}
+      </div>
+    }
+
+    <app-card
+      [title]="'anonymousTemplates.responsesListTitle' | t"
+      [subtitle]="'anonymousTemplates.responsesListSubtitle' | t"
+    >
+      <div class="overflow-hidden rounded-md border border-slate-100 bg-white">
+        <div class="overflow-x-auto">
+          <table class="min-w-[56rem] w-full divide-y divide-slate-100">
+            <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase text-slate-500">
+              <tr>
+                <th class="px-2.5 py-2">{{ 'anonymousTemplates.submittedOn' | t }}</th>
+                <th class="px-2.5 py-2">{{ 'anonymousTemplates.score' | t }}</th>
+                <th class="px-2.5 py-2">{{ 'anonymousTemplates.answersCount' | t }}</th>
+                <th class="px-2.5 py-2">{{ 'anonymousTemplates.customInputValuesCount' | t }}</th>
+                <th class="px-2.5 py-2">{{ 'anonymousTemplates.responseId' | t }}</th>
+                <th class="px-2.5 py-2 text-end">{{ 'branches.actions' | t }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              @if (anonymousTemplatesStore.responsesLoading()) {
+                <tr>
+                  <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="6">
+                    <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                    {{ 'anonymousTemplates.responsesLoading' | t }}
+                  </td>
+                </tr>
+              } @else {
+                @for (response of anonymousTemplatesStore.responses(); track response.anonymousSurveyResponseId) {
+                  <tr class="align-top transition hover:bg-slate-50">
+                    <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
+                      {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+                    </td>
+                    <td class="px-2.5 py-2">
+                      <span
+                        class="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        [class.bg-emerald-50]="response.isScored"
+                        [class.text-emerald-700]="response.isScored"
+                        [class.bg-slate-100]="!response.isScored"
+                        [class.text-slate-500]="!response.isScored"
+                      >
+                        @if (response.scorePercentage !== null) {
+                          {{ response.scorePercentage | number: '1.0-2' }}%
+                        } @else {
+                          {{ 'anonymousTemplates.unscored' | t }}
+                        }
+                      </span>
+                    </td>
+                    <td class="px-2.5 py-2 text-[11px] font-bold text-slate-700">
+                      {{ response.answersCount }}
+                    </td>
+                    <td class="px-2.5 py-2 text-[11px] font-bold text-slate-700">
+                      {{ response.customInputValuesCount }}
+                    </td>
+                    <td class="px-2.5 py-2">
+                      <p class="max-w-48 truncate text-[10px] font-semibold text-slate-500" [title]="response.anonymousSurveyResponseId">
+                        {{ response.anonymousSurveyResponseId }}
+                      </p>
+                    </td>
+                    <td class="px-2.5 py-2">
+                      <div class="flex justify-end">
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          [routerLink]="[response.anonymousSurveyResponseId]"
+                        >
+                          <app-icon [icon]="detailsIcon" [size]="14" />
+                          {{ 'anonymousTemplates.viewResponse' | t }}
+                        </app-button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="6">
+                      {{ 'anonymousTemplates.noResponses' | t }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 md:flex-row md:items-center md:justify-between">
+        <p class="text-[11px] font-semibold text-slate-500">
+          {{ 'branches.paginationSummary' | t }}
+          {{ anonymousTemplatesStore.responsesCurrentPage() }} /
+          {{ anonymousTemplatesStore.responsesTotalPages() }}
+          -
+          {{ anonymousTemplatesStore.responsesTotalItems() }}
+          {{ 'anonymousTemplates.responsesShort' | t }}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <app-button
+            size="sm"
+            type="button"
+            variant="secondary"
+            [disabled]="!anonymousTemplatesStore.responsesHasPreviousPage() || anonymousTemplatesStore.responsesLoading()"
+            (pressed)="previousPage()"
+          >
+            <app-icon [icon]="chevronLeftIcon" [size]="15" />
+            {{ 'branches.previousPage' | t }}
+          </app-button>
+          <app-button
+            size="sm"
+            type="button"
+            variant="secondary"
+            [disabled]="!anonymousTemplatesStore.responsesHasNextPage() || anonymousTemplatesStore.responsesLoading()"
+            (pressed)="nextPage()"
+          >
+            {{ 'branches.nextPage' | t }}
+            <app-icon [icon]="chevronRightIcon" [size]="15" />
+          </app-button>
+        </div>
+      </div>
+    </app-card>
+  }
+</div>

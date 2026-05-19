@@ -12,6 +12,7 @@ import {
   Network,
   PanelLeftClose,
   PanelLeftOpen,
+  QrCode,
   UserCog,
   UsersRound
 } from 'lucide-angular';
@@ -33,6 +34,7 @@ interface MenuItem {
     | 'questions'
     | 'globalQuestionGroups'
     | 'globalQuestions'
+    | 'anonymousTemplates'
     | 'reports';
   exact?: boolean;
   child?: boolean;
@@ -124,6 +126,15 @@ const MENU_ITEMS: readonly MenuItem[] = [
     feature: 'globalQuestions'
   },
   {
+    label: 'Anonymous templates',
+    labelKey: 'nav.anonymousTemplates',
+    path: '/anonymous-templates',
+    icon: QrCode,
+    roles: [],
+    feature: 'anonymousTemplates',
+    exact: true
+  },
+  {
     label: 'Surveys',
     labelKey: 'nav.surveys',
     path: '/survey',
@@ -203,6 +214,9 @@ export class SidebarComponent {
     }
     if (feature === 'globalQuestions') {
       return this.authStore.canAccessGlobalQuestions();
+    }
+    if (feature === 'anonymousTemplates') {
+      return this.authStore.canAccessAnonymousTemplates();
     }
     if (feature === 'reports') {
       return this.authStore.canAccessReports();

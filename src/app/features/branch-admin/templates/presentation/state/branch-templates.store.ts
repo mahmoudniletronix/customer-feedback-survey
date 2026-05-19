@@ -653,6 +653,30 @@ export class BranchTemplatesStore {
     if (code.includes('childquestiongroupinactive')) {
       return 'branchTemplates.conditionChildQuestionGroupInactive';
     }
+    if (code.includes('custominputnameduplicated')) {
+      return 'branchTemplates.customInputNameDuplicated';
+    }
+    if (code.includes('custominputorderduplicated')) {
+      return 'branchTemplates.customInputOrderDuplicated';
+    }
+    if (code.includes('custominputstringvalidationinvalid')) {
+      return 'branchTemplates.customInputStringValidationInvalid';
+    }
+    if (code.includes('custominputintegervalidationinvalid')) {
+      return 'branchTemplates.customInputIntegerValidationInvalid';
+    }
+    if (code.includes('custominputtypecannotbechanged')) {
+      return 'branchTemplates.customInputTypeCannotBeChanged';
+    }
+    if (code.includes('custominputnotfound')) {
+      return 'branchTemplates.customInputNotFound';
+    }
+    if (code.includes('custominputidduplicated')) {
+      return 'branchTemplates.customInputIdDuplicated';
+    }
+    if (code.includes('custominputs') || code.includes('custominput')) {
+      return 'branchTemplates.customInputsInvalid';
+    }
 
     if (error.status === 401) {
       return 'branchTemplates.unauthorized';
@@ -753,7 +777,12 @@ export class BranchTemplatesStore {
       status: template.status || currentTemplate?.status || 'Draft',
       isActive: template.isActive,
       questionsCount: template.questionsCount || currentTemplate?.questionsCount || 0,
+      groupsCount: template.groupsCount || currentTemplate?.groupsCount || 0,
+      customInputsCount: template.customInputsCount || currentTemplate?.customInputsCount || 0,
+      createdBy: template.createdBy ?? currentTemplate?.createdBy ?? null,
       createdOnUtc: template.createdOnUtc || currentTemplate?.createdOnUtc || '',
+      customInputs:
+        template.customInputs.length > 0 ? template.customInputs : currentTemplate?.customInputs ?? [],
       questions: template.questions.length > 0 ? template.questions : currentTemplate?.questions ?? [],
       questionConditions: template.questionConditions ?? currentTemplate?.questionConditions ?? [],
     };

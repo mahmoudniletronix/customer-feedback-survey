@@ -1,0 +1,392 @@
+<div class="space-y-3 text-xs">
+  <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+    <div class="min-w-0">
+      <p class="text-[10px] font-bold uppercase text-[#0d94b3]">
+        {{ 'branchTemplates.conditionalLogicTitle' | t }}
+      </p>
+      <p class="mt-0.5 max-w-2xl text-[11px] leading-4 text-slate-500">
+        {{ 'anonymousTemplates.conditionsSubtitle' | t }}
+      </p>
+    </div>
+
+    <div class="grid w-full grid-cols-1 gap-1.5 sm:grid-cols-2 lg:w-auto">
+      <app-button
+        type="button"
+        variant="secondary"
+        [disabled]="
+          configuredConditionsCount() === 0 ||
+          anonymousTemplatesStore.managingQuestionConditions()
+        "
+        (pressed)="clearConditions()"
+      >
+        <app-icon [icon]="trashIcon" [size]="13" />
+        {{ 'branchTemplates.clearConditions' | t }}
+      </app-button>
+      <app-button
+        type="button"
+        variant="secondary"
+        [disabled]="!isDirty() || anonymousTemplatesStore.managingQuestionConditions()"
+        (pressed)="resetConditions()"
+      >
+        <app-icon [icon]="resetIcon" [size]="13" />
+        {{ 'branchTemplates.resetQuestions' | t }}
+      </app-button>
+    </div>
+  </div>
+
+  <ng-template #questionNodeTemplate let-node>
+    <section [class]="treeNodeContainerClass(node)">
+      <div
+        class="absolute inset-x-0 top-0 h-0.5"
+        [class.bg-[#11A7C9]]="node.depth === 0"
+        [class.bg-emerald-500]="node.depth > 0"
+      ></div>
+      <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div class="flex min-w-0 flex-1 items-center gap-2">
+          <span
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ring-2 ring-white"
+            [class.bg-cyan-50]="node.depth === 0"
+            [class.text-[#0d94b3]]="node.depth === 0"
+            [class.bg-emerald-50]="node.depth > 0"
+            [class.text-emerald-700]="node.depth > 0"
+          >
+            {{ node.question.selectedOrder ?? '-' }}
+          </span>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <h3 class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+                {{ questionText(node.question) }}
+              </h3>
+              <span
+                class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                [class.bg-cyan-50]="node.depth === 0"
+                [class.text-[#0d94b3]]="node.depth === 0"
+                [class.bg-emerald-50]="node.depth > 0"
+                [class.text-emerald-700]="node.depth > 0"
+              >
+                <app-icon [icon]="branchIcon" [size]="11" />
+                @if (node.depth === 0) {
+                  {{ 'branchTemplates.rootQuestion' | t }}
+                } @else {
+                  {{ 'branchTemplates.followUpQuestion' | t }}
+                }
+              </span>
+            </div>
+            @if (questionSecondaryText(node.question)) {
+              <p
+                class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+              >
+                {{ questionSecondaryText(node.question) }}
+              </p>
+            }
+            <div class="mt-1.5 flex flex-wrap gap-1.5">
+              <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+                {{ answerTypeLabel(node.question) }}
+              </span>
+              @if (node.question.groupNameEn || node.question.groupNameAr) {
+                <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-500">
+                  {{ node.question.groupNameEn || node.question.groupNameAr }}
+                </span>
+              }
+              @if (node.question.isGlobal) {
+                <span class="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700">
+                  {{ node.question.scopeName }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+        @if (node.canBeParent) {
+          <span
+            class="inline-flex w-fit items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200"
+          >
+            <app-icon [icon]="branchIcon" [size]="12" />
+            {{ nodeConditionsCount(node) }} {{ 'branchTemplates.conditionsConfigured' | t }}
+          </span>
+        }
+      </div>
+
+      @if (!node.canBeParent) {
+        <div
+          class="mt-2 flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 p-2 text-[11px] font-semibold text-slate-500"
+        >
+          <app-icon class="mt-0.5 shrink-0 text-slate-400" [icon]="blockedIcon" [size]="13" />
+          <span>{{ 'branchTemplates.conditionsNotAllowedForType' | t }}</span>
+        </div>
+      } @else {
+        <div class="mt-2.5 space-y-2">
+          @for (trigger of node.triggers; track trigger.key) {
+            <div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50/70">
+              <div
+                class="flex flex-col gap-2 border-b border-slate-100 bg-white/80 px-2.5 py-2 md:flex-row md:items-center md:justify-between"
+              >
+                <div class="flex min-w-0 items-center gap-2">
+                  <span
+                    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-[9px] font-black uppercase text-[#0d94b3]"
+                  >
+                    {{ 'branchTemplates.ifAnswer' | t }}
+                  </span>
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <p
+                        class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                      >
+                        {{ trigger.label }}
+                      </p>
+                      @if (trigger.valueLabel) {
+                        <span
+                          class="inline-flex w-fit rounded-full bg-cyan-50 px-1.5 py-0.5 text-[10px] font-black text-[#0d94b3] ring-1 ring-cyan-100"
+                        >
+                          {{ trigger.valueLabel }}
+                        </span>
+                      }
+                    </div>
+                    @if (trigger.secondaryLabel) {
+                      <p
+                        class="mt-0.5 break-words text-[10px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                      >
+                        {{ trigger.secondaryLabel }}
+                      </p>
+                    }
+                  </div>
+                </div>
+                <span
+                  class="inline-flex w-fit shrink-0 items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200"
+                >
+                  <app-icon [icon]="branchIcon" [size]="12" />
+                  {{ trigger.conditions.length }}
+                </span>
+              </div>
+
+              @if (trigger.conditions.length > 0) {
+                <div class="space-y-2 px-2.5 py-2">
+                  @for (
+                    conditionView of trigger.conditions;
+                    track trackCondition(conditionView.condition)
+                  ) {
+                    <div class="relative ms-1 border-s-2 border-cyan-200 ps-3">
+                      <span
+                        class="absolute -start-[5px] top-3 h-2 w-2 rounded-full bg-[#11A7C9] ring-2 ring-cyan-50"
+                      ></span>
+                      <div
+                        class="mb-2 flex flex-col gap-2 rounded-lg border border-cyan-100 bg-cyan-50/70 p-2 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div class="min-w-0">
+                          <p class="text-[9px] font-black uppercase text-[#0d94b3]">
+                            {{ 'branchTemplates.thenShow' | t }}
+                          </p>
+                          <p
+                            class="mt-0.5 min-w-0 break-words text-[11px] font-bold text-slate-700 [overflow-wrap:anywhere]"
+                          >
+                            @if (conditionView.childQuestion; as childQuestion) {
+                              {{ questionText(childQuestion) }}
+                            } @else {
+                              {{ childQuestionText(conditionView.condition.childTemplateQuestionId) }}
+                            }
+                          </p>
+                          @if (conditionView.childQuestion; as childQuestion) {
+                            <div class="mt-1.5 flex flex-wrap gap-1.5">
+                              <span
+                                class="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-100"
+                              >
+                                {{ answerTypeLabel(childQuestion) }}
+                              </span>
+                              @if (childQuestion.isGlobal) {
+                                <span
+                                  class="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700"
+                                >
+                                  {{ childQuestion.scopeName }}
+                                </span>
+                              }
+                            </div>
+                          }
+                        </div>
+                        <div class="grid grid-cols-1 gap-1.5 sm:flex sm:flex-wrap sm:justify-end">
+                          @if (
+                            conditionView.childQuestion &&
+                            canConfigureQuestion(conditionView.childQuestion)
+                          ) {
+                            <app-button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              [disabled]="anonymousTemplatesStore.managingQuestionConditions()"
+                              (pressed)="focusQuestion(conditionView.childQuestion, node.question)"
+                            >
+                              <app-icon [icon]="branchIcon" [size]="13" />
+                              {{ 'branchTemplates.configureRelatedQuestion' | t }}
+                            </app-button>
+                          }
+                          <app-button
+                            type="button"
+                            size="sm"
+                            variant="danger"
+                            [disabled]="anonymousTemplatesStore.managingQuestionConditions()"
+                            (pressed)="removeCondition(conditionView.condition)"
+                          >
+                            <app-icon [icon]="trashIcon" [size]="13" />
+                            {{ 'branchTemplates.removeCondition' | t }}
+                          </app-button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="grid gap-1.5 border-t border-slate-100 bg-white px-2.5 py-2 md:grid-cols-[minmax(0,1fr)_auto]">
+                <select
+                  class="h-9 min-w-0 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-4 focus:ring-[#11A7C9]/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                  [value]="trigger.selectedChildTemplateQuestionId"
+                  [disabled]="
+                    trigger.childCandidates.length === 0 ||
+                    anonymousTemplatesStore.managingQuestionConditions()
+                  "
+                  (change)="updateSelectedChild(trigger.key, $event)"
+                >
+                  <option value="">{{ 'branchTemplates.selectRelatedQuestion' | t }}</option>
+                  @for (child of trigger.childCandidates; track child.anonymousTemplateQuestionId) {
+                    <option [value]="child.anonymousTemplateQuestionId">
+                      {{ questionText(child) }}
+                    </option>
+                  }
+                </select>
+                <app-button
+                  type="button"
+                  size="sm"
+                  [disabled]="
+                    !trigger.selectedChildTemplateQuestionId ||
+                    anonymousTemplatesStore.managingQuestionConditions()
+                  "
+                  (pressed)="addCondition(node.question, trigger)"
+                >
+                  <app-icon [icon]="plusIcon" [size]="13" />
+                  {{ 'branchTemplates.addRelatedQuestion' | t }}
+                </app-button>
+              </div>
+
+              @if (trigger.childCandidates.length === 0) {
+                <p class="mt-1.5 px-2.5 pb-2 text-[10px] font-semibold text-slate-400">
+                  {{ 'branchTemplates.noRelatedQuestionCandidates' | t }}
+                </p>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </ng-template>
+
+  @if (selectedQuestions().length === 0) {
+    <div
+      class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center font-semibold text-slate-500"
+    >
+      {{ 'branchTemplates.conditionsNeedSelectedQuestions' | t }}
+    </div>
+  } @else {
+    @if (focusedQuestion(); as focusedQuestion) {
+      <div
+        class="space-y-2 rounded-lg border border-cyan-100 bg-white p-2.5 shadow-sm shadow-slate-200/60"
+      >
+        <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div class="min-w-0">
+            <p class="text-[10px] font-black uppercase text-[#0d94b3]">
+              {{ 'branchTemplates.logicPath' | t }}
+            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                class="inline-flex h-7 items-center rounded-full bg-cyan-50 px-2 text-[10px] font-bold text-[#0d94b3] ring-1 ring-cyan-100 transition hover:bg-cyan-100"
+                (click)="clearFocusedQuestion()"
+              >
+                {{ 'branchTemplates.logicPathRoots' | t }}
+              </button>
+              @for (
+                pathQuestion of focusedQuestionPath();
+                track pathQuestion.anonymousTemplateQuestionId;
+                let pathIndex = $index
+              ) {
+                <span class="text-[11px] font-bold text-slate-300">/</span>
+                <button
+                  type="button"
+                  class="inline-flex h-7 max-w-[16rem] items-center gap-1.5 rounded-full bg-white px-2 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-default disabled:bg-[#11A7C9] disabled:text-white disabled:ring-[#11A7C9]"
+                  [disabled]="pathIndex === focusedQuestionPath().length - 1"
+                  (click)="focusPathQuestion(pathIndex)"
+                >
+                  <span
+                    class="flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-100 px-1 text-[9px] font-black text-slate-500"
+                  >
+                    {{ pathQuestion.selectedOrder ?? pathIndex + 1 }}
+                  </span>
+                  <span class="truncate">{{ questionText(pathQuestion) }}</span>
+                </button>
+              }
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-1.5 sm:flex sm:justify-end">
+            <app-button
+              type="button"
+              variant="secondary"
+              [disabled]="anonymousTemplatesStore.managingQuestionConditions()"
+              (pressed)="backOneFocusedQuestion()"
+            >
+              <app-icon [icon]="backIcon" [size]="13" />
+              {{ 'branchTemplates.backOneStep' | t }}
+            </app-button>
+            <app-button
+              type="button"
+              variant="secondary"
+              [disabled]="anonymousTemplatesStore.managingQuestionConditions()"
+              (pressed)="clearFocusedQuestion()"
+            >
+              <app-icon [icon]="backIcon" [size]="13" />
+              {{ 'branchTemplates.backToRootQuestions' | t }}
+            </app-button>
+          </div>
+        </div>
+        <div class="rounded-lg border border-cyan-50 bg-cyan-50/60 px-2.5 py-2">
+          <p class="text-[10px] font-black uppercase text-[#0d94b3]">
+            {{ 'branchTemplates.focusedConditionQuestion' | t }}
+          </p>
+          <div class="mt-0.5 flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div class="min-w-0">
+              <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+                {{ questionText(focusedQuestion) }}
+              </p>
+              @if (questionSecondaryText(focusedQuestion)) {
+                <p
+                  class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                >
+                  {{ questionSecondaryText(focusedQuestion) }}
+                </p>
+              }
+            </div>
+            @if (focusedParentQuestion(); as parentQuestion) {
+              <span
+                class="inline-flex w-fit max-w-full items-center gap-1.5 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-600 ring-1 ring-cyan-100"
+              >
+                <span class="text-[#0d94b3]">{{ 'branchTemplates.currentParentQuestion' | t }}</span>
+                <span class="truncate">{{ questionText(parentQuestion) }}</span>
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <div
+      class="rounded-lg border border-cyan-100 bg-cyan-50/70 p-2 text-[11px] font-semibold text-[#0d94b3]"
+    >
+      {{ configuredConditionsCount() }} {{ 'branchTemplates.conditionsConfigured' | t }}
+    </div>
+
+    <div class="space-y-2">
+      @for (node of visibleNodes(); track node.question.anonymousTemplateQuestionId) {
+        <ng-container
+          [ngTemplateOutlet]="questionNodeTemplate"
+          [ngTemplateOutletContext]="{ $implicit: node }"
+        />
+      }
+    </div>
+  }
+</div>

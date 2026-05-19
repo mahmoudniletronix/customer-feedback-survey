@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { toCreatedByUser } from '../../../../shared/models/audit.model';
 import {
   CreateDepartmentApiResponse,
   CreateDepartmentPayload,
@@ -101,6 +102,7 @@ export class DepartmentsService {
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
       isActive: response.isActive ?? true,
+      createdBy: toCreatedByUser(response.createdBy),
       createdOnUtc: response.createdOnUtc ?? '',
     };
   }
