@@ -6,6 +6,7 @@ import {
   ClipboardList,
   FileText,
   HelpCircle,
+  History,
   LayoutDashboard,
   LucideIconData,
   MessageSquareText,
@@ -14,7 +15,7 @@ import {
   PanelLeftOpen,
   QrCode,
   UserCog,
-  UsersRound
+  UsersRound,
 } from 'lucide-angular';
 import { Role } from '../../shared/models/role.model';
 import { AuthStore } from '../../features/auth/presentation/state/auth.store';
@@ -35,26 +36,50 @@ interface MenuItem {
     | 'globalQuestionGroups'
     | 'globalQuestions'
     | 'anonymousTemplates'
-    | 'reports';
+    | 'systemReports'
+    | 'branchDashboard';
   exact?: boolean;
   child?: boolean;
 }
 
 const MENU_ITEMS: readonly MenuItem[] = [
   {
-    label: 'Dashboard',
-    labelKey: 'nav.dashboard',
-    path: '/dashboard',
-    icon: LayoutDashboard,
-    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN']
+    label: 'System Dashboard',
+    labelKey: 'nav.systemDashboard',
+    path: '/reports/system-dashboard',
+    icon: ChartNoAxesColumnIncreasing,
+    roles: [],
+    feature: 'systemReports',
+    exact: true,
   },
   {
-    label: 'My Branch',
-    labelKey: 'nav.branchWorkspace',
+    label: 'System Responses History',
+    labelKey: 'nav.systemResponsesHistory',
+    path: '/reports/system-responses',
+    icon: History,
+    roles: [],
+    feature: 'systemReports',
+    exact: true,
+    child: true,
+  },
+  {
+    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     path: '/branch-admin',
-    icon: Building2,
-    roles: ['BRANCH_ADMIN'],
-    exact: true
+    icon: LayoutDashboard,
+    roles: [],
+    feature: 'branchDashboard',
+    exact: true,
+  },
+  {
+    label: 'Responses History',
+    labelKey: 'nav.responsesHistory',
+    path: '/branch-admin/responses',
+    icon: History,
+    roles: [],
+    feature: 'branchDashboard',
+    exact: true,
+    child: true,
   },
   {
     label: 'Branch users',
@@ -63,7 +88,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     icon: UsersRound,
     roles: ['BRANCH_ADMIN'],
     exact: true,
-    child: true
+    child: true,
   },
   {
     label: 'Templates',
@@ -73,7 +98,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: ['BRANCH_ADMIN'],
     feature: 'templates',
     exact: true,
-    child: true
+    child: true,
   },
   {
     label: 'Questions',
@@ -83,7 +108,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: ['BRANCH_ADMIN'],
     feature: 'questions',
     exact: true,
-    child: true
+    child: true,
   },
   {
     label: 'Question groups',
@@ -93,21 +118,21 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: ['BRANCH_ADMIN'],
     feature: 'questionGroups',
     exact: true,
-    child: true
+    child: true,
   },
   {
     label: 'Branches',
     labelKey: 'nav.branches',
     path: '/branches',
     icon: Building2,
-    roles: ['SUPER_ADMIN']
+    roles: ['SUPER_ADMIN'],
   },
   {
     label: 'Departments',
     labelKey: 'nav.departments',
     path: '/departments',
     icon: Network,
-    roles: ['SUPER_ADMIN']
+    roles: ['SUPER_ADMIN'],
   },
   {
     label: 'Global question groups',
@@ -115,7 +140,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     path: '/global-question-groups',
     icon: ClipboardList,
     roles: [],
-    feature: 'globalQuestionGroups'
+    feature: 'globalQuestionGroups',
   },
   {
     label: 'Global questions',
@@ -123,7 +148,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     path: '/global-questions',
     icon: HelpCircle,
     roles: [],
-    feature: 'globalQuestions'
+    feature: 'globalQuestions',
   },
   {
     label: 'Anonymous templates',
@@ -132,44 +157,36 @@ const MENU_ITEMS: readonly MenuItem[] = [
     icon: QrCode,
     roles: [],
     feature: 'anonymousTemplates',
-    exact: true
+    exact: true,
   },
   {
     label: 'Surveys',
     labelKey: 'nav.surveys',
     path: '/survey',
     icon: ClipboardList,
-    roles: []
+    roles: [],
   },
   {
     label: 'Operators',
     labelKey: 'operators.title',
     path: '/operators',
     icon: UserCog,
-    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN']
+    roles: ['SUPER_ADMIN', 'DEPARTMENT_ADMIN'],
   },
   {
     label: 'My templates',
     labelKey: 'operatorTemplates.title',
     path: '/operator/templates',
     icon: FileText,
-    roles: ['OPERATOR']
+    roles: ['OPERATOR'],
   },
-  {
-    label: 'Users',
-    labelKey: 'nav.users',
-    path: '/users',
-    icon: UsersRound,
-    roles: ['SUPER_ADMIN']
-  },
-  {
-    label: 'Reports',
-    labelKey: 'nav.reports',
-    path: '/reports',
-    icon: ChartNoAxesColumnIncreasing,
-    roles: ['SUPER_ADMIN'],
-    feature: 'reports'
-  }
+  // {
+  //   label: 'Users',
+  //   labelKey: 'nav.users',
+  //   path: '/users',
+  //   icon: UsersRound,
+  //   roles: ['SUPER_ADMIN']
+  // },
 ];
 
 @Component({
@@ -178,7 +195,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
   imports: [RouterLink, RouterLinkActive, IconComponent, TranslatePipe],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
   readonly collapsed = input(false);
@@ -195,7 +212,7 @@ export class SidebarComponent {
   readonly menuItems = computed(() => {
     const role = this.authStore.role();
     return MENU_ITEMS.filter(
-      (item) => (role !== null && item.roles.includes(role)) || this.canAccessFeature(item.feature)
+      (item) => (role !== null && item.roles.includes(role)) || this.canAccessFeature(item.feature),
     );
   });
 
@@ -218,8 +235,11 @@ export class SidebarComponent {
     if (feature === 'anonymousTemplates') {
       return this.authStore.canAccessAnonymousTemplates();
     }
-    if (feature === 'reports') {
-      return this.authStore.canAccessReports();
+    if (feature === 'systemReports') {
+      return this.authStore.canAccessSystemReports();
+    }
+    if (feature === 'branchDashboard') {
+      return this.authStore.canAccessBranchDashboard();
     }
     return false;
   }

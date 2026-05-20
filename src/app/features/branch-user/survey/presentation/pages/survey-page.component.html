@@ -43,7 +43,7 @@
         @for (survey of surveyStore.surveys(); track survey.id) {
           <button
             type="button"
-            class="w-full border text-left transition hover:border-[#11A7C9]"
+            class="w-full border text-start transition hover:border-[#11A7C9]"
             [class.border-[#11A7C9]]="isSelected(survey.id)"
             [class.bg-cyan-50]="isSelected(survey.id)"
             [class.border-slate-100]="!isSelected(survey.id)"

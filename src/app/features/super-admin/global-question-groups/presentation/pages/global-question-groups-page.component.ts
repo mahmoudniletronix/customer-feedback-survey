@@ -18,6 +18,7 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { I18nService } from '../../../../../core/services/i18n.service';
 import {
   CreateGlobalQuestionGroupRequest,
   GlobalQuestionGroupListItem,
@@ -45,6 +46,7 @@ export class GlobalQuestionGroupsPageComponent implements OnInit {
   readonly globalQuestionGroupsStore = inject(GlobalQuestionGroupsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -237,6 +239,25 @@ export class GlobalQuestionGroupsPageComponent implements OnInit {
   editGroupFieldError(field: keyof typeof this.editGroupForm.controls): string {
     const control = this.editGroupForm.controls[field];
     return this.fieldError(field, control.touched, control.valid, control.hasError('required'));
+  }
+
+  groupDisplayName(group: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(group.nameEn, group.nameAr);
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private fieldError(

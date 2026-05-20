@@ -158,11 +158,11 @@ export class DepartmentsPageComponent implements OnInit {
       return '-';
     }
 
-    if (this.i18n.language() === 'ar') {
-      return department.createdBy.nameAr || department.createdBy.nameEn || '-';
-    }
+    return this.localizedText(department.createdBy.nameEn, department.createdBy.nameAr);
+  }
 
-    return department.createdBy.nameEn || department.createdBy.nameAr || '-';
+  departmentDisplayName(department: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(department.nameEn, department.nameAr);
   }
 
   fieldError(field: keyof typeof this.createForm.controls): string {
@@ -189,5 +189,20 @@ export class DepartmentsPageComponent implements OnInit {
     }
 
     return this.i18n.translate('departments.nameEnRequired');
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 }

@@ -16,7 +16,6 @@ import { BarChart3, Frown, MessageSquareText, Mic, Smile, TrendingUp } from 'luc
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
-import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { BranchAdminTemplate } from '../../../branch/domain/branch-admin-branch.model';
 import {
@@ -30,14 +29,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-branch-satisfaction-report-panel',
   standalone: true,
-  imports: [
-    ButtonComponent,
-    CardComponent,
-    DecimalPipe,
-    IconComponent,
-    ReactiveFormsModule,
-    TranslatePipe,
-  ],
+  imports: [ButtonComponent, DecimalPipe, IconComponent, ReactiveFormsModule, TranslatePipe],
   templateUrl: './branch-satisfaction-report-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -179,6 +171,11 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
         responsive: true,
         maintainAspectRatio: false,
         locale: language,
+        layout: {
+          padding: {
+            top: 8,
+          },
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -193,7 +190,8 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
         scales: {
           y: {
             beginAtZero: true,
-            max: 100,
+            suggestedMax: 100,
+            grace: '5%',
             grid: { color: '#E5EAF1' },
           },
           x: {

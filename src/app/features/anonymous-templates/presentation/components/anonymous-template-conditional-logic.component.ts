@@ -311,6 +311,11 @@ export class AnonymousTemplateConditionalLogicComponent {
     return this.localizedText(question.textEn, question.textAr ?? '', isArabic) || '-';
   }
 
+  groupDisplayName(question: AnonymousConditionalLogicQuestion): string {
+    const isArabic = this.i18n.language() === 'ar';
+    return this.localizedText(question.groupNameEn, question.groupNameAr ?? '', isArabic) || '-';
+  }
+
   childQuestionText(templateQuestionId: string): string {
     const question = this.selectedQuestions().find(
       (currentQuestion) => currentQuestion.anonymousTemplateQuestionId === templateQuestionId,
@@ -318,19 +323,9 @@ export class AnonymousTemplateConditionalLogicComponent {
     return question ? this.questionText(question) : templateQuestionId;
   }
 
-  questionSecondaryText(question: AnonymousConditionalLogicQuestion): string {
-    const isArabic = this.i18n.language() === 'ar';
-    return this.secondaryLocalizedText(question.textEn, question.textAr ?? '', isArabic);
-  }
-
   optionLabel(option: AnonymousTemplateQuestionOption): string {
     const isArabic = this.i18n.language() === 'ar';
     return this.localizedText(option.textEn, option.textAr ?? '', isArabic) || '-';
-  }
-
-  optionSecondaryLabel(option: AnonymousTemplateQuestionOption): string {
-    const isArabic = this.i18n.language() === 'ar';
-    return this.secondaryLocalizedText(option.textEn, option.textAr ?? '', isArabic);
   }
 
   answerTypeLabel(question: AnonymousConditionalLogicQuestion): string {
@@ -415,7 +410,7 @@ export class AnonymousTemplateConditionalLogicComponent {
             option.optionId,
             null,
             this.optionLabel(option),
-            this.optionSecondaryLabel(option),
+            '',
             this.triggerValueLabel(option.value),
           ),
         );
@@ -838,14 +833,4 @@ export class AnonymousTemplateConditionalLogicComponent {
     return englishText || arabicText;
   }
 
-  private secondaryLocalizedText(
-    englishText: string,
-    arabicText: string,
-    isArabic: boolean,
-  ): string {
-    if (isArabic) {
-      return englishText;
-    }
-    return arabicText;
-  }
 }

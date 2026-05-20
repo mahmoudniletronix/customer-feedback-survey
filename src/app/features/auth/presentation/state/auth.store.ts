@@ -73,7 +73,7 @@ export class AuthStore {
 
   redirectPath(): string {
     const role = this.role();
-    if (role === 'BRANCH_ADMIN') {
+    if (this.canAccessBranchDashboard()) {
       return '/branch-admin';
     }
     if (role === 'OPERATOR') {
@@ -88,8 +88,8 @@ export class AuthStore {
     if (this.canAccessQuestionGroups()) {
       return '/branch-admin/question-groups';
     }
-    if (this.canAccessReports()) {
-      return '/reports';
+    if (this.canAccessSystemReports()) {
+      return '/reports/system-dashboard';
     }
     if (role === 'DEPARTMENT_ADMIN') {
       return '/survey';
@@ -98,38 +98,44 @@ export class AuthStore {
   }
 
   canAccessTemplates(): boolean {
-    return this.role() === 'BRANCH_ADMIN' || this.hasApiRole('Template Editor');
+    return (
+      this.role() === 'BRANCH_ADMIN' ||
+      (this.role() === 'BRANCH_USER' &&
+        (this.hasApiRole('Template Editor') ||
+          this.hasPermission('AnonymousTemplates.ViewAll') ||
+          this.hasPermission('AnonymousTemplates.ViewDetails')))
+    );
   }
 
   canAccessQuestionGroups(): boolean {
     return (
       this.role() === 'BRANCH_ADMIN' ||
-      this.hasApiRole('Question Editor') ||
-      this.hasPermission('QuestionGroups.ViewAll')
+      (this.role() === 'BRANCH_USER' &&
+        (this.hasApiRole('Question Editor') || this.hasPermission('QuestionGroups.ViewAll')))
     );
   }
 
   canManageQuestionGroups(action: 'Create' | 'Update' | 'Delete' | 'ViewAll'): boolean {
     return (
       this.role() === 'BRANCH_ADMIN' ||
-      this.hasApiRole('Question Editor') ||
-      this.hasPermission(`QuestionGroups.${action}`)
+      (this.role() === 'BRANCH_USER' &&
+        (this.hasApiRole('Question Editor') || this.hasPermission(`QuestionGroups.${action}`)))
     );
   }
 
   canAccessQuestions(): boolean {
     return (
       this.role() === 'BRANCH_ADMIN' ||
-      this.hasApiRole('Question Editor') ||
-      this.hasPermission('Questions.ViewAll')
+      (this.role() === 'BRANCH_USER' &&
+        (this.hasApiRole('Question Editor') || this.hasPermission('Questions.ViewAll')))
     );
   }
 
   canManageQuestions(action: 'Create' | 'Update' | 'Delete' | 'ViewAll'): boolean {
     return (
       this.role() === 'BRANCH_ADMIN' ||
-      this.hasApiRole('Question Editor') ||
-      this.hasPermission(`Questions.${action}`)
+      (this.role() === 'BRANCH_USER' &&
+        (this.hasApiRole('Question Editor') || this.hasPermission(`Questions.${action}`)))
     );
   }
 
@@ -188,9 +194,18 @@ export class AuthStore {
   }
 
   canAccessReports(): boolean {
-    const role = this.role();
+    return this.canAccessSystemReports();
+  }
+
+  canAccessSystemReports(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('Reports.ViewSystemDashboard');
+  }
+
+  canAccessBranchDashboard(): boolean {
     return (
-      role === 'SUPER_ADMIN' || role === 'DEPARTMENT_ADMIN' || this.hasApiRole('Report Viewer')
+      this.role() === 'BRANCH_ADMIN' ||
+      (this.role() === 'BRANCH_USER' &&
+        (this.hasPermission('Reports.ViewBranchReports') || this.hasApiRole('Report Viewer')))
     );
   }
 

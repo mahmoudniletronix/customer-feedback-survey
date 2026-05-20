@@ -83,7 +83,7 @@ export class AuthService {
       token: response.token,
       userType,
       roles: this.resolveApiRoles(response, branchUserRoles),
-      permissions: response.permissions ?? [],
+      permissions: this.resolvePermissions(response, tokenPayload),
       user,
     };
   }
@@ -94,7 +94,8 @@ export class AuthService {
     }
 
     const roles = response.roles ?? [];
-    const permissions = response.permissions ?? [];
+    const tokenPayload = this.decodeJwtPayload(response.token);
+    const permissions = this.resolvePermissions(response, tokenPayload);
 
     if (roles.some((role) => this.normalizeRole(role) === 'systemadministrator')) {
       return 'SuperAdmin';
@@ -132,6 +133,24 @@ export class AuthService {
     return [...new Set([...responseRoles, ...assignedRoles])];
   }
 
+  private resolvePermissions(
+    response: LoginResponse,
+    tokenPayload: Record<string, unknown> | null,
+  ): readonly string[] {
+    const responsePermissions = response.permissions ?? [];
+    const tokenPermissions = this.readStringArray(
+      tokenPayload,
+      'permissions',
+      'permission',
+      'Permissions',
+      'Permission',
+      'permissions[]',
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/permission',
+    );
+
+    return [...new Set([...responsePermissions, ...tokenPermissions])];
+  }
+
   private displayName(userNameOrEmail: string): string {
     return userNameOrEmail.includes('@') ? userNameOrEmail.split('@')[0] : userNameOrEmail;
   }
@@ -162,6 +181,28 @@ export class AuthService {
   private readString(payload: Record<string, unknown> | null, key: string): string | null {
     const value = payload?.[key];
     return typeof value === 'string' && value.length > 0 ? value : null;
+  }
+
+  private readStringArray(
+    payload: Record<string, unknown> | null,
+    ...keys: readonly string[]
+  ): readonly string[] {
+    if (!payload) {
+      return [];
+    }
+
+    const values = keys.flatMap((key) => {
+      const value = payload[key];
+      if (typeof value === 'string') {
+        return [value];
+      }
+      if (Array.isArray(value)) {
+        return value.filter((item): item is string => typeof item === 'string');
+      }
+      return [];
+    });
+
+    return [...new Set(values)];
   }
 
   private resolveBranchNameEn(

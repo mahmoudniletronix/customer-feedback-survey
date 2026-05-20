@@ -44,10 +44,25 @@ export class BranchTableComponent {
       return '-';
     }
 
+    return this.localizedText(branch.createdBy.nameEn, branch.createdBy.nameAr);
+  }
+
+  branchDisplayName(branch: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(branch.nameEn, branch.nameAr);
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
     if (this.i18n.language() === 'ar') {
-      return branch.createdBy.nameAr || branch.createdBy.nameEn || '-';
+      return arabicText || englishText || fallback;
     }
 
-    return branch.createdBy.nameEn || branch.createdBy.nameAr || '-';
+    return englishText || arabicText || fallback;
   }
 }

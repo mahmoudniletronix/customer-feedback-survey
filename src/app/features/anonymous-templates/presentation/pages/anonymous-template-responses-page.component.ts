@@ -16,6 +16,7 @@ import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { ActivatedRoute } from '@angular/router';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { AnonymousTemplatesStore } from '../state/anonymous-templates.store';
 
 @Component({
@@ -38,6 +39,7 @@ export class AnonymousTemplateResponsesPageComponent implements OnInit {
   readonly anonymousTemplatesStore = inject(AnonymousTemplatesStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
 
@@ -121,6 +123,30 @@ export class AnonymousTemplateResponsesPageComponent implements OnInit {
 
   nextPage(): void {
     this.anonymousTemplatesStore.nextResponsesPage(this.anonymousTemplateId);
+  }
+
+  selectedTemplateDisplayName(): string {
+    const template = this.anonymousTemplatesStore.selectedTemplate();
+    if (!template) {
+      return this.i18n.translate('anonymousTemplates.responsesTitle');
+    }
+
+    return this.localizedText(template.nameEn, template.nameAr);
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private toPageSize(value: string): number {

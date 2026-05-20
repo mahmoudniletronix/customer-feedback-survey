@@ -114,12 +114,6 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return this.localizedText(question.textEn, question.textAr);
   }
 
-  questionSecondaryText(question: PublicAnonymousTemplateQuestion): string {
-    return this.i18n.language() === 'ar'
-      ? question.textEn
-      : question.textAr ?? '';
-  }
-
   isRootQuestion(question: PublicAnonymousTemplateQuestion): boolean {
     const template = this.publicAnonymousTemplateStore.template();
 
@@ -293,12 +287,6 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
 
   optionText(option: PublicAnonymousTemplateQuestionOption): string {
     return this.localizedText(option.textEn, option.textAr);
-  }
-
-  optionSecondaryText(option: PublicAnonymousTemplateQuestionOption): string {
-    return this.i18n.language() === 'ar'
-      ? option.textEn
-      : option.textAr ?? '';
   }
 
   hasAnswer(question: PublicAnonymousTemplateQuestion): boolean {

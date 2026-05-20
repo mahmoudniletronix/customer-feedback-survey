@@ -42,7 +42,6 @@ import {
 } from '../../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
-import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
@@ -107,7 +106,6 @@ type QuestionOptionFormValue = QuestionFormValue['options'][number];
   standalone: true,
   imports: [
     ButtonComponent,
-    CardComponent,
     DatePipe,
     IconComponent,
     InputComponent,
@@ -424,6 +422,26 @@ export class QuestionsPageComponent implements OnInit {
     }
 
     return question.createdBy.nameEn || question.createdBy.nameAr || '-';
+  }
+
+  questionTextHeader(): string {
+    return this.i18n.translate('survey.questionText');
+  }
+
+  primaryQuestionText(question: QuestionListItem): string {
+    if (this.i18n.language() === 'ar') {
+      return question.textAr || question.textEn || '-';
+    }
+
+    return question.textEn || question.textAr || '-';
+  }
+
+  secondaryQuestionText(question: QuestionListItem): string {
+    if (this.i18n.language() === 'ar') {
+      return question.textEn || '-';
+    }
+
+    return question.textAr || '-';
   }
 
   private fieldError(

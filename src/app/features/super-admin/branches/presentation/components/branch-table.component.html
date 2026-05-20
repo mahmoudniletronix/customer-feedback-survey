@@ -11,10 +11,7 @@
       >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <p class="break-words font-bold text-slate-900">{{ branch.nameEn }}</p>
-            @if (branch.nameAr) {
-              <p class="mt-1 break-words text-xs text-slate-500">{{ branch.nameAr }}</p>
-            }
+            <p class="break-words font-bold text-slate-900">{{ branchDisplayName(branch) }}</p>
           </div>
           <span
             class="inline-flex shrink-0 rounded-full px-2.5 py-1 text-xs font-bold"
@@ -72,11 +69,10 @@
 <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white md:block">
   <div class="overflow-x-auto">
     <table class="min-w-[66rem] divide-y divide-slate-100 lg:min-w-full">
-      <thead class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+      <thead class="bg-slate-50 text-start text-xs font-bold uppercase tracking-wide text-slate-500">
         <tr>
           <th class="px-4 py-3">{{ 'branches.code' | t }}</th>
-          <th class="px-4 py-3">{{ 'branches.nameEn' | t }}</th>
-          <th class="px-4 py-3">{{ 'branches.nameAr' | t }}</th>
+          <th class="px-4 py-3">{{ 'common.name' | t }}</th>
           <th class="px-4 py-3">{{ 'branches.address' | t }}</th>
           <th class="px-4 py-3">{{ 'common.status' | t }}</th>
           <th class="px-4 py-3">{{ 'common.createdBy' | t }}</th>
@@ -95,8 +91,7 @@
             (keydown.space)="selectBranch(branch)"
           >
             <td class="whitespace-nowrap px-4 py-3 font-semibold text-slate-800">{{ branch.code }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ branch.nameEn }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ branch.nameAr }}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ branchDisplayName(branch) }}</td>
             <td class="whitespace-nowrap px-4 py-3 text-slate-700">{{ branch.address }}</td>
             <td class="whitespace-nowrap px-4 py-3">
               <span
@@ -130,7 +125,7 @@
           </tr>
         } @empty {
           <tr>
-            <td class="px-4 py-8 text-center text-slate-500" colspan="8">
+            <td class="px-4 py-8 text-center text-slate-500" colspan="7">
               {{ 'common.noRecords' | t }}
             </td>
           </tr>

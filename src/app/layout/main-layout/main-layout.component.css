@@ -248,8 +248,12 @@
     min-height: 2.6rem;
   }
 
+  .header-left {
+    flex: 1 1 auto;
+  }
+
   .page-meta {
-    max-width: calc(100vw - 11.5rem);
+    max-width: calc(100vw - 13.75rem);
   }
 
   .page-title {

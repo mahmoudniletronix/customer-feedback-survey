@@ -1,8 +1,13 @@
 .app-sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   background: linear-gradient(180deg, #1f3a56 0%, #162a3e 100%);
   color: white;
   width: 18rem;
+  max-width: calc(100vw - 1rem);
   box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
+  will-change: transform, width;
 }
 
 .app-sidebar.sidebar-collapsed {
@@ -11,10 +16,17 @@
 
 @media (max-width: 1023px) {
   .app-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 50;
+    width: min(18rem, calc(100vw - 1rem));
     transform: translateX(-100%);
+    box-shadow: 24px 0 48px rgba(15, 23, 42, 0.26);
   }
   :host-context([dir='rtl']) .app-sidebar {
     transform: translateX(100%);
+    box-shadow: -24px 0 48px rgba(15, 23, 42, 0.26);
   }
   .app-sidebar.mobile-open {
     transform: translateX(0);
@@ -53,6 +65,24 @@
   color: rgba(165, 243, 252, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+}
+
+.sidebar-close-btn {
+  width: 2.35rem;
+  height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(236, 254, 255, 0.82);
+  transition: all 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
 }
 
 /* Nav Items */
@@ -132,6 +162,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* Collapse Button */
@@ -175,6 +206,40 @@
 .sidebar-collapsed .nav-icon-box {
   width: 2.35rem;
   height: 2.35rem;
+}
+
+@media (max-width: 1023px) {
+  .brand-section {
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-nav {
+    padding-bottom: 1rem;
+  }
+
+  .nav-item {
+    min-height: 3rem;
+    border-radius: 0.8rem;
+  }
+
+  .nav-item:hover {
+    transform: none;
+  }
+
+  :host-context([dir='rtl']) .nav-item:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-sidebar {
+    width: calc(100vw - 0.75rem);
+    max-width: calc(100vw - 0.75rem);
+  }
+
+  .sidebar-inner {
+    padding-inline: 0.75rem;
+  }
 }
 
 /* Custom Scrollbar */

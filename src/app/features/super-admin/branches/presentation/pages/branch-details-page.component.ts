@@ -362,6 +362,23 @@ export class BranchDetailsPageComponent implements OnInit {
     return 'branches.fieldRequired';
   }
 
+  localizedDisplayName(entity: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(entity.nameEn, entity.nameAr);
+  }
+
+  codedDisplayName(entity: {
+    nameEn: string | null;
+    nameAr?: string | null;
+    code?: string | null;
+  }): string {
+    const name = this.localizedDisplayName(entity);
+    return entity.code ? `${name} - ${entity.code}` : name;
+  }
+
+  questionDisplayText(question: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(question.textEn, question.textAr);
+  }
+
   private departmentAdminRequiredError(field: keyof typeof this.departmentAdminForm.controls): string {
     const errorKeys: Record<keyof typeof this.departmentAdminForm.controls, string> = {
       departmentId: 'departmentAdmins.departmentIdRequired',
@@ -374,6 +391,21 @@ export class BranchDetailsPageComponent implements OnInit {
     };
 
     return errorKeys[field];
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private departmentAdminMaxLengthError(field: keyof typeof this.departmentAdminForm.controls): string {

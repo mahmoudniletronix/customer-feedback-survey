@@ -1,6 +1,6 @@
 <aside
-  class="app-sidebar fixed inset-y-0 start-0 z-50 flex h-dvh transition-all duration-400 lg:sticky lg:top-0 lg:z-40 lg:translate-x-0"
-  [class.sidebar-collapsed]="collapsed()"
+  class="app-sidebar flex h-dvh transition-all duration-400"
+  [class.sidebar-collapsed]="collapsed() && !mobileOpen()"
   [class.mobile-open]="mobileOpen()"
 >
   <div class="sidebar-inner flex min-h-0 w-full flex-col px-3.5 py-4">
@@ -9,12 +9,20 @@
       <div class="brand-logo-container">
         <app-icon [icon]="brandIcon" [size]="22" />
       </div>
-      @if (!collapsed()) {
+      @if (!collapsed() || mobileOpen()) {
         <div class="brand-text min-w-0">
           <p class="brand-name truncate">{{ 'app.brand' | t }}</p>
           <p class="brand-subtitle truncate">{{ 'app.console' | t }}</p>
         </div>
       }
+      <!-- <button
+        type="button"
+        class="sidebar-close-btn ms-auto lg:hidden"
+        [attr.aria-label]="'common.closeSidebar' | t"
+        (click)="close.emit()"
+      >
+        <app-icon [icon]="panelLeftCloseIcon" [size]="18" />
+      </button> -->
     </div>
 
     <!-- Nav -->
@@ -31,7 +39,7 @@
           <div class="nav-icon-box">
             <app-icon [icon]="item.icon" [size]="20" />
           </div>
-          @if (!collapsed()) {
+          @if (!collapsed() || mobileOpen()) {
             <span class="nav-label">{{ item.labelKey | t }}</span>
           }
         </a>
@@ -39,12 +47,14 @@
     </nav>
 
     <!-- Footer / Collapse -->
-    <div class="sidebar-footer mt-auto border-t border-white/5 pt-3">
+    <div class="sidebar-footer mt-auto hidden border-t border-white/5 pt-3 lg:block">
       <button
         type="button"
         class="collapse-btn"
         (click)="toggle.emit()"
-        [attr.aria-label]="collapsed() ? ('common.expandSidebar' | t) : ('common.collapseSidebar' | t)"
+        [attr.aria-label]="
+          collapsed() ? ('common.expandSidebar' | t) : ('common.collapseSidebar' | t)
+        "
       >
         <app-icon [icon]="collapsed() ? panelLeftOpenIcon : panelLeftCloseIcon" [size]="18" />
         @if (!collapsed()) {

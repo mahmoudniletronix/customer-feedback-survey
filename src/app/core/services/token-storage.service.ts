@@ -138,7 +138,15 @@ export class TokenStorageService {
 
     const role = this.toRole(userType);
     const roles = this.readStringArray(payload, 'roles', 'role');
-    const permissions = this.readStringArray(payload, 'permissions', 'permission');
+    const permissions = this.readStringArray(
+      payload,
+      'permissions',
+      'permission',
+      'Permissions',
+      'Permission',
+      'permissions[]',
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/permission',
+    );
     const user = this.resolveUser(payload, role);
     const session: AuthSession = {
       token,
@@ -280,10 +288,25 @@ export class TokenStorageService {
 
     const branchNameEn = session.user.branchNameEn ?? this.readBranchNameEn(payload) ?? undefined;
     const branchNameAr = session.user.branchNameAr ?? this.readBranchNameAr(payload) ?? undefined;
+    const permissions = [
+      ...new Set([
+        ...session.permissions,
+        ...this.readStringArray(
+          payload,
+          'permissions',
+          'permission',
+          'Permissions',
+          'Permission',
+          'permissions[]',
+          'http://schemas.microsoft.com/ws/2008/06/identity/claims/permission',
+        ),
+      ]),
+    ];
 
     if (
       branchNameEn === session.user.branchNameEn &&
-      branchNameAr === session.user.branchNameAr
+      branchNameAr === session.user.branchNameAr &&
+      permissions.length === session.permissions.length
     ) {
       return session;
     }
@@ -295,6 +318,7 @@ export class TokenStorageService {
         branchNameEn,
         branchNameAr,
       },
+      permissions,
     };
   }
 

@@ -10,13 +10,8 @@
           {{ 'anonymousTemplates.responsesEyebrow' | t }}
         </p>
         <h2 class="mt-1 break-words text-lg font-bold text-slate-900 [overflow-wrap:anywhere]">
-          {{ anonymousTemplatesStore.selectedTemplate()?.nameEn || ('anonymousTemplates.responsesTitle' | t) }}
+          {{ selectedTemplateDisplayName() }}
         </h2>
-        @if (anonymousTemplatesStore.selectedTemplate()?.nameAr; as nameAr) {
-          <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
-            {{ nameAr }}
-          </p>
-        }
       </div>
     </div>
 
@@ -36,7 +31,7 @@
       [subtitle]="'anonymousTemplates.responsesFiltersSubtitle' | t"
     >
       <form
-        class="grid gap-2 md:grid-cols-2 xl:grid-cols-[8.5rem_8.5rem_8rem_8rem_8rem_8rem_auto]"
+        class="compact-filter-form grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[8.5rem_8.5rem_8rem_8rem_8rem_8rem_auto]"
         [formGroup]="filtersForm"
         (ngSubmit)="applyFilters()"
       >
@@ -142,7 +137,7 @@
       <div class="overflow-hidden rounded-md border border-slate-100 bg-white">
         <div class="overflow-x-auto">
           <table class="min-w-[56rem] w-full divide-y divide-slate-100">
-            <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase text-slate-500">
+            <thead class="bg-slate-50 text-start text-[10px] font-bold uppercase text-slate-500">
               <tr>
                 <th class="px-2.5 py-2">{{ 'anonymousTemplates.submittedOn' | t }}</th>
                 <th class="px-2.5 py-2">{{ 'anonymousTemplates.score' | t }}</th>

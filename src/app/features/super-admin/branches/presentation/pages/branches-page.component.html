@@ -103,7 +103,7 @@
 
   <app-card [title]="'branches.listTitle' | t" [subtitle]="'branches.listSubtitle' | t">
     <form
-      class="mb-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]"
+      class="compact-filter-form mb-4 grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-[minmax(0,1fr)_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchBranches()"
     >
@@ -193,10 +193,7 @@
               {{ 'branches.code' | t }}
             </p>
             <h3 class="mt-1 break-words font-bold text-slate-900">{{ branch.code }}</h3>
-            <p class="mt-2 font-semibold text-slate-700">{{ branch.nameEn }}</p>
-            @if (branch.nameAr) {
-              <p class="mt-1 text-slate-500">{{ branch.nameAr }}</p>
-            }
+            <p class="mt-2 font-semibold text-slate-700">{{ branchDisplayName(branch) }}</p>
           </div>
           <div class="flex flex-wrap gap-2">
             <span
@@ -286,7 +283,7 @@
         <div class="space-y-2">
           @for (admin of branch.branchAdmins; track admin.branchAdminId) {
             <div class="border border-slate-100">
-              <p class="font-bold text-slate-900">{{ admin.nameEn }}</p>
+              <p class="font-bold text-slate-900">{{ branchDisplayName(admin) }}</p>
               <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
               @if (admin.phoneNumber) {
                 <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
@@ -308,11 +305,8 @@
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="font-bold text-slate-900">
-                    {{ department.nameEn }}{{ department.code ? ' - ' + department.code : '' }}
+                    {{ branchOptionDisplayName(department) }}
                   </p>
-                  @if (department.nameAr) {
-                    <p class="mt-1 text-xs text-slate-500">{{ department.nameAr }}</p>
-                  }
                 </div>
                 <p class="text-xs font-semibold text-slate-500">
                   {{ 'branches.operatorsCount' | t }}: {{ department.operatorsCount }}
@@ -325,7 +319,7 @@
                   </p>
                   @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
                     <p class="mt-2 text-xs text-slate-600">
-                      {{ admin.nameEn }} - {{ admin.email }}
+                      {{ branchDisplayName(admin) }} - {{ admin.email }}
                     </p>
                   }
                 </div>
@@ -344,7 +338,7 @@
         <div class="space-y-2">
           @for (user of branch.branchUsers; track user.branchUserId) {
             <div class="border border-slate-100">
-              <p class="font-bold text-slate-900">{{ user.nameEn }}</p>
+              <p class="font-bold text-slate-900">{{ branchDisplayName(user) }}</p>
               <p class="mt-1 text-xs text-slate-500">{{ user.userName }} - {{ user.email }}</p>
               @if (user.roles.length > 0) {
                 <div class="mt-2 flex flex-wrap gap-2">
@@ -373,7 +367,7 @@
             <div class="border border-slate-100">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p class="font-bold text-slate-900">{{ template.nameEn }}</p>
+                  <p class="font-bold text-slate-900">{{ branchDisplayName(template) }}</p>
                   @if (template.description) {
                     <p class="mt-1 text-xs text-slate-500">{{ template.description }}</p>
                   }
@@ -397,15 +391,12 @@
         <div class="space-y-2">
           @for (group of branch.questionGroups; track group.groupId) {
             <div class="border border-slate-100">
-              <p class="font-bold text-slate-900">{{ group.nameEn }}</p>
+              <p class="font-bold text-slate-900">{{ branchDisplayName(group) }}</p>
               @for (question of group.questions; track question.questionId) {
                 <div class="mt-2 bg-slate-50 p-3">
                   <p class="text-xs font-semibold text-slate-700">
-                    {{ question.textEn }} - {{ question.type }}
+                    {{ questionDisplayText(question) }} - {{ question.type }}
                   </p>
-                  @if (question.textAr) {
-                    <p class="mt-1 text-xs text-slate-500">{{ question.textAr }}</p>
-                  }
                 </div>
               } @empty {
                 <p class="mt-2 text-xs text-slate-500">{{ 'common.noRecords' | t }}</p>
@@ -438,7 +429,7 @@
     @if (selectedBranchForEdit(); as branch) {
       <div class="border border-cyan-100 bg-cyan-50 font-semibold text-slate-700">
         {{ 'branches.selectedBranch' | t }}:
-        <span class="text-[#0d94b3]">{{ branch.nameEn }} - {{ branch.code }}</span>
+        <span class="text-[#0d94b3]">{{ branchOptionDisplayName(branch) }}</span>
       </div>
     }
 
@@ -569,7 +560,7 @@
       >
         <option value="">{{ 'branches.selectBranchPlaceholder' | t }}</option>
         @for (branch of branchesStore.branchSelection(); track branch.id) {
-          <option [value]="branch.id">{{ branch.nameEn }} - {{ branch.code }}</option>
+          <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
         }
       </select>
       @if (branchAdminFieldError('branchId')) {

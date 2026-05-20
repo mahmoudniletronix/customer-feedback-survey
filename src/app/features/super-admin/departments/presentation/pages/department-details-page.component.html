@@ -58,7 +58,7 @@
       </div>
     }
 
-    <app-card [title]="department.nameEn" [subtitle]="department.nameAr || ('departments.noArabicName' | t)">
+    <app-card [title]="departmentDisplayName(department)">
       <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <p class="text-xs font-semibold text-slate-400">
           {{ department.createdOnUtc ? (department.createdOnUtc | date: 'medium') : '-' }}
@@ -124,7 +124,7 @@
         <div class="space-y-2">
           @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
             <div class="border border-slate-100 p-3">
-              <p class="font-bold text-slate-900">{{ admin.nameEn }}</p>
+              <p class="font-bold text-slate-900">{{ personDisplayName(admin) }}</p>
               <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
               @if (admin.phoneNumber) {
                 <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
@@ -140,7 +140,7 @@
         <div class="space-y-2">
           @for (operator of department.operators; track operator.operatorId) {
             <div class="border border-slate-100 p-3">
-              <p class="font-bold text-slate-900">{{ operator.nameEn }}</p>
+              <p class="font-bold text-slate-900">{{ personDisplayName(operator) }}</p>
               <p class="mt-1 text-xs text-slate-500">{{ operator.userName }} - {{ operator.email }}</p>
               @if (operator.phoneNumber) {
                 <p class="mt-1 text-xs text-slate-500">{{ operator.phoneNumber }}</p>
@@ -164,7 +164,7 @@
     @if (departmentsStore.selectedDetails(); as department) {
       <div class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
         {{ 'departments.selectedDepartment' | t }}:
-        <span class="text-[#0d94b3]">{{ department.nameEn }}</span>
+        <span class="text-[#0d94b3]">{{ departmentDisplayName(department) }}</span>
       </div>
     }
 

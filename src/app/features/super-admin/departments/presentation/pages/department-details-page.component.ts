@@ -170,6 +170,14 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
+  departmentDisplayName(department: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(department.nameEn, department.nameAr);
+  }
+
+  personDisplayName(person: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(person.nameEn, person.nameAr);
+  }
+
   fieldError(field: keyof typeof this.departmentForm.controls): string {
     const control = this.departmentForm.controls[field];
     if (!control.touched || control.valid) {
@@ -220,6 +228,21 @@ export class DepartmentDetailsPageComponent implements OnInit {
     };
 
     return errorKeys[field];
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private departmentAdminMaxLengthError(field: keyof typeof this.departmentAdminForm.controls): string {

@@ -44,11 +44,18 @@ export class DashboardPageComponent implements OnInit {
     const role = this.authStore.role();
 
     if (role === 'SUPER_ADMIN') {
-      return [
+      const superAdminActions: WorkspaceAction[] = [
         { labelKey: 'dashboard.actionManageBranches', path: '/branches', icon: this.buildingIcon },
         { labelKey: 'operators.title', path: '/operators', icon: this.userCogIcon },
-        { labelKey: 'dashboard.actionReviewGlobalReports', path: '/reports', icon: this.chartIcon },
       ];
+      if (this.authStore.canAccessSystemReports()) {
+        superAdminActions.push({
+          labelKey: 'dashboard.actionReviewGlobalReports',
+          path: '/reports/system-dashboard',
+          icon: this.chartIcon,
+        });
+      }
+      return superAdminActions;
     }
 
     if (role === 'BRANCH_ADMIN') {
@@ -83,10 +90,10 @@ export class DashboardPageComponent implements OnInit {
           icon: this.squarePenIcon,
         });
       }
-      if (this.authStore.canAccessReports()) {
+      if (this.authStore.canAccessBranchDashboard()) {
         branchUserActions.push({
-          labelKey: 'nav.reports',
-          path: '/reports',
+          labelKey: 'nav.dashboard',
+          path: '/branch-admin',
           icon: this.chartIcon,
         });
       }

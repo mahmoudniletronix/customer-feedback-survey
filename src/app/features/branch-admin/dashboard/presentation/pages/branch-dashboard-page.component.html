@@ -1,0 +1,1010 @@
+<div class="w-full space-y-3 sm:space-y-4">
+  <section
+    class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm shadow-slate-200/60"
+  >
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-start">
+        <a
+          class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          routerLink="/branch-admin/responses"
+        >
+          {{ 'branchDashboard.viewAllResponses' | t }}
+        </a>
+      </div>
+
+      <form
+        class="compact-filter-form space-y-2 rounded-lg bg-slate-50/80 p-2"
+        [formGroup]="filtersForm"
+        (ngSubmit)="applyFilters()"
+      >
+        <div class="grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-[auto_auto_auto] lg:justify-end">
+          <button
+            class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+            type="button"
+            (click)="toggleAdvancedFilters()"
+          >
+            <app-icon [icon]="calendarIcon" [size]="14" />
+            {{ advancedFiltersOpen() ? 'Hide filters' : 'More filters' }}
+          </button>
+
+          <app-button
+            type="submit"
+            size="sm"
+            [fullWidth]="true"
+            [loading]="dashboardStore.loading()"
+          >
+            <app-icon [icon]="searchIcon" [size]="15" />
+            {{ 'branchDashboard.apply' | t }}
+          </app-button>
+          <app-button
+            type="button"
+            size="sm"
+            variant="secondary"
+            [fullWidth]="true"
+            (pressed)="clearFilters()"
+          >
+            {{ 'branchDashboard.clear' | t }}
+          </app-button>
+        </div>
+
+        @if (advancedFiltersOpen()) {
+          <div
+            class="grid min-w-0 gap-2 border-t border-slate-200/70 pt-2 motion-safe:[animation:branch-dashboard-rise_.22s_ease-out_both] sm:grid-cols-2 xl:grid-cols-[8rem_8rem_7.5rem_minmax(12rem,1fr)]"
+          >
+            <label class="block">
+              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.from' | t }}</span>
+              <input
+                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                type="date"
+                formControlName="from"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.to' | t }}</span>
+              <input
+                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                type="date"
+                formControlName="to"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.groupBy' | t }}</span>
+              <select
+                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                formControlName="groupBy"
+              >
+                <option value="Day">{{ 'branchDashboard.day' | t }}</option>
+                <option value="Month">{{ 'branchDashboard.month' | t }}</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.template' | t }}</span>
+              <select
+                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                formControlName="templateId"
+              >
+                <option value="">{{ 'branchDashboard.allTemplates' | t }}</option>
+                @for (template of branchStore.branch()?.templates ?? []; track template.templateId) {
+                  <option [value]="template.templateId">{{ templateName(template) }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        }
+      </form>
+    </div>
+  </section>
+
+  @if (dashboardStore.loading()) {
+    <section class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+        <div class="h-28 animate-pulse rounded-xl border border-slate-200 bg-white p-4">
+          <div class="h-3 w-24 rounded bg-slate-100"></div>
+          <div class="mt-5 h-7 w-20 rounded bg-slate-100"></div>
+          <div class="mt-3 h-3 w-32 rounded bg-slate-100"></div>
+        </div>
+      }
+    </section>
+  } @else if (dashboardStore.error()) {
+    <div
+      class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-[#D94B5A]"
+    >
+      {{ dashboardStore.error() ?? '' | t }}
+    </div>
+  } @else if (dashboardStore.dashboard(); as dashboard) {
+    @if (dashboardStore.isEmpty()) {
+      <section
+        class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/60 sm:p-8"
+      >
+        <app-icon class="mx-auto text-slate-300" [icon]="chartIcon" [size]="28" />
+        <h3 class="mt-3 text-sm font-extrabold text-slate-900">{{ 'branchDashboard.emptyTitle' | t }}</h3>
+        <p class="mt-1 text-xs font-semibold text-slate-500">
+          {{ 'branchDashboard.emptyDescription' | t }}
+        </p>
+      </section>
+    } @else {
+      <!-- Premium Creative Dashboard Widget Panel -->
+      <section
+        class="grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md shadow-slate-200/50 motion-safe:[animation:branch-dashboard-rise_.5s_ease-out_both] lg:grid-cols-[1.1fr_1.9fr] gap-0"
+      >
+        <!-- COLUMN 1: Executive Pulse Deck (XP Score + Sentiment Distribution) -->
+        <div
+          class="flex flex-col justify-between min-w-0 border-b border-slate-100 p-5 sm:p-6 lg:border-b-0 lg:border-e lg:border-slate-100 bg-slate-50/20"
+        >
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                >{{ 'branchDashboard.executiveDial' | t }}</span
+              >
+              <span
+                class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-slate-500 bg-slate-100"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full"
+                  [style.backgroundColor]="scoreColor()"
+                ></span>
+                {{ 'branchDashboard.xpPulse' | t }}
+              </span>
+            </div>
+
+            <!-- Score Radial Dial -->
+            <div
+              class="flex flex-col items-center justify-center py-4 sm:flex-row sm:justify-start sm:gap-6 sm:py-2"
+            >
+              <div class="relative flex items-center justify-center w-28 h-28 shrink-0">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <!-- Outer Dial Shadow Circle -->
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    stroke="#f1f5f9"
+                    stroke-width="8"
+                    fill="transparent"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="38"
+                    stroke="#e2e8f0"
+                    stroke-width="5"
+                    fill="transparent"
+                  />
+                  <!-- High-end glowing track -->
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="38"
+                    [attr.stroke]="scoreColor()"
+                    stroke-width="5.5"
+                    fill="transparent"
+                    [attr.stroke-dasharray]="strokeDashArray"
+                    [attr.stroke-dashoffset]="strokeDashOffset()"
+                    stroke-linecap="round"
+                    class="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <div class="absolute flex flex-col items-center justify-center">
+                  <span class="text-2xl font-black tracking-tight text-slate-900 leading-none">
+                    {{ averageScore() | number: '1.0-1' }}%
+                  </span>
+                  <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">
+                    {{ 'branchDashboard.score' | t }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quick Score Explanation -->
+              <div class="mt-4 text-center sm:mt-0 sm:text-start min-w-0">
+                <h4 class="text-xs font-black text-slate-800">
+                  @if (averageScore() >= 80) {
+                    {{ 'branchDashboard.excellentSatisfaction' | t }}
+                  } @else if (averageScore() >= 60) {
+                    {{ 'branchDashboard.averagePerformance' | t }}
+                  } @else {
+                    {{ 'branchDashboard.immediateActionRequired' | t }}
+                  }
+                </h4>
+                <p class="mt-1 text-[11px] font-semibold leading-relaxed text-slate-500 max-w-xs">
+                  {{ 'branchDashboard.basedOnPrefix' | t }} {{ totalResponses() }}
+                  {{ 'branchDashboard.customerInteractions' | t }}
+                  {{ templatesWithResponsesCount() }} {{ 'branchDashboard.activeForms' | t }}
+                </p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <span
+                    class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-black text-slate-500"
+                  >
+                    <app-icon [icon]="responsesIcon" [size]="10" />
+                    {{ totalResponses() }} {{ 'branchDashboard.responses' | t }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unified Sentiment Segmented Bar -->
+          <div class="mt-6 border-t border-slate-100 pt-5">
+            <div
+              class="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2"
+            >
+              <span>{{ 'branchDashboard.sentimentBreakdown' | t }}</span>
+              <span class="text-[11px] text-slate-700 font-extrabold"
+                >{{ satisfiedPercent() | number: '1.0-0' }}% {{ 'branchDashboard.positive' | t }}</span
+              >
+            </div>
+
+            <!-- Single multi-segmented progress track -->
+            <div
+              class="relative flex h-3.5 w-full overflow-hidden rounded-full bg-slate-100 p-0.5 border border-slate-200/50"
+            >
+              @if (totalResponses() > 0) {
+                <div
+                  class="h-full rounded-l-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500"
+                  [style.width]="barWidth(satisfiedPercent())"
+                  [title]="'Satisfied: ' + (satisfiedPercent() | number: '1.0-0') + '%'"
+                ></div>
+                <div
+                  class="h-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
+                  [style.width]="barWidth(neutralPercent())"
+                  [title]="'Neutral: ' + (neutralPercent() | number: '1.0-0') + '%'"
+                ></div>
+                <div
+                  class="h-full rounded-r-full bg-gradient-to-r from-rose-400 to-rose-500 transition-all duration-500"
+                  [style.width]="barWidth(unhappyPercent())"
+                  [title]="'Unhappy: ' + (unhappyPercent() | number: '1.0-0') + '%'"
+                ></div>
+              } @else {
+                <div class="h-full w-full rounded-full bg-slate-200"></div>
+              }
+            </div>
+
+            <!-- Sentiment interactive legend pills -->
+            <div class="mt-3.5 grid grid-cols-3 gap-2">
+              <!-- Satisfied pill -->
+              <div
+                class="flex flex-col rounded-lg bg-emerald-50/50 p-2 border border-emerald-100/50 text-start"
+              >
+                <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-800">
+                  <app-icon [icon]="smileIcon" [size]="12" class="text-emerald-500 shrink-0" />
+                  {{ 'branchDashboard.satisfied' | t }}
+                </span>
+                <span class="mt-1 text-base font-extrabold text-emerald-950">
+                  {{ dashboard.summary.satisfiedResponses }}
+                </span>
+                <span class="text-[9px] font-semibold text-emerald-600">
+                  {{ satisfiedPercent() | number: '1.0-0' }}% {{ 'branchDashboard.ratio' | t }}
+                </span>
+              </div>
+
+              <!-- Neutral pill -->
+              <div
+                class="flex flex-col rounded-lg bg-amber-50/50 p-2 border border-amber-100/50 text-start"
+              >
+                <span class="flex items-center gap-1 text-[10px] font-bold text-amber-800">
+                  <app-icon [icon]="mehIcon" [size]="12" class="text-amber-500 shrink-0" />
+                  {{ 'branchDashboard.neutral' | t }}
+                </span>
+                <span class="mt-1 text-base font-extrabold text-amber-950">
+                  {{ dashboard.summary.neutralResponses }}
+                </span>
+                <span class="text-[9px] font-semibold text-amber-600">
+                  {{ neutralPercent() | number: '1.0-0' }}% {{ 'branchDashboard.ratio' | t }}
+                </span>
+              </div>
+
+              <!-- Unhappy pill -->
+              <div
+                class="flex flex-col rounded-lg bg-rose-50/50 p-2 border border-rose-100/50 text-start"
+              >
+                <span class="flex items-center gap-1 text-[10px] font-bold text-rose-800">
+                  <app-icon [icon]="frownIcon" [size]="12" class="text-rose-500 shrink-0" />
+                  {{ 'branchDashboard.unhappy' | t }}
+                </span>
+                <span class="mt-1 text-base font-extrabold text-rose-950">
+                  {{ dashboard.summary.unhappyResponses }}
+                </span>
+                <span class="text-[9px] font-semibold text-rose-600">
+                  {{ unhappyPercent() | number: '1.0-0' }}% {{ 'branchDashboard.ratio' | t }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: Operational Volume & Channel Analytics -->
+        <div class="grid divide-y divide-slate-100 min-w-0">
+          <!-- TOP ROW: Activity & Volume Deck -->
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 p-5 sm:p-6 gap-0"
+          >
+            <!-- Responses Composition Widget -->
+            <div class="flex flex-col justify-between pr-0 sm:pr-4 pb-4 sm:pb-0 text-start">
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                  >{{ 'branchDashboard.operationalScale' | t }}</span
+                >
+                <div class="mt-2 flex items-baseline gap-2">
+                  <span class="text-4xl font-black text-slate-950 leading-none">
+                    {{ totalResponses() }}
+                  </span>
+                  <span class="text-xs font-bold text-slate-500">{{ 'branchDashboard.responses' | t }}</span>
+                </div>
+              </div>
+              <div class="mt-4 space-y-2">
+                <div
+                  class="flex items-center justify-between text-[11px] font-semibold text-slate-500"
+                >
+                  <span>{{ 'branchDashboard.scoredFeedback' | t }}</span>
+                  <span class="font-extrabold text-slate-700">{{
+                    dashboard.summary.scoredResponses
+                  }}</span>
+                </div>
+                <div class="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    class="h-full rounded-full bg-cyan-500"
+                    [style.width]="
+                      barWidth((dashboard.summary.scoredResponses / (totalResponses() || 1)) * 100)
+                    "
+                  ></div>
+                </div>
+                <div
+                  class="flex items-center justify-between text-[10px] text-slate-400 font-medium"
+                >
+                  <span>{{ 'branchDashboard.unscoredResponses' | t }}: {{ dashboard.summary.unscoredResponses }}</span>
+                  <span
+                    >{{
+                      (dashboard.summary.unscoredResponses / (totalResponses() || 1)) * 100
+                        | number: '1.0-0'
+                    }}%</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Templates & Campaign Scale Widget -->
+            <div class="flex flex-col justify-between pt-4 sm:pt-0 sm:pl-4 text-start">
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                  >{{ 'branchDashboard.surveyCampaigns' | t }}</span
+                >
+                <div class="mt-2 flex items-baseline gap-2">
+                  <span class="text-4xl font-black text-slate-950 leading-none">
+                    {{ activeTemplatesCount() }}
+                  </span>
+                  <span class="text-xs font-bold text-slate-500">{{ 'branchDashboard.templates' | t }}</span>
+                </div>
+              </div>
+              <div class="mt-4 space-y-2">
+                <div
+                  class="flex items-center justify-between text-[11px] font-semibold text-slate-500"
+                >
+                  <span>{{ 'branchDashboard.templatesWithResponses' | t }}</span>
+                  <span class="font-extrabold text-slate-700">
+                    {{ templatesWithResponsesCount() }} / {{ activeTemplatesCount() }}
+                  </span>
+                </div>
+                <div class="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    class="h-full rounded-full bg-indigo-500"
+                    [style.width]="barWidth(templateActivityPercent())"
+                  ></div>
+                </div>
+                <p class="text-[10px] text-slate-400 font-medium">
+                  {{ 'branchDashboard.templateCoverage' | t }}
+                  {{ templateActivityPercent() | number: '1.0-0' }}%.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM ROW: Channels & Direct Feedback Modalities -->
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 p-5 sm:p-6 gap-0"
+          >
+            <!-- Voice Modal Card with Pulse Effect -->
+            <div class="flex flex-col justify-between pr-0 sm:pr-4 pb-4 sm:pb-0 text-start">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                    >{{ 'branchDashboard.voiceChannel' | t }}</span
+                  >
+                  <p class="mt-1.5 text-2xl font-black text-slate-950">
+                    {{ dashboard.summary.voiceAnswersCount }}
+                  </p>
+                  <p class="text-[11px] font-semibold text-slate-500 mt-0.5">
+                    {{ 'branchDashboard.voiceReceived' | t }}
+                  </p>
+                </div>
+                <div
+                  class="relative flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
+                >
+                  <app-icon [icon]="micIcon" [size]="16" class="z-10" />
+                  <!-- Pulsing effect -->
+                  <span
+                    class="absolute inline-flex h-full w-full rounded-xl bg-cyan-400 opacity-20 animate-ping"
+                  ></span>
+                </div>
+              </div>
+              <div
+                class="mt-4 flex items-center gap-2 rounded-lg bg-cyan-50/40 border border-cyan-100/50 p-2"
+              >
+                <!-- Visual EQ Bar Representation -->
+                <div class="flex items-end gap-0.5 h-6">
+                  <span
+                    class="w-1 bg-cyan-400 rounded-t h-3 animate-[pulse_1s_infinite_alternate]"
+                  ></span>
+                  <span
+                    class="w-1 bg-cyan-500 rounded-t h-5 animate-[pulse_0.7s_infinite_alternate]"
+                  ></span>
+                  <span
+                    class="w-1 bg-cyan-600 rounded-t h-4 animate-[pulse_1.2s_infinite_alternate]"
+                  ></span>
+                  <span
+                    class="w-1 bg-cyan-500 rounded-t h-2 animate-[pulse_0.8s_infinite_alternate]"
+                  ></span>
+                  <span
+                    class="w-1 bg-cyan-400 rounded-t h-4 animate-[pulse_1.1s_infinite_alternate]"
+                  ></span>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-[10px] font-extrabold text-cyan-800 uppercase tracking-wide">
+                    {{ 'branchDashboard.audioChannels' | t }}
+                  </p>
+                  <p class="text-[9px] font-medium text-cyan-600 truncate">
+                    {{ 'branchDashboard.audioInsight' | t }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Critical Complaints Widget -->
+            <div class="flex flex-col justify-between pt-4 sm:pt-0 sm:pl-4 text-start">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-wider text-slate-400"
+                    >{{ 'branchDashboard.criticalComplaints' | t }}</span
+                  >
+                  <p class="mt-1.5 text-2xl font-black text-slate-950">
+                    {{ dashboard.summary.complaintsCount }}
+                  </p>
+                  <p class="text-[11px] font-semibold text-slate-500 mt-0.5">
+                    {{ 'branchDashboard.complaintsAttention' | t }}
+                  </p>
+                </div>
+                <div
+                  class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-100/60 shadow-sm shadow-rose-100/50"
+                >
+                  <app-icon [icon]="complaintIcon" [size]="16" />
+                </div>
+              </div>
+              <div
+                class="mt-4 flex items-center gap-2 rounded-lg bg-rose-50/40 border border-rose-100/50 p-2"
+              >
+                <span class="relative flex h-2 w-2 shrink-0">
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"
+                  ></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-[10px] font-extrabold text-rose-800 uppercase tracking-wide">
+                    {{ 'branchDashboard.immediateAction' | t }}
+                  </p>
+                  <p class="text-[9px] font-medium text-rose-600 truncate">
+                    {{ 'branchDashboard.customerRelationsRouting' | t }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(24rem,0.85fr)]">
+        <article
+          class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 sm:p-4"
+        >
+          <div class="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-950">{{ 'branchDashboard.trendTitle' | t }}</h3>
+              <p class="mt-1 text-[11px] font-medium text-slate-500">
+                {{ dashboard.period.from || '-' }} / {{ dashboard.period.to || '-' }} -
+                {{ dashboard.period.groupBy }}
+              </p>
+            </div>
+            <app-icon class="text-[#11A7C9]" [icon]="trendIcon" [size]="18" />
+          </div>
+          @if (dashboard.satisfactionTrend.length === 0) {
+            <p
+              class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-xs font-semibold text-slate-500"
+            >
+              {{ 'branchDashboard.noTrendData' | t }}
+            </p>
+          } @else {
+            <div class="h-56 sm:h-72">
+              <canvas #trendCanvas aria-label="Branch satisfaction trend chart"></canvas>
+            </div>
+          }
+        </article>
+
+        <article
+          class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 sm:p-4"
+        >
+          <div class="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-950">{{ 'branchDashboard.templatePerformance' | t }}</h3>
+              <p class="mt-1 text-[11px] font-medium text-slate-500">
+                {{ 'branchDashboard.lowestTemplatesFirst' | t }}
+              </p>
+            </div>
+            <app-icon class="text-[#11A7C9]" [icon]="layersIcon" [size]="18" />
+          </div>
+
+          @if (dashboard.templatePerformance.length === 0) {
+            <p
+              class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-xs font-semibold text-slate-500"
+            >
+              {{ 'branchDashboard.noTemplatePerformance' | t }}
+            </p>
+          } @else {
+            <div class="hidden overflow-hidden rounded-lg border border-slate-200 md:block">
+              <table class="w-full table-fixed">
+                <thead
+                  class="bg-slate-50 text-start text-[10px] font-extrabold uppercase text-slate-500"
+                >
+                  <tr>
+                    <th class="w-[38%] px-3 py-2">{{ 'branchDashboard.template' | t }}</th>
+                    <th class="px-3 py-2">{{ 'branchDashboard.responses' | t }}</th>
+                    <th class="px-3 py-2">{{ 'branchDashboard.avgScore' | t }}</th>
+                    <th class="px-3 py-2">{{ 'branchDashboard.risk' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                  @for (item of dashboard.templatePerformance; track item.templateId) {
+                    <tr
+                      class="cursor-pointer transition hover:bg-slate-50"
+                      (click)="filterByTemplate(item.templateId)"
+                    >
+                      <td class="px-3 py-3">
+                        <p
+                          class="truncate font-extrabold text-slate-900"
+                          [title]="performanceTemplateName(item)"
+                        >
+                          {{ performanceTemplateName(item) }}
+                        </p>
+                        <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                          {{ item.complaintsCount }} {{ 'branchDashboard.complaints' | t }}
+                        </p>
+                      </td>
+                      <td class="px-3 py-3 font-bold text-slate-700">{{ item.responsesCount }}</td>
+                      <td
+                        class="px-3 py-3 font-extrabold"
+                        [class.text-emerald-700]="item.averageScorePercentage >= 80"
+                        [class.text-amber-700]="
+                          item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                        "
+                        [class.text-rose-700]="item.averageScorePercentage < 60"
+                      >
+                        {{ item.averageScorePercentage | number: '1.0-1' }}%
+                      </td>
+                      <td class="px-3 py-3">
+                        <span
+                          class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-extrabold"
+                          [class.bg-rose-50]="item.riskLevel === 'HighRisk'"
+                          [class.text-rose-700]="item.riskLevel === 'HighRisk'"
+                          [class.bg-amber-50]="item.riskLevel === 'MediumRisk'"
+                          [class.text-amber-700]="item.riskLevel === 'MediumRisk'"
+                          [class.bg-emerald-50]="item.riskLevel === 'Healthy'"
+                          [class.text-emerald-700]="item.riskLevel === 'Healthy'"
+                        >
+                          {{ riskLabel(item) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="space-y-2 md:hidden">
+              @for (item of dashboard.templatePerformance; track item.templateId) {
+                <button
+                  class="w-full rounded-lg border border-slate-200 bg-white p-3 text-start transition hover:bg-slate-50"
+                  type="button"
+                  (click)="filterByTemplate(item.templateId)"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <p
+                        class="truncate text-xs font-extrabold text-slate-900"
+                        [title]="performanceTemplateName(item)"
+                      >
+                        {{ performanceTemplateName(item) }}
+                      </p>
+                      <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                        {{ item.responsesCount }} {{ 'branchDashboard.responsePlural' | t }} -
+                        {{ item.complaintsCount }} {{ 'branchDashboard.complaints' | t }}
+                      </p>
+                    </div>
+                    <span
+                      class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold"
+                      [class.bg-rose-50]="item.riskLevel === 'HighRisk'"
+                      [class.text-rose-700]="item.riskLevel === 'HighRisk'"
+                      [class.bg-amber-50]="item.riskLevel === 'MediumRisk'"
+                      [class.text-amber-700]="item.riskLevel === 'MediumRisk'"
+                      [class.bg-emerald-50]="item.riskLevel === 'Healthy'"
+                      [class.text-emerald-700]="item.riskLevel === 'Healthy'"
+                    >
+                      {{ riskLabel(item) }}
+                    </span>
+                  </div>
+                  <div class="mt-3 flex items-center justify-between gap-3">
+                    <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        class="h-full rounded-full"
+                        [class.bg-emerald-500]="item.averageScorePercentage >= 80"
+                        [class.bg-amber-500]="
+                          item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                        "
+                        [class.bg-rose-500]="item.averageScorePercentage < 60"
+                        [style.width]="barWidth(item.averageScorePercentage)"
+                      ></div>
+                    </div>
+                    <span
+                      class="text-xs font-black"
+                      [class.text-emerald-700]="item.averageScorePercentage >= 80"
+                      [class.text-amber-700]="
+                        item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                      "
+                      [class.text-rose-700]="item.averageScorePercentage < 60"
+                    >
+                      {{ item.averageScorePercentage | number: '1.0-1' }}%
+                    </span>
+                  </div>
+                </button>
+              }
+            </div>
+          }
+        </article>
+      </section>
+
+      <!-- Lowest Rated Questions (Friction Points Deck) & Custom Input Segments -->
+      <section class="grid gap-4 xl:grid-cols-2">
+        <!-- Friction Point Inspector -->
+        <article
+          class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50 flex flex-col justify-between"
+        >
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-sm font-black text-slate-900 tracking-tight">
+                  {{ 'branchDashboard.frictionInspector' | t }}
+                </h3>
+                <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
+                  {{ 'branchDashboard.frictionSubtitle' | t }}
+                </p>
+              </div>
+              <span
+                class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 text-rose-500"
+              >
+                <app-icon [icon]="alertCircleIcon" [size]="16" />
+              </span>
+            </div>
+            <div class="mt-4 space-y-3">
+              @for (
+                item of dashboard.lowestRatedQuestions;
+                track item.questionId;
+                let idx = $index
+              ) {
+                <div
+                  class="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50/20 p-3 transition-all duration-300 hover:shadow-sm hover:border-slate-200"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-2.5 min-w-0">
+                      <span
+                        class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded bg-slate-900 text-[10px] font-black text-white"
+                        >#{{ idx + 1 }}</span
+                      >
+                      <div class="min-w-0 text-start">
+                        <p
+                          class="break-words text-xs font-black text-slate-900 leading-normal [overflow-wrap:anywhere]"
+                        >
+                          {{ questionText(item) }}
+                        </p>
+                        <p
+                          class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-bold text-slate-400"
+                        >
+                          <span
+                            class="truncate max-w-[150px]"
+                            [title]="questionTemplateName(item)"
+                            >{{ questionTemplateName(item) }}</span
+                          >
+                          <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                          <span>{{ item.questionTypeName }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                      [class.bg-rose-50]="item.averageScorePercentage < 60"
+                      [class.text-rose-600]="item.averageScorePercentage < 60"
+                      [class.bg-amber-50]="
+                        item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                      "
+                      [class.text-amber-600]="
+                        item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                      "
+                      [class.bg-emerald-50]="item.averageScorePercentage >= 80"
+                      [class.text-emerald-600]="item.averageScorePercentage >= 80"
+                      >{{ item.averageScorePercentage | number: '1.0-1' }}%</span
+                    >
+                  </div>
+                  <div class="mt-3.5 flex items-center justify-between gap-4">
+                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 p-px">
+                      <div
+                        class="h-full rounded-full transition-all duration-500"
+                        [class.bg-rose-500]="item.averageScorePercentage < 60"
+                        [class.bg-amber-500]="
+                          item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                        "
+                        [class.bg-emerald-500]="item.averageScorePercentage >= 80"
+                        [style.width]="barWidth(item.averageScorePercentage)"
+                      ></div>
+                    </div>
+                    <div
+                      class="flex items-center gap-1.5 shrink-0 text-[10px] font-extrabold text-slate-500"
+                    >
+                      <app-icon [icon]="gaugeIcon" [size]="12" class="text-slate-400" />
+                      <span>{{ 'branchDashboard.avg' | t }} {{ item.averageValue | number: '1.0-1' }} / 5</span>
+                    </div>
+                  </div>
+                  <p class="mt-1.5 text-[9px] font-semibold text-slate-400 text-start">
+                    {{ 'branchDashboard.basedOnPrefix' | t }} {{ item.answersCount }}
+                    {{ 'branchDashboard.customerRatings' | t }}
+                  </p>
+                </div>
+              } @empty {
+                <div
+                  class="rounded-xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50"
+                >
+                  <app-icon class="mx-auto text-slate-300" [icon]="helpIcon" [size]="24" />
+                  <p class="mt-2 text-xs font-semibold text-slate-500">
+                    {{ 'branchDashboard.noRatedQuestions' | t }}
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+        </article>
+
+        <!-- Demographic Analyst -->
+        <article
+          class="min-w-0 self-start rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50"
+        >
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-sm font-black text-slate-900 tracking-tight">
+                  {{ 'branchDashboard.demographicAnalyst' | t }}
+                </h3>
+                <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
+                  {{ 'branchDashboard.demographicSubtitle' | t }}
+                </p>
+              </div>
+              <span
+                class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-50 text-cyan-500"
+              >
+                <app-icon [icon]="layersIcon" [size]="16" />
+              </span>
+            </div>
+            @if (dashboard.customInputSegments.length === 0) {
+              <div
+                class="mt-4 rounded-xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50"
+              >
+                <app-icon class="mx-auto text-slate-300" [icon]="templateIcon" [size]="24" />
+                <p class="mt-2 text-xs font-semibold text-slate-500">
+                  {{ 'branchDashboard.noCustomSegments' | t }}
+                </p>
+              </div>
+            } @else {
+              <div class="mt-4 space-y-3">
+                <div class="flex gap-1.5 overflow-x-auto rounded-xl bg-slate-50 p-1">
+                  @for (segment of dashboard.customInputSegments; track segment.customInputName) {
+                    <button
+                      class="shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-extrabold transition"
+                      type="button"
+                      [class.bg-white]="selectedSegment()?.customInputName === segment.customInputName"
+                      [class.shadow-sm]="selectedSegment()?.customInputName === segment.customInputName"
+                      [class.text-cyan-700]="selectedSegment()?.customInputName === segment.customInputName"
+                      [class.text-slate-500]="selectedSegment()?.customInputName !== segment.customInputName"
+                      (click)="selectedSegmentName.set(segment.customInputName)"
+                    >
+                      {{ segment.customInputName }}
+                    </button>
+                  }
+                </div>
+
+                @if (selectedSegment(); as segment) {
+                  <div class="space-y-2 motion-safe:[animation:branch-dashboard-rise_.25s_ease-out_both]">
+                    <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+                      <div class="min-w-0">
+                        <p class="truncate text-xs font-black text-slate-950">{{ segment.customInputName }}</p>
+                        <p class="text-[10px] font-semibold text-slate-500">
+                          {{ segment.typeName }} - {{ segmentResponsesTotal(segment) }}
+                          {{ 'branchDashboard.responses' | t }}
+                        </p>
+                      </div>
+                      <span
+                        class="rounded-full px-2.5 py-1 text-[10px] font-black"
+                        [class.bg-emerald-50]="segmentAverageScore(segment) >= 80"
+                        [class.text-emerald-700]="segmentAverageScore(segment) >= 80"
+                        [class.bg-amber-50]="
+                          segmentAverageScore(segment) >= 60 && segmentAverageScore(segment) < 80
+                        "
+                        [class.text-amber-700]="
+                          segmentAverageScore(segment) >= 60 && segmentAverageScore(segment) < 80
+                        "
+                        [class.bg-rose-50]="segmentAverageScore(segment) < 60"
+                        [class.text-rose-700]="segmentAverageScore(segment) < 60"
+                      >
+                        {{ 'branchDashboard.score' | t }} {{ segmentAverageScore(segment) | number: '1.0-1' }}%
+                      </span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                      @for (item of segment.segments; track item.value) {
+                        <div
+                          class="grid grid-cols-[minmax(7rem,1fr)_minmax(7rem,12rem)_auto] items-center gap-3 rounded-xl bg-slate-50/70 px-3 py-2 max-sm:grid-cols-1 max-sm:gap-1.5"
+                        >
+                          <div class="min-w-0">
+                            <p class="truncate text-xs font-black text-slate-900" [title]="item.value || '-'">
+                              {{ item.value || '-' }}
+                            </p>
+                            <p class="mt-0.5 text-[10px] font-semibold text-slate-400">
+                              {{ item.responsesCount }}
+                              {{
+                                item.responsesCount === 1
+                                  ? ('branchDashboard.responseSingular' | t)
+                                  : ('branchDashboard.responsePlural' | t)
+                              }}
+                            </p>
+                          </div>
+                          <div class="h-1.5 overflow-hidden rounded-full bg-white max-sm:w-full">
+                            <div
+                              class="h-full rounded-full"
+                              [class.bg-emerald-500]="item.averageScorePercentage >= 80"
+                              [class.bg-amber-500]="
+                                item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                              "
+                              [class.bg-rose-500]="item.averageScorePercentage < 60"
+                              [style.width]="barWidth(item.averageScorePercentage)"
+                            ></div>
+                          </div>
+                          <span
+                            class="justify-self-end rounded-full px-2 py-1 text-[10px] font-black max-sm:justify-self-start"
+                            [class.bg-emerald-50]="item.averageScorePercentage >= 80"
+                            [class.text-emerald-700]="item.averageScorePercentage >= 80"
+                            [class.bg-amber-50]="
+                              item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                            "
+                            [class.text-amber-700]="
+                              item.averageScorePercentage >= 60 && item.averageScorePercentage < 80
+                            "
+                            [class.bg-rose-50]="item.averageScorePercentage < 60"
+                            [class.text-rose-700]="item.averageScorePercentage < 60"
+                          >
+                            {{ 'branchDashboard.score' | t }} {{ item.averageScorePercentage | number: '1.0-0' }}%
+                          </span>
+                        </div>
+                      } @empty {
+                        <p class="rounded-xl bg-slate-50 px-3 py-6 text-center text-xs font-semibold text-slate-500">
+                          {{ 'branchDashboard.noSegmentValues' | t }}
+                        </p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </article>
+      </section>
+
+      <!-- Customer Friction Feed -->
+      <section
+        class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50 flex flex-col justify-between"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>{{ 'branchDashboard.frictionFeed' | t }}</span>
+              <span class="relative flex h-2 w-2 shrink-0">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"
+                ></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              </span>
+            </h3>
+            <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
+              {{ 'branchDashboard.frictionFeedSubtitle' | t }}
+            </p>
+          </div>
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 text-rose-500">
+            <app-icon [icon]="alertIcon" [size]="16" />
+          </span>
+        </div>
+        <div class="space-y-3">
+          @if (dashboard.criticalResponses.length > 0) {
+            @for (item of dashboard.criticalResponses; track item.surveyResponseId) {
+              <button
+                class="group w-full rounded-2xl border border-slate-200 bg-white p-4 text-start shadow-sm shadow-slate-100/80 transition hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100/40"
+                type="button"
+                (click)="openResponseDetails(item.surveyResponseId)"
+              >
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-xs font-black text-slate-950 truncate" [title]="criticalTemplateName(item)">
+                      {{ criticalTemplateName(item) }}
+                    </p>
+                    <p class="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-400">
+                      <span>{{ item.submittedOnUtc | date: 'MMM d, y, h:mm a' }}</span>
+                      <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                      <span>{{ item.customInputs.length }} {{ 'branchResponseDetails.submittedFields' | t }}</span>
+                    </p>
+                  </div>
+                  <span
+                    class="rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-black text-rose-600"
+                  >
+                    {{ 'branchDashboard.score' | t }} {{ item.scorePercentage | number: '1.0-1' }}%
+                  </span>
+                </div>
+                <p
+                  class="mt-3 line-clamp-2 break-words text-xs font-semibold leading-6 text-slate-600 [overflow-wrap:anywhere]"
+                >
+                  {{ item.complaintText || ('branchDashboard.noComplaintText' | t) }}
+                </p>
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                  @if (item.customInputs.length > 0) {
+                    @for (input of item.customInputs.slice(0, 4); track input.name + input.value) {
+                      <span
+                        class="max-w-full truncate rounded-lg bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-500"
+                        [title]="input.value"
+                        >{{ input.name }}: {{ input.value || '-' }}</span
+                      >
+                    }
+                  } @else {
+                    <span class="rounded-lg bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-400">
+                      {{ 'branchDashboard.noCustomFields' | t }}
+                    </span>
+                  }
+                </div>
+                <div class="mt-3 text-end">
+                  <span class="text-[11px] font-black text-cyan-600 group-hover:text-cyan-700">
+                    {{ 'branchDashboard.viewDetails' | t }}
+                  </span>
+                </div>
+              </button>
+            }
+          } @else {
+            <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-center">
+              <app-icon class="mx-auto text-slate-300" [icon]="alertIcon" [size]="24" />
+              <p class="mt-2 text-xs font-semibold text-slate-500">
+                {{ 'branchDashboard.noCriticalResponses' | t }}
+              </p>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<app-branch-response-details-modal
+  [open]="dashboardStore.responseDetailsOpen()"
+  [loading]="dashboardStore.responseDetailsLoading()"
+  [error]="dashboardStore.responseDetailsError()"
+  [details]="dashboardStore.responseDetails()"
+  (closed)="dashboardStore.closeResponseDetails()"
+/>

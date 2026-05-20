@@ -3,9 +3,8 @@ import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/cor
 import { I18nService } from '../../../../core/services/i18n.service';
 import { FileText, Network, UserCog, UsersRound } from 'lucide-angular';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
-import { BranchAdminTemplate } from '../../branch/domain/branch-admin-branch.model';
+import { BranchAdminBranchDetails, BranchAdminTemplate } from '../../branch/domain/branch-admin-branch.model';
 import { BranchAdminBranchStore } from '../../branch/presentation/state/branch-admin-branch.store';
 import { BranchSatisfactionReportPanelComponent } from '../../reports/presentation/components/branch-satisfaction-report-panel.component';
 
@@ -14,7 +13,6 @@ import { BranchSatisfactionReportPanelComponent } from '../../reports/presentati
   standalone: true,
   imports: [
     BranchSatisfactionReportPanelComponent,
-    CardComponent,
     DatePipe,
     IconComponent,
     TranslatePipe,
@@ -34,6 +32,14 @@ export class BranchAdminOverviewPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.branchStore.load();
+  }
+
+  branchName(branch: BranchAdminBranchDetails): string {
+    if (this.i18n.language() === 'ar') {
+      return branch.nameAr || branch.nameEn || '-';
+    }
+
+    return branch.nameEn || branch.nameAr || '-';
   }
 
   templateName(template: BranchAdminTemplate): string {

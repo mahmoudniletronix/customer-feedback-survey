@@ -220,6 +220,19 @@ export class BranchesPageComponent implements OnInit {
     return this.i18n.translate('branches.fieldRequired');
   }
 
+  branchDisplayName(branch: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(branch.nameEn, branch.nameAr);
+  }
+
+  branchOptionDisplayName(branch: { nameEn: string | null; nameAr?: string | null; code?: string | null }): string {
+    const name = this.localizedText(branch.nameEn, branch.nameAr);
+    return branch.code ? `${name} - ${branch.code}` : name;
+  }
+
+  questionDisplayText(question: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(question.textEn, question.textAr);
+  }
+
   createBranch(): void {
     this.branchForm.markAllAsTouched();
     if (this.branchForm.invalid || this.branchesStore.creating()) {
@@ -261,5 +274,20 @@ export class BranchesPageComponent implements OnInit {
     this.departmentsStore.createDepartment(this.departmentForm.getRawValue());
     this.departmentForm.reset();
     this.createDepartmentModalOpen.set(false);
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 }

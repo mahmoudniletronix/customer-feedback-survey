@@ -183,11 +183,6 @@
                       <h4 class="break-words text-base font-bold leading-6 text-slate-950">
                         {{ questionText(question) }}
                       </h4>
-                      @if (questionSecondaryText(question)) {
-                        <p class="mt-0.5 break-words text-[12px] font-semibold text-slate-400">
-                          {{ questionSecondaryText(question) }}
-                        </p>
-                      }
                       <div class="mt-2 flex flex-wrap gap-1.5">
                         <span class="text-[10px] font-bold text-slate-500">
                           {{ question.typeName }}
@@ -221,7 +216,7 @@
                         @for (option of question.options; track option.optionId) {
                           <button
                             type="button"
-                            class="flex min-h-14 w-full items-start gap-3 border-b border-slate-100 px-3 py-3 text-left transition last:border-b-0 hover:bg-[#F5FCFE]"
+                            class="flex min-h-14 w-full items-start gap-3 border-b border-slate-100 px-3 py-3 text-start transition last:border-b-0 hover:bg-[#F5FCFE]"
                             [class.bg-[#E8F8FC]]="
                               answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
                             "
@@ -246,22 +241,10 @@
                               }
                             </span>
                             <span class="min-w-0 flex-1">
-                              <span class="flex items-start justify-between gap-2">
-                                <span class="min-w-0">
-                                  <span class="block break-words text-sm font-bold text-slate-950">
-                                    {{ optionText(option) }}
-                                  </span>
-                                  @if (optionSecondaryText(option)) {
-                                    <span class="mt-0.5 block break-words text-[11px] font-semibold text-slate-400">
-                                      {{ optionSecondaryText(option) }}
-                                    </span>
-                                  }
+                              <span class="block">
+                                <span class="block break-words text-sm font-bold text-slate-950">
+                                  {{ optionText(option) }}
                                 </span>
-                                @if (option.value !== null) {
-                                  <span class="shrink-0 text-[10px] font-bold text-[#0D9FC0]">
-                                    {{ 'publicAnonymousTemplates.value' | t }} {{ option.value }}
-                                  </span>
-                                }
                               </span>
                             </span>
                           </button>

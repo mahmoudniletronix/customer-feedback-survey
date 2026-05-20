@@ -32,7 +32,7 @@
 
   <app-card [title]="'questionGroups.listTitle' | t" [subtitle]="'questionGroups.listSubtitle' | t">
     <form
-      class="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_8rem_10rem_auto]"
+      class="compact-filter-form grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_8rem_10rem_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchGroups()"
     >
@@ -105,7 +105,7 @@
             <col class="w-[15%]" />
           </colgroup>
           <thead
-            class="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+            class="bg-slate-50 text-start text-xs font-bold uppercase tracking-wide text-slate-500"
           >
             <tr>
               <th class="px-3 py-2">{{ 'questionGroups.nameEn' | t }}</th>

@@ -1,0 +1,189 @@
+<div class="w-full space-y-3 sm:space-y-4">
+  <section class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm shadow-slate-200/60">
+    <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex shrink-0 justify-start">
+        <a
+          class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50"
+          routerLink="/reports/system-responses"
+        >
+          View All Responses
+        </a>
+      </div>
+
+      <form class="compact-filter-form min-w-0 flex-1 rounded-lg bg-slate-50/80 p-1.5" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+        <div class="grid min-w-0 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-[minmax(7rem,0.8fr)_minmax(7rem,0.8fr)_minmax(9rem,1fr)_minmax(9rem,1fr)_6rem_auto_auto] xl:items-end">
+          <label class="block">
+            <span>From</span>
+            <input class="w-full border border-slate-200 bg-white" type="date" formControlName="from" />
+          </label>
+          <label class="block">
+            <span>To</span>
+            <input class="w-full border border-slate-200 bg-white" type="date" formControlName="to" />
+          </label>
+          <label class="block">
+            <span>Branch</span>
+            <select class="w-full border border-slate-200 bg-white" formControlName="branchId">
+              <option value="">All branches</option>
+              @for (branch of store.branches(); track branch.id) {
+                <option [value]="branch.id">{{ branchOptionName(branch) }}</option>
+              }
+            </select>
+          </label>
+          <label class="block">
+            <span>Department</span>
+            <select class="w-full border border-slate-200 bg-white" formControlName="departmentId">
+              <option value="">All departments</option>
+              @for (department of store.departments(); track department.id) {
+                <option [value]="department.id">{{ departmentOptionName(department) }}</option>
+              }
+            </select>
+          </label>
+          <label class="block">
+            <span>Group</span>
+            <select class="w-full border border-slate-200 bg-white" formControlName="groupBy">
+              <option value="Day">Day</option>
+              <option value="Month">Month</option>
+            </select>
+          </label>
+          <app-button type="submit" size="sm" [fullWidth]="true" [loading]="store.dashboardLoading()">
+            <app-icon [icon]="searchIcon" [size]="14" />
+            Apply
+          </app-button>
+          <app-button type="button" size="sm" variant="secondary" [fullWidth]="true" (pressed)="clearFilters()">
+            Clear
+          </app-button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  @if (store.dashboardLoading()) {
+    <section class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      @for (item of [1,2,3,4,5,6,7,8]; track item) {
+        <div class="h-24 animate-pulse rounded-xl border border-slate-200 bg-white"></div>
+      }
+    </section>
+  } @else if (store.dashboardError()) {
+    <section class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+      {{ store.dashboardError() }}
+    </section>
+  } @else if (store.dashboard(); as dashboard) {
+    @if (store.dashboardEmpty()) {
+      <section class="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm font-bold text-slate-500">
+        No survey responses found for the selected period.
+      </section>
+    } @else {
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        @for (card of summaryMetrics(dashboard); track card.label) {
+          <article class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ card.label }}</p>
+            <p class="mt-2 text-xl font-black text-slate-950">{{ card.value }}</p>
+          </article>
+        }
+      </section>
+
+      <section class="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(24rem,0.85fr)]">
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 class="text-sm font-black text-slate-950">Satisfaction Trend</h3>
+          <div class="mt-4 space-y-2">
+            @for (point of dashboard.satisfactionTrend; track point.period) {
+              <div class="grid grid-cols-[7rem_minmax(0,1fr)_4rem] items-center gap-3 text-[11px] font-bold">
+                <span class="text-slate-500">{{ point.period }}</span>
+                <span class="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <span class="block h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(point.averageScorePercentage)"></span>
+                </span>
+                <span class="text-end text-slate-900">{{ point.averageScorePercentage | number: '1.0-1' }}%</span>
+              </div>
+            } @empty {
+              <p class="text-xs font-semibold text-slate-500">No trend data available.</p>
+            }
+          </div>
+        </article>
+
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 class="text-sm font-black text-slate-950">Branch Performance</h3>
+          <div class="mt-3 overflow-x-auto">
+            <table class="min-w-[44rem] w-full text-[11px]">
+              <thead class="bg-slate-50 text-[10px] uppercase text-slate-500">
+                <tr><th>Branch</th><th>Responses</th><th>Avg Score</th><th>Complaints</th><th>Risk</th></tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (branch of dashboard.branchPerformance; track branch.branchId) {
+                  <tr>
+                    <td class="font-black">{{ branchName(branch) }} <span class="text-slate-400">({{ branch.branchCode }})</span></td>
+                    <td>{{ branch.responsesCount }}</td>
+                    <td>{{ branch.averageScorePercentage | number: '1.0-1' }}%</td>
+                    <td>{{ branch.complaintsCount }}</td>
+                    <td><span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black">{{ riskLabel(branch.riskLevel) }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid gap-4 xl:grid-cols-2">
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 class="text-sm font-black text-slate-950">Department Activity</h3>
+          <div class="mt-3 divide-y divide-slate-100">
+            @for (department of dashboard.departmentActivity; track department.departmentId) {
+              <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 py-2 text-[11px] font-bold">
+                <span>{{ localized(department.departmentNameEn, department.departmentNameAr) }}</span>
+                <span>{{ department.responsesCount }} responses</span>
+                <span>{{ department.lastResponseDate ? (department.lastResponseDate | date: 'mediumDate') : '-' }}</span>
+              </div>
+            } @empty {
+              <p class="py-4 text-xs font-semibold text-slate-500">No department activity.</p>
+            }
+          </div>
+        </article>
+
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 class="text-sm font-black text-slate-950">Top Templates</h3>
+          <div class="mt-3 divide-y divide-slate-100">
+            @for (template of dashboard.topTemplates; track template.templateId) {
+              <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 py-2 text-[11px] font-bold">
+                <span class="truncate">{{ localized(template.templateNameEn, template.templateNameAr) }}</span>
+                <span>{{ template.responsesCount }} responses</span>
+                <span>{{ template.averageScorePercentage | number: '1.0-1' }}%</span>
+              </div>
+            } @empty {
+              <p class="py-4 text-xs font-semibold text-slate-500">No template data.</p>
+            }
+          </div>
+        </article>
+      </section>
+
+      <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 class="text-sm font-black text-slate-950">Critical Responses Across System</h3>
+        <div class="mt-3 space-y-2">
+          @for (item of dashboard.criticalResponses; track item.surveyResponseId) {
+            <button class="w-full rounded-lg border border-slate-200 bg-white p-3 text-start transition hover:bg-slate-50" type="button" (click)="openDetails(item)">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="text-xs font-black text-slate-950">{{ localized(item.templateNameEn, item.templateNameAr) }}</p>
+                  <p class="mt-1 text-[10px] font-semibold text-slate-500">
+                    {{ branchName(item) }} - {{ localized(item.departmentNameEn, item.departmentNameAr) }} - {{ localized(item.operatorNameEn, item.operatorNameAr) }}
+                  </p>
+                </div>
+                <span class="rounded-full bg-rose-50 px-2 py-1 text-[10px] font-black text-rose-700">{{ item.scorePercentage | number: '1.0-1' }}%</span>
+              </div>
+              <p class="mt-2 line-clamp-2 text-[11px] font-semibold text-slate-600">{{ item.complaintText || 'No complaint text' }}</p>
+            </button>
+          } @empty {
+            <p class="py-4 text-center text-xs font-semibold text-slate-500">No critical responses found.</p>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<app-system-response-details-modal
+  [open]="store.detailsOpen()"
+  [loading]="store.detailsLoading()"
+  [error]="store.detailsError()"
+  [details]="store.details()"
+  (closed)="store.closeDetails()"
+/>

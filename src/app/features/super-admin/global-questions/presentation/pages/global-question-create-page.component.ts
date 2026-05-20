@@ -28,6 +28,7 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { I18nService } from '../../../../../core/services/i18n.service';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import {
   CreateGlobalQuestionRequest,
@@ -87,6 +88,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   readonly globalQuestionsStore = inject(GlobalQuestionsStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -343,6 +345,25 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
     return labelKey ?? fallbackTypeName;
   }
 
+  questionDisplayText(question: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(question.textEn, question.textAr);
+  }
+
+  questionGroupDisplayName(question: {
+    groupNameEn?: string | null;
+    groupNameAr?: string | null;
+  }): string {
+    return this.localizedText(question.groupNameEn, question.groupNameAr);
+  }
+
+  groupSelectionDisplayName(group: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(group.nameEn, group.nameAr);
+  }
+
+  optionDisplayText(option: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(option.textEn, option.textAr);
+  }
+
   onQuestionTypeChanged(event: Event): void {
     const answerType = this.readAnswerTypeFromEvent(event);
     this.answerType.set(answerType);
@@ -419,6 +440,21 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
         this.createOptionForm(2, 'Good', '', 4),
       ]),
     });
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private createOptionForm(

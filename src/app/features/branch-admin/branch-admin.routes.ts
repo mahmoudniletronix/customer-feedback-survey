@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import { roleGuard } from '../../core/guards/role.guard';
+import { BranchDashboardService } from './dashboard/data/branch-dashboard.service';
+import { branchDashboardAccessGuard } from './dashboard/presentation/guards/branch-dashboard-access.guard';
+import { BranchResponsesHistoryStore } from './dashboard/presentation/state/branch-responses-history.store';
+import { BranchDashboardStore } from './dashboard/presentation/state/branch-dashboard.store';
 import { BranchAdminBranchService } from './branch/data/branch-admin-branch.service';
 import { BranchAdminBranchStore } from './branch/presentation/state/branch-admin-branch.store';
 import { BranchUsersService } from '../branch-user/branch-users/data/branch-users.service';
@@ -22,6 +26,8 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
     providers: [
       BranchAdminBranchService,
       BranchAdminBranchStore,
+      BranchDashboardService,
+      BranchDashboardStore,
       BranchUsersService,
       BranchUsersStore,
       BranchSatisfactionReportService,
@@ -30,10 +36,19 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
     children: [
       {
         path: '',
-        canActivate: [roleGuard(['BRANCH_ADMIN'])],
+        canActivate: [branchDashboardAccessGuard],
         loadComponent: () =>
-          import('./presentation/pages/branch-admin-overview-page.component').then(
-            (m) => m.BranchAdminOverviewPageComponent,
+          import('./dashboard/presentation/pages/branch-dashboard-page.component').then(
+            (m) => m.BranchDashboardPageComponent,
+          ),
+      },
+      {
+        path: 'responses',
+        canActivate: [branchDashboardAccessGuard],
+        providers: [BranchResponsesHistoryStore],
+        loadComponent: () =>
+          import('./dashboard/presentation/pages/branch-responses-history-page.component').then(
+            (m) => m.BranchResponsesHistoryPageComponent,
           ),
       },
       {

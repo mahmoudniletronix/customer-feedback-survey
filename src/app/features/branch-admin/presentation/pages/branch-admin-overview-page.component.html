@@ -1,4 +1,4 @@
-<div class="w-full space-y-3">
+<div class="w-full space-y-4">
   <!-- <div>
     <p
       class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
@@ -25,114 +25,113 @@
       {{ branchStore.error() ?? '' | t }}
     </div>
   } @else if (branchStore.branch(); as branch) {
-    <app-card>
-      <div class="space-y-3">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div class="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
-            <p class="shrink-0 font-extrabold text-slate-950">{{ branch.code }}</p>
-            <p class="text-xs font-semibold text-slate-600">{{ branch.nameEn || '-' }}</p>
-            @if (branch.nameAr) {
-              <p class="text-xs font-semibold text-slate-600">{{ branch.nameAr }}</p>
-            }
-            <p class="text-xs text-slate-600">{{ branch.address || '-' }}</p>
-            <p class="text-xs font-semibold text-slate-400">
-              {{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'medium') : '-' }}
-            </p>
+    <section
+      class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60"
+    >
+      <div
+        class="flex flex-col gap-4 border-b border-slate-100 bg-slate-50/60 p-4 lg:flex-row lg:items-center lg:justify-between"
+      >
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="text-base font-extrabold text-slate-950">{{ branch.code }}</p>
+            <span
+              class="inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-bold"
+              [class.bg-emerald-50]="branch.isActive"
+              [class.text-emerald-700]="branch.isActive"
+              [class.bg-slate-100]="!branch.isActive"
+              [class.text-slate-500]="!branch.isActive"
+            >
+              {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
+            </span>
           </div>
-          <span
-            class="inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-bold"
-            [class.bg-emerald-50]="branch.isActive"
-            [class.text-emerald-700]="branch.isActive"
-            [class.bg-slate-100]="!branch.isActive"
-            [class.text-slate-500]="!branch.isActive"
+          <p class="mt-1 text-sm font-semibold text-slate-700">{{ branchName(branch) }}</p>
+          <div
+            class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] font-semibold text-slate-500"
           >
-            {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
-          </span>
+            <span>{{ branch.address || '-' }}</span>
+            <span>{{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'medium') : '-' }}</span>
+          </div>
         </div>
 
-        <div
-          class="grid gap-x-6 gap-y-3 border-t border-slate-100 sm:grid-cols-2 xl:grid-cols-4"
-        >
-          <!-- <div class="flex min-w-0 items-center gap-2">
-            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="departmentIcon" [size]="17" />
-            <p class="min-w-0 truncate text-xs font-bold text-slate-500">
-              {{ 'branches.departmentsCount' | t }}
-            </p>
-            <p class="shrink-0 font-extrabold text-slate-950">
-              {{ branch.summary.departmentsCount }}
-            </p>
-          </div> -->
-          <!-- 
-          <div class="flex min-w-0 items-center gap-2">
-            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="userCogIcon" [size]="17" />
-            <p class="min-w-0 truncate text-xs font-bold text-slate-500">
-              {{ 'branches.departmentAdminsCount' | t }}
-            </p>
-            <p class="shrink-0 font-extrabold text-slate-950">
-              {{ branch.summary.departmentAdminsCount }}
-            </p>
-          </div> -->
-
-          <div class="flex min-w-0 items-center gap-2">
-            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="usersIcon" [size]="17" />
-            <p class="min-w-0 truncate text-xs font-bold text-slate-500">
+        <div class="grid grid-cols-2 gap-2 sm:min-w-72">
+          <div
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm shadow-slate-200/50"
+          >
+            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="usersIcon" [size]="15" />
+            <span class="min-w-0 flex-1 truncate text-[10px] font-bold uppercase text-slate-400">
               {{ 'branches.branchUsersCount' | t }}
-            </p>
-            <p class="shrink-0 font-extrabold text-slate-950">
-              {{ branch.summary.branchUsersCount }}
-            </p>
+            </span>
+            <span class="text-base font-extrabold text-slate-950">{{
+              branch.summary.branchUsersCount
+            }}</span>
           </div>
-
-          <div class="flex min-w-0 items-center gap-2">
-            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="templateIcon" [size]="17" />
-            <p class="min-w-0 truncate text-xs font-bold text-slate-500">
+          <div
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm shadow-slate-200/50"
+          >
+            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="templateIcon" [size]="15" />
+            <span class="min-w-0 flex-1 truncate text-[10px] font-bold uppercase text-slate-400">
               {{ 'branches.templatesCount' | t }}
-            </p>
-            <p class="shrink-0 font-extrabold text-slate-950">
+            </span>
+            <span class="text-base font-extrabold text-slate-950">
               {{ branch.summary.templatesCount || branch.templates.length }}
-            </p>
+            </span>
           </div>
         </div>
       </div>
-    </app-card>
+    </section>
 
-    <div class="grid xl:grid-cols-2">
-      <app-card
-        [title]="'branchTemplates.listTitle' | t"
-        [subtitle]="'branchTemplates.listSubtitle' | t"
+    <div class="grid items-start gap-5 xl:grid-cols-12">
+      <section
+        class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 xl:col-span-4 2xl:col-span-3"
       >
-        <div class="space-y-2">
+        <div class="mb-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h3 class="text-xs font-bold text-slate-900">{{ 'branchTemplates.listTitle' | t }}</h3>
+            <p class="mt-0.5 text-[11px] text-slate-500">
+              {{ 'branchTemplates.listSubtitle' | t }}
+            </p>
+          </div>
+          <span
+            class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold text-[#0d94b3]"
+          >
+            {{ branch.templates.length }}
+          </span>
+        </div>
+
+        <div class="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200">
           @for (template of branch.templates; track template.templateId) {
-            <div class="border border-slate-100 bg-white">
-              <div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+            <div class="bg-white px-3 py-3 text-[11px] transition hover:bg-slate-50/80">
+              <div class="flex min-w-0 items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p
-                    class="max-w-52 truncate font-extrabold text-slate-900"
+                    class="min-w-0 truncate font-extrabold text-slate-900"
                     [title]="templateName(template)"
                   >
                     {{ templateName(template) }}
                   </p>
+                  <p
+                    class="mt-1 line-clamp-2 text-[11px] font-medium leading-5 text-slate-500"
+                    [title]="templateDescription(template)"
+                  >
+                    {{ templateDescription(template) }}
+                  </p>
                 </div>
-                <p
-                  class="min-w-0 flex-1 truncate text-xs font-medium text-slate-500"
-                  [title]="templateDescription(template)"
-                >
-                  {{ templateDescription(template) }}
-                </p>
                 <span
-                  class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600"
+                  class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600"
                 >
                   {{ template.status || '-' }}
                 </span>
               </div>
             </div>
           } @empty {
-            <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
+            <p class="p-4 text-center text-[11px] text-slate-500">{{ 'common.noRecords' | t }}</p>
           }
         </div>
-      </app-card>
+      </section>
 
-      <app-branch-satisfaction-report-panel [templates]="branch.templates" />
+      <div class="xl:col-span-8 2xl:col-span-9">
+        <app-branch-satisfaction-report-panel [templates]="branch.templates" />
+      </div>
     </div>
   }
 </div>

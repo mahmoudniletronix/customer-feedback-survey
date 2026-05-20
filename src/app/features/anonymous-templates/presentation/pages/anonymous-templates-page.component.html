@@ -43,7 +43,7 @@
     [subtitle]="'anonymousTemplates.listSubtitle' | t"
   >
     <form
-      class="mb-3 grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_8rem_8rem_8rem_8rem_auto]"
+      class="compact-filter-form mb-3 grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_8rem_8rem_8rem_8rem_auto]"
       [formGroup]="searchForm"
       (ngSubmit)="searchTemplates()"
     >
@@ -79,7 +79,7 @@
           >
             <option value="">{{ branchOptionsLoading() ? ('anonymousTemplates.loading' | t) : ('anonymousTemplates.allBranches' | t) }}</option>
             @for (branch of branchOptions(); track branch.id) {
-              <option [value]="branch.id">{{ branch.nameEn || branch.nameAr || branch.code }}</option>
+              <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
             }
           </select>
         </label>
@@ -142,7 +142,7 @@
     <div class="overflow-hidden rounded-md border border-slate-100 bg-white">
       <div class="overflow-x-auto">
         <table class="min-w-[76rem] w-full divide-y divide-slate-100">
-          <thead class="bg-slate-50 text-left text-[10px] font-bold uppercase text-slate-500">
+          <thead class="bg-slate-50 text-start text-[10px] font-bold uppercase text-slate-500">
             <tr>
               <th class="px-2.5 py-2">{{ 'anonymousTemplates.nameColumn' | t }}</th>
               <th class="px-2.5 py-2">{{ 'common.scope' | t }}</th>
@@ -170,13 +170,8 @@
                 <tr class="align-top transition hover:bg-slate-50" [class.bg-slate-50]="!template.isActive">
                   <td class="px-2.5 py-2">
                     <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
-                      {{ template.nameEn }}
+                      {{ templateDisplayName(template) }}
                     </p>
-                    @if (template.nameAr) {
-                      <p class="mt-0.5 break-words text-[10px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
-                        {{ template.nameAr }}
-                      </p>
-                    }
                     @if (template.description) {
                       <p class="mt-0.5 line-clamp-1 break-words text-[10px] text-slate-500 [overflow-wrap:anywhere]">
                         {{ template.description }}
@@ -380,7 +375,7 @@
         <div class="rounded-md border border-slate-100 bg-slate-50 p-3 text-[11px] text-slate-600">
           <div class="flex flex-wrap items-center gap-2">
             <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
-              {{ template.nameEn }}
+              {{ templateDisplayName(template) }}
             </p>
             <span
               class="rounded-full px-2 py-0.5 text-[10px] font-bold"
@@ -392,9 +387,6 @@
               {{ template.scopeName }}
             </span>
           </div>
-          <p class="mt-1 break-words font-semibold text-slate-500 [overflow-wrap:anywhere]">
-            {{ template.nameAr || '-' }}
-          </p>
         </div>
         <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <app-button size="sm" type="button" variant="secondary" (pressed)="closeDeleteTemplate()">
@@ -428,7 +420,7 @@
         <div class="rounded-md border border-slate-100 bg-slate-50 p-3 text-[11px] text-slate-600">
           <div class="flex flex-wrap items-center gap-2">
             <p class="break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
-              {{ template.nameEn }}
+              {{ templateDisplayName(template) }}
             </p>
             <span
               class="rounded-full px-2 py-0.5 text-[10px] font-bold"
@@ -440,9 +432,6 @@
               {{ template.scopeName }}
             </span>
           </div>
-          <p class="mt-1 break-words font-semibold text-slate-500 [overflow-wrap:anywhere]">
-            {{ template.nameAr || '-' }}
-          </p>
         </div>
         <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <app-button size="sm" type="button" variant="secondary" (pressed)="closeRestoreTemplate()">
@@ -795,13 +784,8 @@
               </span>
               <div class="min-w-0">
                 <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
-                  {{ template.nameEn }}
+                  {{ templateDisplayName(template) }}
                 </p>
-                @if (template.nameAr) {
-                  <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-600 [overflow-wrap:anywhere]">
-                    {{ template.nameAr }}
-                  </p>
-                }
                 <div class="mt-2 flex flex-wrap gap-1.5">
                   <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                     {{ template.statusName }}
@@ -881,17 +865,12 @@
                   <div class="rounded-md bg-white p-1.5">
                     <div class="flex items-center justify-between gap-2">
                       <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
-                        {{ customInput.labelEn || customInput.name }}
+                        {{ customInputDisplayLabel(customInput) }}
                       </p>
                       <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-500">
                         {{ customInput.typeName }}
                       </span>
                     </div>
-                    @if (customInput.labelAr) {
-                      <p class="mt-1 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
-                        {{ customInput.labelAr }}
-                      </p>
-                    }
                   </div>
                 }
               </div>

@@ -36,6 +36,7 @@ import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
+import { I18nService } from '../../../../core/services/i18n.service';
 import {
   AnonymousTemplateListItem,
   AnonymousTemplateCustomInputType,
@@ -96,6 +97,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   private readonly branchesService = inject(BranchesService);
   private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
   readonly branchIcon = Building2;
@@ -486,8 +488,39 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     linkElement.click();
   }
 
+  branchOptionDisplayName(branch: BranchSelection): string {
+    return this.localizedText(branch.nameEn, branch.nameAr, branch.code);
+  }
+
+  templateDisplayName(template: { nameEn: string | null; nameAr: string | null }): string {
+    return this.localizedText(template.nameEn, template.nameAr);
+  }
+
+  customInputDisplayLabel(input: {
+    labelEn: string | null;
+    labelAr: string | null;
+    name: string;
+  }): string {
+    return this.localizedText(input.labelEn ?? input.name, input.labelAr, input.name);
+  }
+
   branchDisplayName(template: { branchNameEn: string | null; branchNameAr: string | null }): string {
-    return template.branchNameEn ?? template.branchNameAr ?? '-';
+    return this.localizedText(template.branchNameEn, template.branchNameAr);
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private canUseTemplateAction(template: AnonymousTemplateListItem): boolean {

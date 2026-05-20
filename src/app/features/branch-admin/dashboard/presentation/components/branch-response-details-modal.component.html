@@ -1,0 +1,279 @@
+<app-modal
+  [title]="'branchResponseDetails.title' | t"
+  [open]="open()"
+  size="lg"
+  (closed)="closed.emit()"
+>
+  @if (loading()) {
+    <div class="space-y-2">
+      <div class="h-16 animate-pulse rounded-lg bg-slate-50"></div>
+      <div class="h-10 animate-pulse rounded-lg bg-slate-50"></div>
+      <div class="h-32 animate-pulse rounded-lg bg-slate-50"></div>
+    </div>
+  } @else if (error()) {
+    <div
+      class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700"
+    >
+      {{ error() ?? '' | t }}
+    </div>
+  } @else if (details(); as response) {
+    <div class="space-y-3 text-[11px]">
+      <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <p class="text-[9px] font-black uppercase tracking-wide text-[#0d94b3]">
+              {{ 'branchResponseDetails.eyebrow' | t }}
+            </p>
+            <h3
+              class="mt-0.5 break-words text-sm font-black text-slate-950 [overflow-wrap:anywhere]"
+            >
+              {{ templateName(response) }}
+            </h3>
+            <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-semibold text-slate-500">
+              <span class="inline-flex items-center gap-1">
+                <app-icon [icon]="userIcon" [size]="12" />
+                {{ operatorName(response) }}
+              </span>
+              <span class="inline-flex items-center gap-1">
+                <app-icon [icon]="calendarIcon" [size]="12" />
+                {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+              </span>
+              <span class="inline-flex min-w-0 items-center gap-1">
+                <app-icon [icon]="hashIcon" [size]="12" />
+                <span class="truncate">{{ response.surveyResponseId }}</span>
+              </span>
+            </div>
+          </div>
+
+          <span
+            class="inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black"
+            [class.bg-slate-100]="!response.score.isScored"
+            [class.text-slate-600]="!response.score.isScored"
+            [class.bg-emerald-50]="response.score.isScored && response.score.scorePercentage >= 80"
+            [class.text-emerald-700]="
+              response.score.isScored && response.score.scorePercentage >= 80
+            "
+            [class.bg-amber-50]="
+              response.score.isScored &&
+              response.score.scorePercentage >= 60 &&
+              response.score.scorePercentage < 80
+            "
+            [class.text-amber-700]="
+              response.score.isScored &&
+              response.score.scorePercentage >= 60 &&
+              response.score.scorePercentage < 80
+            "
+            [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
+            [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
+          >
+            {{
+              response.score.isScored
+                ? (response.score.scorePercentage | number: '1.0-1') + '%'
+                : ('branchResponseDetails.notScored' | t)
+            }}
+          </span>
+        </div>
+      </header>
+
+      <section
+        class="grid overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e"
+        >
+          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">
+            {{ 'branchResponseDetails.actualScore' | t }}
+          </p>
+          <p class="text-sm font-black text-slate-950 sm:mt-1">
+            {{ response.score.isScored ? response.score.actualScore : '-' }}
+          </p>
+        </div>
+        <div
+          class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e"
+        >
+          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">
+            {{ 'branchResponseDetails.maxScore' | t }}
+          </p>
+          <p class="text-sm font-black text-slate-950 sm:mt-1">
+            {{ response.score.isScored ? response.score.maxScore : '-' }}
+          </p>
+        </div>
+        <div class="flex items-center justify-between px-3 py-2 sm:block">
+          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">
+            {{ 'branchResponseDetails.percentage' | t }}
+          </p>
+          <p
+            class="text-sm font-black sm:mt-1"
+            [class.text-slate-600]="!response.score.isScored"
+            [class.text-emerald-700]="
+              response.score.isScored && response.score.scorePercentage >= 80
+            "
+            [class.text-amber-700]="
+              response.score.isScored &&
+              response.score.scorePercentage >= 60 &&
+              response.score.scorePercentage < 80
+            "
+            [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
+          >
+            {{
+              response.score.isScored
+                ? (response.score.scorePercentage | number: '1.0-2') + '%'
+                : ('branchResponseDetails.notScored' | t)
+            }}
+          </p>
+        </div>
+      </section>
+
+      <section class="rounded-lg border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+          <div>
+            <h4 class="text-xs font-black text-slate-950">
+              {{ 'branchResponseDetails.customInputs' | t }}
+            </h4>
+            <p class="text-[10px] font-semibold text-slate-500">
+              {{ response.customInputsCount }} {{ 'branchResponseDetails.submittedFields' | t }}
+            </p>
+          </div>
+          <app-icon class="text-[#11A7C9]" [icon]="fileIcon" [size]="15" />
+        </div>
+
+        @if (response.customInputs.length === 0) {
+          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
+            {{ 'branchResponseDetails.noCustomInputs' | t }}
+          </p>
+        } @else {
+          <dl class="divide-y divide-slate-100">
+            @for (input of response.customInputs; track input.customInputId) {
+              <div class="grid gap-1 px-3 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
+                <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
+                  {{ input.name }} - {{ input.typeName }}
+                </dt>
+                <dd
+                  class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                >
+                  {{ input.displayValue || '-' }}
+                </dd>
+              </div>
+            }
+          </dl>
+        }
+      </section>
+
+      <section class="rounded-lg border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+          <div>
+            <h4 class="text-xs font-black text-slate-950">
+              {{ 'branchResponseDetails.answers' | t }}
+            </h4>
+            <p class="text-[10px] font-semibold text-slate-500">
+              {{ response.answersCount }} {{ 'branchResponseDetails.answersCaptured' | t }}
+            </p>
+          </div>
+          <app-icon class="text-[#11A7C9]" [icon]="gaugeIcon" [size]="15" />
+        </div>
+
+        <div class="divide-y divide-slate-100">
+          @for (answer of response.answers; track answer.questionId) {
+            <article class="px-3 py-2.5">
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p
+                    class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
+                  >
+                    {{ questionText(answer) }}
+                  </p>
+                  <p class="text-[10px] font-semibold text-slate-500">
+                    {{ answer.questionTypeName }}
+                  </p>
+                </div>
+                <span
+                  class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
+                >
+                  {{ answer.questionType }}
+                </span>
+              </div>
+
+              <div class="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
+                @switch (answer.questionType) {
+                  @case ('SingleChoice') {
+                    <p class="text-[11px] font-bold text-slate-900">
+                      {{ 'branchResponseDetails.selectedOption' | t }}: {{ displayAnswer(answer) }}
+                    </p>
+                    <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
+                      {{ 'branchResponseDetails.optionValue' | t }}:
+                      {{ answer.selectedOptionValue ?? '-' }}
+                    </p>
+                  }
+                  @case ('StarRating') {
+                    <div class="flex items-center gap-2">
+                      <div class="flex gap-1">
+                        @for (slot of scaleSlots; track slot.index) {
+                          <span
+                            class="h-2 w-2 rounded-full"
+                            [class.bg-amber-400]="isActiveScaleSlot(slot, answer.starRatingValue)"
+                            [class.bg-slate-200]="!isActiveScaleSlot(slot, answer.starRatingValue)"
+                          ></span>
+                        }
+                      </div>
+                      <span class="text-[11px] font-black text-slate-900">{{
+                        displayAnswer(answer)
+                      }}</span>
+                    </div>
+                  }
+                  @case ('Smiles') {
+                    <div class="flex items-center gap-2">
+                      <div class="flex gap-1">
+                        @for (slot of scaleSlots; track slot.index) {
+                          <span
+                            class="h-2 w-2 rounded-full"
+                            [class.bg-emerald-400]="isActiveScaleSlot(slot, answer.smileValue)"
+                            [class.bg-slate-200]="!isActiveScaleSlot(slot, answer.smileValue)"
+                          ></span>
+                        }
+                      </div>
+                      <span class="text-[11px] font-black text-slate-900">
+                        {{ 'branchResponseDetails.smileValue' | t }}: {{ displayAnswer(answer) }}
+                      </span>
+                    </div>
+                  }
+                  @case ('Complain') {
+                    <p
+                      class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                    >
+                      {{ displayAnswer(answer) }}
+                    </p>
+                  }
+                  @case ('Voice') {
+                    @if (voiceUrl(answer)) {
+                      <div class="space-y-1.5">
+                        <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+                          <app-icon class="text-[#11A7C9]" [icon]="micIcon" [size]="13" />
+                          {{ displayAnswer(answer) }}
+                        </p>
+                        <audio class="h-8 w-full" controls [src]="voiceUrl(answer)"></audio>
+                      </div>
+                    } @else {
+                      <p class="text-[11px] font-semibold text-slate-500">
+                        {{ 'branchResponseDetails.noVoiceFile' | t }}
+                      </p>
+                    }
+                  }
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
+              {{ 'branchResponseDetails.noAnswers' | t }}
+            </p>
+          }
+        </div>
+      </section>
+
+      <div class="flex justify-end">
+        <app-button type="button" size="sm" variant="secondary" (pressed)="closed.emit()">
+          {{ 'branchResponseDetails.close' | t }}
+        </app-button>
+      </div>
+    </div>
+  }
+</app-modal>

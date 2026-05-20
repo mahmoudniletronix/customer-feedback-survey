@@ -129,7 +129,7 @@
             @if (template.customInputs.length > 0) {
               <button
                 type="button"
-                class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition"
+                class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start transition"
                 [class.bg-cyan-50]="customInputsOpen()"
                 [class.text-[#0d94b3]]="customInputsOpen()"
                 [class.bg-white]="!customInputsOpen()"
@@ -159,7 +159,7 @@
             @for (question of visibleQuestions(); track question.id; let index = $index) {
               <button
                 type="button"
-                class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition"
+                class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start transition"
                 [class.bg-cyan-50]="!summaryOpen() && currentQuestionIndex() === index"
                 [class.text-[#0d94b3]]="!summaryOpen() && currentQuestionIndex() === index"
                 [class.bg-white]="summaryOpen() || currentQuestionIndex() !== index"
@@ -198,7 +198,7 @@
 
             <button
               type="button"
-              class="mt-3 flex w-full items-center gap-2 rounded-lg border border-slate-100 px-2 py-2 text-left text-slate-600 transition hover:bg-slate-50"
+              class="mt-3 flex w-full items-center gap-2 rounded-lg border border-slate-100 px-2 py-2 text-start text-slate-600 transition hover:bg-slate-50"
               [class.bg-cyan-50]="summaryOpen()"
               [class.text-[#0d94b3]]="summaryOpen()"
               [disabled]="!allQuestionsValid() || responseSubmitted()"
@@ -234,7 +234,7 @@
               </p>
               @if (submittedResponse(); as response) {
                 <div
-                  class="grid w-full max-w-5xl gap-3 text-left text-xs sm:grid-cols-2 xl:grid-cols-[repeat(5,minmax(7rem,1fr))_minmax(12rem,1.4fr)]"
+                  class="grid w-full max-w-5xl gap-3 text-start text-xs sm:grid-cols-2 xl:grid-cols-[repeat(5,minmax(7rem,1fr))_minmax(12rem,1.4fr)]"
                 >
                   <div class="rounded-lg bg-slate-50 p-3.5">
                     <p class="font-bold text-slate-400">
@@ -276,7 +276,7 @@
                   </div>
                 </div>
                 @if (response.customInputs.length > 0) {
-                  <div class="w-full max-w-4xl rounded-lg border border-slate-100 bg-slate-50 p-3 text-left">
+                  <div class="w-full max-w-4xl rounded-lg border border-slate-100 bg-slate-50 p-3 text-start">
                     <p class="mb-2 text-xs font-bold text-slate-900">
                       {{ 'operatorTemplates.customInputs' | t }}
                     </p>

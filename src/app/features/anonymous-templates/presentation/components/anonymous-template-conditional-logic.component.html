@@ -72,20 +72,13 @@
                 }
               </span>
             </div>
-            @if (questionSecondaryText(node.question)) {
-              <p
-                class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
-              >
-                {{ questionSecondaryText(node.question) }}
-              </p>
-            }
             <div class="mt-1.5 flex flex-wrap gap-1.5">
               <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">
                 {{ answerTypeLabel(node.question) }}
               </span>
               @if (node.question.groupNameEn || node.question.groupNameAr) {
                 <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-500">
-                  {{ node.question.groupNameEn || node.question.groupNameAr }}
+                  {{ groupDisplayName(node.question) }}
                 </span>
               }
               @if (node.question.isGlobal) {
@@ -353,13 +346,6 @@
               <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
                 {{ questionText(focusedQuestion) }}
               </p>
-              @if (questionSecondaryText(focusedQuestion)) {
-                <p
-                  class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
-                >
-                  {{ questionSecondaryText(focusedQuestion) }}
-                </p>
-              }
             </div>
             @if (focusedParentQuestion(); as parentQuestion) {
               <span

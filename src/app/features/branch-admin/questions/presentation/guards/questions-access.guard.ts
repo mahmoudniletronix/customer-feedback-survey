@@ -10,5 +10,5 @@ export const questionsAccessGuard: CanActivateFn = () => {
     return true;
   }
 
-  return router.createUrlTree(['/dashboard']);
+  return router.createUrlTree([authStore.redirectPath()]);
 };

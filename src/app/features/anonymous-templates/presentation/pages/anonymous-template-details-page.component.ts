@@ -26,10 +26,10 @@ import {
 import { AuthStore } from '../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
-import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
+import { I18nService } from '../../../../core/services/i18n.service';
 import {
   AnonymousTemplate,
   AnonymousTemplateCustomInputType,
@@ -81,7 +81,6 @@ interface ConditionView {
   standalone: true,
   imports: [
     ButtonComponent,
-    CardComponent,
     DatePipe,
     IconComponent,
     InputComponent,
@@ -99,6 +98,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
 
@@ -394,6 +394,59 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     linkElement.href = qrCode;
     linkElement.download = `anonymous-template-qr-${Date.now()}.png`;
     linkElement.click();
+  }
+
+  templateDisplayName(template: { nameEn: string | null; nameAr: string | null }): string {
+    return this.localizedText(template.nameEn, template.nameAr);
+  }
+
+  branchDisplayName(template: { branchNameEn: string | null; branchNameAr: string | null }): string {
+    return this.localizedText(template.branchNameEn, template.branchNameAr);
+  }
+
+  customInputDisplayLabel(input: {
+    labelEn: string | null;
+    labelAr: string | null;
+    name: string;
+  }): string {
+    return this.localizedText(input.labelEn ?? input.name, input.labelAr, input.name);
+  }
+
+  questionDisplayText(question: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(question.textEn, question.textAr);
+  }
+
+  questionGroupDisplayName(question: {
+    groupNameEn: string | null;
+    groupNameAr?: string | null;
+  }): string {
+    return this.localizedText(question.groupNameEn, question.groupNameAr);
+  }
+
+  optionDisplayText(option: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(option.textEn, option.textAr);
+  }
+
+  conditionQuestionDisplayText(
+    question: AnonymousTemplateQuestion | null,
+    fallbackId: string,
+  ): string {
+    return question ? this.questionDisplayText(question) : fallbackId;
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private populateEditForm(template: AnonymousTemplate): void {

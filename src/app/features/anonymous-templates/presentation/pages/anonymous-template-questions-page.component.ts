@@ -134,12 +134,7 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
   readonly pageTitle = computed(() => {
     const selection = this.anonymousTemplatesStore.questionsSelection();
     const template = this.anonymousTemplatesStore.selectedTemplate();
-    return selection?.nameEn || template?.nameEn || '';
-  });
-  readonly pageSubtitle = computed(() => {
-    const selection = this.anonymousTemplatesStore.questionsSelection();
-    const template = this.anonymousTemplatesStore.selectedTemplate();
-    return selection?.nameAr || template?.nameAr || '';
+    return this.localizedText(selection?.nameEn ?? template?.nameEn, selection?.nameAr ?? template?.nameAr, '');
   });
   readonly isDirty = computed(() => this.toSelectedIdsKey() !== this.toOriginalSelectedIdsKey());
   readonly hasPendingChanges = computed(() => this.isDirty() || this.conditionsDirty());
@@ -213,11 +208,22 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
   }
 
   questionText(question: AnonymousTemplateQuestionSelectionItem): string {
-    if (this.i18n.language() === 'ar') {
-      return question.textAr || question.textEn || '-';
-    }
+    return this.localizedText(question.textEn, question.textAr);
+  }
 
-    return question.textEn || question.textAr || '-';
+  groupDisplayName(group: { nameEn: string | null; nameAr?: string | null }): string {
+    return this.localizedText(group.nameEn, group.nameAr);
+  }
+
+  questionGroupDisplayName(question: {
+    groupNameEn: string | null;
+    groupNameAr?: string | null;
+  }): string {
+    return this.localizedText(question.groupNameEn, question.groupNameAr);
+  }
+
+  optionDisplayText(option: { textEn: string | null; textAr?: string | null }): string {
+    return this.localizedText(option.textEn, option.textAr);
   }
 
   answerTypeLabel(type: QuestionAnswerTypeInput): string {
@@ -428,6 +434,21 @@ export class AnonymousTemplateQuestionsPageComponent implements OnInit {
     }
 
     return [...groupsById.values()];
+  }
+
+  private localizedText(
+    enValue: string | null | undefined,
+    arValue: string | null | undefined,
+    fallback = '-',
+  ): string {
+    const englishText = enValue?.trim() ?? '';
+    const arabicText = arValue?.trim() ?? '';
+
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || fallback;
+    }
+
+    return englishText || arabicText || fallback;
   }
 
   private toSelectedQuestions(
