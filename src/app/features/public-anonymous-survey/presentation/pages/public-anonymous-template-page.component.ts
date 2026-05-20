@@ -81,6 +81,12 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   readonly answeredVisibleQuestionsCount = computed(
     () => this.visibleQuestions().filter((question) => this.hasAnswer(question)).length,
   );
+  readonly progressPercent = computed(() => {
+    const visibleQuestionsCount = this.visibleQuestions().length;
+    return visibleQuestionsCount > 0
+      ? (this.answeredVisibleQuestionsCount() / visibleQuestionsCount) * 100
+      : 0;
+  });
   readonly canSubmit = computed(
     () =>
       !this.publicAnonymousTemplateStore.submitting() &&
@@ -112,6 +118,14 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return this.i18n.language() === 'ar'
       ? question.textEn
       : question.textAr ?? '';
+  }
+
+  isRootQuestion(question: PublicAnonymousTemplateQuestion): boolean {
+    const template = this.publicAnonymousTemplateStore.template();
+
+    return template
+      ? template.rootAnonymousTemplateQuestionIds.includes(question.anonymousTemplateQuestionId)
+      : question.isRoot;
   }
 
   groupName(question: PublicAnonymousTemplateQuestion): string {

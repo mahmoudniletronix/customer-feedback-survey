@@ -164,10 +164,12 @@ export class AnonymousTemplatesService {
     anonymousTemplateId: string,
     payload: ManageAnonymousTemplateQuestionConditionsPayload,
   ): Observable<ManageAnonymousTemplateQuestionConditionsResult> {
+    const normalizedPayload = this.toManageQuestionConditionsPayload(payload);
+
     return this.http
       .put<ManageAnonymousTemplateQuestionConditionsApiResponse>(
         `${this.anonymousTemplatesUrl}/${anonymousTemplateId}/question-conditions`,
-        payload,
+        normalizedPayload,
       )
       .pipe(
         map((response) => this.toManageQuestionConditionsResult(response, anonymousTemplateId)),
@@ -635,6 +637,17 @@ export class AnonymousTemplatesService {
       branchId: this.readNullableRecordId(response.branchId),
       conditionsCount: response.conditionsCount ?? conditions.length,
       conditions,
+    };
+  }
+
+  private toManageQuestionConditionsPayload(
+    payload: ManageAnonymousTemplateQuestionConditionsPayload,
+  ): ManageAnonymousTemplateQuestionConditionsPayload {
+    return {
+      conditions: payload.conditions.map((condition, index) => ({
+        ...condition,
+        order: index + 1,
+      })),
     };
   }
 

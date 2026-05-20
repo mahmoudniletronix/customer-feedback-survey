@@ -157,8 +157,19 @@ export class AnonymousTemplateConditionalLogicComponent {
 
   constructor() {
     effect(() => {
+      const selection = this.anonymousTemplatesStore.questionsSelection();
+      if (!selection) {
+        this.originalConditions.set([]);
+        this.draftConditions.set([]);
+        this.selectedChildByTrigger.set({});
+        this.focusedQuestionPathIds.set([]);
+        this.initializedKey.set('');
+        return;
+      }
+
       const selectionKey = [
-        this.selectedQuestions()
+        selection.anonymousTemplateId,
+        this.persistedSelectedQuestions()
           .map((question) => question.anonymousTemplateQuestionId)
           .join('|'),
         this.conditionsFingerprint(this.toQuestionConditions(this.conditions())),
@@ -339,6 +350,26 @@ export class AnonymousTemplateConditionalLogicComponent {
 
   nodeConditionsCount(node: ConditionTreeNodeView): number {
     return node.triggers.reduce((total, trigger) => total + trigger.conditions.length, 0);
+  }
+
+  private persistedSelectedQuestions(): readonly AnonymousConditionalLogicQuestion[] {
+    return (
+      this.anonymousTemplatesStore
+        .questionsSelection()
+        ?.questions.filter(
+          (question) =>
+            question.isSelected &&
+            question.isActive &&
+            question.anonymousTemplateQuestionId !== null &&
+            question.anonymousTemplateQuestionId.length > 0,
+        )
+        .map((question) => this.toLogicQuestion(question))
+        .sort(
+          (first, second) =>
+            (first.selectedOrder ?? Number.MAX_SAFE_INTEGER) -
+            (second.selectedOrder ?? Number.MAX_SAFE_INTEGER),
+        ) ?? []
+    );
   }
 
   private toLogicQuestions(

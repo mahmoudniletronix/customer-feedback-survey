@@ -499,7 +499,6 @@ export class AnonymousTemplatesStore {
       ? this.anonymousTemplatesService.assignQuestions(anonymousTemplateId, questionsPayload).pipe(
           map((result) => {
             const selection = this.mergeAssignedQuestionsSelection(anonymousTemplateId, result);
-            this.questionsSelectionSignal.set(selection);
             this.patchTemplateQuestionsCount(
               result.anonymousTemplateId,
               result.assignedQuestionsCount,
@@ -530,6 +529,7 @@ export class AnonymousTemplatesStore {
       )
       .subscribe({
         next: ({ selection, result }) => {
+          this.questionsSelectionSignal.set(selection);
           this.patchTemplateQuestionConditions(result);
           this.successSignal.set('anonymousTemplates.conditionsUpdateSuccess');
           onSaved(selection);

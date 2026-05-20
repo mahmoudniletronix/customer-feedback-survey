@@ -1,17 +1,17 @@
-<main class="min-h-screen bg-slate-50 text-xs text-slate-700">
-  <header class="border-b border-slate-200 bg-white">
-    <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-      <div class="flex min-w-0 items-center gap-2">
+<main class="min-h-screen bg-white text-xs text-slate-700">
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
+      <div class="flex min-w-0 items-center gap-3">
         <span
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E8F8FC] text-[#0D9FC0]"
         >
-          <app-icon [icon]="globeIcon" [size]="18" />
+          <app-icon [icon]="globeIcon" [size]="19" />
         </span>
         <div class="min-w-0">
-          <p class="text-[10px] font-bold uppercase tracking-wide text-[#0d94b3]">
+          <p class="text-[10px] font-bold uppercase text-[#0D9FC0]">
             {{ 'publicAnonymousTemplates.publicSurvey' | t }}
           </p>
-          <h1 class="truncate text-sm font-bold text-slate-900">
+          <h1 class="truncate text-sm font-bold text-slate-950">
             {{ templateName() || ('publicAnonymousTemplates.loadingTitle' | t) }}
           </h1>
         </div>
@@ -19,7 +19,7 @@
 
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
+        class="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-bold text-slate-600 transition hover:border-[#11A7C9] hover:text-[#0D9FC0]"
         (click)="toggleLanguage()"
       >
         <app-icon [icon]="languageIcon" [size]="14" />
@@ -28,45 +28,46 @@
     </div>
   </header>
 
-  <section class="mx-auto max-w-5xl px-4 py-5">
+  <section class="mx-auto max-w-3xl px-4 pb-32 pt-6 sm:pt-8">
     @if (publicAnonymousTemplateStore.loading()) {
-      <div class="rounded-lg border border-slate-200 bg-white p-5 text-center shadow-sm">
-        <p class="font-bold text-slate-900">{{ 'publicAnonymousTemplates.loading' | t }}</p>
+      <div class="py-16 text-center">
+        <span
+          class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#E8F8FC] text-[#0D9FC0]"
+        >
+          <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#B7EAF4] border-t-[#0D9FC0]"></span>
+        </span>
+        <p class="font-bold text-slate-950">{{ 'publicAnonymousTemplates.loading' | t }}</p>
         <p class="mt-1 text-[11px] text-slate-500">
           {{ 'publicAnonymousTemplates.loadingDescription' | t }}
         </p>
       </div>
     } @else if (publicAnonymousTemplateStore.error()) {
-      <div class="rounded-lg border border-rose-100 bg-white p-5 shadow-sm">
+      <div class="border-l-4 border-[#D94B5A] bg-rose-50 px-4 py-4">
         <div class="flex items-start gap-3">
-          <span
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-[#D94B5A]"
-          >
-            <app-icon [icon]="alertIcon" [size]="18" />
-          </span>
+          <app-icon class="mt-0.5 shrink-0 text-[#D94B5A]" [icon]="alertIcon" [size]="20" />
           <div class="min-w-0">
-            <h2 class="text-base font-bold text-slate-900">
+            <h2 class="text-base font-bold text-slate-950">
               {{ 'publicAnonymousTemplates.unavailableTitle' | t }}
             </h2>
-            <p class="mt-1 text-xs leading-5 text-slate-500">
+            <p class="mt-1 text-xs leading-5 text-slate-600">
               {{ publicAnonymousTemplateStore.error() ?? '' | t }}
             </p>
           </div>
         </div>
       </div>
     } @else if (publicAnonymousTemplateStore.template(); as template) {
-      <div class="space-y-4">
-        <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <section class="border-b border-slate-200 pb-6">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
-              <p class="text-[10px] font-bold uppercase tracking-wide text-[#0d94b3]">
+              <p class="text-[10px] font-bold uppercase text-[#0D9FC0]">
                 {{ template.scopeName }}
               </p>
-              <h2 class="mt-1 break-words text-lg font-bold text-slate-900">
+              <h2 class="mt-1 break-words text-2xl font-bold leading-8 text-slate-950">
                 {{ templateName() }}
               </h2>
               @if (templateDescription()) {
-                <p class="mt-1 max-w-3xl text-xs leading-5 text-slate-500">
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
                   {{ templateDescription() }}
                 </p>
               }
@@ -74,38 +75,49 @@
 
             <div class="flex shrink-0 flex-wrap gap-2 sm:justify-end">
               <span
-                class="rounded-full bg-cyan-50 px-2 py-0.5 text-[11px] font-bold text-[#0d94b3]"
+                class="inline-flex h-8 items-center rounded-full bg-[#E8F8FC] px-3 text-[11px] font-bold text-[#0D9FC0]"
               >
                 {{ answeredVisibleQuestionsCount() }} / {{ visibleQuestions().length }}
                 {{ 'publicAnonymousTemplates.answered' | t }}
               </span>
-              <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+              <span
+                class="inline-flex h-8 items-center rounded-full bg-slate-100 px-3 text-[11px] font-bold text-slate-600"
+              >
                 {{ template.activeFrom | date: 'mediumDate' }}
               </span>
-              @if (template.expireTo) {
-                <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600">
-                  {{ 'publicAnonymousTemplates.until' | t }} {{ template.expireTo | date: 'mediumDate' }}
-                </span>
-              }
             </div>
+          </div>
+
+          <div class="mt-5">
+            <div class="h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-[#11A7C9] transition-all"
+                [style.width.%]="progressPercent()"
+              ></div>
+            </div>
+            @if (template.expireTo) {
+              <p class="mt-2 text-[11px] font-semibold text-slate-500">
+                {{ 'publicAnonymousTemplates.until' | t }} {{ template.expireTo | date: 'mediumDate' }}
+              </p>
+            }
           </div>
         </section>
 
         @if (template.customInputs.length > 0) {
-          <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="mb-3">
-              <h3 class="text-sm font-bold text-slate-900">
+          <section class="border-b border-slate-200 py-6">
+            <div class="mb-4">
+              <h3 class="text-sm font-bold text-slate-950">
                 {{ 'publicAnonymousTemplates.customInputsTitle' | t }}
               </h3>
-              <p class="mt-0.5 text-[11px] text-slate-500">
+              <p class="mt-1 text-[11px] text-slate-500">
                 {{ 'publicAnonymousTemplates.customInputsSubtitle' | t }}
               </p>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid gap-4 sm:grid-cols-2">
               @for (input of template.customInputs; track input.customInputId) {
-                <label class="block rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <span class="flex items-center justify-between gap-2">
+                <label class="block">
+                  <span class="mb-2 flex items-center justify-between gap-2">
                     <span class="text-[11px] font-bold text-slate-700">
                       {{ customInputLabel(input) }}
                     </span>
@@ -116,7 +128,7 @@
                     }
                   </span>
                   <input
-                    class="mt-2 h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-cyan-100"
+                    class="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-300 hover:border-slate-300 focus:border-[#11A7C9] focus:bg-white focus:ring-4 focus:ring-cyan-50"
                     [type]="input.type === 2 ? 'number' : 'text'"
                     [value]="customInputValue(input)"
                     [attr.min]="input.type === 2 ? input.minValue : null"
@@ -125,8 +137,8 @@
                     [attr.maxlength]="input.type === 1 ? input.maxLength : null"
                     (input)="updateCustomInputValue(input, $event)"
                   />
-                  @if (customInputError(input)) {
-                    <p class="mt-1 text-[11px] font-semibold text-[#D94B5A]">
+                  @if (validationSubmitted() && customInputError(input)) {
+                    <p class="mt-1.5 text-[11px] font-semibold text-[#D94B5A]">
                       {{ customInputError(input) }}
                     </p>
                   }
@@ -136,55 +148,55 @@
           </section>
         }
 
-        <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <section class="py-6">
+          <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h3 class="text-sm font-bold text-slate-900">
+              <h3 class="text-sm font-bold text-slate-950">
                 {{ 'publicAnonymousTemplates.questionsTitle' | t }}
               </h3>
-              <p class="mt-0.5 text-[11px] text-slate-500">
+              <p class="mt-1 text-[11px] text-slate-500">
                 {{ 'publicAnonymousTemplates.questionsSubtitle' | t }}
               </p>
             </div>
-            <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+            <span class="inline-flex h-7 items-center rounded-full bg-slate-100 px-3 text-[11px] font-bold text-slate-600">
               {{ visibleQuestions().length }} {{ 'publicAnonymousTemplates.visibleQuestions' | t }}
             </span>
           </div>
 
-          <div class="space-y-3">
+          <div>
             @for (question of visibleQuestions(); track question.anonymousTemplateQuestionId; let index = $index) {
-              <article class="rounded-lg border border-cyan-100 bg-white p-3 shadow-sm">
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div class="flex min-w-0 items-start gap-2">
+              <article
+                class="border-b border-slate-100 py-6 last:border-b-0"
+                [class.ml-3]="!isRootQuestion(question)"
+                [class.border-l-2]="!isRootQuestion(question)"
+                [class.border-l-[#B7EAF4]]="!isRootQuestion(question)"
+                [class.pl-4]="!isRootQuestion(question)"
+              >
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div class="flex min-w-0 items-start gap-3">
                     <span
-                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-[11px] font-bold text-[#0d94b3]"
+                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E8F8FC] text-sm font-bold text-[#0D9FC0]"
                     >
                       {{ index + 1 }}
                     </span>
                     <div class="min-w-0">
-                      <h4 class="break-words text-sm font-bold text-slate-900">
+                      <h4 class="break-words text-base font-bold leading-6 text-slate-950">
                         {{ questionText(question) }}
                       </h4>
                       @if (questionSecondaryText(question)) {
-                        <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-400">
+                        <p class="mt-0.5 break-words text-[12px] font-semibold text-slate-400">
                           {{ questionSecondaryText(question) }}
                         </p>
                       }
-                      <div class="mt-1 flex flex-wrap gap-1.5">
-                        <span
-                          class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
-                        >
+                      <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span class="text-[10px] font-bold text-slate-500">
                           {{ question.typeName }}
                         </span>
-                        <span
-                          class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#0d94b3]"
-                        >
+                        <span class="text-[10px] font-bold text-[#0D9FC0]">
                           {{ groupName(question) }}
                         </span>
                         @if (question.isGlobal) {
-                          <span
-                            class="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700"
-                          >
+                          <span class="text-[10px] font-bold text-violet-700">
                             {{ question.scopeName }}
                           </span>
                         }
@@ -194,7 +206,7 @@
 
                   @if (hasAnswer(question)) {
                     <span
-                      class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700"
+                      class="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-3 text-[10px] font-bold text-emerald-700"
                     >
                       <app-icon [icon]="checkIcon" [size]="12" />
                       {{ 'publicAnonymousTemplates.answeredOne' | t }}
@@ -202,44 +214,55 @@
                   }
                 </div>
 
-                <div class="mt-3">
+                <div class="mt-4">
                   @switch (questionKind(question)) {
                     @case ('singleChoice') {
-                      <div class="grid gap-2 sm:grid-cols-2">
+                      <div class="overflow-hidden rounded-lg border border-slate-200">
                         @for (option of question.options; track option.optionId) {
                           <button
                             type="button"
-                            class="rounded-lg border p-3 text-left transition"
-                            [class.border-cyan-300]="
+                            class="flex min-h-14 w-full items-start gap-3 border-b border-slate-100 px-3 py-3 text-left transition last:border-b-0 hover:bg-[#F5FCFE]"
+                            [class.bg-[#E8F8FC]]="
                               answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
-                            "
-                            [class.bg-cyan-50]="
-                              answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
-                            "
-                            [class.border-slate-200]="
-                              answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId !== option.optionId
-                            "
-                            [class.bg-white]="
-                              answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId !== option.optionId
                             "
                             (click)="setSingleChoiceAnswer(question.anonymousTemplateQuestionId, option.optionId)"
                           >
-                            <span class="flex items-start justify-between gap-2">
-                              <span class="min-w-0">
-                                <span class="block break-words font-bold text-slate-900">
-                                  {{ optionText(option) }}
+                            <span
+                              class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition"
+                              [class.border-[#11A7C9]]="
+                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                              "
+                              [class.bg-[#11A7C9]]="
+                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                              "
+                              [class.border-slate-300]="
+                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId !== option.optionId
+                              "
+                            >
+                              @if (
+                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                              ) {
+                                <span class="h-2 w-2 rounded-full bg-white"></span>
+                              }
+                            </span>
+                            <span class="min-w-0 flex-1">
+                              <span class="flex items-start justify-between gap-2">
+                                <span class="min-w-0">
+                                  <span class="block break-words text-sm font-bold text-slate-950">
+                                    {{ optionText(option) }}
+                                  </span>
+                                  @if (optionSecondaryText(option)) {
+                                    <span class="mt-0.5 block break-words text-[11px] font-semibold text-slate-400">
+                                      {{ optionSecondaryText(option) }}
+                                    </span>
+                                  }
                                 </span>
-                                @if (optionSecondaryText(option)) {
-                                  <span class="mt-0.5 block break-words text-[11px] font-semibold text-slate-400">
-                                    {{ optionSecondaryText(option) }}
+                                @if (option.value !== null) {
+                                  <span class="shrink-0 text-[10px] font-bold text-[#0D9FC0]">
+                                    {{ 'publicAnonymousTemplates.value' | t }} {{ option.value }}
                                   </span>
                                 }
                               </span>
-                              @if (option.value !== null) {
-                                <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#0d94b3]">
-                                  {{ 'publicAnonymousTemplates.value' | t }} {{ option.value }}
-                                </span>
-                              }
                             </span>
                           </button>
                         }
@@ -247,29 +270,23 @@
                     }
 
                     @case ('starRating') {
-                      <div class="flex flex-wrap gap-2">
+                      <div class="inline-flex flex-wrap overflow-hidden rounded-lg border border-slate-200">
                         @for (value of ratingValues; track value) {
                           <button
                             type="button"
-                            class="inline-flex h-10 min-w-12 items-center justify-center gap-1 rounded-lg border px-3 text-xs font-bold transition"
-                            [class.border-amber-300]="
-                              answerFor(question.anonymousTemplateQuestionId).starRatingValue === value
-                            "
+                            class="inline-flex h-11 min-w-14 items-center justify-center gap-1 border-r border-slate-200 px-3 text-sm font-bold transition last:border-r-0 hover:bg-amber-50"
                             [class.bg-amber-50]="
                               answerFor(question.anonymousTemplateQuestionId).starRatingValue === value
                             "
                             [class.text-amber-700]="
                               answerFor(question.anonymousTemplateQuestionId).starRatingValue === value
                             "
-                            [class.border-slate-200]="
-                              answerFor(question.anonymousTemplateQuestionId).starRatingValue !== value
-                            "
                             [class.bg-white]="
                               answerFor(question.anonymousTemplateQuestionId).starRatingValue !== value
                             "
                             (click)="setStarRatingAnswer(question.anonymousTemplateQuestionId, value)"
                           >
-                            <app-icon [icon]="starIcon" [size]="14" />
+                            <app-icon [icon]="starIcon" [size]="15" />
                             {{ value }}
                           </button>
                         }
@@ -277,22 +294,16 @@
                     }
 
                     @case ('smiles') {
-                      <div class="flex flex-wrap gap-2">
+                      <div class="inline-flex flex-wrap overflow-hidden rounded-lg border border-slate-200">
                         @for (value of ratingValues; track value) {
                           <button
                             type="button"
-                            class="h-10 min-w-12 rounded-lg border px-3 text-xs font-bold transition"
-                            [class.border-emerald-300]="
-                              answerFor(question.anonymousTemplateQuestionId).smileValue === value
-                            "
+                            class="h-11 min-w-14 border-r border-slate-200 px-3 text-sm font-bold transition last:border-r-0 hover:bg-emerald-50"
                             [class.bg-emerald-50]="
                               answerFor(question.anonymousTemplateQuestionId).smileValue === value
                             "
                             [class.text-emerald-700]="
                               answerFor(question.anonymousTemplateQuestionId).smileValue === value
-                            "
-                            [class.border-slate-200]="
-                              answerFor(question.anonymousTemplateQuestionId).smileValue !== value
                             "
                             [class.bg-white]="
                               answerFor(question.anonymousTemplateQuestionId).smileValue !== value
@@ -307,7 +318,7 @@
 
                     @case ('complain') {
                       <textarea
-                        class="min-h-24 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-cyan-100"
+                        class="min-h-28 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-[#11A7C9]"
                         [value]="answerFor(question.anonymousTemplateQuestionId).textAnswer"
                         [placeholder]="'publicAnonymousTemplates.textAnswerPlaceholder' | t"
                         (input)="updateTextAnswer(question.anonymousTemplateQuestionId, $event)"
@@ -316,9 +327,9 @@
 
                     @case ('voice') {
                       <label
-                        class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-5 text-center transition hover:bg-white"
+                        class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center transition hover:border-[#11A7C9] hover:bg-[#F5FCFE]"
                       >
-                        <app-icon [icon]="micIcon" [size]="20" />
+                        <app-icon class="text-[#0D9FC0]" [icon]="micIcon" [size]="22" />
                         <span class="font-bold text-slate-700">
                           {{ 'publicAnonymousTemplates.voiceUpload' | t }}
                         </span>
@@ -329,7 +340,7 @@
                           (change)="updateVoiceFile(question.anonymousTemplateQuestionId, $event)"
                         />
                         @if (answerFor(question.anonymousTemplateQuestionId).voiceFileName) {
-                          <span class="text-[11px] font-semibold text-[#0d94b3]">
+                          <span class="text-[11px] font-semibold text-[#0D9FC0]">
                             {{ answerFor(question.anonymousTemplateQuestionId).voiceFileName }}
                           </span>
                         }
@@ -339,51 +350,51 @@
                 </div>
 
                 @if (questionError(question)) {
-                  <p class="mt-2 rounded-lg border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-[#D94B5A]">
+                  <p class="mt-3 border-l-2 border-[#D94B5A] bg-rose-50 px-3 py-2 text-[11px] font-semibold text-[#D94B5A]">
                     {{ questionError(question) }}
                   </p>
                 }
               </article>
             }
           </div>
-
-          <div class="mt-4 rounded-lg border border-cyan-100 bg-cyan-50 p-3">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div class="flex min-w-0 items-start gap-2">
-                <app-icon class="mt-0.5 shrink-0 text-[#0d7f99]" [icon]="fileTextIcon" [size]="16" />
-                <p class="text-[11px] font-semibold leading-5 text-[#0d7f99]">
-                  {{ 'publicAnonymousTemplates.submitNote' | t }}
-                </p>
-              </div>
-              <button
-                type="button"
-                class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#11A7C9] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#0d94b3] disabled:cursor-not-allowed disabled:bg-slate-300"
-                [disabled]="!canSubmit()"
-                (click)="submitSurvey()"
-              >
-                @if (publicAnonymousTemplateStore.submitting()) {
-                  <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                  {{ 'publicAnonymousTemplates.submitting' | t }}
-                } @else {
-                  <app-icon [icon]="sendIcon" [size]="15" />
-                  {{ 'publicAnonymousTemplates.submitAction' | t }}
-                }
-              </button>
-            </div>
-
-            @if (validationError()) {
-              <p class="mt-3 rounded-lg border border-rose-100 bg-white px-3 py-2 text-[11px] font-semibold text-[#D94B5A]">
-                {{ validationError() ?? '' | t }}
-              </p>
-            }
-
-            @if (publicAnonymousTemplateStore.submitError()) {
-              <p class="mt-3 rounded-lg border border-rose-100 bg-white px-3 py-2 text-[11px] font-semibold text-[#D94B5A]">
-                {{ publicAnonymousTemplateStore.submitError() ?? '' | t }}
-              </p>
-            }
-          </div>
         </section>
+      </div>
+
+      <div class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
+        <div class="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 items-start gap-2">
+            <app-icon class="mt-0.5 shrink-0 text-[#0D7F99]" [icon]="fileTextIcon" [size]="16" />
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold leading-5 text-[#0D7F99]">
+                {{ 'publicAnonymousTemplates.submitNote' | t }}
+              </p>
+              @if (validationError()) {
+                <p class="mt-1 text-[11px] font-semibold text-[#D94B5A]">
+                  {{ validationError() ?? '' | t }}
+                </p>
+              }
+              @if (publicAnonymousTemplateStore.submitError()) {
+                <p class="mt-1 text-[11px] font-semibold text-[#D94B5A]">
+                  {{ publicAnonymousTemplateStore.submitError() ?? '' | t }}
+                </p>
+              }
+            </div>
+          </div>
+          <button
+            type="button"
+            class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#11A7C9] px-5 text-xs font-bold text-white shadow-sm transition hover:bg-[#0D9FC0] disabled:cursor-not-allowed disabled:bg-slate-300"
+            [disabled]="!canSubmit()"
+            (click)="submitSurvey()"
+          >
+            @if (publicAnonymousTemplateStore.submitting()) {
+              <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+              {{ 'publicAnonymousTemplates.submitting' | t }}
+            } @else {
+              <app-icon [icon]="sendIcon" [size]="15" />
+              {{ 'publicAnonymousTemplates.submitAction' | t }}
+            }
+          </button>
+        </div>
       </div>
     }
   </section>

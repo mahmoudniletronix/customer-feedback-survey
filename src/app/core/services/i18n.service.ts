@@ -104,7 +104,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'publicAnonymousTemplates.validationError':
       'Complete required respondent details and all visible questions before submitting.',
     'publicAnonymousTemplates.submitNote':
-      'Only currently visible questions will be submitted. Hidden answers are cleared automatically.',
+      'Review your answers, then submit your feedback.',
     'publicAnonymousTemplates.submitAction': 'Submit response',
     'publicAnonymousTemplates.submitting': 'Submitting...',
     'publicAnonymousTemplates.submitError':

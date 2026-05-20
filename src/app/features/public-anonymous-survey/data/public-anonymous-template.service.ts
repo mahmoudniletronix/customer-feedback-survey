@@ -5,6 +5,7 @@ import {
   SKIP_ERROR_TOAST,
   SKIP_SUCCESS_TOAST,
 } from '../../../core/interceptors/error-toast.interceptor';
+import { SKIP_AUTH } from '../../../core/interceptors/auth.interceptor';
 import { toScopeState } from '../../../shared/models/resource-scope.model';
 import { environment } from '../../../../environments/environment';
 import {
@@ -31,12 +32,9 @@ export class PublicAnonymousTemplateService {
 
   getTemplate(anonymousTemplateId: string): Observable<PublicAnonymousTemplate> {
     return this.http
-      .get<PublicAnonymousTemplateApiResponse>(
-        `${this.anonTemplatesUrl}/${anonymousTemplateId}`,
-        {
-          context: new HttpContext().set(SKIP_ERROR_TOAST, true),
-        },
-      )
+      .get<PublicAnonymousTemplateApiResponse>(`${this.anonTemplatesUrl}/${anonymousTemplateId}`, {
+        context: new HttpContext().set(SKIP_AUTH, true).set(SKIP_ERROR_TOAST, true),
+      })
       .pipe(map((response) => this.toTemplate(response, anonymousTemplateId)));
   }
 
@@ -50,6 +48,7 @@ export class PublicAnonymousTemplateService {
         payload,
         {
           context: new HttpContext()
+            .set(SKIP_AUTH, true)
             .set(SKIP_ERROR_TOAST, true)
             .set(SKIP_SUCCESS_TOAST, true),
         },
@@ -234,9 +233,7 @@ export class PublicAnonymousTemplateService {
 
   private toNumber(value: number | string | null | undefined): number | null {
     const numericValue = typeof value === 'string' ? Number(value) : value;
-    return typeof numericValue === 'number' && Number.isFinite(numericValue)
-      ? numericValue
-      : null;
+    return typeof numericValue === 'number' && Number.isFinite(numericValue) ? numericValue : null;
   }
 
   private readRecordId(id: string | number | null | undefined): string {
