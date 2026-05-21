@@ -6,7 +6,9 @@
       <div class="h-32 animate-pulse rounded-lg bg-slate-50"></div>
     </div>
   } @else if (error()) {
-    <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700">
+    <div
+      class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700"
+    >
       {{ error() }}
     </div>
   } @else if (details(); as response) {
@@ -21,7 +23,9 @@
               <span>{{ localized(response.branchNameEn, response.branchNameAr) }}</span>
               <span>{{ localized(response.departmentNameEn, response.departmentNameAr) }}</span>
               <span>{{ localized(response.operatorNameEn, response.operatorNameAr) }}</span>
-              <span>{{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}</span>
+              <span>{{
+                response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
+              }}</span>
             </div>
           </div>
           <span
@@ -29,30 +33,58 @@
             [class.bg-slate-100]="!response.score.isScored"
             [class.text-slate-600]="!response.score.isScored"
             [class.bg-emerald-50]="response.score.isScored && response.score.scorePercentage >= 80"
-            [class.text-emerald-700]="response.score.isScored && response.score.scorePercentage >= 80"
-            [class.bg-amber-50]="response.score.isScored && response.score.scorePercentage >= 60 && response.score.scorePercentage < 80"
-            [class.text-amber-700]="response.score.isScored && response.score.scorePercentage >= 60 && response.score.scorePercentage < 80"
+            [class.text-emerald-700]="
+              response.score.isScored && response.score.scorePercentage >= 80
+            "
+            [class.bg-amber-50]="
+              response.score.isScored &&
+              response.score.scorePercentage >= 60 &&
+              response.score.scorePercentage < 80
+            "
+            [class.text-amber-700]="
+              response.score.isScored &&
+              response.score.scorePercentage >= 60 &&
+              response.score.scorePercentage < 80
+            "
             [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
             [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
           >
-            {{ response.score.isScored ? (response.score.scorePercentage | number: '1.0-1') + '%' : 'Not Scored' }}
+            {{
+              response.score.isScored
+                ? (response.score.scorePercentage | number: '1.0-1') + '%'
+                : 'Not Scored'
+            }}
           </span>
         </div>
       </header>
 
-      <section class="grid overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3">
-        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e">
+      <section
+        class="grid overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e"
+        >
           <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">Actual Score</p>
-          <p class="text-sm font-black text-slate-950 sm:mt-1">{{ response.score.isScored ? response.score.actualScore : '-' }}</p>
+          <p class="text-sm font-black text-slate-950 sm:mt-1">
+            {{ response.score.isScored ? response.score.actualScore : '-' }}
+          </p>
         </div>
-        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e">
+        <div
+          class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e"
+        >
           <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">Max Score</p>
-          <p class="text-sm font-black text-slate-950 sm:mt-1">{{ response.score.isScored ? response.score.maxScore : '-' }}</p>
+          <p class="text-sm font-black text-slate-950 sm:mt-1">
+            {{ response.score.isScored ? response.score.maxScore : '-' }}
+          </p>
         </div>
         <div class="flex items-center justify-between px-3 py-2 sm:block">
           <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">Percentage</p>
           <p class="text-sm font-black text-slate-950 sm:mt-1">
-            {{ response.score.isScored ? (response.score.scorePercentage | number: '1.0-2') + '%' : 'Not Scored' }}
+            {{
+              response.score.isScored
+                ? (response.score.scorePercentage | number: '1.0-2') + '%'
+                : 'Not Scored'
+            }}
           </p>
         </div>
       </section>
@@ -60,16 +92,26 @@
       <section class="rounded-lg border border-slate-200 bg-white">
         <div class="border-b border-slate-100 px-3 py-2">
           <h4 class="text-xs font-black text-slate-950">Custom Inputs</h4>
-          <p class="text-[10px] font-semibold text-slate-500">{{ response.customInputsCount }} submitted fields</p>
+          <p class="text-[10px] font-semibold text-slate-500">
+            {{ response.customInputsCount }} submitted fields
+          </p>
         </div>
         @if (response.customInputs.length === 0) {
-          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">No custom inputs submitted.</p>
+          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
+            No custom inputs submitted.
+          </p>
         } @else {
           <dl class="divide-y divide-slate-100">
             @for (input of response.customInputs; track input.customInputId) {
               <div class="grid gap-1 px-3 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
-                <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">{{ input.name }} - {{ input.typeName }}</dt>
-                <dd class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">{{ input.displayValue || '-' }}</dd>
+                <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
+                  {{ input.name }} - {{ input.typeName }}
+                </dt>
+                <dd
+                  class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
+                >
+                  {{ input.displayValue || '-' }}
+                </dd>
               </div>
             }
           </dl>
@@ -79,19 +121,27 @@
       <section class="rounded-lg border border-slate-200 bg-white">
         <div class="border-b border-slate-100 px-3 py-2">
           <h4 class="text-xs font-black text-slate-950">Answers</h4>
-          <p class="text-[10px] font-semibold text-slate-500">{{ response.answersCount }} answers captured</p>
+          <p class="text-[10px] font-semibold text-slate-500">
+            {{ response.answersCount }} answers captured
+          </p>
         </div>
         <div class="divide-y divide-slate-100">
           @for (answer of response.answers; track answer.questionId) {
             <article class="px-3 py-2.5">
               <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
-                  <p class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
+                  <p
+                    class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
+                  >
                     {{ localized(answer.questionTextEn, answer.questionTextAr) }}
                   </p>
-                  <p class="text-[10px] font-semibold text-slate-500">{{ answer.questionTypeName }}</p>
+                  <p class="text-[10px] font-semibold text-slate-500">
+                    {{ answer.questionTypeName }}
+                  </p>
                 </div>
-                <span class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600">
+                <span
+                  class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
+                >
                   {{ answer.questionType }}
                 </span>
               </div>
@@ -103,17 +153,23 @@
                     <p class="text-[11px] font-semibold text-slate-500">No voice file submitted.</p>
                   }
                 } @else {
-                  <p class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
+                  <p
+                    class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                  >
                     {{ displayAnswer(answer) }}
                   </p>
                   @if (answer.questionType === 'SingleChoice') {
-                    <p class="mt-0.5 text-[10px] font-semibold text-slate-500">Option score: {{ answer.selectedOptionValue ?? '-' }}</p>
+                    <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
+                      Option score: {{ answer.selectedOptionValue ?? '-' }}
+                    </p>
                   }
                 }
               </div>
             </article>
           } @empty {
-            <p class="px-3 py-4 text-center text-[11px] font-semibold text-slate-500">No answers found.</p>
+            <p class="px-3 py-4 text-center text-[11px] font-semibold text-slate-500">
+              No answers found.
+            </p>
           }
         </div>
       </section>

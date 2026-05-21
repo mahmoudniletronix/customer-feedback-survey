@@ -34,7 +34,9 @@
         <span
           class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#E8F8FC] text-[#0D9FC0]"
         >
-          <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#B7EAF4] border-t-[#0D9FC0]"></span>
+          <span
+            class="h-4 w-4 animate-spin rounded-full border-2 border-[#B7EAF4] border-t-[#0D9FC0]"
+          ></span>
         </span>
         <p class="font-bold text-slate-950">{{ 'publicAnonymousTemplates.loading' | t }}</p>
         <p class="mt-1 text-[11px] text-slate-500">
@@ -97,7 +99,8 @@
             </div>
             @if (template.expireTo) {
               <p class="mt-2 text-[11px] font-semibold text-slate-500">
-                {{ 'publicAnonymousTemplates.until' | t }} {{ template.expireTo | date: 'mediumDate' }}
+                {{ 'publicAnonymousTemplates.until' | t }}
+                {{ template.expireTo | date: 'mediumDate' }}
               </p>
             }
           </div>
@@ -122,7 +125,9 @@
                       {{ customInputLabel(input) }}
                     </span>
                     @if (input.isRequired) {
-                      <span class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-[#D94B5A]">
+                      <span
+                        class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-[#D94B5A]"
+                      >
                         {{ 'publicAnonymousTemplates.required' | t }}
                       </span>
                     }
@@ -158,13 +163,19 @@
                 {{ 'publicAnonymousTemplates.questionsSubtitle' | t }}
               </p>
             </div>
-            <span class="inline-flex h-7 items-center rounded-full bg-slate-100 px-3 text-[11px] font-bold text-slate-600">
+            <span
+              class="inline-flex h-7 items-center rounded-full bg-slate-100 px-3 text-[11px] font-bold text-slate-600"
+            >
               {{ visibleQuestions().length }} {{ 'publicAnonymousTemplates.visibleQuestions' | t }}
             </span>
           </div>
 
           <div>
-            @for (question of visibleQuestions(); track question.anonymousTemplateQuestionId; let index = $index) {
+            @for (
+              question of visibleQuestions();
+              track question.anonymousTemplateQuestionId;
+              let index = $index
+            ) {
               <article
                 class="border-b border-slate-100 py-6 last:border-b-0"
                 [class.ml-3]="!isRootQuestion(question)"
@@ -218,24 +229,34 @@
                             type="button"
                             class="flex min-h-14 w-full items-start gap-3 border-b border-slate-100 px-3 py-3 text-start transition last:border-b-0 hover:bg-[#F5FCFE]"
                             [class.bg-[#E8F8FC]]="
-                              answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                              answerFor(question.anonymousTemplateQuestionId)
+                                .selectedQuestionOptionId === option.optionId
                             "
-                            (click)="setSingleChoiceAnswer(question.anonymousTemplateQuestionId, option.optionId)"
+                            (click)="
+                              setSingleChoiceAnswer(
+                                question.anonymousTemplateQuestionId,
+                                option.optionId
+                              )
+                            "
                           >
                             <span
                               class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition"
                               [class.border-[#11A7C9]]="
-                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                                answerFor(question.anonymousTemplateQuestionId)
+                                  .selectedQuestionOptionId === option.optionId
                               "
                               [class.bg-[#11A7C9]]="
-                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                                answerFor(question.anonymousTemplateQuestionId)
+                                  .selectedQuestionOptionId === option.optionId
                               "
                               [class.border-slate-300]="
-                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId !== option.optionId
+                                answerFor(question.anonymousTemplateQuestionId)
+                                  .selectedQuestionOptionId !== option.optionId
                               "
                             >
                               @if (
-                                answerFor(question.anonymousTemplateQuestionId).selectedQuestionOptionId === option.optionId
+                                answerFor(question.anonymousTemplateQuestionId)
+                                  .selectedQuestionOptionId === option.optionId
                               ) {
                                 <span class="h-2 w-2 rounded-full bg-white"></span>
                               }
@@ -243,8 +264,15 @@
                             <span class="min-w-0 flex-1">
                               <span class="block">
                                 <span class="block break-words text-sm font-bold text-slate-950">
-                                  {{ optionText(option) }}
+                                  {{ optionPrimaryText(option) }}
                                 </span>
+                                @if (optionSecondaryText(option)) {
+                                  <span
+                                    class="mt-0.5 block break-words text-xs font-semibold text-slate-400"
+                                  >
+                                    {{ optionSecondaryText(option) }}
+                                  </span>
+                                }
                               </span>
                             </span>
                           </button>
@@ -253,21 +281,28 @@
                     }
 
                     @case ('starRating') {
-                      <div class="inline-flex flex-wrap overflow-hidden rounded-lg border border-slate-200">
+                      <div
+                        class="inline-flex flex-wrap overflow-hidden rounded-lg border border-slate-200"
+                      >
                         @for (value of ratingValues; track value) {
                           <button
                             type="button"
                             class="inline-flex h-11 min-w-14 items-center justify-center gap-1 border-r border-slate-200 px-3 text-sm font-bold transition last:border-r-0 hover:bg-amber-50"
                             [class.bg-amber-50]="
-                              answerFor(question.anonymousTemplateQuestionId).starRatingValue === value
+                              answerFor(question.anonymousTemplateQuestionId).starRatingValue ===
+                              value
                             "
                             [class.text-amber-700]="
-                              answerFor(question.anonymousTemplateQuestionId).starRatingValue === value
+                              answerFor(question.anonymousTemplateQuestionId).starRatingValue ===
+                              value
                             "
                             [class.bg-white]="
-                              answerFor(question.anonymousTemplateQuestionId).starRatingValue !== value
+                              answerFor(question.anonymousTemplateQuestionId).starRatingValue !==
+                              value
                             "
-                            (click)="setStarRatingAnswer(question.anonymousTemplateQuestionId, value)"
+                            (click)="
+                              setStarRatingAnswer(question.anonymousTemplateQuestionId, value)
+                            "
                           >
                             <app-icon [icon]="starIcon" [size]="15" />
                             {{ value }}
@@ -277,7 +312,9 @@
                     }
 
                     @case ('smiles') {
-                      <div class="inline-flex flex-wrap overflow-hidden rounded-lg border border-slate-200">
+                      <div
+                        class="inline-flex flex-wrap overflow-hidden rounded-lg border border-slate-200"
+                      >
                         @for (value of ratingValues; track value) {
                           <button
                             type="button"
@@ -333,7 +370,9 @@
                 </div>
 
                 @if (questionError(question)) {
-                  <p class="mt-3 border-l-2 border-[#D94B5A] bg-rose-50 px-3 py-2 text-[11px] font-semibold text-[#D94B5A]">
+                  <p
+                    class="mt-3 border-l-2 border-[#D94B5A] bg-rose-50 px-3 py-2 text-[11px] font-semibold text-[#D94B5A]"
+                  >
                     {{ questionError(question) }}
                   </p>
                 }
@@ -343,8 +382,12 @@
         </section>
       </div>
 
-      <div class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
-        <div class="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div
+        class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur"
+      >
+        <div
+          class="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div class="flex min-w-0 items-start gap-2">
             <app-icon class="mt-0.5 shrink-0 text-[#0D7F99]" [icon]="fileTextIcon" [size]="16" />
             <div class="min-w-0">
@@ -370,7 +413,9 @@
             (click)="submitSurvey()"
           >
             @if (publicAnonymousTemplateStore.submitting()) {
-              <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+              <span
+                class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+              ></span>
               {{ 'publicAnonymousTemplates.submitting' | t }}
             } @else {
               <app-icon [icon]="sendIcon" [size]="15" />

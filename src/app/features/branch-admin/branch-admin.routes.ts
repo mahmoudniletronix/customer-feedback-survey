@@ -15,10 +15,13 @@ import { questionsAccessGuard } from './questions/presentation/guards/questions-
 import { QuestionsService } from './questions/data/questions.service';
 import { QuestionsStore } from './questions/presentation/state/questions.store';
 import { BranchSatisfactionReportService } from './reports/data/branch-satisfaction-report.service';
+import { BranchTemplatesPdfReportService } from './reports/data/branch-templates-pdf-report.service';
 import { BranchSatisfactionReportStore } from './reports/presentation/state/branch-satisfaction-report.store';
+import { BranchTemplatesPdfReportStore } from './reports/presentation/state/branch-templates-pdf-report.store';
 import { branchTemplateAccessGuard } from './templates/presentation/guards/branch-template-access.guard';
 import { BranchTemplatesService } from './templates/data/branch-templates.service';
 import { BranchTemplatesStore } from './templates/presentation/state/branch-templates.store';
+import { AnonymousTemplatesService } from '../anonymous-templates/data/anonymous-templates.service';
 
 export const BRANCH_ADMIN_ROUTES: Routes = [
   {
@@ -50,6 +53,19 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
           import('./dashboard/presentation/pages/branch-responses-history-page.component').then(
             (m) => m.BranchResponsesHistoryPageComponent,
           ),
+      },
+      {
+        path: 'reports/templates-pdf',
+        canActivate: [branchDashboardAccessGuard],
+        providers: [
+          AnonymousTemplatesService,
+          BranchTemplatesPdfReportService,
+          BranchTemplatesPdfReportStore,
+        ],
+        loadComponent: () =>
+          import(
+            './reports/presentation/pages/branch-templates-pdf-report-page.component'
+          ).then((m) => m.BranchTemplatesPdfReportPageComponent),
       },
       {
         path: 'users',

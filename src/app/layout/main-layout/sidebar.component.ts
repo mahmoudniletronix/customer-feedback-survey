@@ -92,6 +92,16 @@ const MENU_ITEMS: readonly MenuItem[] = [
     child: true,
   },
   {
+    label: 'Templates PDF Report',
+    labelKey: 'nav.branchTemplatesPdfReport',
+    path: '/branch-admin/reports/templates-pdf',
+    icon: FileText,
+    roles: [],
+    feature: 'branchDashboard',
+    exact: true,
+    child: true,
+  },
+  {
     label: 'Branch users',
     labelKey: 'branchUsers.title',
     path: '/branch-admin/users',

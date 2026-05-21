@@ -16,6 +16,7 @@ import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminTemplate } from '../../../branch/domain/branch-admin-branch.model';
 import { BranchAdminBranchStore } from '../../../branch/presentation/state/branch-admin-branch.store';
 import {
@@ -45,6 +46,7 @@ type ScoreStatus = 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored';
 export class BranchResponsesHistoryPageComponent implements OnInit {
   readonly historyStore = inject(BranchResponsesHistoryStore);
   readonly branchStore = inject(BranchAdminBranchStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
 
@@ -72,7 +74,9 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.branchStore.load();
+    if (this.authStore.role() === 'BRANCH_ADMIN') {
+      this.branchStore.load();
+    }
     this.historyStore.load({ pageNumber: 1, pageSize: 10 });
   }
 

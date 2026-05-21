@@ -1,7 +1,9 @@
 <div class="w-full space-y-3 text-[11px] text-slate-700">
   <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
-      <div class="inline-flex items-center gap-2 rounded-lg bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold uppercase text-[#0d94b3]">
+      <div
+        class="inline-flex items-center gap-2 rounded-lg bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold uppercase text-[#0d94b3]"
+      >
         <app-icon [icon]="chartIcon" [size]="14" />
         {{ 'anonymousDashboard.eyebrow' | t }}
       </div>
@@ -147,12 +149,18 @@
   </section>
 
   @if (store.loading()) {
-    <section class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/60">
-      <span class="mx-auto mb-2 block h-6 w-6 animate-spin rounded-full border-2 border-[#11A7C9]/25 border-t-[#11A7C9]"></span>
+    <section
+      class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/60"
+    >
+      <span
+        class="mx-auto mb-2 block h-6 w-6 animate-spin rounded-full border-2 border-[#11A7C9]/25 border-t-[#11A7C9]"
+      ></span>
       <p class="text-[12px] font-bold text-slate-500">{{ 'anonymousDashboard.loading' | t }}</p>
     </section>
   } @else if (store.error()) {
-    <section class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-[12px] font-bold text-rose-700">
+    <section
+      class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-[12px] font-bold text-rose-700"
+    >
       <div class="flex items-center gap-2">
         <app-icon [icon]="alertIcon" [size]="16" />
         {{ store.error() ?? '' | t }}
@@ -160,7 +168,9 @@
     </section>
   } @else if (store.dashboard(); as dashboard) {
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <div class="flex items-start justify-between gap-3">
           <div>
             <p class="text-[10px] font-extrabold uppercase text-slate-400">
@@ -183,27 +193,49 @@
           </span>
         </div>
         <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-          <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(dashboard.summary.totalAnonymousTemplates ? (dashboard.summary.activeAnonymousTemplates / dashboard.summary.totalAnonymousTemplates) * 100 : 0)"></div>
+          <div
+            class="h-full rounded-full bg-[#11A7C9]"
+            [style.width]="
+              barWidth(
+                dashboard.summary.totalAnonymousTemplates
+                  ? (dashboard.summary.activeAnonymousTemplates /
+                      dashboard.summary.totalAnonymousTemplates) *
+                      100
+                  : 0
+              )
+            "
+          ></div>
         </div>
       </article>
 
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <p class="text-[10px] font-extrabold uppercase text-slate-400">
           {{ 'anonymousDashboard.totalResponses' | t }}
         </p>
         <div class="mt-1 flex items-baseline gap-2">
-          <p class="text-xl font-extrabold text-slate-950">{{ dashboard.summary.totalResponses }}</p>
+          <p class="text-xl font-extrabold text-slate-950">
+            {{ dashboard.summary.totalResponses }}
+          </p>
           <span class="text-[11px] font-extrabold text-emerald-600">
             {{ dashboard.summary.averageScorePercentage | number: '1.2-2' }}%
           </span>
         </div>
         <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-bold text-slate-500">
-          <span>{{ 'anonymousDashboard.scored' | t }}: {{ dashboard.summary.scoredResponses }}</span>
-          <span>{{ 'anonymousDashboard.unscored' | t }}: {{ dashboard.summary.unscoredResponses }}</span>
+          <span
+            >{{ 'anonymousDashboard.scored' | t }}: {{ dashboard.summary.scoredResponses }}</span
+          >
+          <span
+            >{{ 'anonymousDashboard.unscored' | t }}:
+            {{ dashboard.summary.unscoredResponses }}</span
+          >
         </div>
       </article>
 
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <p class="text-[10px] font-extrabold uppercase text-slate-400">
           {{ 'anonymousDashboard.satisfaction' | t }}
         </p>
@@ -226,7 +258,9 @@
         </div>
       </article>
 
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <p class="text-[10px] font-extrabold uppercase text-slate-400">
           {{ 'anonymousDashboard.complaints' | t }} / {{ 'anonymousDashboard.voiceAnswers' | t }}
         </p>
@@ -244,15 +278,23 @@
     </div>
 
     @if (store.isEmpty()) {
-      <section class="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center shadow-sm shadow-slate-200/60">
+      <section
+        class="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center shadow-sm shadow-slate-200/60"
+      >
         <app-icon class="mx-auto mb-2 text-slate-300" [icon]="chartIcon" [size]="28" />
-        <p class="text-sm font-extrabold text-slate-900">{{ 'anonymousDashboard.emptyTitle' | t }}</p>
-        <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ 'anonymousDashboard.emptyDescription' | t }}</p>
+        <p class="text-sm font-extrabold text-slate-900">
+          {{ 'anonymousDashboard.emptyTitle' | t }}
+        </p>
+        <p class="mt-1 text-[11px] font-semibold text-slate-500">
+          {{ 'anonymousDashboard.emptyDescription' | t }}
+        </p>
       </section>
     }
 
     <section class="grid gap-3 xl:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)]">
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <div class="mb-3 flex items-center gap-2">
           <span class="rounded-lg bg-cyan-50 p-2 text-[#0d94b3]">
             <app-icon [icon]="trendIcon" [size]="16" />
@@ -266,13 +308,17 @@
             <canvas #trendCanvas></canvas>
           </div>
         } @else {
-          <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+          <div
+            class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500"
+          >
             {{ 'anonymousDashboard.noTrendData' | t }}
           </div>
         }
       </article>
 
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <h3 class="text-sm font-extrabold text-slate-950">
           {{ 'anonymousDashboard.customInputSegments' | t }}
         </h3>
@@ -298,7 +344,9 @@
             @for (segmentItem of segment.segments; track segmentItem.value) {
               <div class="rounded-lg bg-slate-50 p-2">
                 <div class="mb-1.5 flex items-center justify-between gap-2">
-                  <p class="break-words text-[11px] font-extrabold text-slate-900 [overflow-wrap:anywhere]">
+                  <p
+                    class="break-words text-[11px] font-extrabold text-slate-900 [overflow-wrap:anywhere]"
+                  >
                     {{ segmentItem.value || '-' }}
                   </p>
                   <span class="text-[10px] font-bold text-slate-500">
@@ -306,7 +354,10 @@
                   </span>
                 </div>
                 <div class="h-1.5 overflow-hidden rounded-full bg-white">
-                  <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(segmentItem.averageScorePercentage)"></div>
+                  <div
+                    class="h-full rounded-full bg-[#11A7C9]"
+                    [style.width]="barWidth(segmentItem.averageScorePercentage)"
+                  ></div>
                 </div>
                 <p class="mt-1 text-[10px] font-bold text-slate-500">
                   {{ segmentItem.averageScorePercentage | number: '1.2-2' }}%
@@ -315,14 +366,18 @@
             }
           </div>
         } @else {
-          <div class="mt-3 rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+          <div
+            class="mt-3 rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500"
+          >
             {{ 'anonymousDashboard.noCustomSegments' | t }}
           </div>
         }
       </article>
     </section>
 
-    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+    <section
+      class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+    >
       <h3 class="mb-3 text-sm font-extrabold text-slate-950">
         {{ 'anonymousDashboard.templatePerformance' | t }}
       </h3>
@@ -340,16 +395,29 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              @for (template of dashboard.anonymousTemplatePerformance; track template.anonymousTemplateId) {
+              @for (
+                template of dashboard.anonymousTemplatePerformance;
+                track template.anonymousTemplateId
+              ) {
                 <tr class="align-top transition hover:bg-slate-50">
                   <td class="px-3 py-2">
                     <p class="font-extrabold text-slate-950">{{ templateName(template) }}</p>
-                    <p class="mt-0.5 text-[10px] font-bold text-slate-400">{{ template.scopeName }}</p>
+                    <p class="mt-0.5 text-[10px] font-bold text-slate-400">
+                      {{ template.scopeName }}
+                    </p>
                   </td>
-                  <td class="px-3 py-2 text-[11px] font-bold text-slate-600">{{ template.statusName }}</td>
-                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">{{ template.responsesCount }}</td>
-                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">{{ template.averageScorePercentage | number: '1.2-2' }}%</td>
-                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">{{ template.complaintsCount }}</td>
+                  <td class="px-3 py-2 text-[11px] font-bold text-slate-600">
+                    {{ template.statusName }}
+                  </td>
+                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">
+                    {{ template.responsesCount }}
+                  </td>
+                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">
+                    {{ template.averageScorePercentage | number: '1.2-2' }}%
+                  </td>
+                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">
+                    {{ template.complaintsCount }}
+                  </td>
                   <td class="px-3 py-2">
                     <span
                       class="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
@@ -370,14 +438,21 @@
         </div>
 
         <div class="grid gap-2 lg:hidden">
-          @for (template of dashboard.anonymousTemplatePerformance; track template.anonymousTemplateId) {
+          @for (
+            template of dashboard.anonymousTemplatePerformance;
+            track template.anonymousTemplateId
+          ) {
             <article class="rounded-lg border border-slate-100 bg-slate-50 p-3">
               <div class="flex items-start justify-between gap-2">
                 <div>
-                  <p class="break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+                  <p
+                    class="break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]"
+                  >
                     {{ templateName(template) }}
                   </p>
-                  <p class="mt-0.5 text-[10px] font-bold text-slate-500">{{ template.statusName }}</p>
+                  <p class="mt-0.5 text-[10px] font-bold text-slate-500">
+                    {{ template.statusName }}
+                  </p>
                 </div>
                 <span
                   class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold"
@@ -392,57 +467,103 @@
                 </span>
               </div>
               <div class="mt-3 grid grid-cols-3 gap-2 text-[10px] font-bold text-slate-500">
-                <span>{{ 'anonymousDashboard.responses' | t }}<strong class="block text-[13px] text-slate-950">{{ template.responsesCount }}</strong></span>
-                <span>{{ 'anonymousDashboard.score' | t }}<strong class="block text-[13px] text-slate-950">{{ template.averageScorePercentage | number: '1.2-2' }}%</strong></span>
-                <span>{{ 'anonymousDashboard.complaints' | t }}<strong class="block text-[13px] text-slate-950">{{ template.complaintsCount }}</strong></span>
+                <span
+                  >{{ 'anonymousDashboard.responses' | t
+                  }}<strong class="block text-[13px] text-slate-950">{{
+                    template.responsesCount
+                  }}</strong></span
+                >
+                <span
+                  >{{ 'anonymousDashboard.score' | t
+                  }}<strong class="block text-[13px] text-slate-950"
+                    >{{ template.averageScorePercentage | number: '1.2-2' }}%</strong
+                  ></span
+                >
+                <span
+                  >{{ 'anonymousDashboard.complaints' | t
+                  }}<strong class="block text-[13px] text-slate-950">{{
+                    template.complaintsCount
+                  }}</strong></span
+                >
               </div>
             </article>
           }
         </div>
       } @else {
-        <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+        <div
+          class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500"
+        >
           {{ 'anonymousDashboard.noTemplatePerformance' | t }}
         </div>
       }
     </section>
 
     <section class="grid gap-3 xl:grid-cols-2">
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <h3 class="mb-3 text-sm font-extrabold text-slate-950">
           {{ 'anonymousDashboard.lowestRatedQuestions' | t }}
         </h3>
         @if (dashboard.lowestRatedQuestions.length > 0) {
           <div class="space-y-2">
-            @for (question of dashboard.lowestRatedQuestions; track question.anonymousTemplateQuestionId) {
+            @for (
+              question of dashboard.lowestRatedQuestions;
+              track question.anonymousTemplateQuestionId
+            ) {
               <div class="rounded-lg bg-slate-50 p-3">
                 <p class="text-[10px] font-extrabold uppercase text-[#0d94b3]">
                   {{ templateName(question) }}
                 </p>
-                <p class="mt-1 break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+                <p
+                  class="mt-1 break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]"
+                >
                   {{ questionText(question) }}
                 </p>
                 <div class="mt-2 grid grid-cols-3 gap-2 text-[10px] font-bold text-slate-500">
-                  <span>{{ 'anonymousDashboard.answers' | t }}<strong class="block text-[13px] text-slate-950">{{ question.answersCount }}</strong></span>
-                  <span>{{ 'anonymousDashboard.avgValue' | t }}<strong class="block text-[13px] text-slate-950">{{ question.averageValue | number: '1.2-2' }}</strong></span>
-                  <span>{{ 'anonymousDashboard.avgScore' | t }}<strong class="block text-[13px] text-slate-950">{{ question.averageScorePercentage | number: '1.2-2' }}%</strong></span>
+                  <span
+                    >{{ 'anonymousDashboard.answers' | t
+                    }}<strong class="block text-[13px] text-slate-950">{{
+                      question.answersCount
+                    }}</strong></span
+                  >
+                  <span
+                    >{{ 'anonymousDashboard.avgValue' | t
+                    }}<strong class="block text-[13px] text-slate-950">{{
+                      question.averageValue | number: '1.2-2'
+                    }}</strong></span
+                  >
+                  <span
+                    >{{ 'anonymousDashboard.avgScore' | t
+                    }}<strong class="block text-[13px] text-slate-950"
+                      >{{ question.averageScorePercentage | number: '1.2-2' }}%</strong
+                    ></span
+                  >
                 </div>
               </div>
             }
           </div>
         } @else {
-          <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+          <div
+            class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500"
+          >
             {{ 'anonymousDashboard.noRatedQuestions' | t }}
           </div>
         }
       </article>
 
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <article
+        class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60"
+      >
         <h3 class="mb-3 text-sm font-extrabold text-slate-950">
           {{ 'anonymousDashboard.criticalResponses' | t }}
         </h3>
         @if (dashboard.criticalResponses.length > 0) {
           <div class="space-y-2">
-            @for (response of dashboard.criticalResponses; track response.anonymousSurveyResponseId) {
+            @for (
+              response of dashboard.criticalResponses;
+              track response.anonymousSurveyResponseId
+            ) {
               <button
                 class="w-full rounded-lg border border-slate-100 bg-slate-50 p-3 text-start transition hover:border-[#11A7C9]/40 hover:bg-cyan-50/30"
                 type="button"
@@ -450,28 +571,40 @@
               >
                 <div class="flex items-start justify-between gap-2">
                   <div class="min-w-0">
-                    <p class="break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+                    <p
+                      class="break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]"
+                    >
                       {{ templateName(response) }}
                     </p>
                     <p class="mt-0.5 text-[10px] font-bold text-slate-500">
-                      {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+                      {{
+                        response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
+                      }}
                     </p>
                   </div>
-                  <span class="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-extrabold text-rose-700">
+                  <span
+                    class="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-extrabold text-rose-700"
+                  >
                     {{ response.scorePercentage | number: '1.2-2' }}%
                   </span>
                 </div>
-                <p class="mt-2 break-words rounded-lg bg-white p-2 text-[11px] font-semibold text-slate-600 [overflow-wrap:anywhere]">
+                <p
+                  class="mt-2 break-words rounded-lg bg-white p-2 text-[11px] font-semibold text-slate-600 [overflow-wrap:anywhere]"
+                >
                   {{ response.complaintText || ('anonymousDashboard.noComplaintText' | t) }}
                 </p>
-                <p class="mt-2 break-words text-[10px] font-bold text-slate-500 [overflow-wrap:anywhere]">
+                <p
+                  class="mt-2 break-words text-[10px] font-bold text-slate-500 [overflow-wrap:anywhere]"
+                >
                   {{ customInputsText(response) }}
                 </p>
               </button>
             }
           </div>
         } @else {
-          <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+          <div
+            class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500"
+          >
             {{ 'anonymousDashboard.noCriticalResponses' | t }}
           </div>
         }

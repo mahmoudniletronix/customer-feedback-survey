@@ -147,11 +147,24 @@ export class PublicAnonymousTemplateService {
     return {
       optionId: this.readRecordId(response.optionId),
       questionId: this.readRecordId(response.questionId),
-      textEn: response.textEn ?? '',
-      textAr: response.textAr ?? null,
+      textEn: this.toCustomerFacingOptionText(response.textEn),
+      textAr: this.toNullableCustomerFacingOptionText(response.textAr),
       order: response.order ?? 0,
       value: response.value ?? null,
     };
+  }
+
+  private toCustomerFacingOptionText(value: string | null | undefined): string {
+    return this.stripOptionScoreLabel(value ?? '');
+  }
+
+  private toNullableCustomerFacingOptionText(value: string | null | undefined): string | null {
+    const optionText = this.stripOptionScoreLabel(value ?? '');
+    return optionText.length > 0 ? optionText : null;
+  }
+
+  private stripOptionScoreLabel(value: string): string {
+    return value.replace(/\s*(?:[-–—|]\s*)?(?:Value|Score)\s+[1-5]\s*$/i, '').trim();
   }
 
   private toQuestionCondition(

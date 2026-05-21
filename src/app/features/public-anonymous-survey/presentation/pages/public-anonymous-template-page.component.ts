@@ -285,8 +285,17 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return 'voice';
   }
 
-  optionText(option: PublicAnonymousTemplateQuestionOption): string {
-    return this.localizedText(option.textEn, option.textAr);
+  optionPrimaryText(option: PublicAnonymousTemplateQuestionOption): string {
+    return this.toCustomerFacingOptionText(this.localizedText(option.textEn, option.textAr));
+  }
+
+  optionSecondaryText(option: PublicAnonymousTemplateQuestionOption): string {
+    const secondaryText = this.i18n.language() === 'ar' ? option.textEn : option.textAr;
+    return this.toCustomerFacingOptionText(secondaryText ?? '');
+  }
+
+  private toCustomerFacingOptionText(value: string): string {
+    return value.replace(/\s*(?:[-|]\s*)?(?:Value|Score)\s+[1-5]\s*$/i, '').trim();
   }
 
   hasAnswer(question: PublicAnonymousTemplateQuestion): boolean {
