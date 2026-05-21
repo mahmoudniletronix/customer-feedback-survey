@@ -1,102 +1,121 @@
 <div class="w-full space-y-3 sm:space-y-4">
-  <section
-    class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm shadow-slate-200/60"
-  >
-    <div class="flex flex-col gap-2">
-      <div class="flex justify-start">
-        <a
-          class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
-          routerLink="/branch-admin/responses"
-        >
-          {{ 'branchDashboard.viewAllResponses' | t }}
-        </a>
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#11A7C9]/10 text-[#11A7C9]">
+        <app-icon [icon]="chartIcon" [size]="15" />
       </div>
+      <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+        {{ 'branchDashboard.eyebrow' | t }}
+      </p>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <a
+        class="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        routerLink="/branch-admin/responses"
+      >
+        <app-icon [icon]="chartIcon" [size]="12" />
+        {{ 'branchDashboard.viewAllResponses' | t }}
+      </a>
+      <button
+        class="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+        type="button"
+        (click)="toggleAdvancedFilters()"
+      >
+        <app-icon [icon]="filtersIcon" [size]="12" />
+        {{
+          advancedFiltersOpen()
+            ? ('branchDashboard.hideFilters' | t)
+            : ('branchDashboard.showFilters' | t)
+        }}
+      </button>
+    </div>
+  </div>
 
+  <div
+    class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+    [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+    [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+    [class.opacity-100]="advancedFiltersOpen()"
+    [class.opacity-0]="!advancedFiltersOpen()"
+  >
+    <div class="min-h-0 overflow-hidden">
+      <section
+      class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+      [class.translate-y-0]="advancedFiltersOpen()"
+      [class.-translate-y-2]="!advancedFiltersOpen()"
+      [class.pointer-events-none]="!advancedFiltersOpen()"
+      [attr.aria-hidden]="!advancedFiltersOpen()"
+      [attr.inert]="advancedFiltersOpen() ? null : ''"
+    >
       <form
-        class="compact-filter-form space-y-2 rounded-lg bg-slate-50/80 p-2"
+        class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
         [formGroup]="filtersForm"
         (ngSubmit)="applyFilters()"
       >
-        <div class="grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-[auto_auto_auto] lg:justify-end">
-          <button
-            class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-extrabold text-slate-600 transition hover:bg-slate-50"
-            type="button"
-            (click)="toggleAdvancedFilters()"
-          >
-            <app-icon [icon]="calendarIcon" [size]="14" />
-            {{ advancedFiltersOpen() ? 'Hide filters' : 'More filters' }}
-          </button>
+        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.from' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="date"
+            formControlName="from"
+          />
+        </label>
 
+        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.to' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="date"
+            formControlName="to"
+          />
+        </label>
+
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.groupBy' | t }}</span>
+          <select
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            formControlName="groupBy"
+          >
+            <option value="Day">{{ 'branchDashboard.day' | t }}</option>
+            <option value="Month">{{ 'branchDashboard.month' | t }}</option>
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.template' | t }}</span>
+          <select
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            formControlName="templateId"
+          >
+            <option value="">{{ 'branchDashboard.allTemplates' | t }}</option>
+            @for (template of branchStore.branch()?.templates ?? []; track template.templateId) {
+              <option [value]="template.templateId">{{ templateName(template) }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="flex gap-1.5">
           <app-button
             type="submit"
             size="sm"
-            [fullWidth]="true"
             [loading]="dashboardStore.loading()"
           >
-            <app-icon [icon]="searchIcon" [size]="15" />
+            <app-icon [icon]="searchIcon" [size]="13" />
             {{ 'branchDashboard.apply' | t }}
           </app-button>
           <app-button
             type="button"
             size="sm"
             variant="secondary"
-            [fullWidth]="true"
             (pressed)="clearFilters()"
           >
             {{ 'branchDashboard.clear' | t }}
           </app-button>
         </div>
-
-        @if (advancedFiltersOpen()) {
-          <div
-            class="grid min-w-0 gap-2 border-t border-slate-200/70 pt-2 motion-safe:[animation:branch-dashboard-rise_.22s_ease-out_both] sm:grid-cols-2 xl:grid-cols-[8rem_8rem_7.5rem_minmax(12rem,1fr)]"
-          >
-            <label class="block">
-              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.from' | t }}</span>
-              <input
-                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-                type="date"
-                formControlName="from"
-              />
-            </label>
-
-            <label class="block">
-              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.to' | t }}</span>
-              <input
-                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-                type="date"
-                formControlName="to"
-              />
-            </label>
-
-            <label class="block">
-              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.groupBy' | t }}</span>
-              <select
-                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-                formControlName="groupBy"
-              >
-                <option value="Day">{{ 'branchDashboard.day' | t }}</option>
-                <option value="Month">{{ 'branchDashboard.month' | t }}</option>
-              </select>
-            </label>
-
-            <label class="block">
-              <span class="mb-0.5 block text-[9px] font-bold text-slate-500">{{ 'branchDashboard.template' | t }}</span>
-              <select
-                class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-                formControlName="templateId"
-              >
-                <option value="">{{ 'branchDashboard.allTemplates' | t }}</option>
-                @for (template of branchStore.branch()?.templates ?? []; track template.templateId) {
-                  <option [value]="template.templateId">{{ templateName(template) }}</option>
-                }
-              </select>
-            </label>
-          </div>
-        }
       </form>
+      </section>
     </div>
-  </section>
+  </div>
 
   @if (dashboardStore.loading()) {
     <section class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

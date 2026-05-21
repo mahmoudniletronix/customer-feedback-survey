@@ -103,21 +103,22 @@
 
   <app-card [title]="'branches.listTitle' | t" [subtitle]="'branches.listSubtitle' | t">
     <form
-      class="compact-filter-form mb-4 grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-[minmax(0,1fr)_auto]"
+      class="flex flex-wrap items-end gap-2"
       [formGroup]="searchForm"
       (ngSubmit)="searchBranches()"
     >
       <app-input
+        size="sm"
         [label]="'branches.search' | t"
         [placeholder]="'branches.searchPlaceholder' | t"
         formControlName="searchText"
       />
-      <div class="flex flex-wrap items-end gap-2 md:justify-end">
-        <app-button type="submit" [loading]="branchesStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="17" />
+      <div class="flex items-end gap-1.5">
+        <app-button type="submit" size="sm" [loading]="branchesStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="13" />
           {{ 'branches.searchAction' | t }}
         </app-button>
-        <app-button type="button" variant="secondary" (pressed)="clearBranchSearch()">
+        <app-button type="button" size="sm" variant="secondary" (pressed)="clearBranchSearch()">
           {{ 'branches.clearSearch' | t }}
         </app-button>
       </div>

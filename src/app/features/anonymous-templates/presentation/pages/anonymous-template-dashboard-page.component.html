@@ -1,0 +1,481 @@
+<div class="w-full space-y-3 text-[11px] text-slate-700">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+      <div class="inline-flex items-center gap-2 rounded-lg bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold uppercase text-[#0d94b3]">
+        <app-icon [icon]="chartIcon" [size]="14" />
+        {{ 'anonymousDashboard.eyebrow' | t }}
+      </div>
+      <h2 class="mt-2 text-base font-extrabold text-slate-950">
+        {{ 'anonymousDashboard.title' | t }}
+      </h2>
+      <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
+        {{ 'anonymousDashboard.description' | t }}
+      </p>
+    </div>
+
+    <button
+      class="inline-flex h-8 w-fit items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filterIcon" [size]="13" />
+      {{
+        advancedFiltersOpen()
+          ? ('branchDashboard.hideFilters' | t)
+          : ('branchDashboard.showFilters' | t)
+      }}
+    </button>
+  </div>
+
+  <section
+    class="overflow-hidden transition-[max-height,padding,border-color,box-shadow,opacity] duration-300 ease-out motion-reduce:transition-none"
+    [class.max-h-[24rem]]="advancedFiltersOpen()"
+    [class.rounded-xl]="advancedFiltersOpen()"
+    [class.border]="advancedFiltersOpen()"
+    [class.border-slate-200]="advancedFiltersOpen()"
+    [class.bg-white]="advancedFiltersOpen()"
+    [class.p-3]="advancedFiltersOpen()"
+    [class.shadow-sm]="advancedFiltersOpen()"
+    [class.shadow-slate-200/60]="advancedFiltersOpen()"
+    [class.max-h-0]="!advancedFiltersOpen()"
+    [class.border-transparent]="!advancedFiltersOpen()"
+    [class.p-0]="!advancedFiltersOpen()"
+    [class.opacity-0]="!advancedFiltersOpen()"
+    [class.opacity-100]="advancedFiltersOpen()"
+  >
+    <div
+      class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+      [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+      [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+      [class.opacity-100]="advancedFiltersOpen()"
+      [class.opacity-0]="!advancedFiltersOpen()"
+    >
+      <div class="min-h-0 overflow-hidden">
+        <form
+          class="grid gap-2 rounded-lg bg-slate-50/80 p-2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:grid-cols-2 lg:grid-cols-6"
+          [formGroup]="filtersForm"
+          (ngSubmit)="applyFilters()"
+          [class.translate-y-0]="advancedFiltersOpen()"
+          [class.-translate-y-2]="!advancedFiltersOpen()"
+          [class.pointer-events-none]="!advancedFiltersOpen()"
+          [attr.aria-hidden]="!advancedFiltersOpen()"
+          [attr.inert]="advancedFiltersOpen() ? null : ''"
+        >
+          <label class="flex min-w-0 flex-col gap-0.5">
+            <span class="text-[9px] font-bold uppercase text-slate-500">
+              {{ 'anonymousDashboard.from' | t }}
+            </span>
+            <input
+              class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="date"
+              formControlName="from"
+            />
+          </label>
+
+          <label class="flex min-w-0 flex-col gap-0.5">
+            <span class="text-[9px] font-bold uppercase text-slate-500">
+              {{ 'anonymousDashboard.to' | t }}
+            </span>
+            <input
+              class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="date"
+              formControlName="to"
+            />
+          </label>
+
+          <label class="flex min-w-0 flex-col gap-0.5 lg:col-span-2">
+            <span class="text-[9px] font-bold uppercase text-slate-500">
+              {{ 'anonymousDashboard.template' | t }}
+            </span>
+            <select
+              class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              formControlName="anonymousTemplateId"
+            >
+              <option value="">
+                {{
+                  store.templatesLoading()
+                    ? ('anonymousDashboard.loading' | t)
+                    : ('anonymousDashboard.allTemplates' | t)
+                }}
+              </option>
+              @for (template of store.templates(); track template.anonymousTemplateId) {
+                <option [value]="template.anonymousTemplateId">
+                  {{ templateName(template) }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="flex min-w-0 flex-col gap-0.5">
+            <span class="text-[9px] font-bold uppercase text-slate-500">
+              {{ 'anonymousDashboard.groupBy' | t }}
+            </span>
+            <select
+              class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              formControlName="groupBy"
+            >
+              <option value="Day">{{ 'anonymousDashboard.day' | t }}</option>
+              <option value="Month">{{ 'anonymousDashboard.month' | t }}</option>
+            </select>
+          </label>
+
+          <label class="flex min-w-0 flex-col gap-0.5">
+            <span class="text-[9px] font-bold uppercase text-slate-500">
+              {{ 'anonymousDashboard.criticalThreshold' | t }}
+            </span>
+            <input
+              class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="number"
+              min="0"
+              max="100"
+              formControlName="criticalScoreThreshold"
+            />
+          </label>
+
+          <div class="flex items-end gap-1.5 sm:col-span-2 lg:col-span-6">
+            <app-button size="sm" type="submit" [loading]="store.loading()">
+              <app-icon [icon]="searchIcon" [size]="14" />
+              {{ 'anonymousDashboard.apply' | t }}
+            </app-button>
+            <app-button size="sm" type="button" variant="secondary" (pressed)="clearFilters()">
+              {{ 'anonymousDashboard.clear' | t }}
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  @if (store.loading()) {
+    <section class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/60">
+      <span class="mx-auto mb-2 block h-6 w-6 animate-spin rounded-full border-2 border-[#11A7C9]/25 border-t-[#11A7C9]"></span>
+      <p class="text-[12px] font-bold text-slate-500">{{ 'anonymousDashboard.loading' | t }}</p>
+    </section>
+  } @else if (store.error()) {
+    <section class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-[12px] font-bold text-rose-700">
+      <div class="flex items-center gap-2">
+        <app-icon [icon]="alertIcon" [size]="16" />
+        {{ store.error() ?? '' | t }}
+      </div>
+    </section>
+  } @else if (store.dashboard(); as dashboard) {
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-extrabold uppercase text-slate-400">
+              {{ 'anonymousDashboard.totalTemplates' | t }}
+            </p>
+            <p class="mt-1 text-xl font-extrabold text-slate-950">
+              {{ dashboard.summary.totalAnonymousTemplates }}
+            </p>
+            <p class="text-[11px] font-semibold text-slate-500">
+              {{ dashboard.summary.activeAnonymousTemplates }}
+              {{ 'anonymousDashboard.activeTemplates' | t }}
+            </p>
+            <p class="text-[11px] font-semibold text-slate-500">
+              {{ dashboard.summary.templatesWithResponsesCount }}
+              {{ 'anonymousDashboard.templatesWithResponses' | t }}
+            </p>
+          </div>
+          <span class="rounded-lg bg-cyan-50 p-2 text-[#0d94b3]">
+            <app-icon [icon]="templateIcon" [size]="20" />
+          </span>
+        </div>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+          <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(dashboard.summary.totalAnonymousTemplates ? (dashboard.summary.activeAnonymousTemplates / dashboard.summary.totalAnonymousTemplates) * 100 : 0)"></div>
+        </div>
+      </article>
+
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <p class="text-[10px] font-extrabold uppercase text-slate-400">
+          {{ 'anonymousDashboard.totalResponses' | t }}
+        </p>
+        <div class="mt-1 flex items-baseline gap-2">
+          <p class="text-xl font-extrabold text-slate-950">{{ dashboard.summary.totalResponses }}</p>
+          <span class="text-[11px] font-extrabold text-emerald-600">
+            {{ dashboard.summary.averageScorePercentage | number: '1.2-2' }}%
+          </span>
+        </div>
+        <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px] font-bold text-slate-500">
+          <span>{{ 'anonymousDashboard.scored' | t }}: {{ dashboard.summary.scoredResponses }}</span>
+          <span>{{ 'anonymousDashboard.unscored' | t }}: {{ dashboard.summary.unscoredResponses }}</span>
+        </div>
+      </article>
+
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <p class="text-[10px] font-extrabold uppercase text-slate-400">
+          {{ 'anonymousDashboard.satisfaction' | t }}
+        </p>
+        <div class="mt-2 grid grid-cols-3 gap-1.5">
+          <div class="rounded-lg bg-emerald-50 p-2 text-emerald-700">
+            <app-icon [icon]="smileIcon" [size]="15" />
+            <p class="mt-1 text-sm font-extrabold">{{ dashboard.summary.satisfiedResponses }}</p>
+            <p class="text-[9px] font-bold">{{ 'anonymousDashboard.satisfied' | t }}</p>
+          </div>
+          <div class="rounded-lg bg-amber-50 p-2 text-amber-700">
+            <app-icon [icon]="helpIcon" [size]="15" />
+            <p class="mt-1 text-sm font-extrabold">{{ dashboard.summary.neutralResponses }}</p>
+            <p class="text-[9px] font-bold">{{ 'anonymousDashboard.neutral' | t }}</p>
+          </div>
+          <div class="rounded-lg bg-rose-50 p-2 text-rose-700">
+            <app-icon [icon]="frownIcon" [size]="15" />
+            <p class="mt-1 text-sm font-extrabold">{{ dashboard.summary.unhappyResponses }}</p>
+            <p class="text-[9px] font-bold">{{ 'anonymousDashboard.unhappy' | t }}</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <p class="text-[10px] font-extrabold uppercase text-slate-400">
+          {{ 'anonymousDashboard.complaints' | t }} / {{ 'anonymousDashboard.voiceAnswers' | t }}
+        </p>
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <div class="rounded-lg bg-rose-50 p-2 text-rose-700">
+            <app-icon [icon]="complaintIcon" [size]="16" />
+            <p class="mt-1 text-lg font-extrabold">{{ dashboard.summary.complaintsCount }}</p>
+          </div>
+          <div class="rounded-lg bg-sky-50 p-2 text-sky-700">
+            <app-icon [icon]="micIcon" [size]="16" />
+            <p class="mt-1 text-lg font-extrabold">{{ dashboard.summary.voiceAnswersCount }}</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    @if (store.isEmpty()) {
+      <section class="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center shadow-sm shadow-slate-200/60">
+        <app-icon class="mx-auto mb-2 text-slate-300" [icon]="chartIcon" [size]="28" />
+        <p class="text-sm font-extrabold text-slate-900">{{ 'anonymousDashboard.emptyTitle' | t }}</p>
+        <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ 'anonymousDashboard.emptyDescription' | t }}</p>
+      </section>
+    }
+
+    <section class="grid gap-3 xl:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)]">
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <div class="mb-3 flex items-center gap-2">
+          <span class="rounded-lg bg-cyan-50 p-2 text-[#0d94b3]">
+            <app-icon [icon]="trendIcon" [size]="16" />
+          </span>
+          <h3 class="text-sm font-extrabold text-slate-950">
+            {{ 'anonymousDashboard.satisfactionTrend' | t }}
+          </h3>
+        </div>
+        @if (dashboard.satisfactionTrend.length > 0) {
+          <div class="h-64 min-h-64">
+            <canvas #trendCanvas></canvas>
+          </div>
+        } @else {
+          <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+            {{ 'anonymousDashboard.noTrendData' | t }}
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <h3 class="text-sm font-extrabold text-slate-950">
+          {{ 'anonymousDashboard.customInputSegments' | t }}
+        </h3>
+        @if (dashboard.customInputSegments.length > 0 && selectedSegment(); as segment) {
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            @for (item of dashboard.customInputSegments; track item.customInputName) {
+              <button
+                class="rounded-lg border px-2.5 py-1 text-[10px] font-extrabold transition"
+                type="button"
+                [class.border-[#11A7C9]]="selectedSegmentName() === item.customInputName"
+                [class.bg-cyan-50]="selectedSegmentName() === item.customInputName"
+                [class.text-[#0d94b3]]="selectedSegmentName() === item.customInputName"
+                [class.border-slate-200]="selectedSegmentName() !== item.customInputName"
+                [class.bg-white]="selectedSegmentName() !== item.customInputName"
+                [class.text-slate-500]="selectedSegmentName() !== item.customInputName"
+                (click)="selectedSegmentName.set(item.customInputName)"
+              >
+                {{ item.customInputName }}
+              </button>
+            }
+          </div>
+          <div class="mt-3 space-y-2">
+            @for (segmentItem of segment.segments; track segmentItem.value) {
+              <div class="rounded-lg bg-slate-50 p-2">
+                <div class="mb-1.5 flex items-center justify-between gap-2">
+                  <p class="break-words text-[11px] font-extrabold text-slate-900 [overflow-wrap:anywhere]">
+                    {{ segmentItem.value || '-' }}
+                  </p>
+                  <span class="text-[10px] font-bold text-slate-500">
+                    {{ segmentItem.responsesCount }} / {{ segmentResponsesTotal(segment) }}
+                  </span>
+                </div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-white">
+                  <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(segmentItem.averageScorePercentage)"></div>
+                </div>
+                <p class="mt-1 text-[10px] font-bold text-slate-500">
+                  {{ segmentItem.averageScorePercentage | number: '1.2-2' }}%
+                </p>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="mt-3 rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+            {{ 'anonymousDashboard.noCustomSegments' | t }}
+          </div>
+        }
+      </article>
+    </section>
+
+    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <h3 class="mb-3 text-sm font-extrabold text-slate-950">
+        {{ 'anonymousDashboard.templatePerformance' | t }}
+      </h3>
+      @if (dashboard.anonymousTemplatePerformance.length > 0) {
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[58rem] divide-y divide-slate-100">
+            <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+              <tr>
+                <th class="px-3 py-2 text-start">{{ 'anonymousDashboard.template' | t }}</th>
+                <th class="px-3 py-2 text-start">{{ 'anonymousDashboard.status' | t }}</th>
+                <th class="px-3 py-2 text-start">{{ 'anonymousDashboard.responses' | t }}</th>
+                <th class="px-3 py-2 text-start">{{ 'anonymousDashboard.score' | t }}</th>
+                <th class="px-3 py-2 text-start">{{ 'anonymousDashboard.complaints' | t }}</th>
+                <th class="px-3 py-2 text-start">{{ 'anonymousDashboard.risk' | t }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (template of dashboard.anonymousTemplatePerformance; track template.anonymousTemplateId) {
+                <tr class="align-top transition hover:bg-slate-50">
+                  <td class="px-3 py-2">
+                    <p class="font-extrabold text-slate-950">{{ templateName(template) }}</p>
+                    <p class="mt-0.5 text-[10px] font-bold text-slate-400">{{ template.scopeName }}</p>
+                  </td>
+                  <td class="px-3 py-2 text-[11px] font-bold text-slate-600">{{ template.statusName }}</td>
+                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">{{ template.responsesCount }}</td>
+                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">{{ template.averageScorePercentage | number: '1.2-2' }}%</td>
+                  <td class="px-3 py-2 text-[11px] font-extrabold text-slate-950">{{ template.complaintsCount }}</td>
+                  <td class="px-3 py-2">
+                    <span
+                      class="rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                      [class.bg-rose-50]="template.riskLevel === 'HighRisk'"
+                      [class.text-rose-700]="template.riskLevel === 'HighRisk'"
+                      [class.bg-amber-50]="template.riskLevel === 'MediumRisk'"
+                      [class.text-amber-700]="template.riskLevel === 'MediumRisk'"
+                      [class.bg-emerald-50]="template.riskLevel === 'Healthy'"
+                      [class.text-emerald-700]="template.riskLevel === 'Healthy'"
+                    >
+                      {{ riskLabel(template.riskLevel) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid gap-2 lg:hidden">
+          @for (template of dashboard.anonymousTemplatePerformance; track template.anonymousTemplateId) {
+            <article class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <p class="break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+                    {{ templateName(template) }}
+                  </p>
+                  <p class="mt-0.5 text-[10px] font-bold text-slate-500">{{ template.statusName }}</p>
+                </div>
+                <span
+                  class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                  [class.bg-rose-50]="template.riskLevel === 'HighRisk'"
+                  [class.text-rose-700]="template.riskLevel === 'HighRisk'"
+                  [class.bg-amber-50]="template.riskLevel === 'MediumRisk'"
+                  [class.text-amber-700]="template.riskLevel === 'MediumRisk'"
+                  [class.bg-emerald-50]="template.riskLevel === 'Healthy'"
+                  [class.text-emerald-700]="template.riskLevel === 'Healthy'"
+                >
+                  {{ riskLabel(template.riskLevel) }}
+                </span>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 text-[10px] font-bold text-slate-500">
+                <span>{{ 'anonymousDashboard.responses' | t }}<strong class="block text-[13px] text-slate-950">{{ template.responsesCount }}</strong></span>
+                <span>{{ 'anonymousDashboard.score' | t }}<strong class="block text-[13px] text-slate-950">{{ template.averageScorePercentage | number: '1.2-2' }}%</strong></span>
+                <span>{{ 'anonymousDashboard.complaints' | t }}<strong class="block text-[13px] text-slate-950">{{ template.complaintsCount }}</strong></span>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+          {{ 'anonymousDashboard.noTemplatePerformance' | t }}
+        </div>
+      }
+    </section>
+
+    <section class="grid gap-3 xl:grid-cols-2">
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <h3 class="mb-3 text-sm font-extrabold text-slate-950">
+          {{ 'anonymousDashboard.lowestRatedQuestions' | t }}
+        </h3>
+        @if (dashboard.lowestRatedQuestions.length > 0) {
+          <div class="space-y-2">
+            @for (question of dashboard.lowestRatedQuestions; track question.anonymousTemplateQuestionId) {
+              <div class="rounded-lg bg-slate-50 p-3">
+                <p class="text-[10px] font-extrabold uppercase text-[#0d94b3]">
+                  {{ templateName(question) }}
+                </p>
+                <p class="mt-1 break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+                  {{ questionText(question) }}
+                </p>
+                <div class="mt-2 grid grid-cols-3 gap-2 text-[10px] font-bold text-slate-500">
+                  <span>{{ 'anonymousDashboard.answers' | t }}<strong class="block text-[13px] text-slate-950">{{ question.answersCount }}</strong></span>
+                  <span>{{ 'anonymousDashboard.avgValue' | t }}<strong class="block text-[13px] text-slate-950">{{ question.averageValue | number: '1.2-2' }}</strong></span>
+                  <span>{{ 'anonymousDashboard.avgScore' | t }}<strong class="block text-[13px] text-slate-950">{{ question.averageScorePercentage | number: '1.2-2' }}%</strong></span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+            {{ 'anonymousDashboard.noRatedQuestions' | t }}
+          </div>
+        }
+      </article>
+
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <h3 class="mb-3 text-sm font-extrabold text-slate-950">
+          {{ 'anonymousDashboard.criticalResponses' | t }}
+        </h3>
+        @if (dashboard.criticalResponses.length > 0) {
+          <div class="space-y-2">
+            @for (response of dashboard.criticalResponses; track response.anonymousSurveyResponseId) {
+              <button
+                class="w-full rounded-lg border border-slate-100 bg-slate-50 p-3 text-start transition hover:border-[#11A7C9]/40 hover:bg-cyan-50/30"
+                type="button"
+                (click)="openCriticalResponse(response)"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <p class="break-words text-[12px] font-extrabold text-slate-950 [overflow-wrap:anywhere]">
+                      {{ templateName(response) }}
+                    </p>
+                    <p class="mt-0.5 text-[10px] font-bold text-slate-500">
+                      {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+                    </p>
+                  </div>
+                  <span class="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-extrabold text-rose-700">
+                    {{ response.scorePercentage | number: '1.2-2' }}%
+                  </span>
+                </div>
+                <p class="mt-2 break-words rounded-lg bg-white p-2 text-[11px] font-semibold text-slate-600 [overflow-wrap:anywhere]">
+                  {{ response.complaintText || ('anonymousDashboard.noComplaintText' | t) }}
+                </p>
+                <p class="mt-2 break-words text-[10px] font-bold text-slate-500 [overflow-wrap:anywhere]">
+                  {{ customInputsText(response) }}
+                </p>
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="rounded-lg border border-dashed border-slate-200 p-6 text-center text-[11px] font-bold text-slate-500">
+            {{ 'anonymousDashboard.noCriticalResponses' | t }}
+          </div>
+        }
+      </article>
+    </section>
+  }
+</div>

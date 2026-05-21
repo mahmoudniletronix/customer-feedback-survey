@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Filter, Search } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import {
@@ -24,6 +25,7 @@ type BooleanFilterValue = '' | 'true' | 'false';
     IconComponent,
     ReactiveFormsModule,
     SystemResponseDetailsModalComponent,
+    TranslatePipe,
   ],
   templateUrl: './system-responses-history-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

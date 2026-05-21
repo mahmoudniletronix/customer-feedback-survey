@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronLeft, ChevronRight, FileText, Pencil, Plus, Search, UserCog } from 'lucide-angular';
+import { ChevronLeft, ChevronRight, FileText, Pencil, Plus, Search, SlidersHorizontal, UserCog } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -42,6 +42,10 @@ export class OperatorsPageComponent implements OnInit {
   readonly templatesIcon = FileText;
   readonly plusIcon = Plus;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+
+  readonly advancedFiltersOpen = signal(true);
+
   readonly operatorIcon = UserCog;
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
@@ -129,6 +133,10 @@ export class OperatorsPageComponent implements OnInit {
     email: ['', [Validators.required, Validators.email, Validators.maxLength(256)]],
     phoneNumber: ['', [Validators.maxLength(30)]],
   });
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
+  }
 
   ngOnInit(): void {
     const departmentId = this.currentDepartmentId();

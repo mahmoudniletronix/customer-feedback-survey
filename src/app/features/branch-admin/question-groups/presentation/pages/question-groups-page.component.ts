@@ -16,6 +16,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
 } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
@@ -63,6 +64,8 @@ export class QuestionGroupsPageComponent implements OnInit {
   readonly plusIcon = Plus;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+  readonly advancedFiltersOpen = signal(true);
 
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
@@ -94,6 +97,10 @@ export class QuestionGroupsPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.questionGroupsStore.load();
+  }
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
   }
 
   searchGroups(): void {

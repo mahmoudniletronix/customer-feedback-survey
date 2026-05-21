@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
+  AlertTriangle,
   Building2,
   ChartColumnIncreasing,
   ClipboardList,
@@ -10,7 +11,6 @@ import {
   UserCog,
 } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
-import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { DashboardStore } from '../state/dashboard.store';
@@ -26,7 +26,7 @@ interface WorkspaceAction {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [RouterLink, CardComponent, KpiCardComponent, TrendChartComponent, IconComponent, TranslatePipe],
+  imports: [RouterLink, KpiCardComponent, TrendChartComponent, IconComponent, TranslatePipe],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -34,6 +34,7 @@ interface WorkspaceAction {
 export class DashboardPageComponent implements OnInit {
   readonly dashboardStore = inject(DashboardStore);
   readonly authStore = inject(AuthStore);
+  readonly alertTriangleIcon = AlertTriangle;
   readonly buildingIcon = Building2;
   readonly chartIcon = ChartColumnIncreasing;
   readonly clipboardIcon = ClipboardList;

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronLeft, ChevronRight, KeyRound, Pencil, RotateCcw, Search, Trash2, UserPlus, UsersRound } from 'lucide-angular';
+import { ChevronLeft, ChevronRight, KeyRound, Pencil, RotateCcw, Search, SlidersHorizontal, Trash2, UserPlus, UsersRound } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
@@ -41,6 +41,10 @@ export class BranchUsersPageComponent implements OnInit {
   readonly deleteIcon = Trash2;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+
+  readonly advancedFiltersOpen = signal(true);
+
   readonly userPlusIcon = UserPlus;
   readonly usersIcon = UsersRound;
 
@@ -76,6 +80,10 @@ export class BranchUsersPageComponent implements OnInit {
   readonly resetPasswordForm = this.formBuilder.nonNullable.group({
     newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(200)]],
   });
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
+  }
 
   ngOnInit(): void {
     this.branchUsersStore.loadRoles();

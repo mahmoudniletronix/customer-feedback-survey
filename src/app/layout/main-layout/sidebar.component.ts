@@ -37,6 +37,7 @@ interface MenuItem {
     | 'globalQuestions'
     | 'anonymousTemplates'
     | 'systemReports'
+    | 'departmentReports'
     | 'branchDashboard';
   exact?: boolean;
   child?: boolean;
@@ -61,6 +62,15 @@ const MENU_ITEMS: readonly MenuItem[] = [
     feature: 'systemReports',
     exact: true,
     child: true,
+  },
+  {
+    label: 'Department Reports',
+    labelKey: 'nav.reports',
+    path: '/reports/department/dashboard',
+    icon: ChartNoAxesColumnIncreasing,
+    roles: [],
+    feature: 'departmentReports',
+    exact: true,
   },
   {
     label: 'Dashboard',
@@ -237,6 +247,9 @@ export class SidebarComponent {
     }
     if (feature === 'systemReports') {
       return this.authStore.canAccessSystemReports();
+    }
+    if (feature === 'departmentReports') {
+      return this.authStore.canAccessDepartmentReports();
     }
     if (feature === 'branchDashboard') {
       return this.authStore.canAccessBranchDashboard();

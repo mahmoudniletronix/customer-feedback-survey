@@ -37,13 +37,14 @@
   </section>
 
   <app-card [title]="'departments.listTitle' | t" [subtitle]="'departments.listSubtitle' | t">
-    <form class="compact-filter-form mb-4 grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-[minmax(0,1fr)_auto]" [formGroup]="searchForm" (ngSubmit)="searchDepartments()">
+    <form class="flex flex-wrap items-end gap-2" [formGroup]="searchForm" (ngSubmit)="searchDepartments()">
       <app-input
+        size="sm"
         [label]="'departments.search' | t"
         [placeholder]="'departments.searchPlaceholder' | t"
         formControlName="searchText"
       />
-      <div class="flex flex-wrap items-end gap-2 md:justify-end">
+      <div class="flex items-end gap-1.5">
         <app-button type="submit" [loading]="departmentsStore.loading()">
           <app-icon [icon]="searchIcon" [size]="17" />
           {{ 'branches.searchAction' | t }}

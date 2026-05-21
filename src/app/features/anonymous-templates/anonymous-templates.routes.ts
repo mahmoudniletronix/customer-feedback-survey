@@ -2,9 +2,20 @@ import { Routes } from '@angular/router';
 import { BranchesService } from '../super-admin/branches/data/branches.service';
 import { AnonymousTemplatesService } from './data/anonymous-templates.service';
 import { anonymousTemplateAccessGuard } from './presentation/guards/anonymous-template-access.guard';
+import { anonymousTemplateDashboardAccessGuard } from './presentation/guards/anonymous-template-dashboard-access.guard';
+import { AnonymousTemplateDashboardStore } from './presentation/state/anonymous-template-dashboard.store';
 import { AnonymousTemplatesStore } from './presentation/state/anonymous-templates.store';
 
 export const ANONYMOUS_TEMPLATES_ROUTES: Routes = [
+  {
+    path: 'dashboard',
+    canActivate: [anonymousTemplateDashboardAccessGuard],
+    providers: [AnonymousTemplatesService, AnonymousTemplateDashboardStore],
+    loadComponent: () =>
+      import('./presentation/pages/anonymous-template-dashboard-page.component').then(
+        (m) => m.AnonymousTemplateDashboardPageComponent,
+      ),
+  },
   {
     path: ':anonymousTemplateId/responses/:responseId',
     canActivate: [anonymousTemplateAccessGuard],

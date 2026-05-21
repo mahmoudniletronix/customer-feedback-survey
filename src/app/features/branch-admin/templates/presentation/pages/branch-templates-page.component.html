@@ -10,10 +10,24 @@
       <p class="mt-1 text-xs text-slate-500">{{ 'branchTemplates.description' | t }}</p>
     </div>
     <div class="flex justify-end sm:shrink-0">
-      <app-button type="button" (pressed)="openCreateTemplate()">
-        <app-icon [icon]="plusIcon" [size]="17" />
-        {{ 'branchTemplates.createAction' | t }}
-      </app-button>
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <button
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          type="button"
+          (click)="toggleAdvancedFilters()"
+        >
+          <app-icon [icon]="filterIcon" [size]="13" />
+          {{
+            advancedFiltersOpen()
+              ? ('branchDashboard.hideFilters' | t)
+              : ('branchDashboard.showFilters' | t)
+          }}
+        </button>
+        <app-button size="sm" type="button" (pressed)="openCreateTemplate()">
+          <app-icon [icon]="plusIcon" [size]="14" />
+          {{ 'branchTemplates.createAction' | t }}
+        </app-button>
+      </div>
     </div>
   </div>
 
@@ -34,25 +48,37 @@
   }
 
   <app-card
-    [title]="'branchTemplates.listTitle' | t"
-    [subtitle]="'branchTemplates.listSubtitle' | t"
+    [title]="''"
+    [subtitle]="''"
   >
+    <div
+      class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+      [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+      [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+      [class.opacity-100]="advancedFiltersOpen()"
+      [class.opacity-0]="!advancedFiltersOpen()"
+    >
+      <div class="min-h-0 overflow-hidden">
     <form
-      class="compact-filter-form grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_10rem_auto]"
+      class="mb-3 flex flex-wrap items-end gap-2 rounded-lg bg-slate-50/80 p-2 ring-1 ring-slate-100 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
       [formGroup]="searchForm"
       (ngSubmit)="searchTemplates()"
+      [class.translate-y-0]="advancedFiltersOpen()"
+      [class.-translate-y-2]="!advancedFiltersOpen()"
+      [class.pointer-events-none]="!advancedFiltersOpen()"
+      [attr.aria-hidden]="!advancedFiltersOpen()"
+      [attr.inert]="advancedFiltersOpen() ? null : ''"
     >
       <app-input
+        size="sm"
         [label]="'branchTemplates.search' | t"
         [placeholder]="'branchTemplates.searchPlaceholder' | t"
         formControlName="searchText"
       />
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'branchTemplates.isActiveFilter' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[10rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'branchTemplates.isActiveFilter' | t }}</span>
         <select
-          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="isActive"
         >
           <option value="">{{ 'branchTemplates.allTemplates' | t }}</option>
@@ -60,12 +86,10 @@
           <option value="false">{{ 'branches.inactive' | t }}</option>
         </select>
       </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'branchTemplates.orderSort' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'branchTemplates.orderSort' | t }}</span>
         <select
-          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="orderSort"
         >
           <option value="">{{ 'branchTemplates.defaultSort' | t }}</option>
@@ -73,16 +97,18 @@
           <option value="Oldest">{{ 'branchTemplates.oldest' | t }}</option>
         </select>
       </label>
-      <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
-        <app-button type="submit" [loading]="templatesStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="17" />
+      <div class="flex items-end gap-1.5">
+        <app-button type="submit" size="sm" [loading]="templatesStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="13" />
           {{ 'branches.searchAction' | t }}
         </app-button>
-        <app-button type="button" variant="secondary" (pressed)="clearTemplateSearch()">
+        <app-button type="button" size="sm" variant="secondary" (pressed)="clearTemplateSearch()">
           {{ 'branches.clearSearch' | t }}
         </app-button>
       </div>
     </form>
+      </div>
+    </div>
 
     <div class="hidden overflow-hidden border border-slate-100 bg-white lg:block">
       <div class="overflow-x-auto">

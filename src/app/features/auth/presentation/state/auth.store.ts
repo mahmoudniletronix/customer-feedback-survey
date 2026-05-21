@@ -15,6 +15,7 @@ export class AuthStore {
   private readonly sessionSignal = signal<AuthSession | null>(null);
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
+  private expirationTimeoutId: number | null = null;
 
   readonly session = this.sessionSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
@@ -34,8 +35,10 @@ export class AuthStore {
       const session = this.sessionSignal();
       if (session) {
         this.tokenStorage.setSession(session);
+        this.scheduleSessionExpiration();
       } else {
         this.tokenStorage.clear();
+        this.clearSessionExpiration();
       }
     });
   }
@@ -75,6 +78,9 @@ export class AuthStore {
     const role = this.role();
     if (this.canAccessBranchDashboard()) {
       return '/branch-admin';
+    }
+    if (this.canAccessDepartmentReports()) {
+      return '/reports/department/dashboard';
     }
     if (role === 'OPERATOR') {
       return '/operator/templates';
@@ -194,11 +200,15 @@ export class AuthStore {
   }
 
   canAccessReports(): boolean {
-    return this.canAccessSystemReports();
+    return this.canAccessSystemReports() || this.canAccessDepartmentReports();
   }
 
   canAccessSystemReports(): boolean {
     return this.role() === 'SUPER_ADMIN' && this.hasPermission('Reports.ViewSystemDashboard');
+  }
+
+  canAccessDepartmentReports(): boolean {
+    return this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Reports.ViewDepartmentReports');
   }
 
   canAccessBranchDashboard(): boolean {
@@ -223,5 +233,39 @@ export class AuthStore {
 
   private normalizeRole(role: string): string {
     return role.replace(/[\s_-]/g, '').toLowerCase();
+  }
+
+  private scheduleSessionExpiration(): void {
+    this.clearSessionExpiration();
+
+    const expiresAt = this.tokenStorage.getSessionExpiresAt();
+    if (!expiresAt) {
+      return;
+    }
+
+    const delay = expiresAt - Date.now();
+    if (delay <= 0) {
+      this.expireSession();
+      return;
+    }
+
+    this.expirationTimeoutId = window.setTimeout(() => this.expireSession(), delay);
+  }
+
+  private clearSessionExpiration(): void {
+    if (this.expirationTimeoutId === null) {
+      return;
+    }
+
+    window.clearTimeout(this.expirationTimeoutId);
+    this.expirationTimeoutId = null;
+  }
+
+  private expireSession(): void {
+    this.tokenStorage.clear();
+    this.sessionSignal.set(null);
+    this.loadingSignal.set(false);
+    this.errorSignal.set(null);
+    void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
   }
 }

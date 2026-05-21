@@ -1,0 +1,491 @@
+<div class="w-full space-y-4">
+  <div class="flex items-center justify-end">
+    <button
+      class="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filtersIcon" [size]="12" />
+      {{
+        advancedFiltersOpen()
+          ? ('departmentDashboard.hideFilters' | t)
+          : ('departmentDashboard.showFilters' | t)
+      }}
+    </button>
+  </div>
+
+  <div
+    class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+    [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+    [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+    [class.opacity-100]="advancedFiltersOpen()"
+    [class.opacity-0]="!advancedFiltersOpen()"
+  >
+    <div class="min-h-0 overflow-hidden">
+    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <form
+        class="flex flex-col gap-2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:flex-row sm:flex-wrap sm:items-end"
+        [formGroup]="filtersForm"
+        (ngSubmit)="applyFilters()"
+        [class.translate-y-0]="advancedFiltersOpen()"
+        [class.-translate-y-2]="!advancedFiltersOpen()"
+        [class.pointer-events-none]="!advancedFiltersOpen()"
+        [attr.aria-hidden]="!advancedFiltersOpen()"
+        [attr.inert]="advancedFiltersOpen() ? null : ''"
+      >
+        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.from' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="date"
+            formControlName="from"
+          />
+        </label>
+        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.to' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="date"
+            formControlName="to"
+          />
+        </label>
+        <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.template' | t }}</span>
+          <select
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            formControlName="templateId"
+          >
+            <option value="">{{ 'departmentDashboard.allTemplates' | t }}</option>
+            @for (template of store.templates(); track template.id) {
+              <option [value]="template.id">{{ optionName(template) }}</option>
+            }
+          </select>
+        </label>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.groupBy' | t }}</span>
+          <select
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            formControlName="groupBy"
+          >
+            <option value="Day">{{ 'departmentDashboard.day' | t }}</option>
+            <option value="Month">{{ 'departmentDashboard.month' | t }}</option>
+          </select>
+        </label>
+        <div class="flex gap-1.5">
+          <app-button type="submit" size="sm" [loading]="store.loading()">
+            <app-icon [icon]="searchIcon" [size]="13" />
+            {{ 'departmentDashboard.apply' | t }}
+          </app-button>
+          <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
+            {{ 'departmentDashboard.clear' | t }}
+          </app-button>
+        </div>
+      </form>
+    </section>
+    </div>
+  </div>
+
+  @if (store.loading()) {
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="dashboard-card h-28 animate-pulse rounded-xl border border-slate-200 bg-white p-4"></div>
+      }
+    </section>
+  } @else if (store.error()) {
+    <section class="dashboard-card rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+      <div class="flex items-center gap-2">
+        <app-icon [icon]="alertTriangleIcon" [size]="16" />
+        <span>{{ store.error() ?? '' | t }}</span>
+      </div>
+    </section>
+  } @else if (store.dashboard(); as dashboard) {
+    @if (store.isEmpty()) {
+      <section class="dashboard-card rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
+        <div class="flex flex-col items-center gap-2">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+            <app-icon [icon]="barChartIcon" [size]="20" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.emptyTitle' | t }}</h2>
+          <p class="mt-1 text-xs font-semibold text-slate-500">
+            {{ 'departmentDashboard.emptyDescription' | t }}
+          </p>
+        </div>
+      </section>
+    }
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      @if (operatorMetrics(); as m) {
+        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-md">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.totalOperators' | t }}</p>
+              <p class="mt-1 text-xl font-black text-slate-950">{{ m.active }}<span class="text-sm font-bold text-slate-400">/{{ m.total }}</span></p>
+              <p class="mt-0.5 text-[11px] font-semibold text-slate-500">{{ m.activePercentage }}% {{ 'departmentDashboard.activeOperators' | t | lowercase }}</p>
+            </div>
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-cyan-50 p-2.5 text-[#11A7C9]">
+              <app-icon [icon]="usersIcon" [size]="20" />
+            </div>
+          </div>
+          <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+            <div class="h-full rounded-full bg-[#11A7C9] transition-all duration-700" [style.width.%]="m.activePercentage"></div>
+          </div>
+        </article>
+      }
+
+      @if (templateMetrics(); as m) {
+        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.totalAssignedTemplates' | t }}</p>
+              <p class="mt-1 text-xl font-black text-slate-950">{{ m.total }}</p>
+              <p class="mt-0.5 text-[11px] font-semibold text-slate-500">{{ m.active }} {{ 'departmentDashboard.activeAssignedTemplates' | t | lowercase }} &middot; {{ m.withResponses }} {{ 'departmentDashboard.templatesWithResponses' | t | lowercase }}</p>
+            </div>
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-violet-50 p-2.5 text-violet-600">
+              <app-icon [icon]="fileTextIcon" [size]="20" />
+            </div>
+          </div>
+        </article>
+      }
+
+      @if (responseMetrics(); as m) {
+        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.totalResponses' | t }}</p>
+              <p class="mt-1 text-xl font-black text-slate-950">{{ m.total }}</p>
+              <p class="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-slate-500">
+                <app-icon [icon]="trendingUpIcon" [size]="12" />
+                {{ m.averageScore.toFixed(1) }}% {{ 'departmentDashboard.averageScore' | t | lowercase }}
+              </p>
+            </div>
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-emerald-50 p-2.5 text-emerald-600">
+              <app-icon [icon]="barChartIcon" [size]="20" />
+            </div>
+          </div>
+        </article>
+      }
+
+      @if (issueMetrics(); as m) {
+        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-md">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.complaints' | t }} &amp; {{ 'departmentDashboard.voiceAnswers' | t }}</p>
+              <p class="mt-1 flex items-center gap-3 text-xl font-black text-slate-950">
+                <span class="flex items-center gap-1.5"><app-icon [icon]="alertTriangleIcon" [size]="16" class="text-amber-500" />{{ m.complaints }}</span>
+                <span class="flex items-center gap-1.5"><app-icon [icon]="micIcon" [size]="16" class="text-cyan-500" />{{ m.voice }}</span>
+              </p>
+            </div>
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-amber-50 p-2.5 text-amber-600">
+              <app-icon [icon]="alertTriangleIcon" [size]="20" />
+            </div>
+          </div>
+        </article>
+      }
+    </section>
+
+    @if (satisfactionData(); as s) {
+      <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+            <app-icon [icon]="smileIcon" [size]="15" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.satisfactionTrend' | t }}</h2>
+        </div>
+        <div class="space-y-3">
+          <div class="flex h-3 overflow-hidden rounded-full bg-slate-100">
+            @if (s.satisfiedPercent > 0) {
+              <div class="h-full bg-emerald-500 transition-all duration-700" [style.width.%]="s.satisfiedPercent" [title]="s.satisfied + ' ' + ('departmentDashboard.satisfied' | t)"></div>
+            }
+            @if (s.neutralPercent > 0) {
+              <div class="h-full bg-amber-400 transition-all duration-700" [style.width.%]="s.neutralPercent" [title]="s.neutral + ' ' + ('departmentDashboard.neutral' | t)"></div>
+            }
+            @if (s.unhappyPercent > 0) {
+              <div class="h-full bg-rose-500 transition-all duration-700" [style.width.%]="s.unhappyPercent" [title]="s.unhappy + ' ' + ('departmentDashboard.unhappy' | t)"></div>
+            }
+          </div>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] font-semibold">
+            <span class="flex items-center gap-1.5">
+              <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+              <app-icon [icon]="smileIcon" [size]="13" class="text-emerald-600" />
+              {{ 'departmentDashboard.satisfied' | t }} <strong class="text-slate-900">{{ s.satisfied }}</strong>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+              <app-icon [icon]="mehIcon" [size]="13" class="text-amber-500" />
+              {{ 'departmentDashboard.neutral' | t }} <strong class="text-slate-900">{{ s.neutral }}</strong>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="inline-block h-2.5 w-2.5 rounded-full bg-rose-500"></span>
+              <app-icon [icon]="frownIcon" [size]="13" class="text-rose-500" />
+              {{ 'departmentDashboard.unhappy' | t }} <strong class="text-slate-900">{{ s.unhappy }}</strong>
+            </span>
+            <span class="ml-auto flex items-center gap-2 text-slate-500">
+              <span class="flex items-center gap-1"><strong class="text-slate-900">{{ s.scored }}</strong> {{ 'departmentDashboard.scored' | t | lowercase }}</span>
+              <span class="flex items-center gap-1"><strong class="text-slate-900">{{ s.unscored }}</strong> {{ 'departmentDashboard.unscored' | t | lowercase }}</span>
+            </span>
+          </div>
+        </div>
+      </section>
+    }
+
+    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+      <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]">
+            <app-icon [icon]="trendingUpIcon" [size]="15" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">
+            {{ 'departmentDashboard.satisfactionTrend' | t }}
+          </h2>
+        </div>
+        <div>
+          <p class="text-[11px] font-semibold text-slate-500">
+            {{ dashboard.period.from || '-' }} {{ 'departmentDashboard.toLower' | t }}
+            {{ dashboard.period.to || '-' }} {{ 'departmentDashboard.by' | t }}
+            {{
+              dashboard.period.groupBy === 'Day'
+                ? ('departmentDashboard.day' | t)
+                : ('departmentDashboard.month' | t)
+            }}
+          </p>
+        </div>
+      </div>
+      @if (dashboard.satisfactionTrend.length === 0) {
+        <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+          {{ 'departmentDashboard.noTrendData' | t }}
+        </p>
+      } @else {
+        <div class="h-64">
+          <canvas #trendCanvas></canvas>
+        </div>
+      }
+    </section>
+
+    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+      <div class="mb-3 flex items-center gap-2">
+        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+          <app-icon [icon]="usersIcon" [size]="15" />
+        </div>
+        <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.operatorPerformance' | t }}</h2>
+      </div>
+      <div class="-mx-4 overflow-x-auto sm:mx-0">
+        <div class="inline-block min-w-full rounded-xl border border-slate-200">
+        <table class="w-full min-w-[42rem] table-fixed">
+          <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+            <tr>
+              <th class="px-3 py-3 text-start">{{ 'departmentDashboard.operator' | t }}</th>
+              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.status' | t }}</th>
+              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.responses' | t }}</th>
+              <th class="w-28 px-3 py-3 text-start">{{ 'departmentDashboard.avgScore' | t }}</th>
+              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.complaints' | t }}</th>
+              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.voice' | t }}</th>
+              <th class="w-36 px-3 py-3 text-start">{{ 'departmentDashboard.lastResponse' | t }}</th>
+              <th class="w-28 px-3 py-3 text-start">{{ 'departmentDashboard.risk' | t }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs">
+            @for (operator of dashboard.operatorPerformance; track operator.operatorId) {
+              <tr
+                class="cursor-pointer transition hover:bg-cyan-50/50"
+                tabindex="0"
+                (click)="openOperatorResponses(operator)"
+                (keyup.enter)="openOperatorResponses(operator)"
+              >
+                <td class="px-3 py-3 font-black text-slate-950">{{ operatorName(operator) }}</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.status }}</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.responsesCount }}</td>
+                <td class="px-3 py-3 font-black text-slate-900">{{ operator.averageScorePercentage | number: '1.0-1' }}%</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.complaintsCount }}</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.voiceAnswersCount }}</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">
+                  {{ operator.lastResponseOnUtc ? (operator.lastResponseOnUtc | date: 'mediumDate') : '-' }}
+                </td>
+                <td class="px-3 py-3">
+                  <span
+                    class="rounded-full px-2 py-1 text-[10px] font-black"
+                    [class.bg-rose-50]="operator.riskLevel === 'HighRisk'"
+                    [class.text-rose-700]="operator.riskLevel === 'HighRisk'"
+                    [class.bg-amber-50]="operator.riskLevel === 'MediumRisk'"
+                    [class.text-amber-700]="operator.riskLevel === 'MediumRisk'"
+                    [class.bg-emerald-50]="operator.riskLevel === 'Healthy'"
+                    [class.text-emerald-700]="operator.riskLevel === 'Healthy'"
+                  >
+                    {{ riskLabel(operator.riskLevel) }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="px-3 py-6 text-center text-xs font-semibold text-slate-500" colspan="8">
+                  {{ 'departmentDashboard.noOperatorPerformance' | t }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+            <app-icon [icon]="fileTextIcon" [size]="15" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.templatePerformance' | t }}</h2>
+        </div>
+        <div class="mt-3 space-y-2">
+          @for (template of dashboard.templatePerformance; track template.templateId + template.branchId) {
+            <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-xs font-black text-slate-950" [title]="templateName(template)">
+                    {{ templateName(template) }}
+                  </p>
+                  <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ branchName(template) }}</p>
+                </div>
+                <span class="shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-black text-slate-700">
+                  {{ riskLabel(template.riskLevel) }}
+                </span>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600">
+                <span>{{ template.responsesCount }} {{ 'departmentDashboard.responses' | t }}</span>
+                <span>{{ template.averageScorePercentage | number: '1.0-1' }}% {{ 'departmentDashboard.avg' | t }}</span>
+                <span>{{ template.complaintsCount }} {{ 'departmentDashboard.complaints' | t }}</span>
+              </div>
+            </div>
+          } @empty {
+            <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+              {{ 'departmentDashboard.noTemplatePerformance' | t }}
+            </p>
+          }
+        </div>
+      </article>
+
+      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+            <app-icon [icon]="alertTriangleIcon" [size]="15" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.lowestRatedQuestions' | t }}</h2>
+        </div>
+        <div class="mt-3 space-y-2">
+          @for (question of dashboard.lowestRatedQuestions; track question.questionId) {
+            <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+              <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">{{ questionText(question) }}</p>
+              <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                {{ templateName(question) }} - {{ question.questionTypeName }}
+              </p>
+              <div class="mt-2 flex flex-wrap gap-2 text-[11px] font-bold text-slate-600">
+                <span>{{ question.answersCount }} {{ 'departmentDashboard.answers' | t }}</span>
+                <span>{{ 'departmentDashboard.avgValue' | t }} {{ question.averageValue | number: '1.0-1' }}</span>
+                <span>{{ question.averageScorePercentage | number: '1.0-1' }}%</span>
+              </div>
+            </div>
+          } @empty {
+            <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+              {{ 'departmentDashboard.noRatedQuestions' | t }}
+            </p>
+          }
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+      <div class="mb-3 flex items-center gap-2">
+        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+          <app-icon [icon]="barChartIcon" [size]="15" />
+        </div>
+        <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.customInputSegments' | t }}</h2>
+      </div>
+      @if (dashboard.customInputSegments.length === 0) {
+        <p class="mt-3 rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+          {{ 'departmentDashboard.noCustomSegments' | t }}
+        </p>
+      } @else {
+        <div class="mt-3 flex gap-2 overflow-x-auto rounded-lg bg-slate-50 p-1">
+          @for (segment of dashboard.customInputSegments; track segment.customInputName) {
+            <button
+              class="shrink-0 rounded-md px-3 py-1.5 text-[11px] font-extrabold transition"
+              type="button"
+              [class.bg-white]="selectedSegment()?.customInputName === segment.customInputName"
+              [class.text-cyan-700]="selectedSegment()?.customInputName === segment.customInputName"
+              [class.text-slate-500]="selectedSegment()?.customInputName !== segment.customInputName"
+              (click)="selectedSegmentName.set(segment.customInputName)"
+            >
+              {{ segment.customInputName }}
+            </button>
+          }
+        </div>
+        @if (selectedSegment(); as segment) {
+          <div class="mt-3 space-y-2">
+            <p class="text-[11px] font-semibold text-slate-500">
+              {{ segment.typeName }} - {{ segmentResponsesTotal(segment) }}
+              {{ 'departmentDashboard.responses' | t }}
+            </p>
+            @for (item of segment.segments; track item.value) {
+              <div class="grid gap-2 rounded-lg bg-slate-50 p-3 sm:grid-cols-[minmax(8rem,1fr)_minmax(10rem,18rem)_5rem] sm:items-center">
+                <p class="truncate text-xs font-black text-slate-900" [title]="item.value || '-'">{{ item.value || '-' }}</p>
+                <div class="h-2 overflow-hidden rounded-full bg-white">
+                  <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(item.averageScorePercentage)"></div>
+                </div>
+                <p class="text-xs font-black text-slate-900">{{ item.averageScorePercentage | number: '1.0-1' }}%</p>
+              </div>
+            }
+          </div>
+        }
+      }
+    </section>
+
+    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+      <div class="mb-3 flex items-center gap-2">
+        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+          <app-icon [icon]="frownIcon" [size]="15" />
+        </div>
+        <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.criticalResponses' | t }}</h2>
+      </div>
+      <div class="mt-3 space-y-2">
+        @for (response of dashboard.criticalResponses; track response.surveyResponseId) {
+          <button
+            class="w-full rounded-lg border border-slate-200 bg-white p-3 text-start transition hover:border-rose-200 hover:bg-rose-50/30"
+            type="button"
+            (click)="openCriticalResponse(response)"
+          >
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <p class="truncate text-xs font-black text-slate-950">
+                  {{ operatorName(response) }} - {{ templateName(response) }}
+                </p>
+                <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                  {{ branchName(response) }} - {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+                </p>
+              </div>
+              <span class="w-fit shrink-0 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-black text-rose-700">
+                {{ response.scorePercentage | number: '1.0-1' }}%
+              </span>
+            </div>
+            <p class="mt-2 break-words text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]">
+              {{ response.complaintText || ('departmentDashboard.noComplaintText' | t) }}
+            </p>
+            <div class="mt-2 flex flex-wrap gap-1.5">
+              @for (input of response.customInputs; track input.name + input.value) {
+                <span class="max-w-full truncate rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
+                  {{ input.name }}: {{ input.value || '-' }}
+                </span>
+              } @empty {
+                <span class="text-[11px] font-semibold text-slate-400">
+                  {{ 'departmentDashboard.noCustomInputs' | t }}
+                </span>
+              }
+            </div>
+          </button>
+        } @empty {
+          <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+            {{ 'departmentDashboard.noCriticalResponses' | t }}
+          </p>
+        }
+      </div>
+    </section>
+  }
+</div>

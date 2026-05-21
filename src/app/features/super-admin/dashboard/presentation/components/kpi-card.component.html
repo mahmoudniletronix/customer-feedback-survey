@@ -1,15 +1,15 @@
-<article class="border border-slate-100 bg-white shadow-sm shadow-slate-200/70">
+<article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-md">
   <div class="flex items-start justify-between">
     <div class="flex items-start gap-3">
-      <span class="flex w-11 shrink-0 items-center justify-center" [class]="iconClasses()">
-        <app-icon [icon]="icons[kpi().icon]" [size]="20" />
+      <span class="flex w-10 shrink-0 items-center justify-center rounded-lg p-2.5 transition-all group-hover:scale-105" [class]="iconClasses()">
+        <app-icon [icon]="icons[kpi().icon]" [size]="18" />
       </span>
-      <div>
-        <p class="font-semibold text-slate-500">{{ kpi().labelKey | t }}</p>
-        <p class="mt-2 font-bold text-slate-900">{{ kpi().value }}</p>
+      <div class="min-w-0">
+        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ kpi().labelKey | t }}</p>
+        <p class="mt-1 text-lg font-black text-slate-950">{{ kpi().value }}</p>
       </div>
     </div>
-    <span class="px-3 py-1 text-xs font-bold" [class]="badgeClasses()">
+    <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black" [class]="badgeClasses()">
       {{ kpi().deltaKey | t }}
     </span>
   </div>

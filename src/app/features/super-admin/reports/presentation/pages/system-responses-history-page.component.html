@@ -1,70 +1,120 @@
 <div class="w-full space-y-3 sm:space-y-4">
-  <section class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm shadow-slate-200/60">
-    <form class="compact-filter-form space-y-2 rounded-lg bg-slate-50/80 p-1.5" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
-      <div class="grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,1fr)_6.5rem_auto_auto_auto] lg:items-end">
-        <label class="block">
-          <span>Search</span>
-          <input class="w-full border border-slate-200 bg-white" type="search" formControlName="searchText" placeholder="Branch, department, template, operator, complaint" />
+  <section class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+    <form class="flex flex-col gap-2" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+      <div class="flex flex-wrap items-end gap-2">
+        <label class="flex flex-col gap-0.5 sm:min-w-[14rem] sm:max-w-[20rem]">
+          <span class="text-[9px] font-bold text-slate-500">Search</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="search"
+            formControlName="searchText"
+            placeholder="Branch, department, template, operator, complaint"
+          />
         </label>
-        <label class="block">
-          <span>Page Size</span>
-          <select class="w-full border border-slate-200 bg-white" formControlName="pageSize">
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+          <span class="text-[9px] font-bold text-slate-500">Page Size</span>
+          <select
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            formControlName="pageSize"
+          >
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
             <option value="100">100</option>
           </select>
         </label>
-        <button class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-extrabold text-slate-600 transition hover:bg-slate-50" type="button" (click)="toggleAdvancedFilters()">
-          <app-icon [icon]="filterIcon" [size]="14" />
-          {{ advancedFiltersOpen() ? 'Hide filters' : 'More filters' }}
+        <button
+          class="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+          type="button"
+          (click)="toggleAdvancedFilters()"
+        >
+          <app-icon [icon]="filterIcon" [size]="12" />
+          {{
+            advancedFiltersOpen()
+              ? ('systemDashboard.hideFilters' | t)
+              : ('systemDashboard.showFilters' | t)
+          }}
         </button>
-        <app-button type="submit" size="sm" [fullWidth]="true" [loading]="store.responsesLoading()">
-          <app-icon [icon]="searchIcon" [size]="14" />
+        <app-button type="submit" size="sm" [loading]="store.responsesLoading()">
+          <app-icon [icon]="searchIcon" [size]="13" />
           Search
         </app-button>
-        <app-button type="button" size="sm" variant="secondary" [fullWidth]="true" (pressed)="clearFilters()">Clear</app-button>
+        <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">Clear</app-button>
       </div>
 
-      @if (advancedFiltersOpen()) {
-        <div class="grid min-w-0 gap-2 border-t border-slate-200/70 pt-2 motion-safe:[animation:branch-dashboard-rise_.22s_ease-out_both] sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-[8rem_8rem_minmax(10rem,1fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_6rem_6rem_7rem_7rem]">
-          <label class="block"><span>From</span><input class="w-full border border-slate-200 bg-white" type="date" formControlName="from" /></label>
-          <label class="block"><span>To</span><input class="w-full border border-slate-200 bg-white" type="date" formControlName="to" /></label>
-          <label class="block">
-            <span>Branch</span>
-            <select class="w-full border border-slate-200 bg-white" formControlName="branchId">
+      <div
+        class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+        [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+        [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+        [class.opacity-100]="advancedFiltersOpen()"
+        [class.opacity-0]="!advancedFiltersOpen()"
+      >
+        <div class="min-h-0 overflow-hidden">
+        <div
+          class="flex flex-wrap items-end gap-2 border-t border-slate-200/70 pt-2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+          [class.translate-y-0]="advancedFiltersOpen()"
+          [class.-translate-y-2]="!advancedFiltersOpen()"
+          [class.pointer-events-none]="!advancedFiltersOpen()"
+          [attr.aria-hidden]="!advancedFiltersOpen()"
+          [attr.inert]="advancedFiltersOpen() ? null : ''"
+        >
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+            <span class="text-[9px] font-bold text-slate-500">From</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="date" formControlName="from" />
+          </label>
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+            <span class="text-[9px] font-bold text-slate-500">To</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="date" formControlName="to" />
+          </label>
+          <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
+            <span class="text-[9px] font-bold text-slate-500">Branch</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="branchId">
               <option value="">All branches</option>
               @for (branch of store.branches(); track branch.id) {
                 <option [value]="branch.id">{{ branchOptionName(branch) }}</option>
               }
             </select>
           </label>
-          <label class="block">
-            <span>Department</span>
-            <select class="w-full border border-slate-200 bg-white" formControlName="departmentId">
+          <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
+            <span class="text-[9px] font-bold text-slate-500">Department</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="departmentId">
               <option value="">All departments</option>
               @for (department of store.departments(); track department.id) {
                 <option [value]="department.id">{{ departmentOptionName(department) }}</option>
               }
             </select>
           </label>
-          <label class="block"><span>Template Id</span><input class="w-full border border-slate-200 bg-white" formControlName="templateId" /></label>
-          <label class="block"><span>Min Score</span><input class="w-full border border-slate-200 bg-white" type="number" min="0" max="100" formControlName="minScorePercentage" /></label>
-          <label class="block"><span>Max Score</span><input class="w-full border border-slate-200 bg-white" type="number" min="0" max="100" formControlName="maxScorePercentage" /></label>
-          <label class="block">
-            <span>Complaint</span>
-            <select class="w-full border border-slate-200 bg-white" formControlName="hasComplaint">
-              <option value="">All</option><option value="true">With complaint</option><option value="false">No complaint</option>
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[10rem]">
+            <span class="text-[9px] font-bold text-slate-500">Template ID</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="templateId" />
+          </label>
+          <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+            <span class="text-[9px] font-bold text-slate-500">Min Score</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="number" min="0" max="100" formControlName="minScorePercentage" />
+          </label>
+          <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+            <span class="text-[9px] font-bold text-slate-500">Max Score</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="number" min="0" max="100" formControlName="maxScorePercentage" />
+          </label>
+          <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">Complaint</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="hasComplaint">
+              <option value="">All</option>
+              <option value="true">With complaint</option>
+              <option value="false">No complaint</option>
             </select>
           </label>
-          <label class="block">
-            <span>Voice</span>
-            <select class="w-full border border-slate-200 bg-white" formControlName="hasVoice">
-              <option value="">All</option><option value="true">With voice</option><option value="false">No voice</option>
+          <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">Voice</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="hasVoice">
+              <option value="">All</option>
+              <option value="true">With voice</option>
+              <option value="false">No voice</option>
             </select>
           </label>
         </div>
-      }
+        </div>
+      </div>
     </form>
   </section>
 

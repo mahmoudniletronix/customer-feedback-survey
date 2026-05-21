@@ -1,25 +1,59 @@
 <div class="w-full space-y-3 sm:space-y-4">
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#11A7C9]/10 text-[#11A7C9]">
+        <app-icon [icon]="templateIcon" [size]="15" />
+      </div>
+      <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Responses</p>
+    </div>
+    <button
+      class="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filterIcon" [size]="12" />
+      {{
+        advancedFiltersOpen()
+          ? ('branchDashboard.hideFilters' | t)
+          : ('branchDashboard.showFilters' | t)
+      }}
+    </button>
+  </div>
+
+  <div
+    class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+    [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+    [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+    [class.opacity-100]="advancedFiltersOpen()"
+    [class.opacity-0]="!advancedFiltersOpen()"
+  >
+    <div class="min-h-0 overflow-hidden">
   <section class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm shadow-slate-200/60">
     <form
-      class="compact-filter-form space-y-2 rounded-lg bg-slate-50/80 p-2"
+      class="flex flex-col gap-2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
       [formGroup]="filtersForm"
       (ngSubmit)="applyFilters()"
+      [class.translate-y-0]="advancedFiltersOpen()"
+      [class.-translate-y-2]="!advancedFiltersOpen()"
+      [class.pointer-events-none]="!advancedFiltersOpen()"
+      [attr.aria-hidden]="!advancedFiltersOpen()"
+      [attr.inert]="advancedFiltersOpen() ? null : ''"
     >
-      <div class="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(14rem,1fr)_7rem_auto_auto_auto] xl:items-end">
-        <label class="block">
-          <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Search</span>
+      <div class="flex flex-wrap items-end gap-2">
+        <label class="flex flex-col gap-0.5 sm:min-w-[14rem] sm:max-w-[18rem]">
+          <span class="text-[9px] font-bold text-slate-500">Search</span>
           <input
-            class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="search"
             formControlName="searchText"
             placeholder="Template, operator, complaint, custom input"
           />
         </label>
 
-        <label class="block">
-          <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Page Size</span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+          <span class="text-[9px] font-bold text-slate-500">Page Size</span>
           <select
-            class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             formControlName="pageSize"
           >
             <option value="10">10</option>
@@ -29,111 +63,63 @@
           </select>
         </label>
 
-        <button
-          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-extrabold text-slate-600 transition hover:bg-slate-50"
-          type="button"
-          (click)="toggleAdvancedFilters()"
-        >
-          <app-icon [icon]="filterIcon" [size]="14" />
-          {{ advancedFiltersOpen() ? 'Hide filters' : 'More filters' }}
-        </button>
-
-        <app-button type="submit" size="sm" [fullWidth]="true" [loading]="historyStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="14" />
+        <app-button type="submit" size="sm" [loading]="historyStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="13" />
           Search
         </app-button>
 
-        <app-button type="button" size="sm" variant="secondary" [fullWidth]="true" (pressed)="clearFilters()">
+        <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
           Clear
         </app-button>
       </div>
 
-      @if (advancedFiltersOpen()) {
-        <div
-          class="grid min-w-0 gap-2 border-t border-slate-200/70 pt-2 motion-safe:[animation:branch-dashboard-rise_.22s_ease-out_both] sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-[8rem_8rem_minmax(12rem,1fr)_6rem_6rem_7rem_7rem]"
-        >
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">From</span>
-            <input
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              type="date"
-              formControlName="from"
-            />
+        <div class="flex flex-wrap items-end gap-2 border-t border-slate-200/70 pt-2">
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+            <span class="text-[9px] font-bold text-slate-500">From</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="date" formControlName="from" />
           </label>
-
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">To</span>
-            <input
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              type="date"
-              formControlName="to"
-            />
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+            <span class="text-[9px] font-bold text-slate-500">To</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="date" formControlName="to" />
           </label>
-
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Template</span>
-            <select
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              formControlName="templateId"
-            >
+          <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
+            <span class="text-[9px] font-bold text-slate-500">Template</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="templateId">
               <option value="">All templates</option>
               @for (template of branchStore.branch()?.templates ?? []; track template.templateId) {
                 <option [value]="template.templateId">{{ templateName(template) }}</option>
               }
             </select>
           </label>
-
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Min Score</span>
-            <input
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              min="0"
-              max="100"
-              type="number"
-              formControlName="minScorePercentage"
-              placeholder="0"
-            />
+          <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+            <span class="text-[9px] font-bold text-slate-500">Min Score</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="number" min="0" max="100" formControlName="minScorePercentage" placeholder="0" />
           </label>
-
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Max Score</span>
-            <input
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              min="0"
-              max="100"
-              type="number"
-              formControlName="maxScorePercentage"
-              placeholder="100"
-            />
+          <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+            <span class="text-[9px] font-bold text-slate-500">Max Score</span>
+            <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="number" min="0" max="100" formControlName="maxScorePercentage" placeholder="100" />
           </label>
-
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Complaint</span>
-            <select
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              formControlName="hasComplaint"
-            >
+          <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">Complaint</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="hasComplaint">
               <option value="">All</option>
               <option value="true">With complaint</option>
               <option value="false">No complaint</option>
             </select>
           </label>
-
-          <label class="block">
-            <span class="mb-0.5 block text-[9px] font-bold text-slate-500">Voice</span>
-            <select
-              class="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-              formControlName="hasVoice"
-            >
+          <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">Voice</span>
+            <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="hasVoice">
               <option value="">All</option>
               <option value="true">With voice</option>
               <option value="false">No voice</option>
             </select>
           </label>
         </div>
-      }
     </form>
   </section>
+    </div>
+  </div>
 
   @if (historyStore.loading()) {
     <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">

@@ -7,16 +7,14 @@
   </div>
 
   <form
-    class="compact-filter-form grid gap-2 rounded-lg bg-slate-50/80 p-2 sm:grid-cols-2 xl:grid-cols-[minmax(18rem,1fr)_9rem_9rem_auto]"
+    class="flex flex-wrap items-end gap-2"
     [formGroup]="filtersForm"
     (ngSubmit)="applyFilters()"
   >
-    <label class="block">
-      <span class="mb-1 block text-[10px] font-semibold text-slate-700">{{
-        'branchReports.templateFilter' | t
-      }}</span>
+    <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
+      <span class="text-[9px] font-bold text-slate-500">{{ 'branchReports.templateFilter' | t }}</span>
       <select
-        class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:bg-white focus:ring-2 focus:ring-[#11A7C9]/15"
+        class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
         formControlName="templateId"
       >
         <option value="">{{ 'branchReports.allTemplates' | t }}</option>
@@ -26,29 +24,25 @@
       </select>
     </label>
 
-    <label class="block">
-      <span class="mb-1 block text-[10px] font-semibold text-slate-700">{{
-        'branchReports.from' | t
-      }}</span>
+    <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+      <span class="text-[9px] font-bold text-slate-500">{{ 'branchReports.from' | t }}</span>
       <input
-        class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:bg-white focus:ring-2 focus:ring-[#11A7C9]/15"
+        class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
         type="date"
         formControlName="from"
       />
     </label>
 
-    <label class="block">
-      <span class="mb-1 block text-[10px] font-semibold text-slate-700">{{
-        'branchReports.to' | t
-      }}</span>
+    <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+      <span class="text-[9px] font-bold text-slate-500">{{ 'branchReports.to' | t }}</span>
       <input
-        class="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/70 px-3 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:bg-white focus:ring-2 focus:ring-[#11A7C9]/15"
+        class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
         type="date"
         formControlName="to"
       />
     </label>
 
-    <div class="flex flex-wrap items-end gap-2 sm:col-span-2 xl:col-span-1 xl:justify-end">
+    <div class="flex items-end gap-1.5">
       <app-button type="submit" size="sm" [loading]="reportStore.loading()">
         {{ 'branches.searchAction' | t }}
       </app-button>

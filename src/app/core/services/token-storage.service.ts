@@ -4,6 +4,7 @@ import { AuthSession, Role, User, UserType } from '../../shared/models/role.mode
 
 const TOKEN_KEY = 'cfs_token';
 const SESSION_KEY = 'cfs_session';
+const SESSION_DURATION_MS = 2 * 60 * 60 * 1000;
 const LEGACY_AUTH_KEYS = [
   'token',
   'authToken',
@@ -21,6 +22,11 @@ export class TokenStorageService {
   private readonly document = inject(DOCUMENT);
 
   getToken(): string | null {
+    if (this.isStoredSessionExpired()) {
+      this.clear();
+      return null;
+    }
+
     return this.window?.localStorage.getItem(TOKEN_KEY) ?? null;
   }
 
@@ -35,7 +41,14 @@ export class TokenStorageService {
       try {
         const parsed = JSON.parse(rawSession) as unknown;
         if (this.isAuthSession(parsed)) {
-          return this.enrichSession(parsed);
+          if (this.isSessionExpired(parsed)) {
+            this.clear();
+            return null;
+          }
+
+          const session = this.ensureSessionExpiration(this.enrichSession(parsed));
+          this.persistSession(session);
+          return session;
         }
       } catch {
         return this.getSessionFromToken();
@@ -46,8 +59,25 @@ export class TokenStorageService {
   }
 
   setSession(session: AuthSession): void {
-    this.window?.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    this.setToken(session.token);
+    this.persistSession(this.ensureSessionExpiration(session));
+  }
+
+  getSessionExpiresAt(): number | null {
+    const rawSession = this.window?.localStorage.getItem(SESSION_KEY);
+    if (!rawSession) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(rawSession) as unknown;
+      if (this.isAuthSession(parsed) && typeof parsed.expiresAt === 'number') {
+        return parsed.expiresAt;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
   }
 
   clear(): void {
@@ -86,6 +116,7 @@ export class TokenStorageService {
       typeof user['name'] === 'string' &&
       typeof user['email'] === 'string' &&
       this.isRole(user['role']) &&
+      this.isOptionalNumber(value['expiresAt']) &&
       this.isOptionalString(user['branchNameEn']) &&
       this.isOptionalString(user['branchNameAr'])
     );
@@ -97,6 +128,10 @@ export class TokenStorageService {
 
   private isOptionalString(value: unknown): boolean {
     return value === undefined || typeof value === 'string';
+  }
+
+  private isOptionalNumber(value: unknown): boolean {
+    return value === undefined || typeof value === 'number';
   }
 
   private isRole(value: unknown): value is Role {
@@ -158,6 +193,36 @@ export class TokenStorageService {
 
     this.setSession(session);
     return session;
+  }
+
+  private persistSession(session: AuthSession): void {
+    this.window?.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    this.setToken(session.token);
+  }
+
+  private ensureSessionExpiration(session: AuthSession): AuthSession {
+    return {
+      ...session,
+      expiresAt: session.expiresAt ?? Date.now() + SESSION_DURATION_MS,
+    };
+  }
+
+  private isStoredSessionExpired(): boolean {
+    const rawSession = this.window?.localStorage.getItem(SESSION_KEY);
+    if (!rawSession) {
+      return false;
+    }
+
+    try {
+      const parsed = JSON.parse(rawSession) as unknown;
+      return this.isAuthSession(parsed) && this.isSessionExpired(parsed);
+    } catch {
+      return false;
+    }
+  }
+
+  private isSessionExpired(session: AuthSession): boolean {
+    return typeof session.expiresAt === 'number' && session.expiresAt <= Date.now();
   }
 
   private decodeJwtPayload(token: string): Record<string, unknown> | null {

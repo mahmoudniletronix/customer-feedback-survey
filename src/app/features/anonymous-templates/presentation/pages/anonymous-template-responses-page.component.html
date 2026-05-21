@@ -31,38 +31,32 @@
       [subtitle]="'anonymousTemplates.responsesFiltersSubtitle' | t"
     >
       <form
-        class="compact-filter-form grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[8.5rem_8.5rem_8rem_8rem_8rem_8rem_auto]"
+        class="flex flex-wrap items-end gap-2"
         [formGroup]="filtersForm"
         (ngSubmit)="applyFilters()"
       >
-        <label class="block">
-          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-            {{ 'anonymousTemplates.fromDate' | t }}
-          </span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.fromDate' | t }}</span>
           <input
-            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="date"
             formControlName="fromDate"
           />
         </label>
 
-        <label class="block">
-          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-            {{ 'anonymousTemplates.toDate' | t }}
-          </span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.toDate' | t }}</span>
           <input
-            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="date"
             formControlName="toDate"
           />
         </label>
 
-        <label class="block">
-          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-            {{ 'anonymousTemplates.minScore' | t }}
-          </span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.minScore' | t }}</span>
           <input
-            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="number"
             min="0"
             max="100"
@@ -70,12 +64,10 @@
           />
         </label>
 
-        <label class="block">
-          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-            {{ 'anonymousTemplates.maxScore' | t }}
-          </span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.maxScore' | t }}</span>
           <input
-            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="number"
             min="0"
             max="100"
@@ -83,12 +75,10 @@
           />
         </label>
 
-        <label class="block">
-          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-            {{ 'globalQuestionGroups.pageSize' | t }}
-          </span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.pageSize' | t }}</span>
           <select
-            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             formControlName="pageSize"
           >
             <option value="10">10</option>
@@ -98,12 +88,10 @@
           </select>
         </label>
 
-        <label class="block">
-          <span class="mb-1 block text-[10px] font-semibold text-slate-700">
-            {{ 'globalQuestionGroups.orderSort' | t }}
-          </span>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.orderSort' | t }}</span>
           <select
-            class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             formControlName="orderSort"
           >
             <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
@@ -112,9 +100,9 @@
           </select>
         </label>
 
-        <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
+        <div class="flex items-end gap-1.5">
           <app-button size="sm" type="submit" [loading]="anonymousTemplatesStore.responsesLoading()">
-            <app-icon [icon]="searchIcon" [size]="14" />
+            <app-icon [icon]="searchIcon" [size]="13" />
             {{ 'branches.searchAction' | t }}
           </app-button>
           <app-button size="sm" type="button" variant="secondary" (pressed)="clearFilters()">

@@ -1,9 +1,27 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Search } from 'lucide-angular';
+import {
+  Search,
+  SlidersHorizontal,
+  Building2,
+  Users,
+  FileText,
+  BarChart3,
+  AlertTriangle,
+  Mic,
+  TrendingUp,
+} from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import {
@@ -30,8 +48,10 @@ import { SystemReportsStore } from '../state/system-reports.store';
     ReactiveFormsModule,
     RouterLink,
     SystemResponseDetailsModalComponent,
+    TranslatePipe,
   ],
   templateUrl: './system-dashboard-page.component.html',
+  styleUrl: './system-dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemDashboardPageComponent implements OnInit {
@@ -40,6 +60,16 @@ export class SystemDashboardPageComponent implements OnInit {
   private readonly i18n = inject(I18nService);
 
   readonly searchIcon = Search;
+  readonly filtersIcon = SlidersHorizontal;
+  readonly buildingIcon = Building2;
+  readonly usersIcon = Users;
+  readonly fileTextIcon = FileText;
+  readonly barChartIcon = BarChart3;
+  readonly alertTriangleIcon = AlertTriangle;
+  readonly micIcon = Mic;
+  readonly trendingUpIcon = TrendingUp;
+
+  readonly advancedFiltersOpen = signal(true);
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
     from: [''],
@@ -49,9 +79,61 @@ export class SystemDashboardPageComponent implements OnInit {
     groupBy: ['Day' as SystemReportsGroupBy],
   });
 
+  readonly branchMetrics = computed(() => {
+    const summary = this.store.dashboard()?.summary;
+    if (!summary) return null;
+    return {
+      total: summary.totalBranches,
+      active: summary.activeBranches,
+      inactive: summary.inactiveBranches,
+      activePercentage:
+        summary.totalBranches > 0
+          ? Math.round((summary.activeBranches / summary.totalBranches) * 100)
+          : 0,
+    };
+  });
+
+  readonly orgMetrics = computed(() => {
+    const summary = this.store.dashboard()?.summary;
+    if (!summary) return null;
+    return {
+      departments: summary.totalDepartments,
+      activeDepartments: summary.activeDepartments,
+      operators: summary.totalOperators,
+    };
+  });
+
+  readonly templateMetrics = computed(() => {
+    const summary = this.store.dashboard()?.summary;
+    if (!summary) return null;
+    return {
+      total: summary.totalTemplates,
+      active: summary.activeTemplates,
+      activePercentage:
+        summary.totalTemplates > 0
+          ? Math.round((summary.activeTemplates / summary.totalTemplates) * 100)
+          : 0,
+    };
+  });
+
+  readonly responseMetrics = computed(() => {
+    const summary = this.store.dashboard()?.summary;
+    if (!summary) return null;
+    return {
+      total: summary.totalResponses,
+      averageScore: summary.averageScorePercentage,
+      complaints: summary.complaintsCount,
+      voice: summary.voiceAnswersCount,
+    };
+  });
+
   ngOnInit(): void {
     this.store.loadOptions();
     this.store.loadDashboard();
+  }
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
   }
 
   applyFilters(): void {
@@ -97,35 +179,16 @@ export class SystemDashboardPageComponent implements OnInit {
     return this.localized(department.nameEn, department.nameAr);
   }
 
-  branchName(item: SystemBranchPerformance | SystemCriticalResponse | SystemTemplatePerformance): string {
+  branchName(
+    item: SystemBranchPerformance | SystemCriticalResponse | SystemTemplatePerformance,
+  ): string {
     return this.localized(item.branchNameEn, item.branchNameAr);
   }
 
   riskLabel(riskLevel: SystemReportsRiskLevel): string {
-    if (riskLevel === 'HighRisk') return 'High Risk';
-    if (riskLevel === 'MediumRisk') return 'Medium Risk';
-    return 'Healthy';
+    if (riskLevel === 'HighRisk') return this.i18n.translate('systemDashboard.highRisk');
+    if (riskLevel === 'MediumRisk') return this.i18n.translate('systemDashboard.mediumRisk');
+    return this.i18n.translate('systemDashboard.healthy');
   }
 
-  barWidth(value: number): string {
-    return `${Math.min(Math.max(value, 0), 100)}%`;
-  }
-
-  summaryMetrics(dashboard: SystemDashboardResponse): readonly { label: string; value: string | number }[] {
-    const summary = dashboard.summary;
-    return [
-      { label: 'Total Branches', value: summary.totalBranches },
-      { label: 'Active Branches', value: summary.activeBranches },
-      { label: 'Inactive Branches', value: summary.inactiveBranches },
-      { label: 'Departments', value: summary.totalDepartments },
-      { label: 'Active Departments', value: summary.activeDepartments },
-      { label: 'Operators', value: summary.totalOperators },
-      { label: 'Templates', value: summary.totalTemplates },
-      { label: 'Active Templates', value: summary.activeTemplates },
-      { label: 'Responses', value: summary.totalResponses },
-      { label: 'Avg Satisfaction', value: `${summary.averageScorePercentage.toFixed(1)}%` },
-      { label: 'Complaints', value: summary.complaintsCount },
-      { label: 'Voice Answers', value: summary.voiceAnswersCount },
-    ];
-  }
 }

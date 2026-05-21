@@ -98,6 +98,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'reports/department',
+        loadChildren: () =>
+          import('./features/department-admin/reports/department-reports.routes').then(
+            (m) => m.DEPARTMENT_REPORTS_ROUTES,
+          ),
+      },
+      {
         path: 'reports',
         loadChildren: () =>
           import('./features/super-admin/reports/reports.routes').then((m) => m.REPORTS_ROUTES),

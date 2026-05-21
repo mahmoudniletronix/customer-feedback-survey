@@ -4,14 +4,28 @@
       <h2 class="mt-2 text-lg font-bold text-slate-900">{{ 'globalQuestionGroups.title' | t }}</h2>
       <p class="mt-1 text-xs text-slate-500">{{ 'globalQuestionGroups.description' | t }}</p>
     </div>
-    @if (canCreate()) {
-      <div class="flex justify-end sm:shrink-0">
-        <app-button type="button" (pressed)="openCreateGroup()">
-          <app-icon [icon]="plusIcon" [size]="17" />
+    <div class="flex justify-end sm:shrink-0">
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <button
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          type="button"
+          (click)="toggleAdvancedFilters()"
+        >
+          <app-icon [icon]="filterIcon" [size]="13" />
+          {{
+            advancedFiltersOpen()
+              ? ('systemDashboard.hideFilters' | t)
+              : ('systemDashboard.showFilters' | t)
+          }}
+        </button>
+        @if (canCreate()) {
+        <app-button size="sm" type="button" (pressed)="openCreateGroup()">
+          <app-icon [icon]="plusIcon" [size]="14" />
           {{ 'globalQuestionGroups.createAction' | t }}
         </app-button>
+        }
       </div>
-    }
+    </div>
   </div>
 
   @if (globalQuestionGroupsStore.success()) {
@@ -30,26 +44,35 @@
     </div>
   }
 
-  <app-card
-    [title]="'globalQuestionGroups.listTitle' | t"
-    [subtitle]="'globalQuestionGroups.listSubtitle' | t"
-  >
-    <form
-      class="compact-filter-form mb-4 grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_10rem_8rem_10rem_auto]"
-      [formGroup]="searchForm"
-      (ngSubmit)="searchGroups()"
+  <app-card [title]="''" [subtitle]="''">
+    <div
+      class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+      [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+      [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+      [class.opacity-100]="advancedFiltersOpen()"
+      [class.opacity-0]="!advancedFiltersOpen()"
     >
+      <div class="min-h-0 overflow-hidden">
+      <form
+        class="mb-3 flex flex-wrap items-end gap-2 rounded-lg bg-slate-50/80 p-2 ring-1 ring-slate-100 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+        [formGroup]="searchForm"
+        (ngSubmit)="searchGroups()"
+        [class.translate-y-0]="advancedFiltersOpen()"
+        [class.-translate-y-2]="!advancedFiltersOpen()"
+        [class.pointer-events-none]="!advancedFiltersOpen()"
+        [attr.aria-hidden]="!advancedFiltersOpen()"
+        [attr.inert]="advancedFiltersOpen() ? null : ''"
+      >
       <app-input
+        size="sm"
         [label]="'globalQuestionGroups.search' | t"
         [placeholder]="'globalQuestionGroups.searchPlaceholder' | t"
         formControlName="searchText"
       />
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'globalQuestionGroups.isActiveFilter' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[10rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
         <select
-          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="isActive"
         >
           <option value="">{{ 'globalQuestionGroups.allGroups' | t }}</option>
@@ -57,12 +80,10 @@
           <option value="false">{{ 'branches.inactive' | t }}</option>
         </select>
       </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'globalQuestionGroups.pageSize' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.pageSize' | t }}</span>
         <select
-          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="pageSize"
         >
           <option value="10">10</option>
@@ -71,12 +92,10 @@
           <option value="100">100</option>
         </select>
       </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'globalQuestionGroups.orderSort' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.orderSort' | t }}</span>
         <select
-          class="w-full border border-slate-200 bg-white px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="orderSort"
         >
           <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
@@ -84,7 +103,7 @@
           <option value="Oldest">{{ 'globalQuestionGroups.oldest' | t }}</option>
         </select>
       </label>
-      <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
+      <div class="flex items-end gap-1.5">
         <app-button type="submit" [loading]="globalQuestionGroupsStore.loading()">
           <app-icon [icon]="searchIcon" [size]="17" />
           {{ 'branches.searchAction' | t }}
@@ -94,6 +113,8 @@
         </app-button>
       </div>
     </form>
+      </div>
+    </div>
 
     <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white lg:block">
       <div class="overflow-x-auto">

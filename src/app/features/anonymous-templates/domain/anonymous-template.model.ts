@@ -519,3 +519,148 @@ export interface AnonymousTemplateResponseAnswerApiResponse {
   textAnswer?: string | null;
   voiceFileName?: string | null;
 }
+
+export type AnonymousTemplateDashboardGroupBy = 'Day' | 'Month';
+export type AnonymousTemplateDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk';
+
+export interface AnonymousTemplateDashboardQuery {
+  from?: string;
+  to?: string;
+  anonymousTemplateId?: string;
+  groupBy?: AnonymousTemplateDashboardGroupBy;
+  topQuestionsCount?: number;
+  criticalResponsesCount?: number;
+  criticalScoreThreshold?: number;
+}
+
+export interface AnonymousTemplateDashboardResponse {
+  period: AnonymousTemplateDashboardPeriod;
+  summary: AnonymousTemplateDashboardSummary;
+  satisfactionTrend: readonly AnonymousTemplateDashboardTrendPoint[];
+  anonymousTemplatePerformance: readonly AnonymousTemplateDashboardTemplatePerformance[];
+  lowestRatedQuestions: readonly AnonymousTemplateDashboardQuestionInsight[];
+  customInputSegments: readonly AnonymousTemplateDashboardCustomInputSegment[];
+  criticalResponses: readonly AnonymousTemplateDashboardCriticalResponse[];
+}
+
+export interface AnonymousTemplateDashboardPeriod {
+  from: string;
+  to: string;
+  isDefaultPeriod: boolean;
+  groupBy: AnonymousTemplateDashboardGroupBy;
+}
+
+export interface AnonymousTemplateDashboardSummary {
+  branchId: string;
+  branchNameEn: string;
+  branchNameAr: string | null;
+  totalAnonymousTemplates: number;
+  activeAnonymousTemplates: number;
+  templatesWithResponsesCount: number;
+  totalResponses: number;
+  scoredResponses: number;
+  unscoredResponses: number;
+  averageScorePercentage: number;
+  satisfiedResponses: number;
+  neutralResponses: number;
+  unhappyResponses: number;
+  complaintsCount: number;
+  voiceAnswersCount: number;
+}
+
+export interface AnonymousTemplateDashboardTrendPoint {
+  period: string;
+  responsesCount: number;
+  averageScorePercentage: number;
+}
+
+export interface AnonymousTemplateDashboardTemplatePerformance {
+  anonymousTemplateId: string;
+  nameEn: string;
+  nameAr: string | null;
+  scope: number;
+  scopeName: string;
+  status: number;
+  statusName: string;
+  isActive: boolean;
+  publicUrl: string;
+  qrCode: string | null;
+  responsesCount: number;
+  scoredResponsesCount: number;
+  averageScorePercentage: number;
+  complaintsCount: number;
+  riskLevel: AnonymousTemplateDashboardRiskLevel;
+}
+
+export interface AnonymousTemplateDashboardQuestionInsight {
+  anonymousTemplateId: string;
+  templateNameEn: string;
+  templateNameAr: string | null;
+  anonymousTemplateQuestionId: string;
+  questionId: string;
+  questionTextEn: string;
+  questionTextAr: string | null;
+  questionType: number;
+  questionTypeName: string;
+  answersCount: number;
+  averageValue: number;
+  averageScorePercentage: number;
+}
+
+export interface AnonymousTemplateDashboardCustomInputSegment {
+  customInputName: string;
+  type: number;
+  typeName: string;
+  segments: readonly AnonymousTemplateDashboardCustomInputSegmentItem[];
+}
+
+export interface AnonymousTemplateDashboardCustomInputSegmentItem {
+  value: string;
+  responsesCount: number;
+  averageScorePercentage: number;
+}
+
+export interface AnonymousTemplateDashboardCriticalResponse {
+  anonymousSurveyResponseId: string;
+  anonymousTemplateId: string;
+  templateNameEn: string;
+  templateNameAr: string | null;
+  submittedOnUtc: string;
+  scorePercentage: number;
+  complaintText: string | null;
+  customInputs: readonly AnonymousTemplateDashboardCriticalCustomInput[];
+}
+
+export interface AnonymousTemplateDashboardCriticalCustomInput {
+  name: string;
+  value: string;
+}
+
+export interface AnonymousTemplateDashboardApiResponse {
+  period?: {
+    from?: string | null;
+    to?: string | null;
+    isDefaultPeriod?: boolean | null;
+    groupBy?: AnonymousTemplateDashboardGroupBy | string | null;
+  } | null;
+  summary?: Partial<AnonymousTemplateDashboardSummary> | null;
+  satisfactionTrend?: readonly Partial<AnonymousTemplateDashboardTrendPoint>[];
+  anonymousTemplatePerformance?: readonly Partial<AnonymousTemplateDashboardTemplatePerformance>[];
+  lowestRatedQuestions?: readonly Partial<AnonymousTemplateDashboardQuestionInsight>[];
+  customInputSegments?: readonly {
+    customInputName?: string | null;
+    type?: number | null;
+    typeName?: string | null;
+    segments?: readonly Partial<AnonymousTemplateDashboardCustomInputSegmentItem>[];
+  }[];
+  criticalResponses?: readonly {
+    anonymousSurveyResponseId?: string | number | null;
+    anonymousTemplateId?: string | number | null;
+    templateNameEn?: string | null;
+    templateNameAr?: string | null;
+    submittedOnUtc?: string | null;
+    scorePercentage?: number | null;
+    complaintText?: string | null;
+    customInputs?: readonly Partial<AnonymousTemplateDashboardCriticalCustomInput>[];
+  }[];
+}

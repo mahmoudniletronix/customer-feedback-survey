@@ -10,6 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import {
+  BarChart3,
   Building2,
   ChevronLeft,
   ChevronRight,
@@ -24,6 +25,7 @@ import {
   QrCode,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
 } from 'lucide-angular';
 import { Router } from '@angular/router';
@@ -100,6 +102,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
+  readonly dashboardIcon = BarChart3;
   readonly branchIcon = Building2;
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -114,6 +117,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly qrCodeIcon = QrCode;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+
+  readonly advancedFiltersOpen = signal(true);
+
   readonly deleteIcon = Trash2;
   readonly copiedPublicUrl = signal(false);
   readonly copiedTemplateId = signal<string | null>(null);
@@ -133,6 +140,11 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   );
   readonly canViewResponses = computed(() =>
     this.authStore.canManageAnonymousTemplates('ViewResponses'),
+  );
+  readonly canViewDashboard = computed(
+    () =>
+      (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.role() === 'BRANCH_USER') &&
+      this.authStore.hasPermission('AnonymousTemplates.ViewResponses'),
   );
   readonly showSuperAdminFilters = computed(() => this.authStore.role() === 'SUPER_ADMIN');
   readonly scope = computed<AnonymousTemplateScope | null>(() => {
@@ -168,6 +180,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     expireTo: [''],
     customInputs: this.formBuilder.array<CustomInputFormGroup>([]),
   });
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
+  }
 
   ngOnInit(): void {
     this.anonymousTemplatesStore.load();
@@ -214,6 +230,14 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
     this.anonymousTemplatesStore.clearMessages();
     this.createModalOpen.set(true);
+  }
+
+  openDashboard(): void {
+    if (!this.canViewDashboard()) {
+      return;
+    }
+
+    void this.router.navigate(['/anonymous-templates/dashboard']);
   }
 
   closeCreateTemplate(): void {

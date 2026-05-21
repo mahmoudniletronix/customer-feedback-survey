@@ -1,0 +1,66 @@
+@keyframes dashboard-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-card {
+  animation: dashboard-rise 0.45s ease-out both;
+}
+
+.dashboard-card:nth-child(1) { animation-delay: 0.02s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.06s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.1s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.14s; }
+.dashboard-card:nth-child(5) { animation-delay: 0.18s; }
+.dashboard-card:nth-child(6) { animation-delay: 0.22s; }
+.dashboard-card:nth-child(7) { animation-delay: 0.26s; }
+.dashboard-card:nth-child(8) { animation-delay: 0.3s; }
+.dashboard-card:nth-child(9) { animation-delay: 0.34s; }
+.dashboard-card:nth-child(10) { animation-delay: 0.38s; }
+
+.dashboard-icon-box {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.group:hover .dashboard-icon-box {
+  transform: scale(1.08);
+}
+
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 639px) {
+  .dashboard-card {
+    animation-duration: 0.28s;
+  }
+}
+
+@media (hover: none) {
+  .group:hover .dashboard-icon-box {
+    transform: none;
+  }
+
+  .dashboard-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-card {
+    animation: none;
+  }
+
+  .dashboard-icon-box {
+    transition: none;
+  }
+}

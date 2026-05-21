@@ -19,6 +19,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
@@ -100,6 +101,8 @@ export class BranchTemplatesPageComponent implements OnInit {
   readonly plusIcon = Plus;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+  readonly advancedFiltersOpen = signal(true);
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
   readonly selectedTemplate = signal<BranchTemplate | null>(null);
@@ -130,6 +133,10 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.templatesStore.load();
+  }
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
   }
 
   get customInputsArray(): FormArray<CustomInputFormGroup> {

@@ -1,37 +1,65 @@
-<div class="space-y-3">
-  <div>
-    <h2 class="font-bold text-slate-900">{{ dashboardStore.heading() }}</h2>
-    <p class="mt-2 text-slate-500">{{ 'dashboard.kpiDescription' | t }}</p>
-  </div>
-
-  <div class="grid md:grid-cols-3">
-    @for (kpi of dashboardStore.kpis(); track kpi.labelKey) {
-      <app-kpi-card [kpi]="kpi" />
-    }
-  </div>
-
-  <div class="grid xl:grid-cols-[1.3fr_0.7fr]">
-    <app-card [title]="'dashboard.responseTrend' | t" [subtitle]="'dashboard.responseTrendSubtitle' | t">
-      <app-trend-chart [data]="dashboardStore.trend()" />
-    </app-card>
-
-    <app-card [title]="'dashboard.roleWorkspace' | t" [subtitle]="'dashboard.roleWorkspaceSubtitle' | t">
-      <div class="space-y-3 text-slate-600">
-        @for (action of workspaceActions(); track action.path) {
-          <a
-            [routerLink]="action.path"
-            class="flex items-center gap-3 bg-slate-50 transition hover:bg-cyan-50 hover:text-[#0e8bab]"
-          >
-            <app-icon [icon]="action.icon" [size]="18" />
-            {{ action.labelKey | t }}
-          </a>
-        } @empty {
-          <p class="flex items-center gap-3 bg-slate-50">
-            <app-icon [icon]="fileTextIcon" [size]="18" />
-            {{ 'common.noRecords' | t }}
-          </p>
-        }
+<div class="space-y-4">
+  @if (dashboardStore.loading()) {
+    <section class="grid gap-4 md:grid-cols-3">
+      @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+        <div class="dashboard-card h-28 animate-pulse rounded-xl border border-slate-200 bg-white"></div>
+      }
+    </section>
+  } @else if (dashboardStore.error(); as error) {
+    <section class="dashboard-card rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+      <div class="flex items-center gap-2">
+        <app-icon [icon]="alertTriangleIcon" [size]="16" />
+        <span>{{ error | t }}</span>
       </div>
-    </app-card>
-  </div>
+    </section>
+  } @else {
+    <section class="grid gap-4 md:grid-cols-3">
+      @for (kpi of dashboardStore.kpis(); track kpi.labelKey) {
+        <app-kpi-card [kpi]="kpi" />
+      }
+    </section>
+
+    <div class="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+      <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]">
+            <app-icon [icon]="chartIcon" [size]="15" />
+          </div>
+          <div>
+            <h2 class="text-sm font-black text-slate-950">{{ 'dashboard.responseTrend' | t }}</h2>
+            <p class="text-[11px] font-semibold text-slate-500">{{ 'dashboard.responseTrendSubtitle' | t }}</p>
+          </div>
+        </div>
+        <app-trend-chart [data]="dashboardStore.trend()" />
+      </section>
+
+      <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+            <app-icon [icon]="squarePenIcon" [size]="15" />
+          </div>
+          <div>
+            <h2 class="text-sm font-black text-slate-950">{{ 'dashboard.roleWorkspace' | t }}</h2>
+            <p class="text-[11px] font-semibold text-slate-500">{{ 'dashboard.roleWorkspaceSubtitle' | t }}</p>
+          </div>
+        </div>
+        <div class="space-y-2">
+          @for (action of workspaceActions(); track action.path) {
+            <a
+              [routerLink]="action.path"
+              class="flex items-center gap-3 rounded-lg bg-slate-50 p-2.5 text-xs font-semibold text-slate-600 transition hover:bg-cyan-50 hover:text-[#0e8bab]"
+            >
+              <app-icon [icon]="action.icon" [size]="18" />
+              {{ action.labelKey | t }}
+            </a>
+          } @empty {
+            <p class="flex items-center gap-3 rounded-lg bg-slate-50 p-2.5 text-xs font-semibold text-slate-500">
+              <app-icon [icon]="fileTextIcon" [size]="18" />
+              {{ 'common.noRecords' | t }}
+            </p>
+          }
+        </div>
+      </section>
+    </div>
+  }
 </div>

@@ -57,7 +57,7 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   readonly templateIcon = FileText;
   readonly complaintIcon = MessageSquareText;
   readonly voiceIcon = FileAudio;
-  readonly advancedFiltersOpen = signal(false);
+  readonly advancedFiltersOpen = signal(true);
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
     from: [''],

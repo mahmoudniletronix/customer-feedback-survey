@@ -8,6 +8,7 @@
 .login-wrapper {
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 /* Background Blobs */
@@ -51,9 +52,10 @@
 .login-brand {
   margin: 0 auto 2rem;
   width: fit-content;
-  /* background: #ffffff; */
+  background: rgba(255, 255, 255, 0.82);
   padding: 1rem 1.5rem;
   border-radius: 1.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   box-shadow:
     0 10px 25px -5px rgba(0, 0, 0, 0.05),
     0 8px 10px -6px rgba(0, 0, 0, 0.05);
@@ -75,9 +77,9 @@
 
 .premium-card {
   display: block;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.72);
   border-radius: 1.5rem;
   overflow: hidden;
   transition:
@@ -187,37 +189,108 @@
     max-width: 100%;
   }
 
+  .login-wrapper {
+    display: flex;
+    min-height: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: clamp(1.25rem, 7svh, 3.5rem);
+  }
+
   .login-brand {
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    padding: 0.625rem 1rem;
     border-radius: 1rem;
   }
 
   .login-brand img {
-    height: 2.75rem;
+    height: clamp(2rem, 9vw, 2.5rem);
   }
 
   .login-header {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.875rem;
   }
 
   .login-header h2 {
-    font-size: 1.45rem;
+    font-size: clamp(1.2rem, 5.4vw, 1.45rem);
+    line-height: 1.15;
   }
 
   .login-header p {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
   }
 
   .login-form {
     gap: 1rem;
   }
 
+  .premium-card {
+    border-radius: 1.125rem;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  }
+
+  .premium-card ::ng-deep section {
+    margin-top: 0 !important;
+    padding: 0.875rem !important;
+  }
+
   .login-footer {
-    margin-top: 1.25rem;
+    margin-top: 1rem;
   }
 
   .bg-blur-blob {
     display: none;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  :host {
+    max-width: min(31rem, calc(100vw - 4rem));
+  }
+
+  .login-wrapper {
+    padding-top: clamp(2rem, 8svh, 4rem);
+  }
+
+  .login-brand {
+    margin-bottom: 1rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .login-brand img {
+    height: 3rem;
+  }
+
+  .premium-card ::ng-deep section {
+    margin-top: 0 !important;
+    padding: 1.125rem !important;
+  }
+}
+
+@media (max-height: 680px) {
+  .login-wrapper {
+    min-height: auto;
+    justify-content: flex-start;
+  }
+
+  .login-brand {
+    margin-bottom: 0.75rem;
+  }
+
+  .login-header {
+    margin-bottom: 0.875rem;
+  }
+
+  .login-footer {
+    margin-top: 0.875rem;
+  }
+}
+
+@media (hover: none) {
+  .premium-card:hover {
+    transform: none;
+    box-shadow: none;
   }
 }

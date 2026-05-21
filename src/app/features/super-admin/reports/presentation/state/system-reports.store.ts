@@ -90,7 +90,7 @@ export class SystemReportsStore {
         next: (dashboard) => this.dashboardSignal.set(dashboard),
         error: (error: unknown) => {
           this.dashboardSignal.set(null);
-          this.dashboardErrorSignal.set(this.errorKey(error, 'System dashboard is temporarily unavailable.'));
+          this.dashboardErrorSignal.set(this.dashboardErrorKey(error));
         },
       });
   }
@@ -181,5 +181,17 @@ export class SystemReportsStore {
     if (error.status === 404) return 'Survey response was not found.';
     if (error.status === 400 || error.status === 422) return 'Invalid filters. Please check date range or score range.';
     return fallback;
+  }
+
+  private dashboardErrorKey(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) return 'systemDashboard.loadError';
+    if (error.status === 401) {
+      void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+      return 'systemDashboard.loadError';
+    }
+    if (error.status === 403) return 'systemDashboard.forbidden';
+    if (error.status === 404) return 'systemDashboard.notFound';
+    if (error.status === 400 || error.status === 422) return 'systemDashboard.invalidFilters';
+    return 'systemDashboard.loadError';
   }
 }

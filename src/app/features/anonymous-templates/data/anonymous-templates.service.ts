@@ -11,6 +11,12 @@ import {
   AnonymousTemplateApiResponse,
   AnonymousTemplateAssignedQuestion,
   AnonymousTemplateAssignedQuestionApiResponse,
+  AnonymousTemplateDashboardApiResponse,
+  AnonymousTemplateDashboardCriticalResponse,
+  AnonymousTemplateDashboardQuery,
+  AnonymousTemplateDashboardResponse,
+  AnonymousTemplateDashboardRiskLevel,
+  AnonymousTemplateDashboardTemplatePerformance,
   AnonymousTemplateCustomInput,
   AnonymousTemplateCustomInputApiResponse,
   AnonymousTemplateCustomInputType,
@@ -223,6 +229,38 @@ export class AnonymousTemplatesService {
       .pipe(map((response) => this.toResponseDetails(response, anonymousTemplateId)));
   }
 
+  dashboard(query: AnonymousTemplateDashboardQuery): Observable<AnonymousTemplateDashboardResponse> {
+    let params = new HttpParams();
+
+    if (query.from) {
+      params = params.set('from', query.from);
+    }
+    if (query.to) {
+      params = params.set('to', query.to);
+    }
+    if (query.anonymousTemplateId) {
+      params = params.set('anonymousTemplateId', query.anonymousTemplateId);
+    }
+    if (query.groupBy) {
+      params = params.set('groupBy', query.groupBy);
+    }
+    if (query.topQuestionsCount !== undefined) {
+      params = params.set('topQuestionsCount', query.topQuestionsCount);
+    }
+    if (query.criticalResponsesCount !== undefined) {
+      params = params.set('criticalResponsesCount', query.criticalResponsesCount);
+    }
+    if (query.criticalScoreThreshold !== undefined) {
+      params = params.set('criticalScoreThreshold', query.criticalScoreThreshold);
+    }
+
+    return this.http
+      .get<AnonymousTemplateDashboardApiResponse>(`${this.anonymousTemplatesUrl}/dashboard`, {
+        params,
+      })
+      .pipe(map((response) => this.toDashboard(response)));
+  }
+
   private toPageResult(
     response: AnonymousTemplatesPageApiResponse | readonly AnonymousTemplateApiResponse[],
     query: AnonymousTemplatesListQuery,
@@ -247,6 +285,121 @@ export class AnonymousTemplatesService {
       totalItems: pageResponse.totalItems ?? templates.length,
       data: templates,
     };
+  }
+
+  private toDashboard(response: AnonymousTemplateDashboardApiResponse): AnonymousTemplateDashboardResponse {
+    const summary = response.summary ?? {};
+
+    return {
+      period: {
+        from: response.period?.from ?? '',
+        to: response.period?.to ?? '',
+        isDefaultPeriod: response.period?.isDefaultPeriod ?? false,
+        groupBy: response.period?.groupBy === 'Month' ? 'Month' : 'Day',
+      },
+      summary: {
+        branchId: this.readRecordId(summary.branchId),
+        branchNameEn: summary.branchNameEn ?? '',
+        branchNameAr: summary.branchNameAr ?? null,
+        totalAnonymousTemplates: summary.totalAnonymousTemplates ?? 0,
+        activeAnonymousTemplates: summary.activeAnonymousTemplates ?? 0,
+        templatesWithResponsesCount: summary.templatesWithResponsesCount ?? 0,
+        totalResponses: summary.totalResponses ?? 0,
+        scoredResponses: summary.scoredResponses ?? 0,
+        unscoredResponses: summary.unscoredResponses ?? 0,
+        averageScorePercentage: summary.averageScorePercentage ?? 0,
+        satisfiedResponses: summary.satisfiedResponses ?? 0,
+        neutralResponses: summary.neutralResponses ?? 0,
+        unhappyResponses: summary.unhappyResponses ?? 0,
+        complaintsCount: summary.complaintsCount ?? 0,
+        voiceAnswersCount: summary.voiceAnswersCount ?? 0,
+      },
+      satisfactionTrend: (response.satisfactionTrend ?? []).map((point) => ({
+        period: point.period ?? '',
+        responsesCount: point.responsesCount ?? 0,
+        averageScorePercentage: point.averageScorePercentage ?? 0,
+      })),
+      anonymousTemplatePerformance: (response.anonymousTemplatePerformance ?? []).map((item) =>
+        this.toDashboardTemplatePerformance(item),
+      ),
+      lowestRatedQuestions: (response.lowestRatedQuestions ?? []).map((item) => ({
+        anonymousTemplateId: this.readRecordId(item.anonymousTemplateId),
+        templateNameEn: item.templateNameEn ?? '',
+        templateNameAr: item.templateNameAr ?? null,
+        anonymousTemplateQuestionId: this.readRecordId(item.anonymousTemplateQuestionId),
+        questionId: this.readRecordId(item.questionId),
+        questionTextEn: item.questionTextEn ?? '',
+        questionTextAr: item.questionTextAr ?? null,
+        questionType: item.questionType ?? 0,
+        questionTypeName: item.questionTypeName ?? '',
+        answersCount: item.answersCount ?? 0,
+        averageValue: item.averageValue ?? 0,
+        averageScorePercentage: item.averageScorePercentage ?? 0,
+      })),
+      customInputSegments: (response.customInputSegments ?? []).map((segment) => ({
+        customInputName: segment.customInputName ?? '',
+        type: segment.type ?? 0,
+        typeName: segment.typeName ?? '',
+        segments: (segment.segments ?? []).map((item) => ({
+          value: item.value ?? '',
+          responsesCount: item.responsesCount ?? 0,
+          averageScorePercentage: item.averageScorePercentage ?? 0,
+        })),
+      })),
+      criticalResponses: (response.criticalResponses ?? []).map((item) =>
+        this.toDashboardCriticalResponse(item),
+      ),
+    };
+  }
+
+  private toDashboardTemplatePerformance(
+    item: Partial<AnonymousTemplateDashboardTemplatePerformance>,
+  ): AnonymousTemplateDashboardTemplatePerformance {
+    return {
+      anonymousTemplateId: this.readRecordId(item.anonymousTemplateId),
+      nameEn: item.nameEn ?? '',
+      nameAr: item.nameAr ?? null,
+      scope: item.scope ?? 0,
+      scopeName: item.scopeName ?? '',
+      status: item.status ?? 0,
+      statusName: item.statusName ?? '',
+      isActive: item.isActive ?? false,
+      publicUrl: item.publicUrl ?? '',
+      qrCode: item.qrCode ?? null,
+      responsesCount: item.responsesCount ?? 0,
+      scoredResponsesCount: item.scoredResponsesCount ?? 0,
+      averageScorePercentage: item.averageScorePercentage ?? 0,
+      complaintsCount: item.complaintsCount ?? 0,
+      riskLevel: this.toDashboardRiskLevel(item.riskLevel),
+    };
+  }
+
+  private toDashboardCriticalResponse(
+    item: NonNullable<AnonymousTemplateDashboardApiResponse['criticalResponses']>[number],
+  ): AnonymousTemplateDashboardCriticalResponse {
+    return {
+      anonymousSurveyResponseId: this.readRecordId(item.anonymousSurveyResponseId),
+      anonymousTemplateId: this.readRecordId(item.anonymousTemplateId),
+      templateNameEn: item.templateNameEn ?? '',
+      templateNameAr: item.templateNameAr ?? null,
+      submittedOnUtc: item.submittedOnUtc ?? '',
+      scorePercentage: item.scorePercentage ?? 0,
+      complaintText: item.complaintText ?? null,
+      customInputs: (item.customInputs ?? []).map((input) => ({
+        name: input.name ?? '',
+        value: input.value ?? '',
+      })),
+    };
+  }
+
+  private toDashboardRiskLevel(
+    riskLevel: AnonymousTemplateDashboardRiskLevel | string | null | undefined,
+  ): AnonymousTemplateDashboardRiskLevel {
+    if (riskLevel === 'HighRisk' || riskLevel === 'MediumRisk') {
+      return riskLevel;
+    }
+
+    return 'Healthy';
   }
 
   private toResponsesPageResult(

@@ -16,6 +16,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
 } from 'lucide-angular';
 import {
@@ -98,6 +99,10 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   readonly questionIcon = HelpCircle;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+
+  readonly advancedFiltersOpen = signal(true);
+
   readonly questionTypeOptions = GLOBAL_QUESTION_TYPE_OPTIONS;
 
   readonly createModalOpen = signal(false);
@@ -141,6 +146,10 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
 
   get options(): GlobalQuestionOptionsFormArray {
     return this.questionForm.controls.options;
+  }
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
   }
 
   ngOnInit(): void {

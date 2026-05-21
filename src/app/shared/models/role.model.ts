@@ -18,4 +18,5 @@ export interface AuthSession {
   userType: UserType;
   roles: readonly string[];
   permissions: readonly string[];
+  expiresAt?: number;
 }

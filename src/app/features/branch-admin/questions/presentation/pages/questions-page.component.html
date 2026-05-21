@@ -6,12 +6,26 @@
       <h2 class="font-extrabold text-slate-950">{{ 'questions.title' | t }}</h2>
       <p class="mt-1 text-xs font-medium text-slate-500">{{ 'questions.description' | t }}</p>
     </div>
-    @if (canCreate()) {
-      <app-button type="button" (pressed)="openCreateQuestion()">
-        <app-icon [icon]="plusIcon" [size]="17" />
-        {{ 'questions.createAction' | t }}
-      </app-button>
-    }
+    <div class="flex flex-wrap items-center justify-end gap-2">
+      <button
+        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        type="button"
+        (click)="toggleAdvancedFilters()"
+      >
+        <app-icon [icon]="filterIcon" [size]="13" />
+        {{
+          advancedFiltersOpen()
+            ? ('branchDashboard.hideFilters' | t)
+            : ('branchDashboard.showFilters' | t)
+        }}
+      </button>
+      @if (canCreate()) {
+        <app-button size="sm" type="button" (pressed)="openCreateQuestion()">
+          <app-icon [icon]="plusIcon" [size]="14" />
+          {{ 'questions.createAction' | t }}
+        </app-button>
+      }
+    </div>
   </div>
 
   @if (questionsStore.success()) {
@@ -29,34 +43,40 @@
   }
 
   <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
-    <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h3 class="text-sm font-extrabold text-slate-950">{{ 'questions.listTitle' | t }}</h3>
-        <p class="mt-1 text-[11px] font-medium text-slate-500">
-          {{ 'questions.listSubtitle' | t }}
-        </p>
-      </div>
+    <div class="mb-3 flex justify-end">
       <div class="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-extrabold text-[#0d94b3]">
         {{ questionsStore.totalItems() }} {{ 'questions.totalItems' | t }}
       </div>
     </div>
 
+    <div
+      class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+      [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+      [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+      [class.opacity-100]="advancedFiltersOpen()"
+      [class.opacity-0]="!advancedFiltersOpen()"
+    >
+      <div class="min-h-0 overflow-hidden">
     <form
-      class="compact-filter-form grid gap-2 rounded-lg bg-slate-50/80 p-2 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1fr)_10rem_8rem_10rem_auto]"
+      class="mb-3 flex flex-wrap items-end gap-2 rounded-lg bg-slate-50/80 p-2 ring-1 ring-slate-100 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
       [formGroup]="searchForm"
       (ngSubmit)="searchQuestions()"
+      [class.translate-y-0]="advancedFiltersOpen()"
+      [class.-translate-y-2]="!advancedFiltersOpen()"
+      [class.pointer-events-none]="!advancedFiltersOpen()"
+      [attr.aria-hidden]="!advancedFiltersOpen()"
+      [attr.inert]="advancedFiltersOpen() ? null : ''"
     >
       <app-input
+        size="sm"
         [label]="'questions.search' | t"
         [placeholder]="'questions.searchPlaceholder' | t"
         formControlName="searchText"
       />
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'questions.isActiveFilter' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[10rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'questions.isActiveFilter' | t }}</span>
         <select
-          class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm shadow-slate-200/40 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="isActive"
         >
           <option value="">{{ 'questions.allQuestions' | t }}</option>
@@ -64,12 +84,10 @@
           <option value="false">{{ 'branches.inactive' | t }}</option>
         </select>
       </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'questions.pageSize' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'questions.pageSize' | t }}</span>
         <select
-          class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm shadow-slate-200/40 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="pageSize"
         >
           <option value="10">10</option>
@@ -78,12 +96,10 @@
           <option value="100">100</option>
         </select>
       </label>
-      <label class="block">
-        <span class="mb-1.5 block text-xs font-semibold text-slate-700">
-          {{ 'questions.orderSort' | t }}
-        </span>
+      <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'questions.orderSort' | t }}</span>
         <select
-          class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm shadow-slate-200/40 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="orderSort"
         >
           <option value="">{{ 'questions.defaultSort' | t }}</option>
@@ -91,16 +107,18 @@
           <option value="Oldest">{{ 'questions.oldest' | t }}</option>
         </select>
       </label>
-      <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-1 xl:justify-end">
-        <app-button type="submit" [loading]="questionsStore.loading()">
-          <app-icon [icon]="searchIcon" [size]="17" />
+      <div class="flex items-end gap-1.5">
+        <app-button type="submit" size="sm" [loading]="questionsStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="13" />
           {{ 'branches.searchAction' | t }}
         </app-button>
-        <app-button type="button" variant="secondary" (pressed)="clearQuestionSearch()">
+        <app-button type="button" size="sm" variant="secondary" (pressed)="clearQuestionSearch()">
           {{ 'branches.clearSearch' | t }}
         </app-button>
       </div>
     </form>
+      </div>
+    </div>
 
     <div class="mt-4 hidden overflow-hidden rounded-xl border border-slate-200 lg:block">
       <div class="overflow-x-auto">

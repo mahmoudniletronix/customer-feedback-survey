@@ -23,6 +23,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
@@ -132,6 +133,8 @@ export class QuestionsPageComponent implements OnInit {
   readonly questionIcon = HelpCircle;
   readonly restoreIcon = RotateCcw;
   readonly searchIcon = Search;
+  readonly filterIcon = SlidersHorizontal;
+  readonly advancedFiltersOpen = signal(true);
   readonly questionTypeOptions = QUESTION_TYPE_OPTIONS;
 
   readonly createModalOpen = signal(false);
@@ -175,6 +178,10 @@ export class QuestionsPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.questionsStore.load();
+  }
+
+  toggleAdvancedFilters(): void {
+    this.advancedFiltersOpen.update((open) => !open);
   }
 
   openCreateQuestion(): void {

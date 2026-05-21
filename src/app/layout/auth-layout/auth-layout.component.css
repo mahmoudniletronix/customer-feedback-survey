@@ -1,4 +1,6 @@
 .auth-page {
+  min-height: 100vh;
+  min-height: 100svh;
   min-height: 100dvh;
   overflow-x: hidden;
 }
@@ -68,19 +70,52 @@
 .login-stage {
   animation-delay: 120ms;
   min-width: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
+@media (max-width: 1023px) {
+  .auth-page {
+    background:
+      linear-gradient(180deg, #f3f7fb 0%, #f8fafc 48%, #eef5f8 100%);
+  }
+
+  .login-stage {
+    align-items: flex-start;
+    justify-content: center;
+    padding-block: clamp(2rem, 7svh, 4.5rem);
+  }
+}
+
 @media (max-width: 639px) {
   .auth-page {
+    min-height: 100vh;
+    min-height: 100svh;
     min-height: 100dvh;
   }
 
   .login-stage {
     align-items: flex-start;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    padding: max(1.25rem, env(safe-area-inset-top)) max(0.875rem, env(safe-area-inset-right))
+      max(1rem, env(safe-area-inset-bottom)) max(0.875rem, env(safe-area-inset-left));
+  }
+}
+
+@media (max-height: 680px) {
+  .login-stage {
+    align-items: flex-start;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .login-stage {
+    padding-inline: clamp(1.5rem, 8vw, 4rem);
   }
 }
 

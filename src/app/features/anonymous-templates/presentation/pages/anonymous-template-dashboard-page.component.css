@@ -1,0 +1,28 @@
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.dashboard-card {
+  animation: dashboard-rise 0.3s ease-out both;
+}
+
+@keyframes dashboard-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-card {
+    animation: none;
+  }
+}

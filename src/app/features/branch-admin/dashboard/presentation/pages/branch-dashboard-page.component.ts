@@ -29,6 +29,7 @@ import {
   MessageSquareWarning,
   Mic,
   Search,
+  SlidersHorizontal,
   Smile,
   TrendingUp,
   UsersRound,
@@ -37,6 +38,7 @@ import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminBranchStore } from '../../../branch/presentation/state/branch-admin-branch.store';
 import { BranchAdminTemplate } from '../../../branch/domain/branch-admin-branch.model';
 import { BranchResponseDetailsModalComponent } from '../components/branch-response-details-modal.component';
@@ -70,6 +72,7 @@ Chart.register(...registerables);
 export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   readonly dashboardStore = inject(BranchDashboardStore);
   readonly branchStore = inject(BranchAdminBranchStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
@@ -89,12 +92,13 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   readonly micIcon = Mic;
   readonly responsesIcon = UsersRound;
   readonly searchIcon = Search;
+  readonly filtersIcon = SlidersHorizontal;
   readonly smileIcon = Smile;
   readonly templateIcon = FileText;
   readonly trendIcon = TrendingUp;
 
   readonly selectedSegmentName = signal('');
-  readonly advancedFiltersOpen = signal(false);
+  readonly advancedFiltersOpen = signal(true);
   readonly selectedSegment = computed<BranchDashboardCustomInputSegment | null>(() => {
     const dashboard = this.dashboardStore.dashboard();
     const segments = dashboard?.customInputSegments ?? [];
@@ -194,7 +198,9 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.branchStore.load();
+    if (this.authStore.role() === 'BRANCH_ADMIN') {
+      this.branchStore.load();
+    }
     this.dashboardStore.load();
   }
 
