@@ -1,0 +1,138 @@
+<app-modal title="Anonymous response details" [open]="open()" size="lg" (closed)="closed.emit()">
+  @if (loading()) {
+    <div class="space-y-2">
+      <div class="h-16 animate-pulse rounded-lg bg-slate-50"></div>
+      <div class="h-10 animate-pulse rounded-lg bg-slate-50"></div>
+      <div class="h-32 animate-pulse rounded-lg bg-slate-50"></div>
+    </div>
+  } @else if (error()) {
+    <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700">
+      {{ error() }}
+    </div>
+  } @else if (details(); as response) {
+    <div class="space-y-3 text-[11px]">
+      <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <p class="text-[9px] font-black uppercase tracking-wide text-[#0d94b3]">
+              Anonymous response
+            </p>
+            <h3 class="mt-0.5 break-words text-sm font-black text-slate-950 [overflow-wrap:anywhere]">
+              {{ responseTitle(response) }}
+            </h3>
+            <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-semibold text-slate-500">
+              <span class="inline-flex items-center gap-1">
+                <app-icon [icon]="calendarIcon" [size]="12" />
+                {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+              </span>
+              <span class="inline-flex min-w-0 items-center gap-1">
+                <app-icon [icon]="hashIcon" [size]="12" />
+                <span class="truncate">{{ response.anonymousSurveyResponseId }}</span>
+              </span>
+            </div>
+          </div>
+
+          <span
+            class="inline-flex w-fit shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black"
+            [class.bg-slate-100]="!response.isScored"
+            [class.text-slate-600]="!response.isScored"
+            [class.bg-emerald-50]="response.isScored && (response.scorePercentage ?? 0) >= 80"
+            [class.text-emerald-700]="response.isScored && (response.scorePercentage ?? 0) >= 80"
+            [class.bg-amber-50]="response.isScored && (response.scorePercentage ?? 0) >= 60 && (response.scorePercentage ?? 0) < 80"
+            [class.text-amber-700]="response.isScored && (response.scorePercentage ?? 0) >= 60 && (response.scorePercentage ?? 0) < 80"
+            [class.bg-rose-50]="response.isScored && (response.scorePercentage ?? 0) < 60"
+            [class.text-rose-700]="response.isScored && (response.scorePercentage ?? 0) < 60"
+          >
+            {{ response.isScored ? ((response.scorePercentage ?? 0) | number: '1.0-1') + '%' : 'Not scored' }}
+          </span>
+        </div>
+      </header>
+
+      <section class="rounded-lg border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+          <div>
+            <h4 class="text-xs font-black text-slate-950">Custom inputs</h4>
+            <p class="text-[10px] font-semibold text-slate-500">
+              {{ response.customInputValuesCount }} submitted fields
+            </p>
+          </div>
+          <app-icon class="text-[#11A7C9]" [icon]="fileIcon" [size]="15" />
+        </div>
+
+        @if (response.customInputValues.length === 0) {
+          <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
+            No custom inputs captured.
+          </p>
+        } @else {
+          <dl class="divide-y divide-slate-100">
+            @for (input of response.customInputValues; track input.customInputValueId || input.name) {
+              <div class="grid gap-1 px-3 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
+                <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
+                  {{ customInputLabel(input) }} - {{ input.typeName }}
+                </dt>
+                <dd class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+                  {{ customInputDisplayValue(input) }}
+                </dd>
+              </div>
+            }
+          </dl>
+        }
+      </section>
+
+      <section class="rounded-lg border border-slate-200 bg-white">
+        <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+          <div>
+            <h4 class="text-xs font-black text-slate-950">Answers</h4>
+            <p class="text-[10px] font-semibold text-slate-500">
+              {{ response.answersCount }} answers captured
+            </p>
+          </div>
+          <app-icon class="text-[#11A7C9]" [icon]="messageIcon" [size]="15" />
+        </div>
+
+        <div class="divide-y divide-slate-100">
+          @for (answer of response.answers; track answer.answerId || answer.questionId) {
+            <article class="px-3 py-2.5">
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
+                    {{ questionText(answer) }}
+                  </p>
+                  <p class="text-[10px] font-semibold text-slate-500">
+                    {{ answer.questionTypeName || answer.questionType || '-' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
+                @if (voiceUrl(answer)) {
+                  <div class="space-y-1.5">
+                    <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+                      <app-icon class="text-[#11A7C9]" [icon]="micIcon" [size]="13" />
+                      {{ answerDisplayValue(answer) }}
+                    </p>
+                    <audio class="h-8 w-full" controls [src]="voiceUrl(answer)"></audio>
+                  </div>
+                } @else {
+                  <p class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
+                    {{ answerDisplayValue(answer) }}
+                  </p>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
+              No answers captured.
+            </p>
+          }
+        </div>
+      </section>
+
+      <div class="flex justify-end">
+        <app-button type="button" size="sm" variant="secondary" (pressed)="closed.emit()">
+          Close
+        </app-button>
+      </div>
+    </div>
+  }
+</app-modal>

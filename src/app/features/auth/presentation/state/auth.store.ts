@@ -76,8 +76,11 @@ export class AuthStore {
 
   redirectPath(): string {
     const role = this.role();
+    if (this.canAccessSurveyDashboard()) {
+      return '/reports/survey-dashboard';
+    }
     if (this.canAccessBranchDashboard()) {
-      return '/branch-admin';
+      return '/branch-admin/templates/dashboard';
     }
     if (this.canAccessDepartmentReports()) {
       return '/reports/department/dashboard';
@@ -200,7 +203,18 @@ export class AuthStore {
   }
 
   canAccessReports(): boolean {
-    return this.canAccessSystemReports() || this.canAccessDepartmentReports();
+    return (
+      this.canAccessSurveyDashboard() ||
+      this.canAccessSystemReports() ||
+      this.canAccessDepartmentReports()
+    );
+  }
+
+  canAccessSurveyDashboard(): boolean {
+    return (
+      (this.role() === 'SUPER_ADMIN' && this.hasPermission('Reports.ViewBranchReports')) ||
+      this.canAccessBranchDashboard()
+    );
   }
 
   canAccessSystemReports(): boolean {

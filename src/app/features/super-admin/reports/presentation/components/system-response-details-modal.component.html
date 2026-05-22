@@ -1,4 +1,4 @@
-<app-modal title="System Response Details" [open]="open()" size="lg" (closed)="closed.emit()">
+<app-modal [title]="'systemResponseDetails.title' | t" [open]="open()" size="lg" (closed)="closed.emit()">
   @if (loading()) {
     <div class="space-y-2">
       <div class="h-16 animate-pulse rounded-lg bg-slate-50"></div>
@@ -9,23 +9,42 @@
     <div
       class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-[11px] font-semibold text-rose-700"
     >
-      {{ error() }}
+      {{ error() ?? '' | t }}
     </div>
   } @else if (details(); as response) {
-    <div class="space-y-3 text-[11px]">
-      <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+    <div class="space-y-2 text-[11px]">
+      <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
-            <h3 class="break-words text-sm font-black text-slate-950 [overflow-wrap:anywhere]">
+            <p class="text-[9px] font-black uppercase tracking-wide text-[#0d94b3]">
+              {{ 'systemResponseDetails.template' | t }}
+            </p>
+            <h3 class="break-words text-[13px] font-black text-slate-950 [overflow-wrap:anywhere]">
               {{ localized(response.templateNameEn, response.templateNameAr) }}
             </h3>
-            <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-semibold text-slate-500">
-              <span>{{ localized(response.branchNameEn, response.branchNameAr) }}</span>
-              <span>{{ localized(response.departmentNameEn, response.departmentNameAr) }}</span>
-              <span>{{ localized(response.operatorNameEn, response.operatorNameAr) }}</span>
-              <span>{{
-                response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
-              }}</span>
+            <div class="mt-1.5 grid gap-x-3 gap-y-1 font-semibold text-slate-500 sm:grid-cols-2 xl:grid-cols-3">
+              <span>
+                {{ 'systemResponseDetails.branch' | t }}:
+                {{ localized(response.branchNameEn, response.branchNameAr) }}
+              </span>
+              @if (response.branchCode) {
+                <span>
+                  {{ 'systemResponseDetails.branchCode' | t }}:
+                  {{ response.branchCode }}
+                </span>
+              }
+              <span>
+                {{ 'systemResponseDetails.department' | t }}:
+                {{ localized(response.departmentNameEn, response.departmentNameAr) }}
+              </span>
+              <span>
+                {{ 'systemResponseDetails.operator' | t }}:
+                {{ localized(response.operatorNameEn, response.operatorNameAr) }}
+              </span>
+              <span>
+                {{ 'systemResponseDetails.submittedOn' | t }}:
+                {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+              </span>
             </div>
           </div>
           <span
@@ -49,11 +68,7 @@
             [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
             [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
           >
-            {{
-              response.score.isScored
-                ? (response.score.scorePercentage | number: '1.0-1') + '%'
-                : 'Not Scored'
-            }}
+            {{ scoreBadgeLabel(response.score) }}
           </span>
         </div>
       </header>
@@ -62,50 +77,50 @@
         class="grid overflow-hidden rounded-lg border border-slate-200 bg-white sm:grid-cols-3"
       >
         <div
-          class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e"
+          class="flex items-center justify-between border-b border-slate-100 px-3 py-1.5 sm:block sm:border-b-0 sm:border-e"
         >
-          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">Actual Score</p>
-          <p class="text-sm font-black text-slate-950 sm:mt-1">
+          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">{{ 'systemResponseDetails.actualScore' | t }}</p>
+          <p class="text-[13px] font-black text-slate-950 sm:mt-0.5">
             {{ response.score.isScored ? response.score.actualScore : '-' }}
           </p>
         </div>
         <div
-          class="flex items-center justify-between border-b border-slate-100 px-3 py-2 sm:block sm:border-b-0 sm:border-e"
+          class="flex items-center justify-between border-b border-slate-100 px-3 py-1.5 sm:block sm:border-b-0 sm:border-e"
         >
-          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">Max Score</p>
-          <p class="text-sm font-black text-slate-950 sm:mt-1">
+          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">{{ 'systemResponseDetails.maxScore' | t }}</p>
+          <p class="text-[13px] font-black text-slate-950 sm:mt-0.5">
             {{ response.score.isScored ? response.score.maxScore : '-' }}
           </p>
         </div>
-        <div class="flex items-center justify-between px-3 py-2 sm:block">
-          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">Percentage</p>
-          <p class="text-sm font-black text-slate-950 sm:mt-1">
+        <div class="flex items-center justify-between px-3 py-1.5 sm:block">
+          <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">{{ 'systemResponseDetails.percentage' | t }}</p>
+          <p class="text-[13px] font-black text-slate-950 sm:mt-0.5">
             {{
               response.score.isScored
                 ? (response.score.scorePercentage | number: '1.0-2') + '%'
-                : 'Not Scored'
+                : ('systemResponseDetails.notScored' | t)
             }}
           </p>
         </div>
       </section>
 
       <section class="rounded-lg border border-slate-200 bg-white">
-        <div class="border-b border-slate-100 px-3 py-2">
-          <h4 class="text-xs font-black text-slate-950">Custom Inputs</h4>
+        <div class="border-b border-slate-100 px-3 py-1.5">
+          <h4 class="text-xs font-black text-slate-950">{{ 'systemResponseDetails.customInputs' | t }}</h4>
           <p class="text-[10px] font-semibold text-slate-500">
-            {{ response.customInputsCount }} submitted fields
+            {{ response.customInputsCount }} {{ 'systemResponseDetails.submittedFields' | t }}
           </p>
         </div>
         @if (response.customInputs.length === 0) {
           <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
-            No custom inputs submitted.
+            {{ 'systemResponseDetails.noCustomInputs' | t }}
           </p>
         } @else {
-          <dl class="divide-y divide-slate-100">
+          <dl class="grid gap-2 p-2 sm:grid-cols-2">
             @for (input of response.customInputs; track input.customInputId) {
-              <div class="grid gap-1 px-3 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
+              <div class="rounded-md bg-slate-50 px-2.5 py-1.5">
                 <dt class="truncate text-[10px] font-black uppercase tracking-wide text-slate-400">
-                  {{ input.name }} - {{ input.typeName }}
+                  {{ input.name }} - {{ customInputTypeLabel(input.typeName) }}
                 </dt>
                 <dd
                   class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]"
@@ -119,15 +134,15 @@
       </section>
 
       <section class="rounded-lg border border-slate-200 bg-white">
-        <div class="border-b border-slate-100 px-3 py-2">
-          <h4 class="text-xs font-black text-slate-950">Answers</h4>
+        <div class="border-b border-slate-100 px-3 py-1.5">
+          <h4 class="text-xs font-black text-slate-950">{{ 'systemResponseDetails.answers' | t }}</h4>
           <p class="text-[10px] font-semibold text-slate-500">
-            {{ response.answersCount }} answers captured
+            {{ response.answersCount }} {{ 'systemResponseDetails.answersCaptured' | t }}
           </p>
         </div>
-        <div class="divide-y divide-slate-100">
+        <div class="grid gap-2 p-2 lg:grid-cols-2">
           @for (answer of response.answers; track answer.questionId) {
-            <article class="px-3 py-2.5">
+            <article class="rounded-lg border border-slate-100 bg-white px-2.5 py-2">
               <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                   <p
@@ -135,32 +150,35 @@
                   >
                     {{ localized(answer.questionTextEn, answer.questionTextAr) }}
                   </p>
-                  <p class="text-[10px] font-semibold text-slate-500">
-                    {{ answer.questionTypeName }}
-                  </p>
                 </div>
                 <span
                   class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
                 >
-                  {{ answer.questionType }}
+                  {{ questionTypeLabel(answer) }}
                 </span>
               </div>
-              <div class="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
+              <div class="mt-1.5 rounded-md bg-slate-50 px-2.5 py-1.5">
                 @if (answer.questionType === 'Voice') {
                   @if (voiceUrl(answer)) {
+                    <p class="mb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">
+                      {{ answerValueLabel(answer) }}
+                    </p>
                     <audio class="h-8 w-full" controls [src]="voiceUrl(answer)"></audio>
                   } @else {
-                    <p class="text-[11px] font-semibold text-slate-500">No voice file submitted.</p>
+                    <p class="text-[11px] font-semibold text-slate-500">{{ 'systemResponseDetails.noVoiceFile' | t }}</p>
                   }
                 } @else {
+                  <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                    {{ answerValueLabel(answer) }}
+                  </p>
                   <p
-                    class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                    class="mt-0.5 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
                   >
                     {{ displayAnswer(answer) }}
                   </p>
                   @if (answer.questionType === 'SingleChoice') {
                     <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
-                      Option score: {{ answer.selectedOptionValue ?? '-' }}
+                      {{ 'systemResponseDetails.optionScore' | t }}: {{ answer.selectedOptionValue ?? '-' }}
                     </p>
                   }
                 }
@@ -168,7 +186,7 @@
             </article>
           } @empty {
             <p class="px-3 py-4 text-center text-[11px] font-semibold text-slate-500">
-              No answers found.
+              {{ 'systemResponseDetails.noAnswers' | t }}
             </p>
           }
         </div>

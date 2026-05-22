@@ -2,13 +2,18 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
-import { SystemResponseAnswer, SystemResponseDetails } from '../../domain/system-reports.model';
+import {
+  SystemResponseAnswer,
+  SystemResponseDetails,
+  SystemResponseScore,
+} from '../../domain/system-reports.model';
 
 @Component({
   selector: 'app-system-response-details-modal',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ModalComponent],
+  imports: [DatePipe, DecimalPipe, ModalComponent, TranslatePipe],
   templateUrl: './system-response-details-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -33,7 +38,56 @@ export class SystemResponseDetailsModalComponent {
     if (answer.questionType === 'StarRating') return `${answer.starRatingValue ?? '-'} / 5`;
     if (answer.questionType === 'Smiles') return `${answer.smileValue ?? '-'} / 5`;
     if (answer.questionType === 'Complain') return answer.textAnswer || answer.displayValue || '-';
-    return answer.voiceFileName || answer.displayValue || 'Voice answer';
+    return answer.voiceFileName || answer.displayValue || this.i18n.translate('systemResponseDetails.voiceAnswer');
+  }
+
+  answerValueLabel(answer: SystemResponseAnswer): string {
+    if (answer.questionType === 'SingleChoice') {
+      return this.i18n.translate('systemResponseDetails.selectedOption');
+    }
+    if (answer.questionType === 'StarRating') {
+      return this.i18n.translate('systemResponseDetails.starRatingValue');
+    }
+    if (answer.questionType === 'Smiles') {
+      return this.i18n.translate('systemResponseDetails.smileValue');
+    }
+    if (answer.questionType === 'Complain') {
+      return this.i18n.translate('systemResponseDetails.textAnswer');
+    }
+    return this.i18n.translate('systemResponseDetails.voiceAnswer');
+  }
+
+  questionTypeLabel(answer: SystemResponseAnswer): string {
+    if (answer.questionType === 'SingleChoice') return this.i18n.translate('questions.typeSingleChoice');
+    if (answer.questionType === 'StarRating') return this.i18n.translate('questions.typeStarRating');
+    if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
+    if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
+    if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');
+    return answer.questionTypeName || answer.questionType;
+  }
+
+  customInputTypeLabel(typeName: string): string {
+    const normalizedType = typeName.replace(/[\s_-]/g, '').toLowerCase();
+    if (normalizedType === 'string') return this.i18n.translate('systemResponseDetails.typeString');
+    if (normalizedType === 'integer' || normalizedType === 'int') {
+      return this.i18n.translate('systemResponseDetails.typeInteger');
+    }
+    return typeName || '-';
+  }
+
+  scoreBadgeLabel(score: SystemResponseScore): string {
+    if (!score.isScored) {
+      return this.i18n.translate('systemResponseDetails.notScored');
+    }
+
+    return `${this.scoreStatusLabel(score)} - ${score.scorePercentage.toFixed(1)}%`;
+  }
+
+  scoreStatusLabel(score: SystemResponseScore): string {
+    if (!score.isScored) return this.i18n.translate('systemResponseDetails.notScored');
+    if (score.scorePercentage >= 80) return this.i18n.translate('systemResponseDetails.healthy');
+    if (score.scorePercentage >= 60) return this.i18n.translate('systemResponseDetails.neutral');
+    return this.i18n.translate('systemResponseDetails.critical');
   }
 
   voiceUrl(answer: SystemResponseAnswer): string {

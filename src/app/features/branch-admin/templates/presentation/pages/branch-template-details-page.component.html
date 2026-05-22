@@ -513,6 +513,16 @@
     </app-card>
 
     <app-card
+      [title]="'branchTemplates.logicPath' | t"
+      [subtitle]="'branchTemplates.conditionalLogicSubtitle' | t"
+    >
+      <app-branch-template-question-tree
+        [questions]="questionTreeQuestions()"
+        [conditions]="questionTreeConditions()"
+      />
+    </app-card>
+
+    <app-card
       [title]="'branchTemplates.questionsSelectionTitle' | t"
       [subtitle]="'branchTemplates.questionsSelectionSubtitle' | t"
     >
@@ -686,5 +696,210 @@
         }
       }
     </app-card>
+
+    <app-card
+      [title]="'branchResponsesHistory.title' | t"
+      [subtitle]="'branchResponsesHistory.emptyDescription' | t"
+    >
+      @if (responsesStore.loading()) {
+        <div class="space-y-2">
+          @for (item of [1, 2, 3]; track item) {
+            <div class="h-14 animate-pulse rounded-lg bg-slate-50"></div>
+          }
+        </div>
+      } @else if (responsesStore.error()) {
+        <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+          {{ responsesStore.error() ?? '' | t }}
+        </div>
+      } @else if (responsesStore.responses(); as page) {
+        <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-[11px] font-semibold text-slate-500">
+            {{ 'branchResponsesHistory.showing' | t }} {{ responsesPageStart() }}-{{ responsesPageEnd() }}
+            {{ 'branchResponsesHistory.of' | t }} {{ page.totalItems }}
+            {{ 'branchResponsesHistory.responses' | t }}
+          </p>
+          <span class="w-fit rounded-full bg-slate-100 px-3 py-1 text-[11px] font-extrabold text-slate-600">
+            {{ 'branchResponsesHistory.page' | t }} {{ page.currentPage }} / {{ page.totalPages || 1 }}
+          </span>
+        </div>
+
+        @if (page.data.length === 0) {
+          <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-6 text-center text-xs font-semibold text-slate-500">
+            {{ 'branchResponsesHistory.emptyTitle' | t }}
+          </div>
+        } @else {
+          <div class="hidden overflow-hidden rounded-xl border border-slate-200 lg:block">
+            <table class="w-full table-fixed">
+              <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+                <tr>
+                  <th class="w-[11rem] px-3 py-3">{{ 'branchResponsesHistory.submittedOn' | t }}</th>
+                  <th class="w-[10rem] px-3 py-3">{{ 'branchResponsesHistory.operator' | t }}</th>
+                  <th class="w-[8rem] px-3 py-3">{{ 'branchResponsesHistory.score' | t }}</th>
+                  <th class="w-[7rem] px-3 py-3">{{ 'branchResponsesHistory.complaint' | t }}</th>
+                  <th class="w-[6rem] px-3 py-3">{{ 'branchResponsesHistory.voice' | t }}</th>
+                  <th class="px-3 py-3">{{ 'branchResponsesHistory.customInputsPreview' | t }}</th>
+                  <th class="w-[8rem] px-3 py-3">{{ 'branchResponsesHistory.actions' | t }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs">
+                @for (row of page.data; track row.surveyResponseId) {
+                  <tr class="transition hover:bg-slate-50">
+                    <td class="px-3 py-3 font-semibold text-slate-600">
+                      {{ row.submittedOnUtc ? (row.submittedOnUtc | date: 'medium') : '-' }}
+                    </td>
+                    <td class="px-3 py-3 font-semibold text-slate-600">
+                      {{ operatorName(row) }}
+                    </td>
+                    <td class="px-3 py-3">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black"
+                        [class.bg-slate-100]="scoreStatus(row) === 'Not Scored'"
+                        [class.text-slate-600]="scoreStatus(row) === 'Not Scored'"
+                        [class.bg-emerald-50]="scoreStatus(row) === 'Healthy'"
+                        [class.text-emerald-700]="scoreStatus(row) === 'Healthy'"
+                        [class.bg-amber-50]="scoreStatus(row) === 'Neutral'"
+                        [class.text-amber-700]="scoreStatus(row) === 'Neutral'"
+                        [class.bg-rose-50]="scoreStatus(row) === 'Critical'"
+                        [class.text-rose-700]="scoreStatus(row) === 'Critical'"
+                      >
+                        {{ scoreLabel(row) }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3">
+                      <span
+                        class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-extrabold"
+                        [class.bg-rose-50]="row.hasComplaint"
+                        [class.text-rose-700]="row.hasComplaint"
+                        [class.bg-slate-100]="!row.hasComplaint"
+                        [class.text-slate-500]="!row.hasComplaint"
+                      >
+                        <app-icon [icon]="complaintIcon" [size]="12" />
+                        {{ booleanLabel(row.hasComplaint) }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3">
+                      <span
+                        class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-extrabold"
+                        [class.bg-cyan-50]="row.hasVoice"
+                        [class.text-cyan-700]="row.hasVoice"
+                        [class.bg-slate-100]="!row.hasVoice"
+                        [class.text-slate-500]="!row.hasVoice"
+                      >
+                        <app-icon [icon]="voiceIcon" [size]="12" />
+                        {{ booleanLabel(row.hasVoice) }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3">
+                      <div class="flex flex-wrap gap-1.5">
+                        @for (input of row.customInputsPreview; track input.name) {
+                          <span class="max-w-[10rem] truncate rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600" [title]="customInputLabel(input)">
+                            {{ customInputLabel(input) }}
+                          </span>
+                        } @empty {
+                          <span class="text-[11px] font-semibold text-slate-400">
+                            {{ 'branchResponsesHistory.noCustomInputs' | t }}
+                          </span>
+                        }
+                      </div>
+                    </td>
+                    <td class="px-3 py-3">
+                      <button
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                        type="button"
+                        (click)="openResponseDetails(row)"
+                      >
+                        <app-icon [icon]="eyeIcon" [size]="13" />
+                        {{ 'branchResponsesHistory.viewDetails' | t }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="space-y-3 lg:hidden">
+            @for (row of page.data; track row.surveyResponseId) {
+              <article class="rounded-xl border border-slate-200 bg-white p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-[11px] font-semibold text-slate-500">
+                      {{ row.submittedOnUtc ? (row.submittedOnUtc | date: 'medium') : '-' }}
+                    </p>
+                    <p class="mt-1 truncate text-xs font-black text-slate-950">
+                      {{ operatorName(row) }}
+                    </p>
+                  </div>
+                  <span
+                    class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black"
+                    [class.bg-slate-100]="scoreStatus(row) === 'Not Scored'"
+                    [class.text-slate-600]="scoreStatus(row) === 'Not Scored'"
+                    [class.bg-emerald-50]="scoreStatus(row) === 'Healthy'"
+                    [class.text-emerald-700]="scoreStatus(row) === 'Healthy'"
+                    [class.bg-amber-50]="scoreStatus(row) === 'Neutral'"
+                    [class.text-amber-700]="scoreStatus(row) === 'Neutral'"
+                    [class.bg-rose-50]="scoreStatus(row) === 'Critical'"
+                    [class.text-rose-700]="scoreStatus(row) === 'Critical'"
+                  >
+                    {{ scoreLabel(row) }}
+                  </span>
+                </div>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-extrabold text-slate-600">
+                    {{ 'branchResponsesHistory.complaint' | t }}: {{ booleanLabel(row.hasComplaint) }}
+                  </span>
+                  <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-extrabold text-slate-600">
+                    {{ 'branchResponsesHistory.voice' | t }}: {{ booleanLabel(row.hasVoice) }}
+                  </span>
+                </div>
+                <button
+                  class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                  type="button"
+                  (click)="openResponseDetails(row)"
+                >
+                  <app-icon [icon]="eyeIcon" [size]="14" />
+                  {{ 'branchResponsesHistory.viewDetails' | t }}
+                </button>
+              </article>
+            }
+          </div>
+
+          <div class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-[11px] font-semibold text-slate-500">
+              {{ 'branchResponsesHistory.showing' | t }} {{ responsesPageStart() }}-{{ responsesPageEnd() }}
+              {{ 'branchResponsesHistory.of' | t }} {{ page.totalItems }}
+            </p>
+            <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+              <button
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+                [disabled]="page.currentPage <= 1"
+                (click)="changeResponsesPage(page.currentPage - 1)"
+              >
+                <app-icon [icon]="chevronLeftIcon" [size]="14" />
+                {{ 'branchResponsesHistory.previous' | t }}
+              </button>
+              <button
+                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+                [disabled]="page.currentPage >= page.totalPages"
+                (click)="changeResponsesPage(page.currentPage + 1)"
+              >
+                {{ 'branchResponsesHistory.next' | t }}
+                <app-icon [icon]="chevronRightIcon" [size]="14" />
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </app-card>
   }
 </div>
+
+<app-branch-response-details-modal
+  [open]="responsesStore.responseDetailsOpen()"
+  [loading]="responsesStore.responseDetailsLoading()"
+  [error]="responsesStore.responseDetailsError()"
+  [details]="responsesStore.responseDetails()"
+  (closed)="responsesStore.closeResponseDetails()"
+/>

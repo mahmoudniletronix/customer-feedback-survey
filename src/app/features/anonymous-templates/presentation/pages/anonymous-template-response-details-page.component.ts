@@ -14,6 +14,7 @@ import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import {
   AnonymousTemplateResponseAnswer,
   AnonymousTemplateResponseCustomInputValue,
+  AnonymousTemplateResponseDetails,
 } from '../../domain/anonymous-template.model';
 import { AnonymousTemplatesStore } from '../state/anonymous-templates.store';
 
@@ -51,11 +52,31 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
   }
 
   customInputDisplayValue(value: AnonymousTemplateResponseCustomInputValue): string {
+    if (value.displayValue.trim().length > 0) {
+      return value.displayValue;
+    }
+
     if (value.type === 2) {
       return value.integerValue === null ? '-' : String(value.integerValue);
     }
 
     return value.stringValue?.trim() || '-';
+  }
+
+  customInputLabel(value: AnonymousTemplateResponseCustomInputValue): string {
+    if (this.i18n.language() === 'ar') {
+      return value.labelAr || value.labelEn || value.nameSnapshot || value.name || '-';
+    }
+
+    return value.labelEn || value.labelAr || value.nameSnapshot || value.name || '-';
+  }
+
+  responseTitle(response: AnonymousTemplateResponseDetails): string {
+    if (this.i18n.language() === 'ar') {
+      return response.templateNameAr || response.templateNameEn || this.i18n.translate('anonymousTemplates.responseDetailsTitle');
+    }
+
+    return response.templateNameEn || response.templateNameAr || this.i18n.translate('anonymousTemplates.responseDetailsTitle');
   }
 
   answerQuestionText(answer: AnonymousTemplateResponseAnswer): string {
@@ -90,7 +111,7 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
       return answer.textAnswer?.trim() || '-';
     }
 
-    return answer.voiceFileName?.trim() || '-';
+    return answer.voiceFileName?.trim() || answer.voiceUrl?.trim() || '-';
   }
 
   answerValueBadge(answer: AnonymousTemplateResponseAnswer): string {

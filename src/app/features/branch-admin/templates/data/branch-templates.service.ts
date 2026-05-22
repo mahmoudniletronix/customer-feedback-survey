@@ -193,6 +193,9 @@ export class BranchTemplatesService {
     return {
       templateId: this.readRecordId(response.templateId),
       branchId: this.readRecordId(response.branchId),
+      branchNameEn: response.branchNameEn ?? '',
+      branchNameAr: response.branchNameAr ?? null,
+      branchCode: response.branchCode ?? '',
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
       description: response.description ?? '',

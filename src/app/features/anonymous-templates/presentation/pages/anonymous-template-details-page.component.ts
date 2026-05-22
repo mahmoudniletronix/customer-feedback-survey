@@ -22,6 +22,10 @@ import {
   Plus,
   QrCode,
   Trash2,
+  Calendar,
+  Clock,
+  Activity,
+  Building2,
 } from 'lucide-angular';
 import { AuthStore } from '../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -113,6 +117,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   readonly plusIcon = Plus;
   readonly qrCodeIcon = QrCode;
   readonly deleteIcon = Trash2;
+  readonly calendarIcon = Calendar;
+  readonly clockIcon = Clock;
+  readonly activityIcon = Activity;
+  readonly buildingIcon = Building2;
   readonly copiedPublicUrl = signal(false);
   readonly editModalOpen = signal(false);
   readonly canUpdate = computed(() => this.authStore.canManageAnonymousTemplates('Update'));
@@ -151,6 +159,21 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       child: questionsByInstanceId.get(condition.childAnonymousTemplateQuestionId) ?? null,
     }));
   });
+
+  readonly conditionViewsByParent = computed<ReadonlyMap<string, readonly ConditionView[]>>(() => {
+    const groupedConditions = new Map<string, ConditionView[]>();
+
+    this.conditionViews().forEach((conditionView) => {
+      const parentId = conditionView.condition.parentAnonymousTemplateQuestionId;
+      groupedConditions.set(parentId, [...(groupedConditions.get(parentId) ?? []), conditionView]);
+    });
+
+    return groupedConditions;
+  });
+
+  readonly orphanConditionViews = computed<readonly ConditionView[]>(() =>
+    this.conditionViews().filter((conditionView) => conditionView.parent === null),
+  );
 
   ngOnInit(): void {
     const anonymousTemplateId = this.route.snapshot.paramMap.get('anonymousTemplateId') ?? '';
@@ -412,8 +435,91 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     return this.localizedText(input.labelEn ?? input.name, input.labelAr, input.name);
   }
 
+  customInputValidationText(input: {
+    type: AnonymousTemplateCustomInputType;
+    minLength: number | null;
+    maxLength: number | null;
+    minValue: number | null;
+    maxValue: number | null;
+  }): string {
+    const validationParts: string[] = [];
+
+    if (input.type === 1) {
+      if (input.minLength !== null) {
+        validationParts.push(
+          `${this.i18n.translate('branchTemplates.customInputMinLength')}: ${input.minLength}`,
+        );
+      }
+      if (input.maxLength !== null) {
+        validationParts.push(
+          `${this.i18n.translate('branchTemplates.customInputMaxLength')}: ${input.maxLength}`,
+        );
+      }
+    } else {
+      if (input.minValue !== null) {
+        validationParts.push(
+          `${this.i18n.translate('branchTemplates.customInputMinValue')}: ${input.minValue}`,
+        );
+      }
+      if (input.maxValue !== null) {
+        validationParts.push(
+          `${this.i18n.translate('branchTemplates.customInputMaxValue')}: ${input.maxValue}`,
+        );
+      }
+    }
+
+    return validationParts.length > 0
+      ? validationParts.join(' / ')
+      : this.i18n.translate('anonymousTemplates.noValidationLimits');
+  }
+
+  customInputTypeDisplayName(typeName: string): string {
+    const normalizedTypeName = typeName.trim().toLowerCase();
+
+    if (normalizedTypeName === 'integer') {
+      return this.i18n.language() === 'ar' ? 'رقم صحيح' : 'Integer';
+    }
+
+    if (normalizedTypeName === 'string') {
+      return this.i18n.language() === 'ar' ? 'نص' : 'Text';
+    }
+
+    return typeName || '-';
+  }
+
   questionDisplayText(question: { textEn: string | null; textAr?: string | null }): string {
     return this.localizedText(question.textEn, question.textAr);
+  }
+
+  questionTypeDisplayName(typeName: string): string {
+    const normalizedTypeName = typeName.trim().toLowerCase();
+    const isArabic = this.i18n.language() === 'ar';
+
+    if (normalizedTypeName === 'singlechoice' || normalizedTypeName === 'single choice') {
+      return isArabic ? 'اختيار واحد' : 'Single choice';
+    }
+
+    if (normalizedTypeName === 'singlechoiceoption' || normalizedTypeName === 'single choice option') {
+      return isArabic ? 'اختيار محدد' : 'Selected option';
+    }
+
+    if (normalizedTypeName === 'multichoice' || normalizedTypeName === 'multi choice') {
+      return isArabic ? 'اختيار متعدد' : 'Multi choice';
+    }
+
+    if (normalizedTypeName === 'freetext' || normalizedTypeName === 'free text') {
+      return isArabic ? 'إجابة نصية' : 'Free text';
+    }
+
+    if (normalizedTypeName === 'smiles') {
+      return isArabic ? 'تقييم بالوجوه' : 'Smiles';
+    }
+
+    if (normalizedTypeName === 'stars' || normalizedTypeName === 'starrating') {
+      return isArabic ? 'تقييم بالنجوم' : 'Star rating';
+    }
+
+    return typeName || '-';
   }
 
   questionGroupDisplayName(question: {
@@ -427,11 +533,39 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     return this.localizedText(option.textEn, option.textAr);
   }
 
+  conditionsForQuestion(question: AnonymousTemplateQuestion): readonly ConditionView[] {
+    return this.conditionViewsByParent().get(question.anonymousTemplateQuestionId) ?? [];
+  }
+
   conditionQuestionDisplayText(
     question: AnonymousTemplateQuestion | null,
-    fallbackId: string,
+    _fallbackId: string,
   ): string {
-    return question ? this.questionDisplayText(question) : fallbackId;
+    return question ? this.questionDisplayText(question) : '-';
+  }
+
+  conditionTriggerDisplay(conditionView: ConditionView): string {
+    const triggerType = this.questionTypeDisplayName(conditionView.condition.triggerTypeName);
+    const selectedOption = conditionView.parent?.options.find(
+      (option) => option.optionId === conditionView.condition.selectedQuestionOptionId,
+    );
+    const selectedOptionText = selectedOption ? this.optionDisplayText(selectedOption) : '';
+    const selectedOptionValue =
+      selectedOption?.value ?? conditionView.condition.triggerValue ?? null;
+
+    if (selectedOptionText.length > 0 && selectedOptionValue !== null) {
+      return `${triggerType} - ${selectedOptionText} - ${this.i18n.translate('anonymousTemplates.value')} ${selectedOptionValue}`;
+    }
+
+    if (selectedOptionText.length > 0) {
+      return `${triggerType} - ${selectedOptionText}`;
+    }
+
+    if (selectedOptionValue !== null) {
+      return `${triggerType} - ${this.i18n.translate('anonymousTemplates.value')} ${selectedOptionValue}`;
+    }
+
+    return triggerType;
   }
 
   private localizedText(

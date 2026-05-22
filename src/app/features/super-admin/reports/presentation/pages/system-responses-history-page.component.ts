@@ -15,6 +15,7 @@ import { SystemResponseDetailsModalComponent } from '../components/system-respon
 import { SystemReportsStore } from '../state/system-reports.store';
 
 type BooleanFilterValue = '' | 'true' | 'false';
+type ScoreStatus = 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored';
 
 @Component({
   selector: 'app-system-responses-history-page',
@@ -126,15 +127,27 @@ export class SystemResponsesHistoryPageComponent implements OnInit {
   }
 
   scoreLabel(row: SystemResponseListItem): string {
-    if (!row.isScored) return 'Not Scored';
-    return `${this.scoreStatus(row)} · ${row.scorePercentage.toFixed(1)}%`;
+    if (!row.isScored) return this.i18n.translate('systemResponsesHistory.notScored');
+    return `${this.i18n.translate(this.scoreStatusLabelKey(row))} - ${row.scorePercentage.toFixed(1)}%`;
   }
 
-  scoreStatus(row: SystemResponseListItem): 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored' {
+  scoreStatus(row: SystemResponseListItem): ScoreStatus {
     if (!row.isScored) return 'Not Scored';
     if (row.scorePercentage >= 80) return 'Healthy';
     if (row.scorePercentage >= 60) return 'Neutral';
     return 'Critical';
+  }
+
+  scoreStatusLabelKey(row: SystemResponseListItem): string {
+    const status = this.scoreStatus(row);
+    if (status === 'Healthy') return 'systemResponsesHistory.healthy';
+    if (status === 'Neutral') return 'systemResponsesHistory.neutral';
+    if (status === 'Critical') return 'systemResponsesHistory.critical';
+    return 'systemResponsesHistory.notScored';
+  }
+
+  booleanLabel(value: boolean): string {
+    return this.i18n.translate(value ? 'systemResponsesHistory.yes' : 'systemResponsesHistory.no');
   }
 
   private toOptionalNumber(value: string): number | undefined {

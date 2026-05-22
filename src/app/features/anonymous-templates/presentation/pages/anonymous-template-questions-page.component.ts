@@ -68,7 +68,7 @@ interface AnonymousTemplateSelectionGroup {
 export class AnonymousTemplateQuestionsPageComponent implements OnInit {
   readonly anonymousTemplatesStore = inject(AnonymousTemplatesStore);
   private readonly authStore = inject(AuthStore);
-  private readonly i18n = inject(I18nService);
+  readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
 

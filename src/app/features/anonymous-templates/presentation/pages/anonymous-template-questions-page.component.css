@@ -1,1 +1,17 @@
-/* Tailwind utility classes are used in the template for this builder screen. */
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+:host ::ng-deep app-card {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+:host ::ng-deep app-anonymous-template-conditional-logic {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}

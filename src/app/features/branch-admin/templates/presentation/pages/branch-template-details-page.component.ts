@@ -13,9 +13,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   ArrowLeft,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Circle,
+  Eye,
+  FileAudio,
   FileText,
   ListChecks,
+  MessageSquareText,
   Pencil,
   Save,
   Trash2,
@@ -36,8 +41,19 @@ import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { QuestionAnswerPreviewComponent } from '../../../../../shared/ui/question-answer-preview/question-answer-preview.component';
 import {
+  BranchSurveyResponseCustomInputPreview,
+  BranchSurveyResponseListItem,
+} from '../../../dashboard/domain/branch-dashboard.model';
+import { BranchResponseDetailsModalComponent } from '../../../dashboard/presentation/components/branch-response-details-modal.component';
+import { BranchResponsesHistoryStore } from '../../../dashboard/presentation/state/branch-responses-history.store';
+import {
+  BranchTemplateQuestionTreeComponent,
+  BranchTemplateQuestionTreeItem,
+} from '../components/branch-template-question-tree.component';
+import {
   BranchTemplate,
   BranchTemplateDetailsQuestion,
+  BranchTemplateQuestionGroupSelection,
   BranchTemplateQuestionSelectionItem,
 } from '../../domain/branch-template.model';
 import { BranchTemplatesStore } from '../state/branch-templates.store';
@@ -101,6 +117,8 @@ interface TemplateDetailsQuestionView {
   standalone: true,
   imports: [
     ButtonComponent,
+    BranchResponseDetailsModalComponent,
+    BranchTemplateQuestionTreeComponent,
     CardComponent,
     DatePipe,
     IconComponent,
@@ -115,6 +133,7 @@ interface TemplateDetailsQuestionView {
 })
 export class BranchTemplateDetailsPageComponent implements OnInit {
   readonly templatesStore = inject(BranchTemplatesStore);
+  readonly responsesStore = inject(BranchResponsesHistoryStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
@@ -123,11 +142,16 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
+  readonly chevronLeftIcon = ChevronLeft;
+  readonly chevronRightIcon = ChevronRight;
   readonly checkedIcon = CheckCircle2;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
+  readonly eyeIcon = Eye;
+  readonly voiceIcon = FileAudio;
   readonly fileTextIcon = FileText;
   readonly listChecksIcon = ListChecks;
+  readonly complaintIcon = MessageSquareText;
   readonly plusIcon = Plus;
   readonly saveIcon = Save;
   readonly unselectedIcon = Circle;
@@ -160,6 +184,20 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     [...(this.templatesStore.selectedTemplate()?.customInputs ?? [])]
       .filter((customInput) => customInput.isActive)
       .sort((first, second) => first.order - second.order),
+  );
+  readonly questionTreeQuestions = computed<readonly BranchTemplateQuestionTreeItem[]>(() => {
+    const selectionGroups = this.templatesStore.questionsSelection()?.groups ?? [];
+    if (selectionGroups.length > 0) {
+      return selectionGroups.flatMap((group) => this.toQuestionTreeItems(group));
+    }
+
+    return this.templatesStore.selectedTemplate()?.questions ?? [];
+  });
+  readonly questionTreeConditions = computed(
+    () =>
+      this.templatesStore.questionsSelection()?.questionConditions ??
+      this.templatesStore.selectedTemplate()?.questionConditions ??
+      [],
   );
 
   readonly templateForm = this.formBuilder.nonNullable.group({
@@ -217,6 +255,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
     this.templatesStore.loadDetails(templateId);
     this.templatesStore.loadQuestionsSelection(templateId);
+    this.responsesStore.load({ templateId, pageNumber: 1, pageSize: 10 });
   }
 
   goBack(): void {
@@ -358,6 +397,14 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     void this.router.navigate(['/branch-admin/templates', template.templateId, 'questions']);
   }
 
+  changeResponsesPage(pageNumber: number): void {
+    this.responsesStore.goToPage(pageNumber);
+  }
+
+  openResponseDetails(row: BranchSurveyResponseListItem): void {
+    this.responsesStore.loadResponseDetails(row.surveyResponseId);
+  }
+
   answerTypeLabel(type: QuestionAnswerTypeInput): string {
     const labelKey = questionAnswerTypeLabelKey(type);
     if (labelKey) {
@@ -375,6 +422,55 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     return [...question.options]
       .filter((option) => option.isActive)
       .sort((first, second) => first.order - second.order);
+  }
+
+  scoreStatus(row: BranchSurveyResponseListItem): 'Healthy' | 'Neutral' | 'Critical' | 'Not Scored' {
+    if (!row.isScored) {
+      return 'Not Scored';
+    }
+    if (row.scorePercentage >= 80) {
+      return 'Healthy';
+    }
+    if (row.scorePercentage >= 60) {
+      return 'Neutral';
+    }
+    return 'Critical';
+  }
+
+  scoreLabel(row: BranchSurveyResponseListItem): string {
+    return row.isScored
+      ? `${row.scorePercentage.toFixed(1)}%`
+      : this.i18n.translate('branchResponsesHistory.notScored');
+  }
+
+  booleanLabel(value: boolean): string {
+    return this.i18n.translate(value ? 'branchResponsesHistory.yes' : 'branchResponsesHistory.no');
+  }
+
+  customInputLabel(input: BranchSurveyResponseCustomInputPreview): string {
+    return `${input.name}: ${input.value || '-'}`;
+  }
+
+  operatorName(row: BranchSurveyResponseListItem): string {
+    return this.localized(row.operatorNameEn, row.operatorNameAr);
+  }
+
+  responsesPageStart(): number {
+    const pagination = this.responsesStore.responses();
+    if (!pagination || pagination.totalItems === 0) {
+      return 0;
+    }
+
+    return (pagination.currentPage - 1) * pagination.pageSize + 1;
+  }
+
+  responsesPageEnd(): number {
+    const pagination = this.responsesStore.responses();
+    if (!pagination) {
+      return 0;
+    }
+
+    return Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems);
   }
 
   customInputTypeLabel(type: BranchTemplate['customInputs'][number]['type']): string {
@@ -411,6 +507,41 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     }
 
     return option.textAr ?? '';
+  }
+
+  private toQuestionTreeItems(
+    group: BranchTemplateQuestionGroupSelection,
+  ): readonly BranchTemplateQuestionTreeItem[] {
+    return group.questions
+      .filter(
+        (
+          question,
+        ): question is BranchTemplateQuestionSelectionItem & { templateQuestionId: string } =>
+          question.isSelected &&
+          question.isActive &&
+          question.templateQuestionId !== null &&
+          question.templateQuestionId.length > 0,
+      )
+      .map((question) => ({
+        templateQuestionId: question.templateQuestionId,
+        questionId: question.questionId,
+        textEn: question.textEn,
+        textAr: question.textAr,
+        type: question.type,
+        typeName: question.typeName,
+        groupNameEn: group.nameEn,
+        groupNameAr: group.nameAr,
+        order: question.order,
+        options: question.options,
+      }));
+  }
+
+  private localized(englishText: string, arabicText: string | null | undefined): string {
+    if (this.i18n.language() === 'ar') {
+      return arabicText || englishText || '-';
+    }
+
+    return englishText || arabicText || '-';
   }
 
   templateFieldError(field: TemplateFieldName): string {

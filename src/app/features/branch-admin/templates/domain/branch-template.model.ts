@@ -24,6 +24,9 @@ export type BranchTemplateStatus = 'Draft' | 'Published' | 'Archived' | string;
 export interface BranchTemplate {
   templateId: string;
   branchId: string;
+  branchNameEn: string;
+  branchNameAr: string | null;
+  branchCode: string;
   nameEn: string;
   nameAr: string;
   description: string;
@@ -197,6 +200,9 @@ export interface UpdateBranchTemplateCustomInputPayload extends CreateBranchTemp
 export interface BranchTemplateApiResponse {
   templateId?: string | number;
   branchId?: string | number;
+  branchNameEn?: string | null;
+  branchNameAr?: string | null;
+  branchCode?: string | null;
   nameEn?: string;
   nameAr?: string | null;
   description?: string | null;

@@ -14,6 +14,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
+import { finalize, take } from 'rxjs';
 import {
   AlertCircle,
   AlertTriangle,
@@ -38,9 +39,13 @@ import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminBranchStore } from '../../../branch/presentation/state/branch-admin-branch.store';
 import { BranchAdminTemplate } from '../../../branch/domain/branch-admin-branch.model';
+import { BranchTemplate } from '../../../templates/domain/branch-template.model';
+import { BranchTemplatesService } from '../../../templates/data/branch-templates.service';
+import { BranchTemplateQuestionTreeComponent } from '../../../templates/presentation/components/branch-template-question-tree.component';
 import { BranchResponseDetailsModalComponent } from '../components/branch-response-details-modal.component';
 import {
   BranchDashboardCriticalResponse,
@@ -61,17 +66,21 @@ Chart.register(...registerables);
     DatePipe,
     DecimalPipe,
     IconComponent,
+    ModalComponent,
     BranchResponseDetailsModalComponent,
+    BranchTemplateQuestionTreeComponent,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
   ],
   templateUrl: './branch-dashboard-page.component.html',
+  providers: [BranchTemplatesService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   readonly dashboardStore = inject(BranchDashboardStore);
   readonly branchStore = inject(BranchAdminBranchStore);
+  private readonly branchTemplatesService = inject(BranchTemplatesService);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
@@ -99,6 +108,11 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
 
   readonly selectedSegmentName = signal('');
   readonly advancedFiltersOpen = signal(true);
+  readonly customInputSegmentsVisible = false;
+  readonly templateDetailsOpen = signal(false);
+  readonly templateDetailsLoading = signal(false);
+  readonly templateDetailsError = signal<string | null>(null);
+  readonly selectedTemplateDetails = signal<BranchTemplate | null>(null);
   readonly selectedSegment = computed<BranchDashboardCustomInputSegment | null>(() => {
     const dashboard = this.dashboardStore.dashboard();
     const segments = dashboard?.customInputSegments ?? [];
@@ -171,6 +185,9 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     to: [''],
     templateId: [''],
     groupBy: ['Day' as BranchDashboardGroupBy],
+    topQuestionsCount: ['5'],
+    criticalResponsesCount: ['10'],
+    criticalScoreThreshold: ['40'],
   });
 
   constructor() {
@@ -215,9 +232,9 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       to: value.to || undefined,
       templateId: value.templateId || undefined,
       groupBy: value.groupBy,
-      topQuestionsCount: 5,
-      criticalResponsesCount: 10,
-      criticalScoreThreshold: 40,
+      topQuestionsCount: this.toOptionalPositiveInteger(value.topQuestionsCount),
+      criticalResponsesCount: this.toOptionalPositiveInteger(value.criticalResponsesCount),
+      criticalScoreThreshold: this.toOptionalPercentage(value.criticalScoreThreshold),
     });
   }
 
@@ -227,6 +244,9 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
       to: '',
       templateId: '',
       groupBy: 'Day',
+      topQuestionsCount: '5',
+      criticalResponsesCount: '10',
+      criticalScoreThreshold: '40',
     });
     this.dashboardStore.load();
   }
@@ -240,12 +260,58 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
+  openTemplateDetails(event: Event, templateId: string): void {
+    event.stopPropagation();
+    if (!templateId || this.templateDetailsLoading()) {
+      return;
+    }
+
+    this.templateDetailsOpen.set(true);
+    this.templateDetailsLoading.set(true);
+    this.templateDetailsError.set(null);
+    this.selectedTemplateDetails.set(null);
+
+    this.branchTemplatesService
+      .getById(templateId)
+      .pipe(
+        take(1),
+        finalize(() => this.templateDetailsLoading.set(false)),
+      )
+      .subscribe({
+        next: (template) => {
+          this.selectedTemplateDetails.set(template.templateId.length > 0 ? template : null);
+          if (template.templateId.length === 0) {
+            this.templateDetailsError.set('branchTemplates.notFound');
+          }
+        },
+        error: () => {
+          this.templateDetailsError.set('branchTemplates.detailsLoadError');
+        },
+      });
+  }
+
+  closeTemplateDetails(): void {
+    this.templateDetailsOpen.set(false);
+    this.templateDetailsLoading.set(false);
+    this.templateDetailsError.set(null);
+    this.selectedTemplateDetails.set(null);
+  }
+
   templateName(template: BranchAdminTemplate): string {
     return this.localized(template.nameEn, template.nameAr);
   }
 
   performanceTemplateName(item: BranchDashboardTemplatePerformance): string {
     return this.localized(item.templateNameEn, item.templateNameAr);
+  }
+
+  templateBranchName(template: BranchTemplate): string {
+    const branchName = this.localized(template.branchNameEn, template.branchNameAr);
+    return template.branchCode ? `${branchName} (${template.branchCode})` : branchName;
+  }
+
+  templateCustomInputLabel(customInput: BranchTemplate['customInputs'][number]): string {
+    return this.localized(customInput.labelEn ?? customInput.name, customInput.labelAr);
   }
 
   questionTemplateName(item: BranchDashboardQuestionInsight): string {
@@ -309,6 +375,24 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
     }
 
     return englishText || arabicText || '-';
+  }
+
+  private toOptionalPositiveInteger(value: string): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return undefined;
+    }
+
+    return parsed;
+  }
+
+  private toOptionalPercentage(value: string): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return undefined;
+    }
+
+    return Math.min(Math.max(parsed, 0), 100);
   }
 
   private renderTrendChart(

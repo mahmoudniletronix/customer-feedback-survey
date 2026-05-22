@@ -220,6 +220,52 @@ export interface AnonymousTemplateResponsesPageResult {
   data: readonly AnonymousTemplateResponseListItem[];
 }
 
+export type BranchAnonymousResponsesOrderSort = 'Newest' | 'Oldest' | '';
+
+export interface BranchAnonymousResponsesQuery {
+  anonymousTemplateId?: string;
+  from?: string;
+  to?: string;
+  minScorePercentage?: number;
+  maxScorePercentage?: number;
+  hasComplaint?: boolean;
+  hasVoice?: boolean;
+  searchText?: string;
+  orderSort?: BranchAnonymousResponsesOrderSort;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface BranchAnonymousResponsesPageResult {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
+  data: readonly BranchAnonymousResponseListItem[];
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export interface BranchAnonymousResponseListItem {
+  anonymousSurveyResponseId: string;
+  anonymousTemplateId: string;
+  anonymousTemplateNameEn: string;
+  anonymousTemplateNameAr: string | null;
+  submittedOnUtc: string;
+  scorePercentage: number | null;
+  isScored: boolean;
+  hasComplaint: boolean;
+  hasVoice: boolean;
+  customInputsPreview: readonly BranchAnonymousResponseCustomInputPreview[];
+}
+
+export interface BranchAnonymousResponseCustomInputPreview {
+  name: string;
+  labelEn: string | null;
+  labelAr: string | null;
+  value: string;
+}
+
 export interface AnonymousTemplateResponseListItem {
   anonymousSurveyResponseId: string;
   anonymousTemplateId: string;
@@ -233,6 +279,8 @@ export interface AnonymousTemplateResponseListItem {
 }
 
 export interface AnonymousTemplateResponseDetails extends AnonymousTemplateResponseListItem {
+  templateNameEn: string;
+  templateNameAr: string | null;
   customInputValues: readonly AnonymousTemplateResponseCustomInputValue[];
   answers: readonly AnonymousTemplateResponseAnswer[];
 }
@@ -240,11 +288,15 @@ export interface AnonymousTemplateResponseDetails extends AnonymousTemplateRespo
 export interface AnonymousTemplateResponseCustomInputValue {
   customInputValueId: string;
   anonymousTemplateCustomInputId: string;
+  name: string;
+  labelEn: string | null;
+  labelAr: string | null;
   nameSnapshot: string;
   type: AnonymousTemplateCustomInputType;
   typeName: string;
   stringValue: string | null;
   integerValue: number | null;
+  displayValue: string;
 }
 
 export interface AnonymousTemplateResponseAnswer {
@@ -264,6 +316,7 @@ export interface AnonymousTemplateResponseAnswer {
   smileValue: number | null;
   textAnswer: string | null;
   voiceFileName: string | null;
+  voiceUrl: string | null;
 }
 
 export interface AnonymousTemplatesListQuery {
@@ -477,9 +530,41 @@ export interface AnonymousTemplateResponsesPageApiResponse {
   data?: readonly AnonymousTemplateResponseApiResponse[];
 }
 
+export interface BranchAnonymousResponsesPageApiResponse {
+  currentPage?: number;
+  pageSize?: number;
+  totalPages?: number;
+  totalItems?: number;
+  data?: readonly BranchAnonymousResponseApiResponse[];
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+}
+
+export interface BranchAnonymousResponseApiResponse {
+  anonymousSurveyResponseId?: string | number;
+  anonymousTemplateId?: string | number;
+  anonymousTemplateNameEn?: string | null;
+  anonymousTemplateNameAr?: string | null;
+  submittedOnUtc?: string | null;
+  scorePercentage?: number | null;
+  isScored?: boolean | null;
+  hasComplaint?: boolean | null;
+  hasVoice?: boolean | null;
+  customInputsPreview?: readonly BranchAnonymousResponseCustomInputPreviewApiResponse[];
+}
+
+export interface BranchAnonymousResponseCustomInputPreviewApiResponse {
+  name?: string | null;
+  labelEn?: string | null;
+  labelAr?: string | null;
+  value?: string | number | null;
+}
+
 export interface AnonymousTemplateResponseApiResponse {
   anonymousSurveyResponseId?: string | number;
   anonymousTemplateId?: string | number;
+  templateNameEn?: string | null;
+  templateNameAr?: string | null;
   submittedOnUtc?: string | null;
   actualScore?: number | null;
   maxScore?: number | null;
@@ -487,6 +572,7 @@ export interface AnonymousTemplateResponseApiResponse {
   isScored?: boolean;
   answersCount?: number | null;
   customInputValuesCount?: number | null;
+  customInputs?: readonly AnonymousTemplateResponseCustomInputValueApiResponse[];
   customInputValues?: readonly AnonymousTemplateResponseCustomInputValueApiResponse[];
   answers?: readonly AnonymousTemplateResponseAnswerApiResponse[];
 }
@@ -494,11 +580,15 @@ export interface AnonymousTemplateResponseApiResponse {
 export interface AnonymousTemplateResponseCustomInputValueApiResponse {
   customInputValueId?: string | number;
   anonymousTemplateCustomInputId?: string | number;
+  name?: string | null;
+  labelEn?: string | null;
+  labelAr?: string | null;
   nameSnapshot?: string | null;
   type?: number | string | null;
   typeName?: string | null;
   stringValue?: string | null;
   integerValue?: number | null;
+  value?: string | number | null;
 }
 
 export interface AnonymousTemplateResponseAnswerApiResponse {
@@ -510,6 +600,7 @@ export interface AnonymousTemplateResponseAnswerApiResponse {
   questionType?: number | string | null;
   questionTypeName?: string | null;
   questionOrder?: number | null;
+  order?: number | null;
   selectedQuestionOptionId?: string | number | null;
   selectedOptionTextEn?: string | null;
   selectedOptionTextAr?: string | null;
@@ -518,6 +609,7 @@ export interface AnonymousTemplateResponseAnswerApiResponse {
   smileValue?: number | null;
   textAnswer?: string | null;
   voiceFileName?: string | null;
+  voiceUrl?: string | null;
 }
 
 export type AnonymousTemplateDashboardGroupBy = 'Day' | 'Month';

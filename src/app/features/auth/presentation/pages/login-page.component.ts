@@ -4,10 +4,10 @@ import { LogIn } from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { AuthStore } from '../state/auth.store';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
-import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { AppFooterComponent } from '../../../../shared/ui/app-footer/app-footer.component';
 
 @Component({
   selector: 'app-login-page',
@@ -15,26 +15,25 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   imports: [
     ReactiveFormsModule,
     ButtonComponent,
-    CardComponent,
     InputComponent,
     IconComponent,
-    TranslatePipe
+    TranslatePipe,
+    AppFooterComponent,
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
   readonly authStore = inject(AuthStore);
   readonly i18n = inject(I18nService);
   readonly loginIcon = LogIn;
-  readonly currentYear = new Date().getFullYear();
 
   private readonly formBuilder = inject(FormBuilder);
 
   readonly form = this.formBuilder.nonNullable.group({
     userNameOrEmail: ['', [Validators.required]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   userNameOrEmailError(): string {

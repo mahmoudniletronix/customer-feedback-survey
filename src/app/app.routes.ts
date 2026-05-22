@@ -1,8 +1,26 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component';
+import { AuthStore } from './features/auth/presentation/state/auth.store';
+
+const dashboardRedirectGuard: CanActivateFn = () => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+  const targetPath = authStore.redirectPath();
+
+  if (targetPath !== '/dashboard') {
+    return router.createUrlTree([targetPath]);
+  }
+
+  if (authStore.role() === 'SUPER_ADMIN') {
+    return router.createUrlTree(['/branches']);
+  }
+
+  return router.createUrlTree(['/auth/login']);
+};
 
 export const routes: Routes = [
   {
@@ -30,10 +48,8 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        loadChildren: () =>
-          import('./features/super-admin/dashboard/dashboard.routes').then(
-            (m) => m.DASHBOARD_ROUTES,
-          ),
+        canActivate: [dashboardRedirectGuard],
+        children: [],
       },
       {
         path: 'branches',
@@ -102,6 +118,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/department-admin/reports/department-reports.routes').then(
             (m) => m.DEPARTMENT_REPORTS_ROUTES,
+          ),
+      },
+      {
+        path: 'reports/survey-dashboard',
+        loadChildren: () =>
+          import('./features/reports/survey-dashboard/survey-dashboard.routes').then(
+            (m) => m.SURVEY_DASHBOARD_ROUTES,
           ),
       },
       {

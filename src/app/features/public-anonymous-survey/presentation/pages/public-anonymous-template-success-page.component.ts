@@ -4,12 +4,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CheckCircle2, ClipboardCheck, RotateCcw } from 'lucide-angular';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { AppFooterComponent } from '../../../../shared/ui/app-footer/app-footer.component';
 import { PublicAnonymousSubmissionResult } from '../../domain/public-anonymous-template.model';
 
 @Component({
   selector: 'app-public-anonymous-template-success-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, IconComponent, RouterLink, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, IconComponent, RouterLink, TranslatePipe, AppFooterComponent],
   templateUrl: './public-anonymous-template-success-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

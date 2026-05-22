@@ -17,11 +17,12 @@ import { I18nService } from '../../core/services/i18n.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { SidebarComponent } from './sidebar.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
+import { AppFooterComponent } from '../../shared/ui/app-footer/app-footer.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, IconComponent, TranslatePipe],
+  imports: [RouterOutlet, SidebarComponent, IconComponent, TranslatePipe, AppFooterComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

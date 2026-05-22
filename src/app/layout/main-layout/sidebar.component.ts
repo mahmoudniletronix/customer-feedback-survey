@@ -7,7 +7,6 @@ import {
   FileText,
   HelpCircle,
   History,
-  LayoutDashboard,
   LucideIconData,
   MessageSquareText,
   Network,
@@ -36,6 +35,7 @@ interface MenuItem {
     | 'globalQuestionGroups'
     | 'globalQuestions'
     | 'anonymousTemplates'
+    | 'surveyDashboard'
     | 'systemReports'
     | 'departmentReports'
     | 'branchDashboard';
@@ -44,6 +44,15 @@ interface MenuItem {
 }
 
 const MENU_ITEMS: readonly MenuItem[] = [
+  {
+    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
+    path: '/reports/survey-dashboard',
+    icon: ChartNoAxesColumnIncreasing,
+    roles: [],
+    feature: 'surveyDashboard',
+    exact: true,
+  },
   {
     label: 'System Dashboard',
     labelKey: 'nav.systemDashboard',
@@ -71,25 +80,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: [],
     feature: 'departmentReports',
     exact: true,
-  },
-  {
-    label: 'Dashboard',
-    labelKey: 'nav.dashboard',
-    path: '/branch-admin',
-    icon: LayoutDashboard,
-    roles: [],
-    feature: 'branchDashboard',
-    exact: true,
-  },
-  {
-    label: 'Responses History',
-    labelKey: 'nav.responsesHistory',
-    path: '/branch-admin/responses',
-    icon: History,
-    roles: [],
-    feature: 'branchDashboard',
-    exact: true,
-    child: true,
   },
   {
     label: 'Templates PDF Report',
@@ -254,6 +244,9 @@ export class SidebarComponent {
     }
     if (feature === 'anonymousTemplates') {
       return this.authStore.canAccessAnonymousTemplates();
+    }
+    if (feature === 'surveyDashboard') {
+      return this.authStore.canAccessSurveyDashboard();
     }
     if (feature === 'systemReports') {
       return this.authStore.canAccessSystemReports();

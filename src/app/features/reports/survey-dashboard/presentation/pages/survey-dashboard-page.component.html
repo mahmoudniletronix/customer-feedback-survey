@@ -1,0 +1,607 @@
+<div class="w-full space-y-4">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-2">
+      <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#11A7C9]/10 text-[#11A7C9]">
+        <app-icon [icon]="chartIcon" [size]="15" />
+      </div>
+      <div>
+        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+          Survey Dashboard
+        </p>
+        <h1 class="text-sm font-black text-slate-950">Unified Survey Dashboard</h1>
+      </div>
+    </div>
+    <button
+      class="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+      type="button"
+      (click)="toggleAdvancedFilters()"
+    >
+      <app-icon [icon]="filterIcon" [size]="12" />
+      {{ advancedFiltersOpen() ? 'Hide Filters' : 'Show Filters' }}
+    </button>
+  </div>
+
+  <div
+    class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none"
+    [class.grid-rows-[1fr]]="advancedFiltersOpen()"
+    [class.grid-rows-[0fr]]="!advancedFiltersOpen()"
+    [class.opacity-100]="advancedFiltersOpen()"
+    [class.opacity-0]="!advancedFiltersOpen()"
+  >
+    <div class="min-h-0 overflow-hidden">
+      <section class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <form
+          class="flex flex-col gap-2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:flex-row sm:flex-wrap sm:items-end"
+          [formGroup]="filtersForm"
+          (ngSubmit)="applyFilters()"
+          [class.translate-y-0]="advancedFiltersOpen()"
+          [class.-translate-y-2]="!advancedFiltersOpen()"
+          [class.pointer-events-none]="!advancedFiltersOpen()"
+          [attr.aria-hidden]="!advancedFiltersOpen()"
+          [attr.inert]="advancedFiltersOpen() ? null : ''"
+        >
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">Source</span>
+            <select
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              formControlName="source"
+              (change)="onSourceChange()"
+            >
+              <option value="All">All</option>
+              <option value="Internal">Internal</option>
+              <option value="Anonymous">Anonymous</option>
+            </select>
+          </label>
+
+          @if (isSuperAdmin()) {
+            <label class="flex flex-col gap-0.5 sm:min-w-[12rem] sm:max-w-[16rem]">
+              <span class="text-[9px] font-bold text-slate-500">Branch</span>
+              <select
+                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                formControlName="branchId"
+                (change)="onBranchChange()"
+              >
+                <option value="">All branches</option>
+                @for (branch of store.branches(); track branch.id) {
+                  <option [value]="branch.id">{{ branchOptionName(branch) }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          @if (sourceSignal() === 'Internal') {
+            <label class="flex flex-col gap-0.5 sm:min-w-[12rem] sm:max-w-[18rem]">
+              <span class="text-[9px] font-bold text-slate-500">Template</span>
+              <select
+                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                formControlName="templateId"
+              >
+                <option value="">All internal templates</option>
+                @for (template of internalTemplateOptions(); track template.id) {
+                  <option [value]="template.id">{{ templateOptionName(template) }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          @if (sourceSignal() === 'Anonymous') {
+            <label class="flex flex-col gap-0.5 sm:min-w-[12rem] sm:max-w-[18rem]">
+              <span class="text-[9px] font-bold text-slate-500">Anonymous Template</span>
+              <select
+                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                formControlName="anonymousTemplateId"
+              >
+                <option value="">All anonymous templates</option>
+                @for (template of anonymousTemplateOptions(); track template.id) {
+                  <option [value]="template.id">{{ templateOptionName(template) }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">From</span>
+            <input
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="date"
+              formControlName="from"
+            />
+          </label>
+
+          <label class="flex flex-col gap-0.5 sm:min-w-[8rem]">
+            <span class="text-[9px] font-bold text-slate-500">To</span>
+            <input
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="date"
+              formControlName="to"
+            />
+          </label>
+
+          <label class="flex flex-col gap-0.5 sm:min-w-[6rem]">
+            <span class="text-[9px] font-bold text-slate-500">Group</span>
+            <select
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              formControlName="groupBy"
+            >
+              <option value="Day">Day</option>
+              <option value="Month">Month</option>
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-0.5 sm:min-w-[6.5rem]">
+            <span class="text-[9px] font-bold text-slate-500">Top Questions</span>
+            <input
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="number"
+              min="1"
+              formControlName="topQuestionsCount"
+            />
+          </label>
+
+          <label class="flex flex-col gap-0.5 sm:min-w-[7rem]">
+            <span class="text-[9px] font-bold text-slate-500">Critical Count</span>
+            <input
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="number"
+              min="1"
+              formControlName="criticalResponsesCount"
+            />
+          </label>
+
+          <label class="flex flex-col gap-0.5 sm:min-w-[7rem]">
+            <span class="text-[9px] font-bold text-slate-500">Critical Score</span>
+            <input
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="number"
+              min="0"
+              max="100"
+              formControlName="criticalScoreThreshold"
+            />
+          </label>
+
+          <div class="flex gap-1.5">
+            <app-button type="submit" size="sm" [loading]="store.loading()">
+              <app-icon [icon]="searchIcon" [size]="13" />
+              Apply
+            </app-button>
+            <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
+              Clear
+            </app-button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  @if (validationError()) {
+    <section class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+      {{ validationError() }}
+    </section>
+  }
+
+  @if (store.loading()) {
+    <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      @for (item of [1,2,3,4,5,6,7,8]; track item) {
+        <div class="h-24 animate-pulse rounded-xl border border-slate-200 bg-white"></div>
+      }
+    </section>
+  } @else if (store.error()) {
+    <section class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+      <div class="flex items-center gap-2">
+        <app-icon [icon]="alertIcon" [size]="16" />
+        <span>{{ store.error() }}</span>
+      </div>
+    </section>
+  } @else if (store.dashboard(); as dashboard) {
+    @if (store.isEmpty()) {
+      <section class="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
+        <app-icon class="mx-auto text-slate-300" [icon]="chartIcon" [size]="28" />
+        <p class="mt-3 text-sm font-black text-slate-900">No survey responses found</p>
+      </section>
+    } @else {
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Total Responses</p>
+          <p class="mt-1 text-2xl font-black text-slate-950">{{ dashboard.summary.totalResponses }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ dashboard.summary.scoredResponses }} scored / {{ dashboard.summary.unscoredResponses }} unscored
+          </p>
+        </article>
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Average Score</p>
+          <p class="mt-1 text-2xl font-black text-slate-950">{{ scoreLabel(dashboard.summary.averageScorePercentage) }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ dashboard.summary.satisfiedResponses }} satisfied / {{ dashboard.summary.unhappyResponses }} unhappy
+          </p>
+        </article>
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Internal Responses</p>
+          <p class="mt-1 text-2xl font-black text-slate-950">{{ dashboard.summary.internalResponses }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ dashboard.summary.activeInternalTemplatesCount }} active internal templates
+          </p>
+        </article>
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Anonymous Responses</p>
+          <p class="mt-1 text-2xl font-black text-slate-950">{{ dashboard.summary.anonymousResponses }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ dashboard.summary.activeAnonymousTemplatesCount }} active anonymous templates
+          </p>
+        </article>
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Complaints</p>
+          <p class="mt-1 text-2xl font-black text-rose-600">{{ dashboard.summary.complaintsCount }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">Requires follow-up</p>
+        </article>
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Voice Answers</p>
+          <p class="mt-1 text-2xl font-black text-cyan-600">{{ dashboard.summary.voiceAnswersCount }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">Audio feedback captured</p>
+        </article>
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Templates With Responses</p>
+          <p class="mt-1 text-2xl font-black text-slate-950">{{ dashboard.summary.templatesWithResponsesCount }}</p>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">Internal + anonymous coverage</p>
+        </article>
+        @if (isSuperAdmin()) {
+          <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+            <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Branches</p>
+            <p class="mt-1 text-2xl font-black text-slate-950">{{ dashboard.summary.branchesWithResponsesCount }} / {{ dashboard.summary.branchesCount }}</p>
+            <p class="mt-1 text-[11px] font-semibold text-slate-500">Branches with responses</p>
+          </article>
+        }
+      </section>
+
+      <section class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]">
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <div class="mb-3 flex items-center gap-2">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]">
+              <app-icon [icon]="trendIcon" [size]="15" />
+            </div>
+            <h2 class="text-sm font-black text-slate-950">Satisfaction Trend</h2>
+          </div>
+          @if (dashboard.satisfactionTrend.length > 0) {
+            <div class="h-72 min-w-0">
+              <canvas #trendCanvas></canvas>
+            </div>
+          } @else {
+            <p class="rounded-lg bg-slate-50 p-8 text-center text-xs font-semibold text-slate-500">
+              No trend data available.
+            </p>
+          }
+        </article>
+
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <div class="mb-3 flex items-center gap-2">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <app-icon [icon]="layersIcon" [size]="15" />
+            </div>
+            <h2 class="text-sm font-black text-slate-950">Source Breakdown</h2>
+          </div>
+          <div class="space-y-3">
+            @for (entry of [
+              { label: 'Internal', metrics: dashboard.sourceBreakdown.internal, color: 'bg-emerald-500' },
+              { label: 'Anonymous', metrics: dashboard.sourceBreakdown.anonymous, color: 'bg-violet-500' }
+            ]; track entry.label) {
+              <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black text-slate-900">{{ entry.label }}</p>
+                    <p class="text-[10px] font-semibold text-slate-500">
+                      {{ entry.metrics.responsesCount }} responses / {{ entry.metrics.scoredResponsesCount }} scored
+                    </p>
+                  </div>
+                  <span class="rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-slate-700">
+                    {{ breakdownAverage(entry.metrics) }}
+                  </span>
+                </div>
+                <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-white">
+                  <div class="h-full rounded-full {{ entry.color }}" [style.width]="barWidth(entry.metrics.averageScorePercentage)"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      </section>
+
+      @if (isSuperAdmin() && dashboard.branchesSummary.length > 0) {
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <div class="mb-3 flex items-center gap-2">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]">
+              <app-icon [icon]="branchIcon" [size]="15" />
+            </div>
+            <h2 class="text-sm font-black text-slate-950">Branches Summary</h2>
+          </div>
+          <div class="overflow-x-auto rounded-lg border border-slate-100">
+            <table class="w-full min-w-[48rem]">
+              <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+                <tr>
+                  <th class="px-3 py-3 text-start">Branch</th>
+                  <th class="px-3 py-3 text-start">Total</th>
+                  <th class="px-3 py-3 text-start">Internal</th>
+                  <th class="px-3 py-3 text-start">Anonymous</th>
+                  <th class="px-3 py-3 text-start">Score</th>
+                  <th class="px-3 py-3 text-start">Complaints</th>
+                  <th class="px-3 py-3 text-start">Voice</th>
+                  <th class="px-3 py-3 text-start">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs">
+                @for (branch of dashboard.branchesSummary; track branch.branchId) {
+                  <tr class="transition hover:bg-slate-50">
+                    <td class="px-3 py-3 font-black text-slate-950">{{ localized(branch.branchNameEn, branch.branchNameAr) }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ branch.totalResponses }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ branch.internalResponses }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ branch.anonymousResponses }}</td>
+                    <td class="px-3 py-3">
+                      <span class="rounded-full px-2 py-1 text-[10px] font-black {{ scoreClass(branch.averageScorePercentage) }}">
+                        {{ scoreLabel(branch.averageScorePercentage) }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ branch.complaintsCount }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ branch.voiceAnswersCount }}</td>
+                    <td class="px-3 py-3">
+                      @if (hasNavigation(branch.detailsNavigation)) {
+                        <button class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50" type="button" (click)="openNavigation(branch.detailsNavigation)">
+                          <app-icon [icon]="detailsIcon" [size]="13" />
+                          Open
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+
+      <section class="grid gap-4 xl:grid-cols-2">
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <div class="mb-3 flex items-center gap-2">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+              <app-icon [icon]="templateIcon" [size]="15" />
+            </div>
+            <h2 class="text-sm font-black text-slate-950">Template Performance</h2>
+          </div>
+          <div class="overflow-x-auto rounded-lg border border-slate-100">
+            <table class="w-full min-w-[52rem]">
+              <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+                <tr>
+                  <th class="px-3 py-3 text-start">Source</th>
+                  <th class="px-3 py-3 text-start">Template</th>
+                  <th class="px-3 py-3 text-start">Branch</th>
+                  <th class="px-3 py-3 text-start">Responses</th>
+                  <th class="px-3 py-3 text-start">Score</th>
+                  <th class="px-3 py-3 text-start">Complaints</th>
+                  <th class="px-3 py-3 text-start">Voice</th>
+                  <th class="px-3 py-3 text-start">Risk</th>
+                  <th class="px-3 py-3 text-start">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs">
+                @for (template of dashboard.templatePerformance; track template.source + template.templateId) {
+                  <tr class="transition hover:bg-slate-50">
+                    <td class="px-3 py-3">
+                      <span class="rounded-full px-2 py-1 text-[10px] font-black {{ sourceClass(template.source) }}">{{ sourceLabel(template.source) }}</span>
+                    </td>
+                    <td class="px-3 py-3">
+                      <p class="truncate font-black text-slate-950" [title]="localized(template.templateNameEn, template.templateNameAr)">
+                        {{ localized(template.templateNameEn, template.templateNameAr) }}
+                      </p>
+                    </td>
+                    <td class="px-3 py-3 font-semibold text-slate-600">{{ localized(template.branchNameEn, template.branchNameAr) }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ template.responsesCount }}</td>
+                    <td class="px-3 py-3">
+                      <span class="rounded-full px-2 py-1 text-[10px] font-black {{ scoreClass(template.averageScorePercentage) }}">
+                        {{ scoreLabel(template.averageScorePercentage) }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ template.complaintsCount }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ template.voiceAnswersCount }}</td>
+                    <td class="px-3 py-3">
+                      <span class="rounded-full px-2 py-1 text-[10px] font-black {{ riskClass(template.riskLevel) }}">{{ template.riskLevel }}</span>
+                    </td>
+                    <td class="px-3 py-3">
+                      @if (hasNavigation(template.detailsNavigation)) {
+                        <button class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50" type="button" (click)="openNavigation(template.detailsNavigation)">
+                          <app-icon [icon]="detailsIcon" [size]="13" />
+                          Responses
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td class="px-3 py-8 text-center text-xs font-semibold text-slate-500" colspan="9">No template performance data.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+          <div class="mb-3 flex items-center gap-2">
+            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+              <app-icon [icon]="questionsIcon" [size]="15" />
+            </div>
+            <h2 class="text-sm font-black text-slate-950">Lowest Rated Questions</h2>
+          </div>
+          <div class="overflow-x-auto rounded-lg border border-slate-100">
+            <table class="w-full min-w-[52rem]">
+              <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+                <tr>
+                  <th class="px-3 py-3 text-start">Source</th>
+                  <th class="px-3 py-3 text-start">Question</th>
+                  <th class="px-3 py-3 text-start">Template</th>
+                  <th class="px-3 py-3 text-start">Branch</th>
+                  <th class="px-3 py-3 text-start">Type</th>
+                  <th class="px-3 py-3 text-start">Answers</th>
+                  <th class="px-3 py-3 text-start">Avg Value</th>
+                  <th class="px-3 py-3 text-start">Avg Score</th>
+                  <th class="px-3 py-3 text-start">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs">
+                @for (question of dashboard.lowestRatedQuestions; track question.source + question.questionId) {
+                  <tr class="transition hover:bg-slate-50">
+                    <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-black {{ sourceClass(question.source) }}">{{ sourceLabel(question.source) }}</span></td>
+                    <td class="px-3 py-3">
+                      <p class="line-clamp-2 font-black text-slate-950">{{ localized(question.questionTextEn, question.questionTextAr) }}</p>
+                    </td>
+                    <td class="px-3 py-3 font-semibold text-slate-600">{{ localized(question.templateNameEn, question.templateNameAr) }}</td>
+                    <td class="px-3 py-3 font-semibold text-slate-600">{{ localized(question.branchNameEn, question.branchNameAr) }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-600">{{ question.questionTypeName || question.questionType }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ question.answersCount }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-700">{{ question.averageValue === null ? 'No Data' : (question.averageValue | number: '1.0-2') }}</td>
+                    <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-black {{ scoreClass(question.averageScorePercentage) }}">{{ scoreLabel(question.averageScorePercentage) }}</span></td>
+                    <td class="px-3 py-3">
+                      @if (hasNavigation(question.detailsNavigation)) {
+                        <button class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50" type="button" (click)="openNavigation(question.detailsNavigation)">
+                          <app-icon [icon]="detailsIcon" [size]="13" />
+                          Responses
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td class="px-3 py-8 text-center text-xs font-semibold text-slate-500" colspan="9">No rated question data.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+            <app-icon [icon]="layersIcon" [size]="15" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">Custom Input Segments</h2>
+        </div>
+        <div class="grid gap-3 lg:grid-cols-2">
+          @for (segment of dashboard.customInputSegments; track segment.source + segment.customInputName) {
+            <article class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+              <div class="mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <p class="text-xs font-black text-slate-950">{{ segmentLabel(segment) }}</p>
+                  <p class="text-[10px] font-semibold text-slate-500">{{ segment.typeName || segment.type }}</p>
+                </div>
+                <span class="rounded-full px-2 py-1 text-[10px] font-black {{ sourceClass(segment.source) }}">{{ sourceLabel(segment.source) }}</span>
+              </div>
+              <div class="space-y-2">
+                @for (item of segment.segments; track item.value) {
+                  <div class="rounded-lg bg-white px-3 py-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <p class="break-words text-[11px] font-black text-slate-900 [overflow-wrap:anywhere]">{{ item.value || '-' }}</p>
+                      <span class="rounded-full px-2 py-1 text-[10px] font-black {{ scoreClass(item.averageScorePercentage) }}">{{ scoreLabel(item.averageScorePercentage) }}</span>
+                    </div>
+                    <p class="mt-1 text-[10px] font-semibold text-slate-500">
+                      {{ item.responsesCount }} responses / {{ item.internalResponses }} internal / {{ item.anonymousResponses }} anonymous
+                    </p>
+                    <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                      <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(item.averageScorePercentage)"></div>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="rounded-lg bg-white p-4 text-center text-xs font-semibold text-slate-500">No segment values.</p>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-xs font-semibold text-slate-500 lg:col-span-2">
+              No custom input segment data.
+            </p>
+          }
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+        <div class="mb-3 flex items-center gap-2">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+            <app-icon [icon]="complaintIcon" [size]="15" />
+          </div>
+          <h2 class="text-sm font-black text-slate-950">Critical Responses</h2>
+        </div>
+        <div class="overflow-x-auto rounded-lg border border-slate-100">
+          <table class="w-full min-w-[60rem]">
+            <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
+              <tr>
+                <th class="px-3 py-3 text-start">Source</th>
+                <th class="px-3 py-3 text-start">Template</th>
+                <th class="px-3 py-3 text-start">Branch</th>
+                <th class="px-3 py-3 text-start">Submitted On</th>
+                <th class="px-3 py-3 text-start">Score</th>
+                <th class="px-3 py-3 text-start">Complaint</th>
+                <th class="px-3 py-3 text-start">Voice</th>
+                <th class="px-3 py-3 text-start">Operator</th>
+                <th class="px-3 py-3 text-start">Custom Inputs</th>
+                <th class="px-3 py-3 text-start">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              @for (response of dashboard.criticalResponses; track response.source + response.responseId) {
+                <tr class="transition hover:bg-slate-50">
+                  <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-black {{ sourceClass(response.source) }}">{{ sourceLabel(response.source) }}</span></td>
+                  <td class="px-3 py-3">
+                    <p class="truncate font-black text-slate-950" [title]="localized(response.templateNameEn, response.templateNameAr)">
+                      {{ localized(response.templateNameEn, response.templateNameAr) }}
+                    </p>
+                  </td>
+                  <td class="px-3 py-3 font-semibold text-slate-600">{{ localized(response.branchNameEn, response.branchNameAr) }}</td>
+                  <td class="px-3 py-3 font-semibold text-slate-600">{{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}</td>
+                  <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-black {{ scoreClass(response.scorePercentage) }}">{{ scoreLabel(response.scorePercentage) }}</span></td>
+                  <td class="px-3 py-3">
+                    <p class="line-clamp-2 max-w-[14rem] font-semibold text-slate-600">{{ response.complaintText || '-' }}</p>
+                  </td>
+                  <td class="px-3 py-3">
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black" [class.bg-cyan-50]="response.hasVoice" [class.text-cyan-700]="response.hasVoice" [class.bg-slate-100]="!response.hasVoice" [class.text-slate-500]="!response.hasVoice">
+                      <app-icon [icon]="micIcon" [size]="12" />
+                      {{ response.hasVoice ? 'Yes' : 'No' }}
+                    </span>
+                  </td>
+                  <td class="px-3 py-3 font-semibold text-slate-600">{{ localized(response.operatorNameEn, response.operatorNameAr) }}</td>
+                  <td class="px-3 py-3">
+                    <p class="line-clamp-2 max-w-[14rem] text-[11px] font-semibold text-slate-500">{{ customInputPreviewText(response.customInputsPreview) }}</p>
+                  </td>
+                  <td class="px-3 py-3">
+                    @if (hasNavigation(response.detailsNavigation)) {
+                      <button class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50" type="button" (click)="openNavigation(response.detailsNavigation)">
+                        <app-icon [icon]="detailsIcon" [size]="13" />
+                        Details
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td class="px-3 py-8 text-center text-xs font-semibold text-slate-500" colspan="10">No critical responses.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<app-branch-response-details-modal
+  [open]="store.internalDetailsOpen()"
+  [loading]="store.internalDetailsLoading()"
+  [error]="store.internalDetailsError()"
+  [details]="store.internalDetails()"
+  (closed)="store.closeInternalDetails()"
+/>
+
+<app-survey-anonymous-response-details-modal
+  [open]="store.anonymousDetailsOpen()"
+  [loading]="store.anonymousDetailsLoading()"
+  [error]="store.anonymousDetailsError()"
+  [details]="store.anonymousDetails()"
+  (closed)="store.closeAnonymousDetails()"
+/>

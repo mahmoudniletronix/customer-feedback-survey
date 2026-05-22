@@ -11,9 +11,11 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
+  BarChart3,
   ChevronLeft,
   ChevronRight,
   FileText,
+  History,
   ListChecks,
   Pencil,
   Plus,
@@ -94,9 +96,11 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
+  readonly dashboardIcon = BarChart3;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
   readonly fileTextIcon = FileText;
+  readonly historyIcon = History;
   readonly listChecksIcon = ListChecks;
   readonly plusIcon = Plus;
   readonly restoreIcon = RotateCcw;

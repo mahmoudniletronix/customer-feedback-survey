@@ -11,7 +11,7 @@
     <div class="flex items-center gap-1.5">
       <a
         class="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
-        routerLink="/branch-admin/responses"
+        routerLink="/branch-admin/templates/responses"
       >
         <app-icon [icon]="chartIcon" [size]="12" />
         {{ 'branchDashboard.viewAllResponses' | t }}
@@ -92,6 +92,37 @@
               <option [value]="template.templateId">{{ templateName(template) }}</option>
             }
           </select>
+        </label>
+
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+          <span class="text-[9px] font-bold text-slate-500">Top Questions</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="number"
+            min="1"
+            formControlName="topQuestionsCount"
+          />
+        </label>
+
+        <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[9rem]">
+          <span class="text-[9px] font-bold text-slate-500">Critical Responses</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="number"
+            min="1"
+            formControlName="criticalResponsesCount"
+          />
+        </label>
+
+        <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[9rem]">
+          <span class="text-[9px] font-bold text-slate-500">Critical Threshold</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="number"
+            min="0"
+            max="100"
+            formControlName="criticalScoreThreshold"
+          />
         </label>
 
         <div class="flex gap-1.5">
@@ -579,6 +610,7 @@
                     <th class="px-3 py-2">{{ 'branchDashboard.responses' | t }}</th>
                     <th class="px-3 py-2">{{ 'branchDashboard.avgScore' | t }}</th>
                     <th class="px-3 py-2">{{ 'branchDashboard.risk' | t }}</th>
+                    <th class="w-[7rem] px-3 py-2">{{ 'branchDashboard.viewDetails' | t }}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs">
@@ -622,6 +654,16 @@
                           {{ riskLabel(item) }}
                         </span>
                       </td>
+                      <td class="px-3 py-3">
+                        <button
+                          class="inline-flex items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-2.5 py-1.5 text-[10px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                          type="button"
+                          (click)="openTemplateDetails($event, item.templateId)"
+                        >
+                          <app-icon [icon]="templateIcon" [size]="12" />
+                          {{ 'branchDashboard.viewDetails' | t }}
+                        </button>
+                      </td>
                     </tr>
                   }
                 </tbody>
@@ -629,9 +671,8 @@
             </div>
             <div class="space-y-2 md:hidden">
               @for (item of dashboard.templatePerformance; track item.templateId) {
-                <button
+                <article
                   class="w-full rounded-lg border border-slate-200 bg-white p-3 text-start transition hover:bg-slate-50"
-                  type="button"
                   (click)="filterByTemplate(item.templateId)"
                 >
                   <div class="flex items-start justify-between gap-3">
@@ -682,7 +723,15 @@
                       {{ item.averageScorePercentage | number: '1.0-1' }}%
                     </span>
                   </div>
-                </button>
+                  <button
+                    class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-2.5 py-1.5 text-[10px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                    type="button"
+                    (click)="openTemplateDetails($event, item.templateId)"
+                  >
+                    <app-icon [icon]="templateIcon" [size]="12" />
+                    {{ 'branchDashboard.viewDetails' | t }}
+                  </button>
+                </article>
               }
             </div>
           }
@@ -799,6 +848,7 @@
         </article>
 
         <div class="grid min-w-0 gap-4">
+        @if (customInputSegmentsVisible) {
         <!-- Demographic Analyst -->
         <article
           class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/50 sm:p-4"
@@ -930,6 +980,7 @@
             }
           </div>
         </article>
+        }
 
       <!-- Customer Friction Feed -->
       <section
@@ -1029,3 +1080,118 @@
   [details]="dashboardStore.responseDetails()"
   (closed)="dashboardStore.closeResponseDetails()"
 />
+
+<app-modal
+  [title]="'branchTemplates.detailsTitle' | t"
+  [open]="templateDetailsOpen()"
+  size="lg"
+  (closed)="closeTemplateDetails()"
+>
+  @if (templateDetailsLoading()) {
+    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs font-semibold text-slate-600">
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      {{ 'branchTemplates.detailsLoading' | t }}
+    </div>
+  } @else if (templateDetailsError()) {
+    <div class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+      {{ templateDetailsError() ?? '' | t }}
+    </div>
+  } @else if (selectedTemplateDetails(); as template) {
+    <div class="space-y-4 text-xs">
+      <section class="grid gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3 sm:grid-cols-2">
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'branchTemplates.templateId' | t }}</p>
+          <p class="mt-1 break-words font-bold text-slate-900 [overflow-wrap:anywhere]">{{ template.templateId }}</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'operatorTemplates.branch' | t }}</p>
+          <p class="mt-1 break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
+            {{ templateBranchName(template) }}
+          </p>
+        </div>
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'branchTemplates.nameEn' | t }}</p>
+          <p class="mt-1 break-words font-bold text-slate-900 [overflow-wrap:anywhere]">{{ template.nameEn }}</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'branchTemplates.nameAr' | t }}</p>
+          <p class="mt-1 break-words font-bold text-slate-900 [overflow-wrap:anywhere]">{{ template.nameAr || '-' }}</p>
+        </div>
+        <div class="sm:col-span-2">
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'branchTemplates.templateDescription' | t }}</p>
+          <p class="mt-1 break-words font-semibold leading-5 text-slate-700 [overflow-wrap:anywhere]">
+            {{ template.description || '-' }}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2 sm:col-span-2">
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600">
+            {{ 'common.status' | t }}: {{ template.status }}
+          </span>
+          <span
+            class="rounded-full px-2.5 py-1 text-[10px] font-black"
+            [class.bg-emerald-50]="template.isActive"
+            [class.text-emerald-700]="template.isActive"
+            [class.bg-slate-100]="!template.isActive"
+            [class.text-slate-500]="!template.isActive"
+          >
+            {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
+          </span>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-black text-[#0d94b3]">
+            {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
+          </span>
+          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600">
+            {{ 'branchTemplates.customInputsCount' | t }}: {{ template.customInputsCount }}
+          </span>
+        </div>
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'branchTemplates.activeFrom' | t }}</p>
+          <p class="mt-1 font-bold text-slate-900">{{ template.activeFrom | date: 'medium' }}</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-black uppercase text-slate-400">{{ 'branchTemplates.expireTo' | t }}</p>
+          <p class="mt-1 font-bold text-slate-900">
+            {{ template.expireTo ? (template.expireTo | date: 'medium') : ('branchTemplates.open' | t) }}
+          </p>
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-slate-100 bg-white p-3">
+        <h3 class="text-xs font-black text-slate-900">{{ 'branchTemplates.customInputsDetailsTitle' | t }}</h3>
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+          @for (customInput of template.customInputs; track customInput.customInputId) {
+            <div class="rounded-lg border border-slate-100 bg-slate-50 p-2">
+              <div class="flex items-start justify-between gap-2">
+                <p class="break-words text-[11px] font-black text-slate-900 [overflow-wrap:anywhere]">
+                  {{ templateCustomInputLabel(customInput) }}
+                </p>
+                <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                  {{ customInput.typeName }}
+                </span>
+              </div>
+              <p class="mt-1 text-[10px] font-semibold text-slate-500">
+                {{ customInput.name }} - {{ customInput.isRequired ? ('branchTemplates.customInputIsRequired' | t) : ('branchTemplates.customInputOptional' | t) }}
+              </p>
+            </div>
+          } @empty {
+            <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs font-semibold text-slate-500 sm:col-span-2">
+              {{ 'branchTemplates.noCustomInputs' | t }}
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-slate-100 bg-white p-3">
+        <div class="mb-3">
+          <h3 class="text-xs font-black text-slate-900">{{ 'branchTemplates.logicPath' | t }}</h3>
+          <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
+            {{ 'branchTemplates.conditionalLogicSubtitle' | t }}
+          </p>
+        </div>
+        <app-branch-template-question-tree
+          [questions]="template.questions"
+          [conditions]="template.questionConditions"
+        />
+      </section>
+    </div>
+  }
+</app-modal>

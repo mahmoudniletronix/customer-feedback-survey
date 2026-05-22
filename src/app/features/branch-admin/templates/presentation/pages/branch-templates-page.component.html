@@ -11,6 +11,20 @@
     </div>
     <div class="flex justify-end sm:shrink-0">
       <div class="flex flex-wrap items-center justify-end gap-2">
+        <a
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[11px] font-extrabold text-[#0d94b3] shadow-sm shadow-cyan-100/60 transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          routerLink="/branch-admin/templates/dashboard"
+        >
+          <app-icon [icon]="dashboardIcon" [size]="13" />
+          {{ 'nav.dashboard' | t }}
+        </a>
+        <a
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          routerLink="/branch-admin/templates/responses"
+        >
+          <app-icon [icon]="historyIcon" [size]="13" />
+          {{ 'branchDashboard.viewAllResponses' | t }}
+        </a>
         <button
           class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
           type="button"

@@ -4,7 +4,9 @@
       <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#11A7C9]/10 text-[#11A7C9]">
         <app-icon [icon]="templateIcon" [size]="15" />
       </div>
-      <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Responses</p>
+      <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+        {{ 'branchResponsesHistory.eyebrow' | t }}
+      </p>
     </div>
     <button
       class="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
@@ -41,17 +43,21 @@
     >
       <div class="flex flex-wrap items-end gap-2">
         <label class="flex flex-col gap-0.5 sm:min-w-[14rem] sm:max-w-[18rem]">
-          <span class="text-[9px] font-bold text-slate-500">Search</span>
+          <span class="text-[9px] font-bold text-slate-500">
+            {{ 'branchResponsesHistory.search' | t }}
+          </span>
           <input
             class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="search"
             formControlName="searchText"
-            placeholder="Template, operator, complaint, custom input"
+            [placeholder]="'branchResponsesHistory.searchPlaceholder' | t"
           />
         </label>
 
         <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-          <span class="text-[9px] font-bold text-slate-500">Page Size</span>
+          <span class="text-[9px] font-bold text-slate-500">
+            {{ 'branchResponsesHistory.pageSize' | t }}
+          </span>
           <select
             class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             formControlName="pageSize"
@@ -65,54 +71,68 @@
 
         <app-button type="submit" size="sm" [loading]="historyStore.loading()">
           <app-icon [icon]="searchIcon" [size]="13" />
-          Search
+          {{ 'common.search' | t }}
         </app-button>
 
         <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
-          Clear
+          {{ 'common.clear' | t }}
         </app-button>
       </div>
 
         <div class="flex flex-wrap items-end gap-2 border-t border-slate-200/70 pt-2">
           <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
-            <span class="text-[9px] font-bold text-slate-500">From</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.from' | t }}
+            </span>
             <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="date" formControlName="from" />
           </label>
           <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
-            <span class="text-[9px] font-bold text-slate-500">To</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.to' | t }}
+            </span>
             <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="date" formControlName="to" />
           </label>
           <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
-            <span class="text-[9px] font-bold text-slate-500">Template</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.template' | t }}
+            </span>
             <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="templateId">
-              <option value="">All templates</option>
+              <option value="">{{ 'branchResponsesHistory.allTemplates' | t }}</option>
               @for (template of branchStore.branch()?.templates ?? []; track template.templateId) {
                 <option [value]="template.templateId">{{ templateName(template) }}</option>
               }
             </select>
           </label>
           <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-            <span class="text-[9px] font-bold text-slate-500">Min Score</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.minScore' | t }}
+            </span>
             <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="number" min="0" max="100" formControlName="minScorePercentage" placeholder="0" />
           </label>
           <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-            <span class="text-[9px] font-bold text-slate-500">Max Score</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.maxScore' | t }}
+            </span>
             <input class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" type="number" min="0" max="100" formControlName="maxScorePercentage" placeholder="100" />
           </label>
           <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[8rem]">
-            <span class="text-[9px] font-bold text-slate-500">Complaint</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.complaint' | t }}
+            </span>
             <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="hasComplaint">
-              <option value="">All</option>
-              <option value="true">With complaint</option>
-              <option value="false">No complaint</option>
+              <option value="">{{ 'branchResponsesHistory.all' | t }}</option>
+              <option value="true">{{ 'branchResponsesHistory.withComplaint' | t }}</option>
+              <option value="false">{{ 'branchResponsesHistory.noComplaint' | t }}</option>
             </select>
           </label>
           <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[8rem]">
-            <span class="text-[9px] font-bold text-slate-500">Voice</span>
+            <span class="text-[9px] font-bold text-slate-500">
+              {{ 'branchResponsesHistory.voice' | t }}
+            </span>
             <select class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15" formControlName="hasVoice">
-              <option value="">All</option>
-              <option value="true">With voice</option>
-              <option value="false">No voice</option>
+              <option value="">{{ 'branchResponsesHistory.all' | t }}</option>
+              <option value="true">{{ 'branchResponsesHistory.withVoice' | t }}</option>
+              <option value="false">{{ 'branchResponsesHistory.noVoice' | t }}</option>
             </select>
           </label>
         </div>
@@ -137,22 +157,28 @@
     <section class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 sm:p-4">
       <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 class="text-sm font-black text-slate-950">Responses</h3>
+          <h3 class="text-sm font-black text-slate-950">
+            {{ 'branchResponsesHistory.title' | t }}
+          </h3>
           <p class="mt-1 text-[11px] font-semibold text-slate-500">
-            Showing {{ pageStart() }}-{{ pageEnd() }} of {{ page.totalItems }} responses
+            {{ 'branchResponsesHistory.showing' | t }} {{ pageStart() }}-{{ pageEnd() }}
+            {{ 'branchResponsesHistory.of' | t }} {{ page.totalItems }}
+            {{ 'branchResponsesHistory.responses' | t }}
           </p>
         </div>
         <span class="w-fit rounded-full bg-slate-100 px-3 py-1 text-[11px] font-extrabold text-slate-600">
-          Page {{ page.currentPage }} / {{ page.totalPages || 1 }}
+          {{ 'branchResponsesHistory.page' | t }} {{ page.currentPage }} / {{ page.totalPages || 1 }}
         </span>
       </div>
 
       @if (page.data.length === 0) {
         <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-8 text-center">
           <app-icon class="mx-auto text-slate-300" [icon]="templateIcon" [size]="28" />
-          <p class="mt-3 text-sm font-black text-slate-900">No survey responses found</p>
+          <p class="mt-3 text-sm font-black text-slate-900">
+            {{ 'branchResponsesHistory.emptyTitle' | t }}
+          </p>
           <p class="mt-1 text-xs font-semibold text-slate-500">
-            No survey responses found for the selected filters.
+            {{ 'branchResponsesHistory.emptyDescription' | t }}
           </p>
         </div>
       } @else {
@@ -160,14 +186,14 @@
           <table class="w-full table-fixed">
             <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
               <tr>
-                <th class="w-[10rem] px-3 py-3">Submitted On</th>
-                <th class="px-3 py-3">Template</th>
-                <th class="w-[10rem] px-3 py-3">Operator</th>
-                <th class="w-[8rem] px-3 py-3">Score</th>
-                <th class="w-[7rem] px-3 py-3">Complaint</th>
-                <th class="w-[6rem] px-3 py-3">Voice</th>
-                <th class="px-3 py-3">Custom Inputs Preview</th>
-                <th class="w-[8rem] px-3 py-3">Actions</th>
+                <th class="w-[10rem] px-3 py-3">{{ 'branchResponsesHistory.submittedOn' | t }}</th>
+                <th class="px-3 py-3">{{ 'branchResponsesHistory.template' | t }}</th>
+                <th class="w-[10rem] px-3 py-3">{{ 'branchResponsesHistory.operator' | t }}</th>
+                <th class="w-[8rem] px-3 py-3">{{ 'branchResponsesHistory.score' | t }}</th>
+                <th class="w-[7rem] px-3 py-3">{{ 'branchResponsesHistory.complaint' | t }}</th>
+                <th class="w-[6rem] px-3 py-3">{{ 'branchResponsesHistory.voice' | t }}</th>
+                <th class="px-3 py-3">{{ 'branchResponsesHistory.customInputsPreview' | t }}</th>
+                <th class="w-[8rem] px-3 py-3">{{ 'branchResponsesHistory.actions' | t }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs">
@@ -208,7 +234,7 @@
                       [class.text-slate-500]="!row.hasComplaint"
                     >
                       <app-icon [icon]="complaintIcon" [size]="12" />
-                      {{ row.hasComplaint ? 'Yes' : 'No' }}
+                      {{ booleanLabel(row.hasComplaint) }}
                     </span>
                   </td>
                   <td class="px-3 py-3">
@@ -220,7 +246,7 @@
                       [class.text-slate-500]="!row.hasVoice"
                     >
                       <app-icon [icon]="voiceIcon" [size]="12" />
-                      {{ row.hasVoice ? 'Yes' : 'No' }}
+                      {{ booleanLabel(row.hasVoice) }}
                     </span>
                   </td>
                   <td class="px-3 py-3">
@@ -230,7 +256,9 @@
                           {{ customInputLabel(input) }}
                         </span>
                       } @empty {
-                        <span class="text-[11px] font-semibold text-slate-400">No custom inputs</span>
+                        <span class="text-[11px] font-semibold text-slate-400">
+                          {{ 'branchResponsesHistory.noCustomInputs' | t }}
+                        </span>
                       }
                     </div>
                   </td>
@@ -241,7 +269,7 @@
                       (click)="openDetails(row)"
                     >
                       <app-icon [icon]="eyeIcon" [size]="13" />
-                      View Details
+                      {{ 'branchResponsesHistory.viewDetails' | t }}
                     </button>
                   </td>
                 </tr>
@@ -279,10 +307,10 @@
 
               <div class="mt-3 flex flex-wrap gap-2">
                 <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-extrabold text-slate-600">
-                  Complaint: {{ row.hasComplaint ? 'Yes' : 'No' }}
+                  {{ 'branchResponsesHistory.complaint' | t }}: {{ booleanLabel(row.hasComplaint) }}
                 </span>
                 <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-extrabold text-slate-600">
-                  Voice: {{ row.hasVoice ? 'Yes' : 'No' }}
+                  {{ 'branchResponsesHistory.voice' | t }}: {{ booleanLabel(row.hasVoice) }}
                 </span>
               </div>
 
@@ -292,7 +320,9 @@
                     {{ customInputLabel(input) }}
                   </span>
                 } @empty {
-                  <span class="text-[11px] font-semibold text-slate-400">No custom inputs</span>
+                  <span class="text-[11px] font-semibold text-slate-400">
+                    {{ 'branchResponsesHistory.noCustomInputs' | t }}
+                  </span>
                 }
               </div>
 
@@ -302,7 +332,7 @@
                 (click)="openDetails(row)"
               >
                 <app-icon [icon]="eyeIcon" [size]="14" />
-                View Details
+                {{ 'branchResponsesHistory.viewDetails' | t }}
               </button>
             </article>
           }
@@ -310,7 +340,8 @@
 
         <div class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p class="text-[11px] font-semibold text-slate-500">
-            Showing {{ pageStart() }}-{{ pageEnd() }} of {{ page.totalItems }}
+            {{ 'branchResponsesHistory.showing' | t }} {{ pageStart() }}-{{ pageEnd() }}
+            {{ 'branchResponsesHistory.of' | t }} {{ page.totalItems }}
           </p>
           <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
             <button
@@ -320,7 +351,7 @@
               (click)="changePage(page.currentPage - 1)"
             >
               <app-icon [icon]="chevronLeftIcon" [size]="14" />
-              Previous
+              {{ 'branchResponsesHistory.previous' | t }}
             </button>
             <button
               class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -328,7 +359,7 @@
               [disabled]="page.currentPage >= page.totalPages"
               (click)="changePage(page.currentPage + 1)"
             >
-              Next
+              {{ 'branchResponsesHistory.next' | t }}
               <app-icon [icon]="chevronRightIcon" [size]="14" />
             </button>
           </div>

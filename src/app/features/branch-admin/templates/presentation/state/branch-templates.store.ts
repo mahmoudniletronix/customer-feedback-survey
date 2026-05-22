@@ -769,6 +769,9 @@ export class BranchTemplatesStore {
     return {
       templateId: template.templateId || currentTemplate?.templateId || templateId,
       branchId: template.branchId || currentTemplate?.branchId || '',
+      branchNameEn: template.branchNameEn || currentTemplate?.branchNameEn || '',
+      branchNameAr: template.branchNameAr ?? currentTemplate?.branchNameAr ?? null,
+      branchCode: template.branchCode || currentTemplate?.branchCode || '',
       nameEn: template.nameEn || currentTemplate?.nameEn || '',
       nameAr: template.nameAr || currentTemplate?.nameAr || '',
       description: template.description || currentTemplate?.description || '',

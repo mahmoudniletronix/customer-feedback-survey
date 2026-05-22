@@ -111,6 +111,7 @@ export interface SystemCriticalResponse {
   branchId: string;
   branchNameEn: string;
   branchNameAr: string | null;
+  branchCode: string;
   departmentId: string;
   departmentNameEn: string;
   departmentNameAr: string | null;
@@ -139,6 +140,7 @@ export interface SystemResponseListItem {
   branchId: string;
   branchNameEn: string;
   branchNameAr: string | null;
+  branchCode: string;
   departmentId: string;
   departmentNameEn: string;
   departmentNameAr: string | null;
@@ -168,6 +170,7 @@ export interface SystemResponseDetails {
   branchId: string;
   branchNameEn: string;
   branchNameAr: string | null;
+  branchCode: string;
   departmentId: string;
   departmentNameEn: string;
   departmentNameAr: string | null;

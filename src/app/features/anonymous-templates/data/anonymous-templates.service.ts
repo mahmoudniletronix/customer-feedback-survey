@@ -50,6 +50,13 @@ import {
   AssignAnonymousTemplateQuestionsApiResponse,
   AssignAnonymousTemplateQuestionsPayload,
   AssignAnonymousTemplateQuestionsResult,
+  BranchAnonymousResponseApiResponse,
+  BranchAnonymousResponseCustomInputPreview,
+  BranchAnonymousResponseCustomInputPreviewApiResponse,
+  BranchAnonymousResponseListItem,
+  BranchAnonymousResponsesPageApiResponse,
+  BranchAnonymousResponsesPageResult,
+  BranchAnonymousResponsesQuery,
   CreateAnonymousTemplatePayload,
   ManageAnonymousTemplateQuestionConditionsApiResponse,
   ManageAnonymousTemplateQuestionConditionsPayload,
@@ -61,6 +68,7 @@ import {
 export class AnonymousTemplatesService {
   private readonly http = inject(HttpClient);
   private readonly anonymousTemplatesUrl = `${environment.apiBaseUrl}/api/anonymous-templates`;
+  private readonly branchAnonymousResponsesUrl = `${environment.apiBaseUrl}/api/reports/anonymous-responses`;
 
   list(query: AnonymousTemplatesListQuery): Observable<AnonymousTemplatesPageResult> {
     let params = new HttpParams()
@@ -216,6 +224,52 @@ export class AnonymousTemplatesService {
         AnonymousTemplateResponsesPageApiResponse | readonly AnonymousTemplateResponseApiResponse[]
       >(`${this.anonymousTemplatesUrl}/${anonymousTemplateId}/responses`, { params })
       .pipe(map((response) => this.toResponsesPageResult(response, query)));
+  }
+
+  branchAnonymousResponses(
+    query: BranchAnonymousResponsesQuery,
+  ): Observable<BranchAnonymousResponsesPageResult> {
+    let params = new HttpParams()
+      .set('pageNumber', Math.max(query.pageNumber, 1))
+      .set('pageSize', Math.min(Math.max(query.pageSize, 1), 100));
+
+    const anonymousTemplateId = query.anonymousTemplateId?.trim() ?? '';
+    if (anonymousTemplateId.length > 0) {
+      params = params.set('anonymousTemplateId', anonymousTemplateId);
+    }
+
+    if (query.from) {
+      params = params.set('from', query.from);
+    }
+    if (query.to) {
+      params = params.set('to', query.to);
+    }
+    if (query.minScorePercentage !== undefined) {
+      params = params.set('minScorePercentage', query.minScorePercentage);
+    }
+    if (query.maxScorePercentage !== undefined) {
+      params = params.set('maxScorePercentage', query.maxScorePercentage);
+    }
+    if (query.hasComplaint !== undefined) {
+      params = params.set('hasComplaint', query.hasComplaint);
+    }
+    if (query.hasVoice !== undefined) {
+      params = params.set('hasVoice', query.hasVoice);
+    }
+
+    const searchText = query.searchText?.trim() ?? '';
+    if (searchText.length > 0) {
+      params = params.set('searchText', searchText);
+    }
+
+    const orderSort = query.orderSort?.trim() ?? '';
+    if (orderSort.length > 0) {
+      params = params.set('orderSort', orderSort);
+    }
+
+    return this.http
+      .get<BranchAnonymousResponsesPageApiResponse>(this.branchAnonymousResponsesUrl, { params })
+      .pipe(map((response) => this.toBranchAnonymousResponsesPageResult(response, query)));
   }
 
   responseDetails(
@@ -430,9 +484,67 @@ export class AnonymousTemplatesService {
     };
   }
 
+  private toBranchAnonymousResponsesPageResult(
+    response: BranchAnonymousResponsesPageApiResponse,
+    query: BranchAnonymousResponsesQuery,
+  ): BranchAnonymousResponsesPageResult {
+    const responses = (response.data ?? []).map((item) =>
+      this.toBranchAnonymousResponseListItem(item),
+    );
+    const pageSize = response.pageSize ?? query.pageSize;
+    const totalItems = response.totalItems ?? responses.length;
+    const totalPages = response.totalPages ?? Math.max(1, Math.ceil(totalItems / pageSize));
+    const currentPage = response.currentPage ?? query.pageNumber;
+
+    return {
+      currentPage,
+      pageSize,
+      totalPages,
+      totalItems,
+      data: responses,
+      hasPreviousPage: response.hasPreviousPage ?? currentPage > 1,
+      hasNextPage: response.hasNextPage ?? currentPage < totalPages,
+    };
+  }
+
+  private toBranchAnonymousResponseListItem(
+    response: BranchAnonymousResponseApiResponse,
+  ): BranchAnonymousResponseListItem {
+    const scorePercentage = response.scorePercentage ?? null;
+
+    return {
+      anonymousSurveyResponseId: this.readRecordId(response.anonymousSurveyResponseId),
+      anonymousTemplateId: this.readRecordId(response.anonymousTemplateId),
+      anonymousTemplateNameEn: response.anonymousTemplateNameEn ?? '',
+      anonymousTemplateNameAr: response.anonymousTemplateNameAr ?? null,
+      submittedOnUtc: response.submittedOnUtc ?? '',
+      scorePercentage,
+      isScored: response.isScored ?? scorePercentage !== null,
+      hasComplaint: response.hasComplaint ?? false,
+      hasVoice: response.hasVoice ?? false,
+      customInputsPreview: (response.customInputsPreview ?? []).map((input) =>
+        this.toBranchAnonymousResponseCustomInputPreview(input),
+      ),
+    };
+  }
+
+  private toBranchAnonymousResponseCustomInputPreview(
+    response: BranchAnonymousResponseCustomInputPreviewApiResponse,
+  ): BranchAnonymousResponseCustomInputPreview {
+    return {
+      name: response.name ?? '',
+      labelEn: response.labelEn ?? null,
+      labelAr: response.labelAr ?? null,
+      value: response.value === null || response.value === undefined ? '' : String(response.value),
+    };
+  }
+
   private toResponseListItem(
     response: AnonymousTemplateResponseApiResponse,
   ): AnonymousTemplateResponseListItem {
+    const customInputs = response.customInputValues ?? response.customInputs ?? [];
+    const answers = response.answers ?? [];
+
     return {
       anonymousSurveyResponseId: this.readRecordId(response.anonymousSurveyResponseId),
       anonymousTemplateId: this.readRecordId(response.anonymousTemplateId),
@@ -441,8 +553,8 @@ export class AnonymousTemplatesService {
       maxScore: response.maxScore ?? null,
       scorePercentage: response.scorePercentage ?? null,
       isScored: response.isScored ?? (response.scorePercentage ?? null) !== null,
-      answersCount: response.answersCount ?? 0,
-      customInputValuesCount: response.customInputValuesCount ?? 0,
+      answersCount: response.answersCount ?? answers.length,
+      customInputValuesCount: response.customInputValuesCount ?? customInputs.length,
     };
   }
 
@@ -451,12 +563,14 @@ export class AnonymousTemplatesService {
     fallbackAnonymousTemplateId: string,
   ): AnonymousTemplateResponseDetails {
     const listItem = this.toResponseListItem(response);
+    const customInputs = response.customInputValues ?? response.customInputs ?? [];
+
     return {
       ...listItem,
       anonymousTemplateId: listItem.anonymousTemplateId || fallbackAnonymousTemplateId,
-      customInputValues: (response.customInputValues ?? []).map((value) =>
-        this.toResponseCustomInputValue(value),
-      ),
+      templateNameEn: response.templateNameEn ?? '',
+      templateNameAr: response.templateNameAr ?? null,
+      customInputValues: customInputs.map((value) => this.toResponseCustomInputValue(value)),
       answers: (response.answers ?? [])
         .map((answer) => this.toResponseAnswer(answer))
         .sort((first, second) => first.questionOrder - second.questionOrder),
@@ -467,30 +581,45 @@ export class AnonymousTemplatesService {
     response: AnonymousTemplateResponseCustomInputValueApiResponse,
   ): AnonymousTemplateResponseCustomInputValue {
     const type = this.toCustomInputType(response.type ?? response.typeName);
+    const rawValue = response.value;
+    const stringValue =
+      response.stringValue ??
+      (typeof rawValue === 'string' || typeof rawValue === 'number' ? String(rawValue) : null);
+    const integerValue =
+      response.integerValue ?? (typeof rawValue === 'number' ? rawValue : null);
+    const name = response.nameSnapshot ?? response.name ?? '';
+    const displayValue =
+      stringValue ?? (integerValue === null || integerValue === undefined ? '' : String(integerValue));
 
     return {
       customInputValueId: this.readRecordId(response.customInputValueId),
       anonymousTemplateCustomInputId: this.readRecordId(response.anonymousTemplateCustomInputId),
-      nameSnapshot: response.nameSnapshot ?? '',
+      name,
+      labelEn: response.labelEn ?? null,
+      labelAr: response.labelAr ?? null,
+      nameSnapshot: name,
       type,
       typeName: response.typeName ?? (type === 2 ? 'Integer' : 'String'),
-      stringValue: response.stringValue ?? null,
-      integerValue: response.integerValue ?? null,
+      stringValue,
+      integerValue,
+      displayValue,
     };
   }
 
   private toResponseAnswer(
     response: AnonymousTemplateResponseAnswerApiResponse,
   ): AnonymousTemplateResponseAnswer {
+    const questionId = this.readRecordId(response.questionId);
+
     return {
-      answerId: this.readRecordId(response.answerId),
+      answerId: this.readRecordId(response.answerId) || questionId,
       anonymousTemplateQuestionId: this.readRecordId(response.anonymousTemplateQuestionId),
-      questionId: this.readRecordId(response.questionId),
+      questionId,
       questionTextEn: response.questionTextEn ?? '',
       questionTextAr: response.questionTextAr ?? null,
       questionType: this.toStatus(response.questionType),
       questionTypeName: response.questionTypeName ?? '',
-      questionOrder: response.questionOrder ?? 0,
+      questionOrder: response.questionOrder ?? response.order ?? 0,
       selectedQuestionOptionId: this.readNullableRecordId(response.selectedQuestionOptionId),
       selectedOptionTextEn: response.selectedOptionTextEn ?? null,
       selectedOptionTextAr: response.selectedOptionTextAr ?? null,
@@ -499,6 +628,7 @@ export class AnonymousTemplatesService {
       smileValue: response.smileValue ?? null,
       textAnswer: response.textAnswer ?? null,
       voiceFileName: response.voiceFileName ?? null,
+      voiceUrl: response.voiceUrl ?? null,
     };
   }
 

@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import {
   Calendar,
   ChevronLeft,
@@ -49,6 +50,7 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly calendarIcon = Calendar;
   readonly chevronLeftIcon = ChevronLeft;
@@ -77,7 +79,12 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
     if (this.authStore.role() === 'BRANCH_ADMIN') {
       this.branchStore.load();
     }
-    this.historyStore.load({ pageNumber: 1, pageSize: 10 });
+
+    const templateId = this.route.snapshot.queryParamMap.get('templateId') ?? '';
+    if (templateId.length > 0) {
+      this.filtersForm.patchValue({ templateId });
+    }
+    this.historyStore.load({ pageNumber: 1, pageSize: 10, templateId: templateId || undefined });
   }
 
   applyFilters(): void {
@@ -149,7 +156,11 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   }
 
   scoreLabel(row: BranchSurveyResponseListItem): string {
-    return row.isScored ? `${row.scorePercentage.toFixed(1)}%` : 'Not Scored';
+    return row.isScored ? `${row.scorePercentage.toFixed(1)}%` : this.i18n.translate('branchResponsesHistory.notScored');
+  }
+
+  booleanLabel(value: boolean): string {
+    return this.i18n.translate(value ? 'branchResponsesHistory.yes' : 'branchResponsesHistory.no');
   }
 
   customInputLabel(input: BranchSurveyResponseCustomInputPreview): string {

@@ -17,6 +17,12 @@
           {{ 'anonymousDashboard.title' | t }}
         </app-button>
       }
+      @if (canViewBranchResponsesReport()) {
+        <app-button size="sm" type="button" variant="secondary" (pressed)="openBranchResponsesReport()">
+          <app-icon [icon]="responsesIcon" [size]="14" />
+          {{ 'anonymousTemplates.branchResponsesTitle' | t }}
+        </app-button>
+      }
       <button
         class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
         type="button"
@@ -860,7 +866,7 @@
                 (pressed)="downloadQrCode(template.qrCode)"
               >
                 <app-icon [icon]="downloadIcon" [size]="14" />
-                {{ 'anonymousTemplates.downloadQr' | t }}
+                <!-- {{ 'anonymousTemplates.downloadQr' | t }} -->
               </app-button>
             </div>
 

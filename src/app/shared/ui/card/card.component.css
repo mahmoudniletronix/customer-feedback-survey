@@ -1,1 +1,5 @@
-/* Styles are composed with Tailwind utility classes in the component template. */
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}

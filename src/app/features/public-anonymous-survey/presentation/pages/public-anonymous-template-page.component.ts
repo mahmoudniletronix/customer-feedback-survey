@@ -30,6 +30,7 @@ import {
 } from '../../domain/public-anonymous-template.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { AppFooterComponent } from '../../../../shared/ui/app-footer/app-footer.component';
 import { PublicAnonymousTemplateStore } from '../state/public-anonymous-template.store';
 
 const RATING_VALUES = [1, 2, 3, 4, 5] as const;
@@ -37,7 +38,7 @@ const RATING_VALUES = [1, 2, 3, 4, 5] as const;
 @Component({
   selector: 'app-public-anonymous-template-page',
   standalone: true,
-  imports: [DatePipe, IconComponent, TranslatePipe],
+  imports: [DatePipe, IconComponent, TranslatePipe, AppFooterComponent],
   templateUrl: './public-anonymous-template-page.component.html',
   styleUrl: './public-anonymous-template-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

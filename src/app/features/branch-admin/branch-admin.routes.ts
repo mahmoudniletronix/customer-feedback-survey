@@ -55,6 +55,23 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
           ),
       },
       {
+        path: 'templates/dashboard',
+        canActivate: [branchDashboardAccessGuard],
+        loadComponent: () =>
+          import('./templates/presentation/pages/branch-template-dashboard-page.component').then(
+            (m) => m.BranchTemplateDashboardPageComponent,
+          ),
+      },
+      {
+        path: 'templates/responses',
+        canActivate: [branchDashboardAccessGuard],
+        providers: [BranchResponsesHistoryStore],
+        loadComponent: () =>
+          import('./templates/presentation/pages/branch-template-responses-page.component').then(
+            (m) => m.BranchTemplateResponsesPageComponent,
+          ),
+      },
+      {
         path: 'reports/templates-pdf',
         canActivate: [branchDashboardAccessGuard],
         providers: [
@@ -114,6 +131,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
           },
           {
             path: ':templateId',
+            providers: [BranchResponsesHistoryStore],
             loadComponent: () =>
               import('./templates/presentation/pages/branch-template-details-page.component').then(
                 (m) => m.BranchTemplateDetailsPageComponent,

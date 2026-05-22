@@ -146,6 +146,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.role() === 'BRANCH_USER') &&
       this.authStore.hasPermission('AnonymousTemplates.ViewResponses'),
   );
+  readonly canViewBranchResponsesReport = computed(() => this.authStore.canAccessBranchDashboard());
   readonly showSuperAdminFilters = computed(() => this.authStore.role() === 'SUPER_ADMIN');
   readonly scope = computed<AnonymousTemplateScope | null>(() => {
     if (this.authStore.role() === 'SUPER_ADMIN') {
@@ -238,6 +239,14 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     }
 
     void this.router.navigate(['/anonymous-templates/dashboard']);
+  }
+
+  openBranchResponsesReport(): void {
+    if (!this.canViewBranchResponsesReport()) {
+      return;
+    }
+
+    void this.router.navigate(['/anonymous-templates/responses']);
   }
 
   closeCreateTemplate(): void {

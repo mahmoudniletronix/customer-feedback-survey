@@ -1,5 +1,5 @@
-<div class="w-full space-y-3 text-xs">
-  <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+<div class="w-full space-y-2 text-[11px]">
+  <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
     <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
       <app-button type="button" variant="secondary" (pressed)="goBack()">
         <app-icon [icon]="arrowLeftIcon" [size]="15" />
@@ -9,7 +9,7 @@
         <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]">
           {{ 'anonymousTemplates.title' | t }}
         </p>
-        <h2 class="mt-1 text-lg font-bold text-slate-900">
+        <h2 class="mt-1 text-base font-bold text-slate-900">
           {{ 'anonymousTemplates.detailsTitle' | t }}
         </h2>
         <p class="mt-0.5 text-[11px] text-slate-500">
@@ -42,10 +42,10 @@
     </div>
   } @else if (anonymousTemplatesStore.selectedTemplate(); as template) {
     <section class="rounded-lg border border-slate-200/70 bg-white p-3 shadow-sm shadow-slate-200/50">
-      <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_14.5rem]">
-        <div class="min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <h3 class="break-words text-base font-bold text-slate-900 [overflow-wrap:anywhere]">
+      <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_14rem] xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_14rem] xl:gap-4">
+        <div class="min-w-0 flex flex-col rounded-md border border-slate-100 bg-slate-50/50 p-3">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <h3 class="break-words text-sm font-bold text-slate-900 [overflow-wrap:anywhere]">
               {{ templateDisplayName(template) }}
             </h3>
             <span
@@ -66,90 +66,146 @@
             >
               {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
             </span>
+          </div>
+          @if (template.description) {
+            <p class="mt-1.5 break-words text-[10px] leading-4 text-slate-600 [overflow-wrap:anywhere]">
+              {{ template.description }}
+            </p>
+          }
+          <div class="mt-auto pt-4 flex flex-wrap gap-1.5">
             @if (canManageQuestions(template)) {
               <app-button size="sm" type="button" [routerLink]="['questions']">
-                <app-icon [icon]="listChecksIcon" [size]="14" />
+                <app-icon [icon]="listChecksIcon" [size]="13" />
                 {{ 'anonymousTemplates.manageQuestions' | t }}
               </app-button>
             }
             @if (canViewTemplateResponses(template)) {
               <app-button size="sm" type="button" variant="secondary" [routerLink]="['responses']">
-                <app-icon [icon]="responsesIcon" [size]="14" />
+                <app-icon [icon]="responsesIcon" [size]="13" />
                 {{ 'anonymousTemplates.responsesTitle' | t }}
               </app-button>
             }
             @if (canUpdateTemplate(template)) {
               <app-button size="sm" type="button" variant="secondary" (pressed)="openEditTemplate(template)">
-                <app-icon [icon]="editIcon" [size]="14" />
+                <app-icon [icon]="editIcon" [size]="13" />
                 {{ 'common.edit' | t }}
               </app-button>
             }
           </div>
-          @if (template.description) {
-            <p class="mt-2 max-w-4xl break-words text-[11px] leading-5 text-slate-600 [overflow-wrap:anywhere]">
-              {{ template.description }}
-            </p>
-          }
+        </div>
 
-          <div class="mt-3 grid overflow-hidden rounded-md border border-slate-200/70 bg-white md:grid-cols-3">
-            <div class="border-b border-slate-100 bg-slate-50/50 px-2.5 py-2 md:border-e md:border-e-slate-100">
-              <p class="text-[10px] font-bold uppercase text-slate-400">
-                {{ 'anonymousTemplates.branchColumn' | t }}
-              </p>
-              <p class="mt-1 text-[11px] font-semibold text-slate-800">
-                {{ template.isGlobal ? '-' : branchDisplayName(template) }}
-              </p>
+        <div class="min-w-0 flex flex-col justify-between rounded-md border border-slate-100 bg-slate-50/50 p-3">
+          <ul class="grid grid-cols-1 gap-x-3 gap-y-3.5 sm:grid-cols-2 text-[11px]">
+            <li class="flex items-start gap-2.5">
+              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-slate-400 shadow-sm ring-1 ring-slate-200/60">
+                <app-icon [icon]="buildingIcon" [size]="13" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase text-slate-400">
+                  {{ 'anonymousTemplates.branchColumn' | t }}
+                </p>
+                <p class="mt-0.5 truncate font-semibold text-slate-800">
+                  {{ template.isGlobal ? '-' : branchDisplayName(template) }}
+                </p>
+              </div>
+            </li>
+
+            <li class="flex items-start gap-2.5">
+              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-[#11A7C9] shadow-sm ring-1 ring-slate-200/60">
+                <app-icon [icon]="activityIcon" [size]="13" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase text-slate-400">
+                  {{ 'common.status' | t }}
+                </p>
+                <p class="mt-0.5 truncate font-semibold text-slate-800">
+                  {{ template.statusName }}
+                </p>
+              </div>
+            </li>
+
+            <li class="flex items-start gap-2.5">
+              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-emerald-500 shadow-sm ring-1 ring-slate-200/60">
+                <app-icon [icon]="calendarIcon" [size]="13" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase text-slate-400">
+                  {{ 'anonymousTemplates.createdOnColumn' | t }}
+                </p>
+                <p class="mt-0.5 truncate font-semibold text-slate-800">
+                  {{ template.createdOnUtc ? (template.createdOnUtc | date: 'medium') : '-' }}
+                </p>
+              </div>
+            </li>
+
+            <li class="flex items-start gap-2.5">
+              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-blue-500 shadow-sm ring-1 ring-slate-200/60">
+                <app-icon [icon]="clockIcon" [size]="13" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase text-slate-400">
+                  {{ 'anonymousTemplates.activeFromColumn' | t }}
+                </p>
+                <p class="mt-0.5 truncate font-semibold text-slate-800">
+                  {{ template.activeFrom ? (template.activeFrom | date: 'medium') : '-' }}
+                </p>
+              </div>
+            </li>
+
+            <li class="flex items-start gap-2.5">
+              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-rose-400 shadow-sm ring-1 ring-slate-200/60">
+                <app-icon [icon]="clockIcon" [size]="13" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase text-slate-400">
+                  {{ 'anonymousTemplates.expireToColumn' | t }}
+                </p>
+                <p class="mt-0.5 truncate font-semibold text-slate-800">
+                  {{ template.expireTo ? (template.expireTo | date: 'medium') : ('anonymousTemplates.openEnded' | t) }}
+                </p>
+              </div>
+            </li>
+
+            <li class="flex items-start gap-2.5">
+              <span class="mt-0.5 flex shrink-0 items-center justify-center rounded-md bg-white p-1.5 text-violet-500 shadow-sm ring-1 ring-slate-200/60">
+                <app-icon [icon]="calendarIcon" [size]="13" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase text-slate-400">
+                  {{ 'anonymousTemplates.modifiedOn' | t }}
+                </p>
+                <p class="mt-0.5 truncate font-semibold text-slate-800">
+                  {{ template.modifiedOnUtc ? (template.modifiedOnUtc | date: 'medium') : '-' }}
+                </p>
+              </div>
+            </li>
+          </ul>
+          
+          <div class="mt-4 flex flex-wrap gap-1 rounded-lg border border-slate-200/70 bg-white p-1.5 shadow-sm shadow-slate-200/40">
+            <div class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1">
+              <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.questionsShort' | t }}</span>
+              <span class="text-xs font-extrabold text-slate-900">{{ template.summary.questionsCount }}</span>
             </div>
-            <div class="border-b border-slate-100 bg-white px-2.5 py-2 md:border-e md:border-e-slate-100">
-              <p class="text-[10px] font-bold uppercase text-slate-400">
-                {{ 'common.status' | t }}
-              </p>
-              <p class="mt-1 text-[11px] font-semibold text-slate-800">{{ template.statusName }}</p>
+            <div class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1">
+              <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.inputsShort' | t }}</span>
+              <span class="text-xs font-extrabold text-slate-900">{{ template.summary.customInputsCount }}</span>
             </div>
-            <div class="border-b border-slate-100 bg-slate-50/50 px-2.5 py-2">
-              <p class="text-[10px] font-bold uppercase text-slate-400">
-                {{ 'anonymousTemplates.createdOnColumn' | t }}
-              </p>
-              <p class="mt-1 text-[11px] font-semibold text-slate-800">
-                {{ template.createdOnUtc ? (template.createdOnUtc | date: 'medium') : '-' }}
-              </p>
-            </div>
-            <div class="bg-white px-2.5 py-2 md:border-e md:border-e-slate-100">
-              <p class="text-[10px] font-bold uppercase text-slate-400">
-                {{ 'anonymousTemplates.activeFromColumn' | t }}
-              </p>
-              <p class="mt-1 text-[11px] font-semibold text-slate-800">
-                {{ template.activeFrom ? (template.activeFrom | date: 'medium') : '-' }}
-              </p>
-            </div>
-            <div class="bg-slate-50/50 px-2.5 py-2 md:border-e md:border-e-slate-100">
-              <p class="text-[10px] font-bold uppercase text-slate-400">
-                {{ 'anonymousTemplates.expireToColumn' | t }}
-              </p>
-              <p class="mt-1 text-[11px] font-semibold text-slate-800">
-                {{ template.expireTo ? (template.expireTo | date: 'medium') : ('anonymousTemplates.openEnded' | t) }}
-              </p>
-            </div>
-            <div class="bg-white px-2.5 py-2">
-              <p class="text-[10px] font-bold uppercase text-slate-400">
-                {{ 'anonymousTemplates.modifiedOn' | t }}
-              </p>
-              <p class="mt-1 text-[11px] font-semibold text-slate-800">
-                {{ template.modifiedOnUtc ? (template.modifiedOnUtc | date: 'medium') : '-' }}
-              </p>
+            <div class="inline-flex items-center gap-1.5 rounded-md border border-slate-100 bg-slate-50/70 px-2 py-1">
+              <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.conditionsShort' | t }}</span>
+              <span class="text-xs font-extrabold text-slate-900">{{ template.summary.questionConditionsCount }}</span>
             </div>
           </div>
         </div>
 
         <div class="space-y-2">
-          <div class="rounded-lg border border-slate-200/70 bg-slate-50/60 p-2">
-            <p class="mb-2 flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+          <div class="rounded-lg border border-slate-200/70 bg-slate-50/60 p-1.5">
+            <p class="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold text-slate-900">
               <app-icon [icon]="qrCodeIcon" [size]="15" />
               {{ 'anonymousTemplates.qrCode' | t }}
             </p>
             @if (template.qrCode) {
               <img
-                class="mx-auto h-24 w-24 rounded-md border border-slate-100 bg-white object-contain p-1"
+                class="mx-auto h-20 w-20 rounded-md border border-slate-100 bg-white object-contain p-1"
                 [src]="template.qrCode"
                 [alt]="'anonymousTemplates.qrCodeAlt' | t"
               />
@@ -158,11 +214,12 @@
                 {{ 'anonymousTemplates.noQrCode' | t }}
               </div>
             }
-            <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px]">
+            <div class="mt-2 flex flex-col gap-1.5 text-[10px]">
               <app-button
                 type="button"
                 size="sm"
                 variant="secondary"
+                [fullWidth]="true"
                 [disabled]="!template.publicUrl"
                 (pressed)="copyPublicUrl(template.publicUrl)"
               >
@@ -173,6 +230,7 @@
                 type="button"
                 size="sm"
                 variant="secondary"
+                [fullWidth]="true"
                 [disabled]="!template.qrCode"
                 (pressed)="downloadQrCode(template.qrCode)"
               >
@@ -182,7 +240,7 @@
             </div>
           </div>
 
-          <div class="rounded-lg border border-slate-200/70 bg-white p-2">
+          <div class="rounded-lg border border-slate-200/70 bg-white p-1.5">
             <p class="text-[10px] font-bold uppercase text-slate-400">
               {{ 'anonymousTemplates.publicUrl' | t }}
             </p>
@@ -194,22 +252,9 @@
       </div>
     </section>
 
-    <div class="flex flex-wrap gap-1.5 rounded-lg border border-slate-200/70 bg-white p-2 shadow-sm shadow-slate-200/40">
-      <div class="inline-flex items-center gap-2 rounded-md border border-slate-100 bg-slate-50/70 px-2.5 py-1.5">
-        <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.questionsShort' | t }}</span>
-        <span class="text-sm font-extrabold text-slate-900">{{ template.summary.questionsCount }}</span>
-      </div>
-      <div class="inline-flex items-center gap-2 rounded-md border border-slate-100 bg-slate-50/70 px-2.5 py-1.5">
-        <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.inputsShort' | t }}</span>
-        <span class="text-sm font-extrabold text-slate-900">{{ template.summary.customInputsCount }}</span>
-      </div>
-      <div class="inline-flex items-center gap-2 rounded-md border border-slate-100 bg-slate-50/70 px-2.5 py-1.5">
-        <span class="text-[10px] font-bold uppercase text-slate-400">{{ 'anonymousTemplates.conditionsShort' | t }}</span>
-        <span class="text-sm font-extrabold text-slate-900">{{ template.summary.questionConditionsCount }}</span>
-      </div>
-    </div>
 
-    <section class="rounded-lg border border-slate-200/70 bg-white p-3 shadow-sm shadow-slate-200/50">
+
+    <section class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50">
       <div class="mb-2 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h3 class="text-xs font-bold text-slate-900">{{ 'branchTemplates.customInputsTitle' | t }}</h3>
@@ -218,11 +263,19 @@
       </div>
       <div class="divide-y divide-slate-100 overflow-hidden rounded-md border border-slate-200/70">
         @for (customInput of template.customInputs; track customInput.customInputId) {
-          <div class="grid gap-2 bg-white px-2.5 py-2 text-[11px] transition hover:bg-slate-50/70 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
-            <p class="min-w-0 break-words font-bold text-slate-900 [overflow-wrap:anywhere]">
-              {{ customInputDisplayLabel(customInput) }}
+          <div class="grid gap-2 bg-white px-3 py-2 text-[10px] transition hover:bg-slate-50/70 md:grid-cols-[1fr_1fr_auto] md:items-center">
+            <div class="min-w-0">
+              <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+                {{ customInputDisplayLabel(customInput) }}
+              </p>
+              <p class="mt-0.5 break-words font-semibold text-slate-500 [overflow-wrap:anywhere]">
+                {{ customInput.name }}
+              </p>
+            </div>
+            <p class="min-w-0 break-words font-semibold text-slate-600 [overflow-wrap:anywhere]">
+              {{ customInputValidationText(customInput) }}
             </p>
-            <div class="flex flex-wrap gap-1.5 text-[10px] font-bold text-slate-500">
+            <div class="flex flex-wrap justify-start gap-1 text-[10px] font-bold text-slate-500 md:justify-end">
               <span class="rounded-full bg-slate-50 px-2 py-0.5">
                 {{ 'branchTemplates.customInputOrder' | t }} {{ customInput.order }}
               </span>
@@ -231,10 +284,19 @@
                   {{ 'branchTemplates.customInputIsRequired' | t }}
                 </span>
               }
-            </div>
-            <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                {{ customInput.typeName }}
+              <span class="rounded-full bg-slate-50 px-2 py-0.5 text-slate-600">
+                {{ customInputTypeDisplayName(customInput.typeName) }}
               </span>
+              <span
+                class="rounded-full px-2 py-0.5"
+                [class.bg-emerald-50]="customInput.isActive"
+                [class.text-emerald-700]="customInput.isActive"
+                [class.bg-slate-100]="!customInput.isActive"
+                [class.text-slate-500]="!customInput.isActive"
+              >
+                {{ (customInput.isActive ? 'common.active' : 'branches.inactive') | t }}
+              </span>
+            </div>
           </div>
         } @empty {
           <div class="p-4 text-center text-[11px] text-slate-500">
@@ -244,7 +306,7 @@
       </div>
     </section>
 
-    <section class="rounded-lg border border-slate-200/70 bg-white p-3 shadow-sm shadow-slate-200/50">
+    <section class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50">
       <div class="mb-2 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h3 class="text-xs font-bold text-slate-900">{{ 'anonymousTemplates.questionsTitle' | t }}</h3>
@@ -253,11 +315,11 @@
       </div>
       <div class="overflow-hidden rounded-md border border-slate-200/70">
         @for (question of template.questions; track question.anonymousTemplateQuestionId) {
-          <article class="border-b border-slate-100 bg-white px-2.5 py-2 transition hover:bg-slate-50/40 last:border-b-0">
-            <div class="flex flex-col gap-1.5 lg:flex-row lg:items-start lg:justify-between">
+          <article class="border-b border-slate-100 bg-white px-2 py-1.5 transition hover:bg-slate-50/40 last:border-b-0">
+            <div class="flex flex-col gap-1 lg:flex-row lg:items-start lg:justify-between">
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-cyan-50 text-[11px] font-bold text-[#0d94b3] ring-1 ring-cyan-100">
+                  <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-cyan-50 text-[10px] font-bold text-[#0d94b3] ring-1 ring-cyan-100">
                     {{ question.order }}
                   </span>
                   <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
@@ -273,31 +335,95 @@
                     {{ question.scopeName }}
                   </span>
                 </div>
-                <div class="mt-1.5 flex flex-wrap gap-1.5 ps-8 text-[10px] font-bold text-slate-500">
-                  <span class="rounded-full bg-slate-100/70 px-2 py-0.5">{{ question.typeName }}</span>
+                <div class="mt-1 flex flex-wrap gap-1 ps-7 text-[10px] font-bold text-slate-500">
+                  <span class="rounded-full bg-slate-100/70 px-2 py-0.5">{{ questionTypeDisplayName(question.typeName) }}</span>
                   <span class="rounded-full bg-slate-100/70 px-2 py-0.5">{{ questionGroupDisplayName(question) }}</span>
-                  <span class="max-w-full truncate rounded-full bg-slate-100/70 px-2 py-0.5">
-                    {{ 'anonymousTemplates.instanceId' | t }} {{ question.anonymousTemplateQuestionId }}
+                  <span
+                    class="rounded-full px-2 py-0.5"
+                    [class.bg-emerald-50]="question.isActive"
+                    [class.text-emerald-700]="question.isActive"
+                    [class.bg-slate-100]="!question.isActive"
+                    [class.text-slate-500]="!question.isActive"
+                  >
+                    {{ (question.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  </span>
+                  <span class="rounded-full bg-slate-100/70 px-2 py-0.5">
+                    {{ question.isEditable ? ('anonymousTemplates.editable' | t) : ('anonymousTemplates.readOnly' | t) }}
                   </span>
                 </div>
               </div>
             </div>
 
             @if (question.options.length > 0) {
-              <div class="mt-2 grid gap-1.5 border-t border-slate-100 pt-2 md:grid-cols-2 xl:grid-cols-4">
+              <div class="mt-2 grid gap-1.5 border-t border-slate-100 pt-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 @for (option of question.options; track option.optionId) {
-                  <div class="rounded-md border border-slate-100 bg-white px-2 py-1.5">
+                  <div class="rounded-md border border-slate-100 bg-white px-2 py-1">
                     <div class="flex items-center justify-between gap-2">
                       <p class="break-words text-[11px] font-bold text-slate-800 [overflow-wrap:anywhere]">
                         {{ optionDisplayText(option) }}
                       </p>
-                      <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                        {{ 'anonymousTemplates.value' | t }} {{ option.value ?? '-' }}
-                      </span>
+                      <div class="flex shrink-0 flex-wrap justify-end gap-1">
+                        <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                          {{ 'branchTemplates.customInputOrder' | t }} {{ option.order }}
+                        </span>
+                        <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                          {{ 'anonymousTemplates.value' | t }} {{ option.value ?? '-' }}
+                        </span>
+                        <span
+                          class="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                          [class.bg-emerald-50]="option.isActive"
+                          [class.text-emerald-700]="option.isActive"
+                          [class.bg-slate-100]="!option.isActive"
+                          [class.text-slate-500]="!option.isActive"
+                        >
+                          {{ (option.isActive ? 'common.active' : 'branches.inactive') | t }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 }
               </div>
+            }
+
+            @if (conditionsForQuestion(question); as questionConditions) {
+              @if (questionConditions.length > 0) {
+                <div class="mt-1.5 rounded-md border border-cyan-100 bg-cyan-50/30 p-1.5">
+                  <p class="mb-1 text-[10px] font-bold text-[#0d94b3]">
+                    {{ 'anonymousTemplates.conditionsTitle' | t }}
+                  </p>
+                  <div class="grid gap-1">
+                    @for (conditionView of questionConditions; track conditionView.condition.conditionId) {
+                      <div class="grid gap-1.5 rounded-md border border-cyan-100/70 bg-white px-2.5 py-1.5 md:grid-cols-[1fr_auto_1fr_auto] md:items-center">
+                        <div class="min-w-0">
+                          <p class="text-[10px] font-bold text-slate-500">
+                            {{ conditionTriggerDisplay(conditionView) }}
+                          </p>
+                        </div>
+                        <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#0d94b3]">
+                          {{ 'anonymousTemplates.thenShow' | t }}
+                        </span>
+                        <p class="min-w-0 break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
+                          {{ conditionQuestionDisplayText(conditionView.child, conditionView.condition.childAnonymousTemplateQuestionId) }}
+                        </p>
+                        <div class="flex flex-wrap gap-1">
+                          <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                            {{ 'branchTemplates.customInputOrder' | t }} {{ conditionView.condition.order }}
+                          </span>
+                          <span
+                            class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                            [class.bg-emerald-50]="conditionView.condition.isActive"
+                            [class.text-emerald-700]="conditionView.condition.isActive"
+                            [class.bg-slate-100]="!conditionView.condition.isActive"
+                            [class.text-slate-500]="!conditionView.condition.isActive"
+                          >
+                            {{ (conditionView.condition.isActive ? 'common.active' : 'branches.inactive') | t }}
+                          </span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
             }
           </article>
         } @empty {
@@ -308,27 +434,25 @@
       </div>
     </section>
 
-    <section class="rounded-lg border border-slate-200/70 bg-white p-3 shadow-sm shadow-slate-200/50">
-      <div class="mb-2">
-        <h3 class="text-xs font-bold text-slate-900">{{ 'anonymousTemplates.conditionsTitle' | t }}</h3>
-        <p class="mt-0.5 text-[11px] text-slate-500">{{ 'anonymousTemplates.conditionsSubtitle' | t }}</p>
-      </div>
-      <div class="divide-y divide-slate-100 overflow-hidden rounded-md border border-slate-200/70">
-        @for (conditionView of conditionViews(); track conditionView.condition.conditionId) {
-          <article class="bg-white px-2.5 py-2 transition hover:bg-slate-50/40">
-            <div class="grid gap-2 md:grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
-              <span class="flex h-7 w-7 items-center justify-center rounded-md bg-cyan-50 text-[#0d94b3]">
+    @if (orphanConditionViews().length > 0) {
+      <section class="rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm shadow-slate-200/50">
+        <div class="mb-2">
+          <h3 class="text-xs font-bold text-slate-900">{{ 'anonymousTemplates.conditionsTitle' | t }}</h3>
+          <p class="mt-0.5 text-[11px] text-slate-500">{{ 'anonymousTemplates.conditionsSubtitle' | t }}</p>
+        </div>
+        <div class="divide-y divide-slate-100 overflow-hidden rounded-md border border-slate-200/70">
+          @for (conditionView of orphanConditionViews(); track conditionView.condition.conditionId) {
+          <article class="bg-white px-2 py-1.5 transition hover:bg-slate-50/40">
+            <div class="grid gap-2 md:grid-cols-[auto_1fr_auto_1fr_auto] md:items-center">
+              <span class="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-50 text-[#0d94b3]">
                 <app-icon [icon]="flowIcon" [size]="14" />
               </span>
               <div class="min-w-0">
                 <p class="break-words text-[11px] font-bold text-slate-900 [overflow-wrap:anywhere]">
                   {{ conditionQuestionDisplayText(conditionView.parent, conditionView.condition.parentAnonymousTemplateQuestionId) }}
                 </p>
-                <p class="mt-1 text-[10px] font-bold uppercase text-slate-400">
-                  {{ conditionView.condition.triggerTypeName }}
-                  @if (conditionView.condition.triggerValue !== null) {
-                    - {{ 'anonymousTemplates.value' | t }} {{ conditionView.condition.triggerValue }}
-                  }
+                <p class="mt-0.5 text-[10px] font-bold text-slate-500">
+                  {{ conditionTriggerDisplay(conditionView) }}
                 </p>
               </div>
               <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#0d94b3]">
@@ -339,15 +463,26 @@
                   {{ conditionQuestionDisplayText(conditionView.child, conditionView.condition.childAnonymousTemplateQuestionId) }}
                 </p>
               </div>
+              <div class="flex flex-wrap gap-1">
+                <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                  {{ 'branchTemplates.customInputOrder' | t }} {{ conditionView.condition.order }}
+                </span>
+                <span
+                  class="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  [class.bg-emerald-50]="conditionView.condition.isActive"
+                  [class.text-emerald-700]="conditionView.condition.isActive"
+                  [class.bg-slate-100]="!conditionView.condition.isActive"
+                  [class.text-slate-500]="!conditionView.condition.isActive"
+                >
+                  {{ (conditionView.condition.isActive ? 'common.active' : 'branches.inactive') | t }}
+                </span>
+              </div>
             </div>
           </article>
-        } @empty {
-          <div class="p-4 text-center text-[11px] text-slate-500">
-            {{ 'anonymousTemplates.noConditions' | t }}
-          </div>
-        }
-      </div>
-    </section>
+          }
+        </div>
+      </section>
+    }
 
     <app-modal
       [title]="'anonymousTemplates.updateTitle' | t"

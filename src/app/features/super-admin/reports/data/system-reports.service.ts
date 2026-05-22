@@ -232,20 +232,27 @@ export class SystemReportsService {
   }
 
   private toResponseIdentity(item: ApiRecord) {
+    const branch = this.readRecord(item['branch']);
+    const department = this.readRecord(item['department']);
+    const template = this.readRecord(item['template']);
+    const operator = this.readRecord(item['operator']);
+
     return {
       surveyResponseId: this.readString(item, 'surveyResponseId'),
-      branchId: this.readString(item, 'branchId'),
-      branchNameEn: this.readString(item, 'branchNameEn'),
-      branchNameAr: this.readNullableString(item, 'branchNameAr'),
-      departmentId: this.readString(item, 'departmentId'),
-      departmentNameEn: this.readString(item, 'departmentNameEn'),
-      departmentNameAr: this.readNullableString(item, 'departmentNameAr'),
-      templateId: this.readString(item, 'templateId'),
-      templateNameEn: this.readString(item, 'templateNameEn'),
-      templateNameAr: this.readNullableString(item, 'templateNameAr'),
-      operatorId: this.readString(item, 'operatorId'),
-      operatorNameEn: this.readString(item, 'operatorNameEn'),
-      operatorNameAr: this.readNullableString(item, 'operatorNameAr'),
+      branchId: this.readString(item, 'branchId') || this.readString(branch, 'branchId'),
+      branchNameEn: this.readString(item, 'branchNameEn') || this.readString(branch, 'nameEn'),
+      branchNameAr: this.readNullableString(item, 'branchNameAr') ?? this.readNullableString(branch, 'nameAr'),
+      branchCode: this.readString(item, 'branchCode') || this.readString(branch, 'code'),
+      departmentId: this.readString(item, 'departmentId') || this.readString(department, 'departmentId'),
+      departmentNameEn: this.readString(item, 'departmentNameEn') || this.readString(department, 'nameEn'),
+      departmentNameAr:
+        this.readNullableString(item, 'departmentNameAr') ?? this.readNullableString(department, 'nameAr'),
+      templateId: this.readString(item, 'templateId') || this.readString(template, 'templateId'),
+      templateNameEn: this.readString(item, 'templateNameEn') || this.readString(template, 'nameEn'),
+      templateNameAr: this.readNullableString(item, 'templateNameAr') ?? this.readNullableString(template, 'nameAr'),
+      operatorId: this.readString(item, 'operatorId') || this.readString(operator, 'operatorId'),
+      operatorNameEn: this.readString(item, 'operatorNameEn') || this.readString(operator, 'nameEn'),
+      operatorNameAr: this.readNullableString(item, 'operatorNameAr') ?? this.readNullableString(operator, 'nameAr'),
     };
   }
 
