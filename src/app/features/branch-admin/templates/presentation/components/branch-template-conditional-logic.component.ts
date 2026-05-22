@@ -9,7 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { ArrowLeft, Ban, GitBranch, Plus, RotateCcw, Trash2 } from 'lucide-angular';
+import { ArrowLeft, Ban, ChevronUp, GitBranch, Plus, RotateCcw, Trash2 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -59,7 +59,17 @@ interface ConditionTriggerBaseView {
   selectedQuestionOptionId: string | null;
   triggerValue: number | null;
   childCandidates: readonly ConditionalLogicQuestion[];
+  childCandidateGroups: readonly ConditionalLogicQuestionGroup[];
   selectedChildTemplateQuestionId: string;
+}
+
+interface ConditionalLogicQuestionGroup {
+  groupId: string;
+  nameEn: string;
+  nameAr: string;
+  isGlobal: boolean;
+  scopeName: string;
+  questions: readonly ConditionalLogicQuestion[];
 }
 
 interface ConditionTriggerView extends ConditionTriggerBaseView {
@@ -106,6 +116,7 @@ export class BranchTemplateConditionalLogicComponent {
   readonly blockedIcon = Ban;
   readonly branchIcon = GitBranch;
   readonly backIcon = ArrowLeft;
+  readonly chevronUpIcon = ChevronUp;
   readonly plusIcon = Plus;
   readonly resetIcon = RotateCcw;
   readonly trashIcon = Trash2;
@@ -113,6 +124,7 @@ export class BranchTemplateConditionalLogicComponent {
   readonly originalConditions = signal<readonly QuestionCondition[]>([]);
   readonly draftConditions = signal<readonly QuestionCondition[]>([]);
   readonly selectedChildByTrigger = signal<Record<string, string>>({});
+  readonly expandedCandidateGroupsByTrigger = signal<Record<string, readonly string[]>>({});
   readonly focusedQuestionPathIds = signal<readonly string[]>([]);
   private readonly initializedSelectionKey = signal('');
 
@@ -166,6 +178,7 @@ export class BranchTemplateConditionalLogicComponent {
         this.originalConditions.set([]);
         this.draftConditions.set([]);
         this.selectedChildByTrigger.set({});
+        this.expandedCandidateGroupsByTrigger.set({});
         this.focusedQuestionPathIds.set([]);
         this.initializedSelectionKey.set('');
         return;
@@ -187,6 +200,7 @@ export class BranchTemplateConditionalLogicComponent {
       this.originalConditions.set(conditions);
       this.draftConditions.set(conditions);
       this.selectedChildByTrigger.set({});
+      this.expandedCandidateGroupsByTrigger.set({});
       this.focusedQuestionPathIds.set([]);
       this.initializedSelectionKey.set(selectionKey);
     });
@@ -205,6 +219,52 @@ export class BranchTemplateConditionalLogicComponent {
       ...selectedChildren,
       [triggerKey]: childTemplateQuestionId,
     }));
+  }
+
+  selectCandidateQuestion(triggerKey: string, question: ConditionalLogicQuestion): void {
+    this.selectedChildByTrigger.update((selectedChildren) => ({
+      ...selectedChildren,
+      [triggerKey]: question.templateQuestionId,
+    }));
+    this.expandedCandidateGroupsByTrigger.update((expandedGroups) => ({
+      ...expandedGroups,
+      [triggerKey]: (expandedGroups[triggerKey] ?? []).filter(
+        (groupId) => groupId !== question.groupId,
+      ),
+    }));
+  }
+
+  toggleCandidateGroup(triggerKey: string, groupId: string): void {
+    this.expandedCandidateGroupsByTrigger.update((expandedGroups) => {
+      const groupIds = expandedGroups[triggerKey] ?? [];
+      const nextGroupIds = groupIds.includes(groupId)
+        ? groupIds.filter((currentGroupId) => currentGroupId !== groupId)
+        : [...groupIds, groupId];
+
+      return {
+        ...expandedGroups,
+        [triggerKey]: nextGroupIds,
+      };
+    });
+  }
+
+  isCandidateGroupExpanded(triggerKey: string, groupId: string): boolean {
+    return this.expandedCandidateGroupsByTrigger()[triggerKey]?.includes(groupId) ?? false;
+  }
+
+  selectedChildQuestion(trigger: ConditionTriggerBaseView): ConditionalLogicQuestion | null {
+    return (
+      trigger.childCandidates.find(
+        (question) => question.templateQuestionId === trigger.selectedChildTemplateQuestionId,
+      ) ?? null
+    );
+  }
+
+  isSelectedCandidate(
+    trigger: ConditionTriggerBaseView,
+    question: ConditionalLogicQuestion,
+  ): boolean {
+    return trigger.selectedChildTemplateQuestionId === question.templateQuestionId;
   }
 
   addCondition(parent: ConditionalLogicQuestion, trigger: ConditionTriggerBaseView): void {
@@ -237,6 +297,10 @@ export class BranchTemplateConditionalLogicComponent {
       ...selectedChildren,
       [trigger.key]: '',
     }));
+    this.expandedCandidateGroupsByTrigger.update((expandedGroups) => ({
+      ...expandedGroups,
+      [trigger.key]: [],
+    }));
   }
 
   removeCondition(condition: QuestionCondition): void {
@@ -249,11 +313,13 @@ export class BranchTemplateConditionalLogicComponent {
   clearConditions(): void {
     this.draftConditions.set([]);
     this.selectedChildByTrigger.set({});
+    this.expandedCandidateGroupsByTrigger.set({});
   }
 
   resetConditions(): void {
     this.draftConditions.set(this.originalConditions());
     this.selectedChildByTrigger.set({});
+    this.expandedCandidateGroupsByTrigger.set({});
   }
 
   focusQuestion(
@@ -338,6 +404,16 @@ export class BranchTemplateConditionalLogicComponent {
   answerTypeLabel(question: ConditionalLogicQuestion): string {
     const labelKey = questionAnswerTypeLabelKey(question.type);
     return labelKey ? this.i18n.translate(labelKey) : question.type || '-';
+  }
+
+  candidateGroupName(group: ConditionalLogicQuestionGroup): string {
+    const isArabic = this.i18n.language() === 'ar';
+    return this.localizedText(group.nameEn, group.nameAr, isArabic) || '-';
+  }
+
+  candidateGroupSecondaryName(group: ConditionalLogicQuestionGroup): string {
+    const isArabic = this.i18n.language() === 'ar';
+    return this.secondaryLocalizedText(group.nameEn, group.nameAr, isArabic);
   }
 
   trackCondition(condition: QuestionCondition): string {
@@ -544,6 +620,12 @@ export class BranchTemplateConditionalLogicComponent {
           condition.triggerValue === triggerValue,
       )
       .sort((first, second) => first.order - second.order);
+    const childCandidates = this.childCandidates(
+      parent,
+      triggerType,
+      selectedQuestionOptionId,
+      triggerValue,
+    );
 
     return {
       key,
@@ -554,9 +636,39 @@ export class BranchTemplateConditionalLogicComponent {
       selectedQuestionOptionId,
       triggerValue,
       conditions,
-      childCandidates: this.childCandidates(parent, triggerType, selectedQuestionOptionId, triggerValue),
+      childCandidates,
+      childCandidateGroups: this.toCandidateGroups(childCandidates),
       selectedChildTemplateQuestionId: this.selectedChildByTrigger()[key] ?? '',
     };
+  }
+
+  private toCandidateGroups(
+    candidates: readonly ConditionalLogicQuestion[],
+  ): readonly ConditionalLogicQuestionGroup[] {
+    const groups = new Map<string, ConditionalLogicQuestionGroup>();
+
+    candidates.forEach((question) => {
+      const groupId = question.groupId || 'ungrouped';
+      const currentGroup = groups.get(groupId);
+      if (currentGroup) {
+        groups.set(groupId, {
+          ...currentGroup,
+          questions: [...currentGroup.questions, question],
+        });
+        return;
+      }
+
+      groups.set(groupId, {
+        groupId,
+        nameEn: question.groupNameEn,
+        nameAr: question.groupNameAr,
+        isGlobal: question.groupIsGlobal,
+        scopeName: question.groupScopeName,
+        questions: [question],
+      });
+    });
+
+    return [...groups.values()];
   }
 
   private childCandidates(

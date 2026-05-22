@@ -6,10 +6,14 @@
       (click)="backToResponses()"
     >
       <app-icon [icon]="backIcon" [size]="14" />
-      Back to responses
+      {{ 'departmentResponseDetails.backToResponses' | t }}
     </button>
-    <p class="text-[10px] font-black uppercase tracking-wide text-[#0d94b3]">Response details</p>
-    <h1 class="text-base font-black text-slate-950">Operator response detail</h1>
+    <p class="text-[10px] font-black uppercase tracking-wide text-[#0d94b3]">
+      {{ 'departmentResponseDetails.eyebrow' | t }}
+    </p>
+    <h1 class="text-base font-black text-slate-950">
+      {{ 'departmentResponseDetails.title' | t }}
+    </h1>
   </section>
 
   @if (store.loading()) {
@@ -22,7 +26,7 @@
     </section>
   } @else if (store.error()) {
     <section class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
-      {{ store.error() }}
+      {{ (store.error() ?? '') | t }}
     </section>
   } @else if (store.details(); as response) {
     <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
@@ -32,12 +36,12 @@
             {{ templateName(response) }}
           </h2>
           <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
-            <span>Branch: {{ branchName(response) }}</span>
-            <span>Operator: {{ operatorName(response) }}</span>
-            <span>Submitted: {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}</span>
+            <span>{{ 'departmentResponseDetails.branch' | t }}: {{ branchName(response) }}</span>
+            <span>{{ 'departmentResponseDetails.operator' | t }}: {{ operatorName(response) }}</span>
+            <span>{{ 'departmentResponseDetails.submitted' | t }}: {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}</span>
           </div>
           <p class="mt-2 break-words text-[11px] font-semibold text-slate-400 [overflow-wrap:anywhere]">
-            Response ID: {{ response.surveyResponseId }}
+            {{ 'departmentResponseDetails.responseId' | t }}: {{ response.surveyResponseId }}
           </p>
         </div>
         <span
@@ -51,42 +55,62 @@
           [class.bg-rose-50]="response.score.isScored && response.score.scorePercentage < 60"
           [class.text-rose-700]="response.score.isScored && response.score.scorePercentage < 60"
         >
-          {{ response.score.isScored ? (response.score.scorePercentage | number: '1.0-1') + '%' : 'Unscored' }}
+          {{
+            response.score.isScored
+              ? (response.score.scorePercentage | number: '1.0-1') + '%'
+              : ('departmentResponseDetails.unscored' | t)
+          }}
         </span>
       </div>
     </section>
 
     <section class="grid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60 sm:grid-cols-4">
       <div class="border-b border-slate-100 p-4 sm:border-b-0 sm:border-e">
-        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Actual score</p>
+        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+          {{ 'departmentResponseDetails.actualScore' | t }}
+        </p>
         <p class="mt-2 text-lg font-black text-slate-950">{{ response.score.isScored ? response.score.actualScore : '-' }}</p>
       </div>
       <div class="border-b border-slate-100 p-4 sm:border-b-0 sm:border-e">
-        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Max score</p>
+        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+          {{ 'departmentResponseDetails.maxScore' | t }}
+        </p>
         <p class="mt-2 text-lg font-black text-slate-950">{{ response.score.isScored ? response.score.maxScore : '-' }}</p>
       </div>
       <div class="border-b border-slate-100 p-4 sm:border-b-0 sm:border-e">
-        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Percentage</p>
+        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+          {{ 'departmentResponseDetails.percentage' | t }}
+        </p>
         <p class="mt-2 text-lg font-black text-slate-950">
           {{ response.score.isScored ? (response.score.scorePercentage | number: '1.0-2') + '%' : '-' }}
         </p>
       </div>
       <div class="p-4">
-        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">Status</p>
-        <p class="mt-2 text-lg font-black text-slate-950">{{ response.score.isScored ? 'Scored' : 'Unscored' }}</p>
+        <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+          {{ 'departmentResponseDetails.status' | t }}
+        </p>
+        <p class="mt-2 text-lg font-black text-slate-950">
+          {{ (response.score.isScored ? 'departmentResponseDetails.scored' : 'departmentResponseDetails.unscored') | t }}
+        </p>
       </div>
     </section>
 
     <section class="rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60">
       <div class="flex items-center justify-between border-b border-slate-100 p-4">
         <div>
-          <h2 class="text-sm font-black text-slate-950">Custom inputs</h2>
-          <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ response.customInputsCount }} submitted fields</p>
+          <h2 class="text-sm font-black text-slate-950">
+            {{ 'departmentResponseDetails.customInputs' | t }}
+          </h2>
+          <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ response.customInputsCount }} {{ 'departmentResponseDetails.submittedFields' | t }}
+          </p>
         </div>
         <app-icon class="text-[#11A7C9]" [icon]="fileIcon" [size]="16" />
       </div>
       @if (response.customInputs.length === 0) {
-        <p class="p-6 text-center text-xs font-semibold text-slate-500">No custom inputs were submitted.</p>
+        <p class="p-6 text-center text-xs font-semibold text-slate-500">
+          {{ 'departmentResponseDetails.noCustomInputs' | t }}
+        </p>
       } @else {
         <dl class="divide-y divide-slate-100">
           @for (input of response.customInputs; track input.customInputId) {
@@ -105,8 +129,12 @@
 
     <section class="rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60">
       <div class="border-b border-slate-100 p-4">
-        <h2 class="text-sm font-black text-slate-950">Answers</h2>
-        <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ response.answersCount }} answers captured</p>
+        <h2 class="text-sm font-black text-slate-950">
+          {{ 'departmentResponseDetails.answers' | t }}
+        </h2>
+        <p class="mt-1 text-[11px] font-semibold text-slate-500">
+          {{ response.answersCount }} {{ 'departmentResponseDetails.answersCaptured' | t }}
+        </p>
       </div>
       <div class="divide-y divide-slate-100">
         @for (answer of response.answers; track answer.questionId) {
@@ -114,18 +142,22 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div class="min-w-0">
                 <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">{{ questionText(answer) }}</p>
-                <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ answer.questionTypeName }}</p>
+                <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ questionTypeLabel(answer) }}</p>
               </div>
               <span class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-600">
-                {{ answer.questionType }}
+                {{ questionTypeLabel(answer) }}
               </span>
             </div>
 
             <div class="mt-3 rounded-lg bg-slate-50 p-3">
               @switch (answer.questionType) {
                 @case ('SingleChoice') {
-                  <p class="text-xs font-bold text-slate-900">Selected option: {{ displayAnswer(answer) }}</p>
-                  <p class="mt-1 text-[11px] font-semibold text-slate-500">Option value: {{ answer.selectedOptionValue ?? '-' }}</p>
+                  <p class="text-xs font-bold text-slate-900">
+                    {{ 'departmentResponseDetails.selectedOption' | t }}: {{ displayAnswer(answer) }}
+                  </p>
+                  <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                    {{ 'departmentResponseDetails.optionValue' | t }}: {{ answer.selectedOptionValue ?? '-' }}
+                  </p>
                 }
                 @case ('StarRating') {
                   <div class="flex items-center gap-2">
@@ -152,7 +184,9 @@
                         ></span>
                       }
                     </div>
-                    <span class="text-xs font-black text-slate-900">Smile value: {{ displayAnswer(answer) }}</span>
+                    <span class="text-xs font-black text-slate-900">
+                      {{ 'departmentResponseDetails.smileValue' | t }}: {{ displayAnswer(answer) }}
+                    </span>
                   </div>
                 }
                 @case ('Complain') {
@@ -167,18 +201,22 @@
                       </p>
                       <audio class="h-9 w-full" controls [src]="voiceUrl(answer)"></audio>
                       <a class="text-[11px] font-extrabold text-[#0d94b3]" [href]="voiceUrl(answer)" target="_blank" rel="noopener">
-                        Open voice file
+                        {{ 'departmentResponseDetails.openVoiceFile' | t }}
                       </a>
                     </div>
                   } @else {
-                    <p class="text-xs font-semibold text-slate-500">No voice file available.</p>
+                    <p class="text-xs font-semibold text-slate-500">
+                      {{ 'departmentResponseDetails.noVoiceFile' | t }}
+                    </p>
                   }
                 }
               }
             </div>
           </article>
         } @empty {
-          <p class="p-6 text-center text-xs font-semibold text-slate-500">No answers were submitted.</p>
+          <p class="p-6 text-center text-xs font-semibold text-slate-500">
+            {{ 'departmentResponseDetails.noAnswers' | t }}
+          </p>
         }
       </div>
     </section>

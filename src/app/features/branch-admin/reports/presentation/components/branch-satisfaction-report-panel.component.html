@@ -188,7 +188,7 @@
         </div>
 
         <div class="h-56 rounded-xl border border-slate-200 bg-white p-3">
-          <canvas #chartCanvas aria-label="Branch satisfaction trend chart"></canvas>
+          <canvas #chartCanvas [attr.aria-label]="'branchDashboard.satisfactionTrendChart' | t"></canvas>
         </div>
 
         @if (report.byTemplate.length > 0) {

@@ -6,7 +6,9 @@
         {{ 'common.back' | t }}
       </app-button>
       <div class="min-w-0">
-        <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]">
+        <p
+          class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]"
+        >
           {{ 'anonymousTemplates.responsesEyebrow' | t }}
         </p>
         <h2 class="mt-1 break-words text-lg font-bold text-slate-900 [overflow-wrap:anywhere]">
@@ -15,14 +17,22 @@
       </div>
     </div>
 
-    <app-button type="button" variant="secondary" [routerLink]="['/anonymous-templates', anonymousTemplateId]">
-      <app-icon [icon]="fileTextIcon" [size]="15" />
-      {{ 'anonymousTemplates.detailsTitle' | t }}
-    </app-button>
+    <div class="w-full sm:w-auto">
+      <app-button
+        type="button"
+        variant="secondary"
+        [routerLink]="['/anonymous-templates', anonymousTemplateId]"
+      >
+        <app-icon [icon]="fileTextIcon" [size]="15" />
+        {{ 'anonymousTemplates.detailsTitle' | t }}
+      </app-button>
+    </div>
   </div>
 
   @if (!canViewResponses()) {
-    <div class="rounded-md border border-amber-100 bg-amber-50 p-3 text-[11px] font-semibold text-amber-700">
+    <div
+      class="rounded-md border border-amber-100 bg-amber-50 p-3 text-[11px] font-semibold text-amber-700"
+    >
       {{ 'anonymousTemplates.noResponsesPermission' | t }}
     </div>
   } @else {
@@ -31,32 +41,38 @@
       [subtitle]="'anonymousTemplates.responsesFiltersSubtitle' | t"
     >
       <form
-        class="flex flex-wrap items-end gap-2"
+        class="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-7"
         [formGroup]="filtersForm"
         (ngSubmit)="applyFilters()"
       >
-        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.fromDate' | t }}</span>
+        <label class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[9px] font-bold text-slate-500">{{
+            'anonymousTemplates.fromDate' | t
+          }}</span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
             type="date"
             formControlName="fromDate"
           />
         </label>
 
-        <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.toDate' | t }}</span>
+        <label class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[9px] font-bold text-slate-500">{{
+            'anonymousTemplates.toDate' | t
+          }}</span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
             type="date"
             formControlName="toDate"
           />
         </label>
 
-        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.minScore' | t }}</span>
+        <label class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[9px] font-bold text-slate-500">{{
+            'anonymousTemplates.minScore' | t
+          }}</span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
             type="number"
             min="0"
             max="100"
@@ -64,10 +80,12 @@
           />
         </label>
 
-        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.maxScore' | t }}</span>
+        <label class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[9px] font-bold text-slate-500">{{
+            'anonymousTemplates.maxScore' | t
+          }}</span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
             type="number"
             min="0"
             max="100"
@@ -75,10 +93,12 @@
           />
         </label>
 
-        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.pageSize' | t }}</span>
+        <label class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[9px] font-bold text-slate-500">{{
+            'globalQuestionGroups.pageSize' | t
+          }}</span>
           <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
             formControlName="pageSize"
           >
             <option value="10">10</option>
@@ -88,10 +108,12 @@
           </select>
         </label>
 
-        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[7rem]">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.orderSort' | t }}</span>
+        <label class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-[9px] font-bold text-slate-500">{{
+            'globalQuestionGroups.orderSort' | t
+          }}</span>
           <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
             formControlName="orderSort"
           >
             <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
@@ -100,8 +122,12 @@
           </select>
         </label>
 
-        <div class="flex items-end gap-1.5">
-          <app-button size="sm" type="submit" [loading]="anonymousTemplatesStore.responsesLoading()">
+        <div class="grid grid-cols-2 gap-1.5 sm:col-span-2 xl:col-span-1 xl:self-end">
+          <app-button
+            size="sm"
+            type="submit"
+            [loading]="anonymousTemplatesStore.responsesLoading()"
+          >
             <app-icon [icon]="searchIcon" [size]="13" />
             {{ 'branches.searchAction' | t }}
           </app-button>
@@ -113,7 +139,9 @@
     </app-card>
 
     @if (anonymousTemplatesStore.responsesError()) {
-      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+      <div
+        class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]"
+      >
         {{ anonymousTemplatesStore.responsesError() ?? '' | t }}
       </div>
     }
@@ -122,7 +150,84 @@
       [title]="'anonymousTemplates.responsesListTitle' | t"
       [subtitle]="'anonymousTemplates.responsesListSubtitle' | t"
     >
-      <div class="overflow-hidden rounded-md border border-slate-100 bg-white">
+      <div class="space-y-3 lg:hidden">
+        @if (anonymousTemplatesStore.responsesLoading()) {
+          <div
+            class="rounded-xl border border-slate-100 bg-slate-50 p-6 text-center text-[11px] font-semibold text-slate-500"
+          >
+            <span
+              class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+            ></span>
+            {{ 'anonymousTemplates.responsesLoading' | t }}
+          </div>
+        } @else {
+          @for (
+            response of anonymousTemplatesStore.responses();
+            track response.anonymousSurveyResponseId
+          ) {
+            <article class="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold text-slate-500">
+                    {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+                  </p>
+                  <!-- <p class="mt-1 break-all text-[10px] font-semibold text-slate-400">
+                    {{ response.anonymousSurveyResponseId }}
+                  </p> -->
+                </div>
+                <span
+                  class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black"
+                  [class.bg-emerald-50]="response.isScored"
+                  [class.text-emerald-700]="response.isScored"
+                  [class.bg-slate-100]="!response.isScored"
+                  [class.text-slate-500]="!response.isScored"
+                >
+                  @if (response.scorePercentage !== null) {
+                    {{ response.scorePercentage | number: '1.0-2' }}%
+                  } @else {
+                    {{ 'anonymousTemplates.unscored' | t }}
+                  }
+                </span>
+              </div>
+
+              <div class="mt-3 grid grid-cols-2 gap-2">
+                <div class="rounded-lg bg-white p-2">
+                  <p class="text-[10px] font-black uppercase text-slate-400">
+                    {{ 'anonymousTemplates.answersCount' | t }}
+                  </p>
+                  <p class="mt-1 font-black text-slate-900">{{ response.answersCount }}</p>
+                </div>
+                <div class="rounded-lg bg-white p-2">
+                  <p class="text-[10px] font-black uppercase text-slate-400">
+                    {{ 'anonymousTemplates.customInputValuesCount' | t }}
+                  </p>
+                  <p class="mt-1 font-black text-slate-900">
+                    {{ response.customInputValuesCount }}
+                  </p>
+                </div>
+              </div>
+
+              <app-button
+                size="sm"
+                type="button"
+                variant="secondary"
+                [routerLink]="[response.anonymousSurveyResponseId]"
+              >
+                <app-icon [icon]="detailsIcon" [size]="14" />
+                {{ 'anonymousTemplates.viewResponse' | t }}
+              </app-button>
+            </article>
+          } @empty {
+            <div
+              class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-[11px] font-semibold text-slate-500"
+            >
+              {{ 'anonymousTemplates.noResponses' | t }}
+            </div>
+          }
+        }
+      </div>
+
+      <div class="hidden overflow-hidden rounded-md border border-slate-100 bg-white lg:block">
         <div class="overflow-x-auto">
           <table class="min-w-[56rem] w-full divide-y divide-slate-100">
             <thead class="bg-slate-50 text-start text-[10px] font-bold uppercase text-slate-500">
@@ -131,23 +236,33 @@
                 <th class="px-2.5 py-2">{{ 'anonymousTemplates.score' | t }}</th>
                 <th class="px-2.5 py-2">{{ 'anonymousTemplates.answersCount' | t }}</th>
                 <th class="px-2.5 py-2">{{ 'anonymousTemplates.customInputValuesCount' | t }}</th>
-                <th class="px-2.5 py-2">{{ 'anonymousTemplates.responseId' | t }}</th>
+                <!-- <th class="px-2.5 py-2">{{ 'anonymousTemplates.responseId' | t }}</th> -->
                 <th class="px-2.5 py-2 text-end">{{ 'branches.actions' | t }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
               @if (anonymousTemplatesStore.responsesLoading()) {
                 <tr>
-                  <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="6">
-                    <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                  <td
+                    class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500"
+                    colspan="6"
+                  >
+                    <span
+                      class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                    ></span>
                     {{ 'anonymousTemplates.responsesLoading' | t }}
                   </td>
                 </tr>
               } @else {
-                @for (response of anonymousTemplatesStore.responses(); track response.anonymousSurveyResponseId) {
+                @for (
+                  response of anonymousTemplatesStore.responses();
+                  track response.anonymousSurveyResponseId
+                ) {
                   <tr class="align-top transition hover:bg-slate-50">
                     <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
-                      {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
+                      {{
+                        response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-'
+                      }}
                     </td>
                     <td class="px-2.5 py-2">
                       <span
@@ -170,11 +285,11 @@
                     <td class="px-2.5 py-2 text-[11px] font-bold text-slate-700">
                       {{ response.customInputValuesCount }}
                     </td>
-                    <td class="px-2.5 py-2">
+                    <!-- <td class="px-2.5 py-2">
                       <p class="max-w-48 truncate text-[10px] font-semibold text-slate-500" [title]="response.anonymousSurveyResponseId">
                         {{ response.anonymousSurveyResponseId }}
                       </p>
-                    </td>
+                    </td> -->
                     <td class="px-2.5 py-2">
                       <div class="flex justify-end">
                         <app-button
@@ -191,7 +306,10 @@
                   </tr>
                 } @empty {
                   <tr>
-                    <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="6">
+                    <td
+                      class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500"
+                      colspan="6"
+                    >
                       {{ 'anonymousTemplates.noResponses' | t }}
                     </td>
                   </tr>
@@ -202,7 +320,9 @@
         </div>
       </div>
 
-      <div class="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 md:flex-row md:items-center md:justify-between">
+      <div
+        class="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 md:flex-row md:items-center md:justify-between"
+      >
         <p class="text-[11px] font-semibold text-slate-500">
           {{ 'branches.paginationSummary' | t }}
           {{ anonymousTemplatesStore.responsesCurrentPage() }} /
@@ -216,7 +336,10 @@
             size="sm"
             type="button"
             variant="secondary"
-            [disabled]="!anonymousTemplatesStore.responsesHasPreviousPage() || anonymousTemplatesStore.responsesLoading()"
+            [disabled]="
+              !anonymousTemplatesStore.responsesHasPreviousPage() ||
+              anonymousTemplatesStore.responsesLoading()
+            "
             (pressed)="previousPage()"
           >
             <app-icon [icon]="chevronLeftIcon" [size]="15" />
@@ -226,7 +349,10 @@
             size="sm"
             type="button"
             variant="secondary"
-            [disabled]="!anonymousTemplatesStore.responsesHasNextPage() || anonymousTemplatesStore.responsesLoading()"
+            [disabled]="
+              !anonymousTemplatesStore.responsesHasNextPage() ||
+              anonymousTemplatesStore.responsesLoading()
+            "
             (pressed)="nextPage()"
           >
             {{ 'branches.nextPage' | t }}

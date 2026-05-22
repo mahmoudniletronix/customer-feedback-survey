@@ -95,7 +95,9 @@
         </label>
 
         <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
-          <span class="text-[9px] font-bold text-slate-500">Top Questions</span>
+          <span class="text-[9px] font-bold text-slate-500">
+            {{ 'branchDashboard.topQuestions' | t }}
+          </span>
           <input
             class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="number"
@@ -105,7 +107,9 @@
         </label>
 
         <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[9rem]">
-          <span class="text-[9px] font-bold text-slate-500">Critical Responses</span>
+          <span class="text-[9px] font-bold text-slate-500">
+            {{ 'branchDashboard.criticalResponsesLimit' | t }}
+          </span>
           <input
             class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="number"
@@ -115,7 +119,9 @@
         </label>
 
         <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[9rem]">
-          <span class="text-[9px] font-bold text-slate-500">Critical Threshold</span>
+          <span class="text-[9px] font-bold text-slate-500">
+            {{ 'branchDashboard.criticalThreshold' | t }}
+          </span>
           <input
             class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
             type="number"
@@ -575,7 +581,7 @@
             </p>
           } @else {
             <div class="h-56 sm:h-72">
-              <canvas #trendCanvas aria-label="Branch satisfaction trend chart"></canvas>
+              <canvas #trendCanvas [attr.aria-label]="'branchDashboard.satisfactionTrendChart' | t"></canvas>
             </div>
           }
         </article>

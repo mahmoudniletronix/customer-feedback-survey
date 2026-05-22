@@ -55,15 +55,49 @@ export class DepartmentOperatorResponsesPageComponent implements OnInit {
   readonly filtersSummary = computed(() => {
     const query = this.store.query();
     const parts: string[] = [];
-    if (query.from || query.to) parts.push(`${query.from || 'start'} to ${query.to || 'today'}`);
-    if (query.templateId) parts.push('template filtered');
-    if (query.minScorePercentage !== undefined || query.maxScorePercentage !== undefined) {
-      parts.push(`${query.minScorePercentage ?? 0}-${query.maxScorePercentage ?? 100}% score`);
+    if (query.from || query.to) {
+      parts.push(
+        `${query.from || this.i18n.translate('departmentOperatorResponses.filterStart')} ${this.i18n.translate('departmentOperatorResponses.to')} ${query.to || this.i18n.translate('departmentOperatorResponses.filterToday')}`,
+      );
     }
-    if (query.hasComplaint !== undefined) parts.push(query.hasComplaint ? 'with complaint' : 'no complaint');
-    if (query.hasVoice !== undefined) parts.push(query.hasVoice ? 'with voice' : 'no voice');
-    if (query.searchText) parts.push(`search: ${query.searchText}`);
-    parts.push(query.orderSort ?? 'Newest');
+    if (query.templateId) {
+      parts.push(this.i18n.translate('departmentOperatorResponses.templateFiltered'));
+    }
+    if (query.minScorePercentage !== undefined || query.maxScorePercentage !== undefined) {
+      parts.push(
+        `${query.minScorePercentage ?? 0}-${query.maxScorePercentage ?? 100}% ${this.i18n.translate('departmentOperatorResponses.scoreFilter')}`,
+      );
+    }
+    if (query.hasComplaint !== undefined) {
+      parts.push(
+        this.i18n.translate(
+          query.hasComplaint
+            ? 'departmentOperatorResponses.withComplaintSummary'
+            : 'departmentOperatorResponses.noComplaintSummary',
+        ),
+      );
+    }
+    if (query.hasVoice !== undefined) {
+      parts.push(
+        this.i18n.translate(
+          query.hasVoice
+            ? 'departmentOperatorResponses.withVoiceSummary'
+            : 'departmentOperatorResponses.noVoiceSummary',
+        ),
+      );
+    }
+    if (query.searchText) {
+      parts.push(
+        `${this.i18n.translate('departmentOperatorResponses.searchSummary')}: ${query.searchText}`,
+      );
+    }
+    parts.push(
+      this.i18n.translate(
+        query.orderSort === 'Oldest'
+          ? 'departmentOperatorResponses.oldest'
+          : 'departmentOperatorResponses.newest',
+      ),
+    );
     return parts.join(' | ');
   });
 
@@ -154,7 +188,9 @@ export class DepartmentOperatorResponsesPageComponent implements OnInit {
   }
 
   scoreLabel(row: DepartmentOperatorResponseListItem): string {
-    return row.isScored ? `${row.scorePercentage.toFixed(1)}%` : 'Unscored';
+    return row.isScored
+      ? `${row.scorePercentage.toFixed(1)}%`
+      : this.i18n.translate('departmentOperatorResponses.unscored');
   }
 
   customInputLabel(input: DepartmentResponseCustomInputPreview): string {

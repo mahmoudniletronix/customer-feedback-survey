@@ -16,6 +16,7 @@ import { Router } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import {
   AlertTriangle,
+  ArrowLeft,
   BarChart3,
   Building2,
   ClipboardList,
@@ -33,9 +34,11 @@ import {
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { BranchResponseDetailsModalComponent } from '../../../../branch-admin/dashboard/presentation/components/branch-response-details-modal.component';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { SurveyAnonymousResponseDetailsModalComponent } from '../components/survey-anonymous-response-details-modal.component';
+import { SurveyTemplateDetailsModalComponent } from '../components/survey-template-details-modal.component';
 import { SurveyDashboardStore } from '../state/survey-dashboard.store';
 import {
   SurveyDashboardCriticalResponse,
@@ -47,6 +50,7 @@ import {
   SurveyDashboardSource,
   SurveyDashboardSourceMetrics,
   SurveyDashboardTemplateOption,
+  SurveyDashboardTemplatePerformance,
   SurveyDashboardTrendPoint,
 } from '../../domain/survey-dashboard.model';
 
@@ -63,6 +67,8 @@ Chart.register(...registerables);
     IconComponent,
     ReactiveFormsModule,
     SurveyAnonymousResponseDetailsModalComponent,
+    SurveyTemplateDetailsModalComponent,
+    TranslatePipe,
   ],
   templateUrl: './survey-dashboard-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,6 +80,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
+  readonly backIcon = ArrowLeft;
 
   private trendChart: Chart<'line', (number | null)[], string> | null = null;
 
@@ -93,6 +100,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly questionsIcon = ClipboardList;
 
   readonly advancedFiltersOpen = signal(true);
+  readonly customInputSegmentsVisible = false;
   readonly validationError = signal<string | null>(null);
   readonly sourceSignal = signal<SurveyDashboardSource>('All');
   readonly selectedBranchId = signal('');
@@ -230,6 +238,10 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  openTemplateDetails(template: SurveyDashboardTemplatePerformance): void {
+    this.store.loadTemplateDetails(template);
+  }
+
   branchOptionName(branch: { nameEn: string; nameAr: string | null; code: string }): string {
     const name = this.localized(branch.nameEn, branch.nameAr);
     return branch.code ? `${name} (${branch.code})` : name;
@@ -256,17 +268,17 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
   sourceLabel(source: SurveyDashboardSource): string {
     if (source === 'Internal') {
-      return 'Internal';
+      return this.i18n.translate('surveyDashboard.sourceInternal');
     }
     if (source === 'Anonymous') {
-      return 'Anonymous';
+      return this.i18n.translate('surveyDashboard.sourceAnonymous');
     }
 
-    return 'All';
+    return this.i18n.translate('surveyDashboard.sourceAll');
   }
 
   scoreLabel(value: number | null): string {
-    return value === null ? 'No Data' : `${value.toFixed(1)}%`;
+    return value === null ? this.i18n.translate('surveyDashboard.noData') : `${value.toFixed(1)}%`;
   }
 
   scoreClass(value: number | null): string {
@@ -282,6 +294,17 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     return 'bg-emerald-50 text-emerald-700';
   }
 
+  riskLabel(riskLevel: string): string {
+    if (riskLevel === 'HighRisk') {
+      return this.i18n.translate('surveyDashboard.highRisk');
+    }
+    if (riskLevel === 'MediumRisk') {
+      return this.i18n.translate('surveyDashboard.mediumRisk');
+    }
+
+    return this.i18n.translate('surveyDashboard.healthy');
+  }
+
   sourceClass(source: SurveyDashboardSource): string {
     if (source === 'Internal') return 'bg-cyan-50 text-cyan-700';
     if (source === 'Anonymous') return 'bg-violet-50 text-violet-700';
@@ -294,7 +317,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
   customInputPreviewText(inputs: readonly SurveyDashboardCustomInputPreview[]): string {
     if (inputs.length === 0) {
-      return 'No custom inputs';
+      return this.i18n.translate('surveyDashboard.noCustomInputs');
     }
 
     return inputs
@@ -319,7 +342,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   hasNavigation(navigation: SurveyDashboardNavigation | null): boolean {
-    return navigation !== null && navigation.method.toUpperCase() === 'GET' && navigation.path.length > 0;
+    return (
+      navigation !== null && navigation.method.toUpperCase() === 'GET' && navigation.path.length > 0
+    );
   }
 
   private queryFromForm(): SurveyDashboardQuery {
@@ -349,22 +374,22 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   private validateFilters(): string | null {
     const value = this.filtersForm.getRawValue();
     if (value.from && value.to && value.from > value.to) {
-      return 'From date cannot be after To date.';
+      return 'surveyDashboard.invalidDateRange';
     }
 
     const topQuestionsCount = this.toPositiveInteger(value.topQuestionsCount, 0);
     if (topQuestionsCount < 1) {
-      return 'Top questions count must be greater than zero.';
+      return 'surveyDashboard.invalidTopQuestions';
     }
 
     const criticalResponsesCount = this.toPositiveInteger(value.criticalResponsesCount, 0);
     if (criticalResponsesCount < 1) {
-      return 'Critical responses count must be greater than zero.';
+      return 'surveyDashboard.invalidCriticalCount';
     }
 
     const threshold = Number(value.criticalScoreThreshold);
     if (!Number.isFinite(threshold) || threshold < 0 || threshold > 100) {
-      return 'Critical score threshold must be between 0 and 100.';
+      return 'surveyDashboard.invalidCriticalScore';
     }
 
     return null;
@@ -392,10 +417,16 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   private openInternalTemplateResponses(navigation: SurveyDashboardNavigation): void {
-    const templateId = this.queryParam(navigation.path, 'templateId');
-    void this.router.navigate(['/branch-admin/templates/responses'], {
-      queryParams: templateId ? { templateId } : {},
-    });
+    const queryParams = this.navigationQueryParams(navigation.path, [
+      'templateId',
+      'pageNumber',
+      'pageSize',
+    ]);
+    const route = this.isSuperAdmin()
+      ? ['/reports/survey-dashboard/internal-responses']
+      : ['/branch-admin/templates/responses'];
+
+    void this.router.navigate(route, { queryParams });
   }
 
   private openAnonymousTemplateResponses(navigation: SurveyDashboardNavigation): void {
@@ -426,6 +457,17 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  private navigationQueryParams(path: string, names: readonly string[]): Record<string, string> {
+    return names.reduce<Record<string, string>>((params, name) => {
+      const value = this.queryParam(path, name);
+      if (value.length > 0) {
+        params[name] = value;
+      }
+
+      return params;
+    }, {});
+  }
+
   private pathSegmentAfter(path: string, segment: string): string {
     const url = this.navigationUrl(path);
     if (!url) {
@@ -434,7 +476,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
     const segments = url.pathname.split('/').filter(Boolean);
     const index = segments.findIndex((item) => item.toLowerCase() === segment.toLowerCase());
-    return index >= 0 ? segments[index + 1] ?? '' : '';
+    return index >= 0 ? (segments[index + 1] ?? '') : '';
   }
 
   private navigationUrl(path: string): URL | null {
@@ -463,6 +505,10 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     return value ? `${value}T23:59:59.999` : undefined;
   }
 
+  public goBack(): void {
+    window.history.back();
+  }
+
   private renderTrendChart(
     canvas: HTMLCanvasElement,
     trend: readonly SurveyDashboardTrendPoint[],
@@ -475,7 +521,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
         labels: trend.map((point) => point.period),
         datasets: [
           {
-            label: 'Combined',
+            label: this.i18n.translate('surveyDashboard.combined'),
             data: trend.map((point) => point.averageScorePercentage),
             borderColor: '#0ea5e9',
             backgroundColor: 'rgba(14, 165, 233, 0.10)',
@@ -485,7 +531,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
             pointHoverRadius: 5,
           },
           {
-            label: 'Internal',
+            label: this.i18n.translate('surveyDashboard.sourceInternal'),
             data: trend.map((point) => point.internalAverageScorePercentage),
             borderColor: '#10b981',
             backgroundColor: 'rgba(16, 185, 129, 0.08)',
@@ -495,7 +541,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
             pointHoverRadius: 5,
           },
           {
-            label: 'Anonymous',
+            label: this.i18n.translate('surveyDashboard.sourceAnonymous'),
             data: trend.map((point) => point.anonymousAverageScorePercentage),
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139, 92, 246, 0.08)',
@@ -520,11 +566,13 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
             callbacks: {
               label: (context) => {
                 const value = context.parsed.y;
-                return `${context.dataset.label}: ${value === null ? 'No Data' : `${value.toFixed(1)}%`}`;
+                return `${context.dataset.label}: ${value === null ? this.i18n.translate('surveyDashboard.noData') : `${value.toFixed(1)}%`}`;
               },
               afterBody: (items) => {
                 const point = trend[items[0]?.dataIndex ?? 0];
-                return point ? `Responses: ${point.responsesCount}` : '';
+                return point
+                  ? `${this.i18n.translate('surveyDashboard.responses')}: ${point.responsesCount}`
+                  : '';
               },
             },
           },

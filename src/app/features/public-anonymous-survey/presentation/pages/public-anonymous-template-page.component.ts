@@ -1,16 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
 import {
-  AlertCircle,
-  CheckCircle2,
-  FileText,
-  Globe2,
-  Languages,
-  Mic,
-  Send,
-  Star,
-} from 'lucide-angular';
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertCircle, Languages, Mic, Send, Star } from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -30,7 +28,8 @@ import {
 } from '../../domain/public-anonymous-template.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
-import { AppFooterComponent } from '../../../../shared/ui/app-footer/app-footer.component';
+import { PublicSurveyFooterComponent } from '../components/public-survey-footer.component';
+import { PublicSurveyBrandingService } from '../services/public-survey-branding.service';
 import { PublicAnonymousTemplateStore } from '../state/public-anonymous-template.store';
 
 const RATING_VALUES = [1, 2, 3, 4, 5] as const;
@@ -38,7 +37,7 @@ const RATING_VALUES = [1, 2, 3, 4, 5] as const;
 @Component({
   selector: 'app-public-anonymous-template-page',
   standalone: true,
-  imports: [DatePipe, IconComponent, TranslatePipe, AppFooterComponent],
+  imports: [IconComponent, TranslatePipe, PublicSurveyFooterComponent],
   templateUrl: './public-anonymous-template-page.component.html',
   styleUrl: './public-anonymous-template-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,11 +47,9 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly i18n = inject(I18nService);
+  private readonly publicSurveyBranding = inject(PublicSurveyBrandingService);
 
   readonly alertIcon = AlertCircle;
-  readonly checkIcon = CheckCircle2;
-  readonly fileTextIcon = FileText;
-  readonly globeIcon = Globe2;
   readonly languageIcon = Languages;
   readonly micIcon = Mic;
   readonly sendIcon = Send;
@@ -78,6 +75,10 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     const template = this.publicAnonymousTemplateStore.template();
     return template ? this.visibleQuestionsFromAnswers(template, this.answers()) : [];
   });
+  readonly hierarchyDepthByQuestionId = computed<Readonly<Record<string, number>>>(() => {
+    const template = this.publicAnonymousTemplateStore.template();
+    return template ? this.buildQuestionHierarchyDepths(template) : {};
+  });
 
   readonly answeredVisibleQuestionsCount = computed(
     () => this.visibleQuestions().filter((question) => this.hasAnswer(question)).length,
@@ -95,12 +96,15 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   );
 
   ngOnInit(): void {
+    this.publicSurveyBranding.applyPublicSurveyBranding();
+
     const anonymousTemplateId = this.route.snapshot.paramMap.get('anonymousTemplateId') ?? '';
     this.publicAnonymousTemplateStore.load(anonymousTemplateId);
   }
 
   ngOnDestroy(): void {
     this.publicAnonymousTemplateStore.clear();
+    this.publicSurveyBranding.restoreAppBranding();
   }
 
   toggleLanguage(): void {
@@ -121,6 +125,11 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return template
       ? template.rootAnonymousTemplateQuestionIds.includes(question.anonymousTemplateQuestionId)
       : question.isRoot;
+  }
+
+  questionHierarchyDepth(question: PublicAnonymousTemplateQuestion): number {
+    const depth = this.hierarchyDepthByQuestionId()[question.anonymousTemplateQuestionId];
+    return depth ?? (this.isRootQuestion(question) ? 0 : 1);
   }
 
   groupName(question: PublicAnonymousTemplateQuestion): string {
@@ -290,13 +299,20 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return this.toCustomerFacingOptionText(this.localizedText(option.textEn, option.textAr));
   }
 
-  optionSecondaryText(option: PublicAnonymousTemplateQuestionOption): string {
-    const secondaryText = this.i18n.language() === 'ar' ? option.textEn : option.textAr;
-    return this.toCustomerFacingOptionText(secondaryText ?? '');
-  }
-
   private toCustomerFacingOptionText(value: string): string {
     return value.replace(/\s*(?:[-|]\s*)?(?:Value|Score)\s+[1-5]\s*$/i, '').trim();
+  }
+
+  isSingleChoiceSelected(questionId: string, optionId: string): boolean {
+    return this.answerFor(questionId).selectedQuestionOptionId === optionId;
+  }
+
+  isStarRatingSelected(questionId: string, value: number): boolean {
+    return this.answerFor(questionId).starRatingValue === value;
+  }
+
+  isSmileSelected(questionId: string, value: number): boolean {
+    return this.answerFor(questionId).smileValue === value;
   }
 
   hasAnswer(question: PublicAnonymousTemplateQuestion): boolean {
@@ -374,9 +390,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return {
       customInputValues: template.customInputs
         .map((input) => this.toCustomInputValuePayload(input))
-        .filter(
-          (value): value is PublicAnonymousCustomInputValuePayload => value !== null,
-        ),
+        .filter((value): value is PublicAnonymousCustomInputValuePayload => value !== null),
       answers: this.visibleQuestions().map((question) => this.toAnswerPayload(question)),
     };
   }
@@ -397,16 +411,13 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     };
   }
 
-  private toAnswerPayload(
-    question: PublicAnonymousTemplateQuestion,
-  ): PublicAnonymousAnswerPayload {
+  private toAnswerPayload(question: PublicAnonymousTemplateQuestion): PublicAnonymousAnswerPayload {
     const answer = this.answerFor(question.anonymousTemplateQuestionId);
     const kind = this.questionKind(question);
 
     return {
       anonymousTemplateQuestionId: question.anonymousTemplateQuestionId,
-      selectedQuestionOptionId:
-        kind === 'singleChoice' ? answer.selectedQuestionOptionId : null,
+      selectedQuestionOptionId: kind === 'singleChoice' ? answer.selectedQuestionOptionId : null,
       starRatingValue: kind === 'starRating' ? answer.starRatingValue : null,
       smileValue: kind === 'smiles' ? answer.smileValue : null,
       textAnswer: kind === 'complain' ? answer.textAnswer.trim() : null,
@@ -511,6 +522,56 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return orderedIds
       .map((questionId) => questionsById.get(questionId))
       .filter((question): question is PublicAnonymousTemplateQuestion => question !== undefined);
+  }
+
+  private buildQuestionHierarchyDepths(
+    template: PublicAnonymousTemplate,
+  ): Readonly<Record<string, number>> {
+    const depths: Record<string, number> = {};
+    const childIdsByParent = new Map<string, string[]>();
+
+    template.questionConditions
+      .slice()
+      .sort((first, second) => first.order - second.order)
+      .forEach((condition) => {
+        const childIds = childIdsByParent.get(condition.parentAnonymousTemplateQuestionId) ?? [];
+
+        if (!childIds.includes(condition.childAnonymousTemplateQuestionId)) {
+          childIds.push(condition.childAnonymousTemplateQuestionId);
+        }
+
+        childIdsByParent.set(condition.parentAnonymousTemplateQuestionId, childIds);
+      });
+
+    const visitQuestion = (questionId: string, depth: number, path: ReadonlySet<string>): void => {
+      const currentDepth = depths[questionId];
+      if (currentDepth !== undefined && currentDepth <= depth) {
+        return;
+      }
+
+      depths[questionId] = depth;
+
+      if (path.has(questionId)) {
+        return;
+      }
+
+      const nextPath = new Set(path);
+      nextPath.add(questionId);
+
+      (childIdsByParent.get(questionId) ?? []).forEach((childQuestionId) =>
+        visitQuestion(childQuestionId, depth + 1, nextPath),
+      );
+    };
+
+    template.rootAnonymousTemplateQuestionIds.forEach((questionId) =>
+      visitQuestion(questionId, 0, new Set()),
+    );
+
+    template.questions.forEach((question) => {
+      depths[question.anonymousTemplateQuestionId] ??= question.isRoot ? 0 : 1;
+    });
+
+    return depths;
   }
 
   private isFormValid(template: PublicAnonymousTemplate): boolean {

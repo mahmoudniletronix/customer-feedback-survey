@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TrendPoint } from '../../domain/dashboard.model';
 
 Chart.register(...registerables);
@@ -17,6 +18,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-trend-chart',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './trend-chart.component.html',
   styleUrl: './trend-chart.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

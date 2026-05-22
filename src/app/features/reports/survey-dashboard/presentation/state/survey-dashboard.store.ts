@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { forkJoin, finalize, take } from 'rxjs';
+import { catchError, finalize, forkJoin, of, take } from 'rxjs';
 import { AnonymousTemplateResponseDetails } from '../../../../anonymous-templates/domain/anonymous-template.model';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchSurveyResponseDetails } from '../../../../branch-admin/dashboard/domain/branch-dashboard.model';
@@ -11,7 +11,9 @@ import {
   SurveyDashboardNavigation,
   SurveyDashboardQuery,
   SurveyDashboardResponse,
+  SurveyDashboardTemplateDetails,
   SurveyDashboardTemplateOption,
+  SurveyDashboardTemplatePerformance,
 } from '../../domain/survey-dashboard.model';
 
 @Injectable()
@@ -46,6 +48,11 @@ export class SurveyDashboardStore {
   private readonly anonymousDetailsLoadingSignal = signal(false);
   private readonly anonymousDetailsErrorSignal = signal<string | null>(null);
 
+  private readonly templateDetailsOpenSignal = signal(false);
+  private readonly templateDetailsSignal = signal<SurveyDashboardTemplateDetails | null>(null);
+  private readonly templateDetailsLoadingSignal = signal(false);
+  private readonly templateDetailsErrorSignal = signal<string | null>(null);
+
   readonly dashboard = this.dashboardSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
@@ -66,15 +73,28 @@ export class SurveyDashboardStore {
   readonly anonymousDetailsLoading = this.anonymousDetailsLoadingSignal.asReadonly();
   readonly anonymousDetailsError = this.anonymousDetailsErrorSignal.asReadonly();
 
+  readonly templateDetailsOpen = this.templateDetailsOpenSignal.asReadonly();
+  readonly templateDetails = this.templateDetailsSignal.asReadonly();
+  readonly templateDetailsLoading = this.templateDetailsLoadingSignal.asReadonly();
+  readonly templateDetailsError = this.templateDetailsErrorSignal.asReadonly();
+
   loadOptions(): void {
     this.optionsLoadingSignal.set(true);
 
     forkJoin({
       branches: this.authStore.role() === 'SUPER_ADMIN'
-        ? this.dashboardService.getBranchOptions()
-        : [[] as readonly SurveyDashboardBranchOption[]],
-      internalTemplates: this.dashboardService.getInternalTemplateOptions(),
-      anonymousTemplates: this.dashboardService.getAnonymousTemplateOptions(),
+        ? this.dashboardService
+            .getBranchOptions()
+            .pipe(catchError(() => of([] as readonly SurveyDashboardBranchOption[])))
+        : of([] as readonly SurveyDashboardBranchOption[]),
+      internalTemplates: this.authStore.role() === 'SUPER_ADMIN'
+        ? of([] as readonly SurveyDashboardTemplateOption[])
+        : this.dashboardService
+            .getInternalTemplateOptions()
+            .pipe(catchError(() => of([] as readonly SurveyDashboardTemplateOption[]))),
+      anonymousTemplates: this.dashboardService
+        .getAnonymousTemplateOptions()
+        .pipe(catchError(() => of([] as readonly SurveyDashboardTemplateOption[]))),
     })
       .pipe(
         take(1),
@@ -107,7 +127,11 @@ export class SurveyDashboardStore {
         finalize(() => this.loadingSignal.set(false)),
       )
       .subscribe({
-        next: (dashboard) => this.dashboardSignal.set(dashboard),
+        next: (dashboard) => {
+          this.dashboardSignal.set(dashboard);
+          this.mergeBranchOptionsFromDashboard(dashboard);
+          this.mergeTemplateOptionsFromDashboard(dashboard);
+        },
         error: (error: unknown) => {
           this.dashboardSignal.set(null);
           this.errorSignal.set(this.errorMessage(error, 'Survey dashboard is temporarily unavailable.'));
@@ -130,7 +154,11 @@ export class SurveyDashboardStore {
         finalize(() => this.loadingSignal.set(false)),
       )
       .subscribe({
-        next: (dashboard) => this.dashboardSignal.set(dashboard),
+        next: (dashboard) => {
+          this.dashboardSignal.set(dashboard);
+          this.mergeBranchOptionsFromDashboard(dashboard);
+          this.mergeTemplateOptionsFromDashboard(dashboard);
+        },
         error: (error: unknown) => {
           this.dashboardSignal.set(null);
           this.errorSignal.set(this.errorMessage(error, 'Survey dashboard is temporarily unavailable.'));
@@ -192,6 +220,36 @@ export class SurveyDashboardStore {
       });
   }
 
+  loadTemplateDetails(template: SurveyDashboardTemplatePerformance): void {
+    if (
+      template.templateId.length === 0 ||
+      (template.source !== 'Internal' && template.source !== 'Anonymous')
+    ) {
+      return;
+    }
+
+    this.templateDetailsOpenSignal.set(true);
+    this.templateDetailsSignal.set(null);
+    this.templateDetailsErrorSignal.set(null);
+    this.templateDetailsLoadingSignal.set(true);
+
+    this.dashboardService
+      .getTemplateDetails(template.templateId, template.source)
+      .pipe(
+        take(1),
+        finalize(() => this.templateDetailsLoadingSignal.set(false)),
+      )
+      .subscribe({
+        next: (details) => this.templateDetailsSignal.set(details),
+        error: (error: unknown) => {
+          this.templateDetailsSignal.set(null);
+          this.templateDetailsErrorSignal.set(
+            this.errorMessage(error, 'Template details are temporarily unavailable.'),
+          );
+        },
+      });
+  }
+
   closeInternalDetails(): void {
     this.internalDetailsOpenSignal.set(false);
     this.internalDetailsSignal.set(null);
@@ -204,6 +262,13 @@ export class SurveyDashboardStore {
     this.anonymousDetailsSignal.set(null);
     this.anonymousDetailsErrorSignal.set(null);
     this.anonymousDetailsLoadingSignal.set(false);
+  }
+
+  closeTemplateDetails(): void {
+    this.templateDetailsOpenSignal.set(false);
+    this.templateDetailsSignal.set(null);
+    this.templateDetailsErrorSignal.set(null);
+    this.templateDetailsLoadingSignal.set(false);
   }
 
   private normalizeQuery(query: SurveyDashboardQuery): SurveyDashboardQuery {
@@ -227,6 +292,67 @@ export class SurveyDashboardStore {
     }
 
     return normalized;
+  }
+
+  private mergeBranchOptionsFromDashboard(dashboard: SurveyDashboardResponse): void {
+    if (this.authStore.role() !== 'SUPER_ADMIN') {
+      return;
+    }
+
+    const branches = new Map<string, SurveyDashboardBranchOption>(
+      this.branchesSignal().map((branch) => [branch.id, branch]),
+    );
+
+    dashboard.branchesSummary.forEach((branch) => {
+      if (!branch.branchId || branches.has(branch.branchId)) {
+        return;
+      }
+
+      branches.set(branch.branchId, {
+        id: branch.branchId,
+        nameEn: branch.branchNameEn,
+        nameAr: branch.branchNameAr,
+        code: '',
+      });
+    });
+
+    this.branchesSignal.set([...branches.values()]);
+  }
+
+  private mergeTemplateOptionsFromDashboard(dashboard: SurveyDashboardResponse): void {
+    const internalTemplates = new Map<string, SurveyDashboardTemplateOption>(
+      this.internalTemplatesSignal().map((template) => [template.id, template]),
+    );
+    const anonymousTemplates = new Map<string, SurveyDashboardTemplateOption>(
+      this.anonymousTemplatesSignal().map((template) => [template.id, template]),
+    );
+
+    dashboard.templatePerformance.forEach((template) => {
+      if (!template.templateId) {
+        return;
+      }
+
+      const option: SurveyDashboardTemplateOption = {
+        id: template.templateId,
+        nameEn: template.templateNameEn,
+        nameAr: template.templateNameAr,
+        branchId: template.branchId,
+        branchNameEn: template.branchNameEn,
+        branchNameAr: template.branchNameAr,
+      };
+
+      if (template.source === 'Internal') {
+        internalTemplates.set(template.templateId, option);
+        return;
+      }
+
+      if (template.source === 'Anonymous') {
+        anonymousTemplates.set(template.templateId, option);
+      }
+    });
+
+    this.internalTemplatesSignal.set([...internalTemplates.values()]);
+    this.anonymousTemplatesSignal.set([...anonymousTemplates.values()]);
   }
 
   private positiveInteger(value: number | undefined, fallback: number): number {

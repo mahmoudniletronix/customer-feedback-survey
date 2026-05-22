@@ -105,6 +105,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   readonly searchText = signal('');
   readonly initializedTemplateId = signal('');
   readonly draggingQuestionId = signal<string | null>(null);
+  readonly expandedAvailableGroupIds = signal<readonly string[]>([]);
 
   readonly templateId = computed(() => this.route.snapshot.paramMap.get('templateId') ?? '');
   readonly selectedQuestionIds = computed(
@@ -166,6 +167,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
           ),
       );
       this.initializedTemplateId.set(selection.templateId);
+      this.expandedAvailableGroupIds.set([]);
     });
   }
 
@@ -205,6 +207,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
       ...questions,
       { ...question, isSelected: true, order: questions.length + 1 },
     ]);
+    this.collapseAvailableGroup(question.groupId);
   }
 
   removeQuestion(questionId: string): void {
@@ -327,6 +330,37 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     return typeof type === 'string' || typeof type === 'number' ? String(type) : '-';
   }
 
+  toggleAvailableGroup(groupId: string): void {
+    this.expandedAvailableGroupIds.update((groupIds) =>
+      groupIds.includes(groupId)
+        ? groupIds.filter((currentGroupId) => currentGroupId !== groupId)
+        : [...groupIds, groupId],
+    );
+  }
+
+  isAvailableGroupExpanded(groupId: string): boolean {
+    return (
+      this.expandedAvailableGroupIds().includes(groupId) ||
+      this.searchText().trim().length > 0
+    );
+  }
+
+  availableGroupName(group: TemplateQuestionManagerGroup): string {
+    if (this.i18n.language() === 'ar') {
+      return group.nameAr || group.nameEn || '-';
+    }
+
+    return group.nameEn || group.nameAr || '-';
+  }
+
+  availableGroupSecondaryName(group: TemplateQuestionManagerGroup): string {
+    if (this.i18n.language() === 'ar') {
+      return group.nameEn || '';
+    }
+
+    return group.nameAr || '';
+  }
+
   questionText(question: TemplateQuestionManagerItem): string {
     if (this.i18n.language() === 'ar') {
       return question.textAr || question.textEn || '-';
@@ -402,6 +436,16 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
           };
         })
         .filter((group) => group.questions.length > 0) ?? []
+    );
+  }
+
+  private collapseAvailableGroup(groupId: string): void {
+    if (this.searchText().trim().length > 0) {
+      return;
+    }
+
+    this.expandedAvailableGroupIds.update((groupIds) =>
+      groupIds.filter((currentGroupId) => currentGroupId !== groupId),
     );
   }
 

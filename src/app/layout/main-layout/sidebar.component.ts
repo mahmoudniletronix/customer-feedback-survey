@@ -8,7 +8,6 @@ import {
   HelpCircle,
   History,
   LucideIconData,
-  MessageSquareText,
   Network,
   PanelLeftClose,
   PanelLeftOpen,
@@ -25,6 +24,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 interface MenuItem {
   label: string;
   labelKey: string;
+  superAdminLabelKey?: string;
   path: string;
   icon: LucideIconData;
   roles: readonly Role[];
@@ -47,6 +47,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
   {
     label: 'Dashboard',
     labelKey: 'nav.dashboard',
+    superAdminLabelKey: 'nav.branchesDashboard',
     path: '/reports/survey-dashboard',
     icon: ChartNoAxesColumnIncreasing,
     roles: [],
@@ -212,7 +213,6 @@ export class SidebarComponent {
   readonly mobileOpen = input(false);
   readonly toggle = output<void>();
   readonly close = output<void>();
-  readonly brandIcon = MessageSquareText;
   readonly panelLeftCloseIcon = PanelLeftClose;
   readonly panelLeftOpenIcon = PanelLeftOpen;
 
@@ -223,6 +223,10 @@ export class SidebarComponent {
     const role = this.authStore.role();
     return MENU_ITEMS.filter(
       (item) => (role !== null && item.roles.includes(role)) || this.canAccessFeature(item.feature),
+    ).map((item) =>
+      role === 'SUPER_ADMIN' && item.superAdminLabelKey
+        ? { ...item, labelKey: item.superAdminLabelKey }
+        : item,
     );
   });
 

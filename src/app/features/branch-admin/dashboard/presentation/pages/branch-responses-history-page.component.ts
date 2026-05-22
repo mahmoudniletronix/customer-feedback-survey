@@ -80,11 +80,15 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
       this.branchStore.load();
     }
 
-    const templateId = this.route.snapshot.queryParamMap.get('templateId') ?? '';
+    const queryParamMap = this.route.snapshot.queryParamMap;
+    const templateId = queryParamMap.get('templateId') ?? '';
+    const pageNumber = this.toQueryPageNumber(queryParamMap.get('pageNumber'));
+    const pageSize = this.toQueryPageSize(queryParamMap.get('pageSize'));
     if (templateId.length > 0) {
       this.filtersForm.patchValue({ templateId });
     }
-    this.historyStore.load({ pageNumber: 1, pageSize: 10, templateId: templateId || undefined });
+    this.filtersForm.patchValue({ pageSize: String(pageSize) });
+    this.historyStore.load({ pageNumber, pageSize, templateId: templateId || undefined });
   }
 
   applyFilters(): void {
@@ -156,7 +160,9 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   }
 
   scoreLabel(row: BranchSurveyResponseListItem): string {
-    return row.isScored ? `${row.scorePercentage.toFixed(1)}%` : this.i18n.translate('branchResponsesHistory.notScored');
+    return row.isScored
+      ? `${row.scorePercentage.toFixed(1)}%`
+      : this.i18n.translate('branchResponsesHistory.notScored');
   }
 
   booleanLabel(value: boolean): string {
@@ -192,6 +198,20 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
     return Number.isFinite(parsed) ? parsed : undefined;
   }
 
+  private toQueryPageNumber(value: string | null): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
+  }
+
+  private toQueryPageSize(value: string | null): number {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed)) {
+      return 10;
+    }
+
+    return Math.min(Math.max(parsed, 1), 100);
+  }
+
   private toPageSize(value: string): number {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 10;
@@ -213,5 +233,8 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
     }
 
     return englishText || arabicText || '-';
+  }
+  public goBack(): void {
+    window.history.back();
   }
 }

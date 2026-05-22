@@ -1,3 +1,9 @@
+import {
+  QuestionAnswerOption,
+  QuestionAnswerTypeInput,
+} from '../../../../shared/models/question-answer.model';
+import { QuestionCondition } from '../../../../shared/models/question-condition.model';
+
 export type SurveyDashboardSource = 'All' | 'Internal' | 'Anonymous';
 export type SurveyDashboardGroupBy = 'Day' | 'Month';
 export type SurveyDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk' | string;
@@ -217,4 +223,62 @@ export interface SurveyDashboardTemplateOption {
   branchId: string | null;
   branchNameEn: string | null;
   branchNameAr: string | null;
+}
+
+export interface SurveyDashboardTemplateDetails {
+  source: SurveyDashboardSource;
+  templateId: string;
+  branchId: string | null;
+  branchNameEn: string | null;
+  branchNameAr: string | null;
+  branchCode: string | null;
+  nameEn: string;
+  nameAr: string | null;
+  description: string | null;
+  status: string;
+  isActive: boolean;
+  activeFrom: string;
+  expireTo: string | null;
+  createdOnUtc: string | null;
+  publicUrl: string | null;
+  qrCode: string | null;
+  questionsCount: number;
+  groupsCount: number;
+  customInputsCount: number;
+  questionConditionsCount: number;
+  responsesCount: number | null;
+  customInputs: readonly SurveyDashboardTemplateCustomInput[];
+  questions: readonly SurveyDashboardTemplateQuestion[];
+  questionConditions: readonly QuestionCondition[];
+}
+
+export interface SurveyDashboardTemplateCustomInput {
+  customInputId: string;
+  name: string;
+  labelEn: string | null;
+  labelAr: string | null;
+  type: string;
+  typeName: string;
+  isRequired: boolean;
+  minLength: number | null;
+  maxLength: number | null;
+  minValue: number | null;
+  maxValue: number | null;
+  order: number;
+  isActive: boolean;
+}
+
+export interface SurveyDashboardTemplateQuestion {
+  templateQuestionId: string;
+  questionId: string;
+  textEn: string;
+  textAr: string | null;
+  type: QuestionAnswerTypeInput;
+  typeName: string;
+  groupId: string;
+  groupNameEn: string;
+  groupNameAr: string | null;
+  order: number | null;
+  isActive: boolean;
+  options: readonly QuestionAnswerOption[];
 }

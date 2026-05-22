@@ -1,4 +1,4 @@
-<app-modal title="Anonymous response details" [open]="open()" size="lg" (closed)="closed.emit()">
+<app-modal [title]="'surveyDashboard.anonymousResponseDetails' | t" [open]="open()" size="lg" (closed)="closed.emit()">
   @if (loading()) {
     <div class="space-y-2">
       <div class="h-16 animate-pulse rounded-lg bg-slate-50"></div>
@@ -15,7 +15,7 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
             <p class="text-[9px] font-black uppercase tracking-wide text-[#0d94b3]">
-              Anonymous response
+              {{ 'surveyDashboard.anonymousResponse' | t }}
             </p>
             <h3 class="mt-0.5 break-words text-sm font-black text-slate-950 [overflow-wrap:anywhere]">
               {{ responseTitle(response) }}
@@ -43,7 +43,7 @@
             [class.bg-rose-50]="response.isScored && (response.scorePercentage ?? 0) < 60"
             [class.text-rose-700]="response.isScored && (response.scorePercentage ?? 0) < 60"
           >
-            {{ response.isScored ? ((response.scorePercentage ?? 0) | number: '1.0-1') + '%' : 'Not scored' }}
+            {{ response.isScored ? ((response.scorePercentage ?? 0) | number: '1.0-1') + '%' : ('surveyDashboard.notScored' | t) }}
           </span>
         </div>
       </header>
@@ -51,9 +51,9 @@
       <section class="rounded-lg border border-slate-200 bg-white">
         <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
           <div>
-            <h4 class="text-xs font-black text-slate-950">Custom inputs</h4>
+            <h4 class="text-xs font-black text-slate-950">{{ 'surveyDashboard.customInputs' | t }}</h4>
             <p class="text-[10px] font-semibold text-slate-500">
-              {{ response.customInputValuesCount }} submitted fields
+              {{ response.customInputValuesCount }} {{ 'surveyDashboard.submittedFields' | t }}
             </p>
           </div>
           <app-icon class="text-[#11A7C9]" [icon]="fileIcon" [size]="15" />
@@ -61,7 +61,7 @@
 
         @if (response.customInputValues.length === 0) {
           <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
-            No custom inputs captured.
+            {{ 'surveyDashboard.noCustomInputsCaptured' | t }}
           </p>
         } @else {
           <dl class="divide-y divide-slate-100">
@@ -82,9 +82,9 @@
       <section class="rounded-lg border border-slate-200 bg-white">
         <div class="flex items-center justify-between border-b border-slate-100 px-3 py-2">
           <div>
-            <h4 class="text-xs font-black text-slate-950">Answers</h4>
+            <h4 class="text-xs font-black text-slate-950">{{ 'surveyDashboard.answers' | t }}</h4>
             <p class="text-[10px] font-semibold text-slate-500">
-              {{ response.answersCount }} answers captured
+              {{ response.answersCount }} {{ 'surveyDashboard.answersCaptured' | t }}
             </p>
           </div>
           <app-icon class="text-[#11A7C9]" [icon]="messageIcon" [size]="15" />
@@ -122,7 +122,7 @@
             </article>
           } @empty {
             <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
-              No answers captured.
+              {{ 'surveyDashboard.noAnswersCaptured' | t }}
             </p>
           }
         </div>
@@ -130,7 +130,7 @@
 
       <div class="flex justify-end">
         <app-button type="button" size="sm" variant="secondary" (pressed)="closed.emit()">
-          Close
+          {{ 'surveyDashboard.close' | t }}
         </app-button>
       </div>
     </div>

@@ -20,7 +20,7 @@ export class DepartmentResponseDetailsStore {
 
   load(operatorId: string, surveyResponseId: string): void {
     if (!operatorId || !surveyResponseId) {
-      this.errorSignal.set('Response id and operator id are required.');
+      this.errorSignal.set('departmentResponseDetails.requiredIds');
       return;
     }
 
@@ -42,7 +42,7 @@ export class DepartmentResponseDetailsStore {
 
   private handleError(error: unknown): void {
     if (!(error instanceof HttpErrorResponse)) {
-      this.errorSignal.set('Response details are temporarily unavailable.');
+      this.errorSignal.set('departmentResponseDetails.unavailable');
       return;
     }
 
@@ -51,18 +51,18 @@ export class DepartmentResponseDetailsStore {
       return;
     }
     if (error.status === 403) {
-      this.errorSignal.set('You do not have permission to view department reports.');
+      this.errorSignal.set('departmentResponseDetails.noPermission');
       return;
     }
     if (error.status === 404) {
-      this.errorSignal.set('Operator or response not found inside current department.');
+      this.errorSignal.set('departmentResponseDetails.notFound');
       return;
     }
     if (error.status === 400 || error.status === 422) {
-      this.errorSignal.set('Invalid response details request.');
+      this.errorSignal.set('departmentResponseDetails.invalidRequest');
       return;
     }
 
-    this.errorSignal.set('Response details are temporarily unavailable.');
+    this.errorSignal.set('departmentResponseDetails.unavailable');
   }
 }

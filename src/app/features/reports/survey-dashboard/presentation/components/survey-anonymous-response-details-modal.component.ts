@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output } from '@angu
 import { Calendar, FileText, Hash, MessageSquareText, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
@@ -15,7 +16,7 @@ import {
 @Component({
   selector: 'app-survey-anonymous-response-details-modal',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, DecimalPipe, IconComponent, ModalComponent],
+  imports: [ButtonComponent, DatePipe, DecimalPipe, IconComponent, ModalComponent, TranslatePipe],
   templateUrl: './survey-anonymous-response-details-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

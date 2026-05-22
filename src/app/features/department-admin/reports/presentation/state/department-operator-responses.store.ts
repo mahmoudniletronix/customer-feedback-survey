@@ -46,7 +46,7 @@ export class DepartmentOperatorResponsesStore {
   load(query: DepartmentOperatorResponsesQuery = this.querySignal()): void {
     const operatorId = this.operatorIdSignal();
     if (!operatorId) {
-      this.errorSignal.set('Operator id is required.');
+      this.errorSignal.set('departmentOperatorResponses.operatorIdRequired');
       return;
     }
 
@@ -122,10 +122,10 @@ export class DepartmentOperatorResponsesStore {
 
   private validateQuery(query: DepartmentOperatorResponsesQuery): string | null {
     if (query.pageNumber < 1) {
-      return 'Invalid filters: page number must be greater than 0.';
+      return 'departmentOperatorResponses.invalidPageNumber';
     }
     if (query.pageSize < 1 || query.pageSize > 100) {
-      return 'Invalid filters: page size must be between 1 and 100.';
+      return 'departmentOperatorResponses.invalidPageSize';
     }
     if (
       (query.minScorePercentage !== undefined &&
@@ -133,14 +133,14 @@ export class DepartmentOperatorResponsesStore {
       (query.maxScorePercentage !== undefined &&
         (query.maxScorePercentage < 0 || query.maxScorePercentage > 100))
     ) {
-      return 'Invalid filters: score percentages must be between 0 and 100.';
+      return 'departmentOperatorResponses.invalidScoreRange';
     }
     if (
       query.minScorePercentage !== undefined &&
       query.maxScorePercentage !== undefined &&
       query.minScorePercentage > query.maxScorePercentage
     ) {
-      return 'Invalid filters: min score cannot be greater than max score.';
+      return 'departmentOperatorResponses.invalidScoreOrder';
     }
 
     return this.validateDateRange(query.from, query.to);
@@ -154,12 +154,12 @@ export class DepartmentOperatorResponsesStore {
     const fromDate = this.toDate(from);
     const toDate = this.toDate(to);
     if (!fromDate || !toDate || fromDate > toDate) {
-      return 'Invalid filters: from date must be before or equal to to date.';
+      return 'departmentOperatorResponses.invalidDateOrder';
     }
 
     const maxTo = new Date(fromDate);
     maxTo.setMonth(maxTo.getMonth() + 12);
-    return toDate > maxTo ? 'Invalid filters: date range cannot exceed 12 months.' : null;
+    return toDate > maxTo ? 'departmentOperatorResponses.invalidDateRange' : null;
   }
 
   private toDate(value: string): Date | null {
@@ -169,7 +169,7 @@ export class DepartmentOperatorResponsesStore {
 
   private handleError(error: unknown): void {
     if (!(error instanceof HttpErrorResponse)) {
-      this.errorSignal.set('Operator responses are temporarily unavailable.');
+      this.errorSignal.set('departmentOperatorResponses.unavailable');
       return;
     }
 
@@ -178,18 +178,18 @@ export class DepartmentOperatorResponsesStore {
       return;
     }
     if (error.status === 403) {
-      this.errorSignal.set('You do not have permission to view department reports.');
+      this.errorSignal.set('departmentOperatorResponses.noPermission');
       return;
     }
     if (error.status === 404) {
-      this.errorSignal.set('Operator not found or not accessible.');
+      this.errorSignal.set('departmentOperatorResponses.operatorNotFound');
       return;
     }
     if (error.status === 400 || error.status === 422) {
-      this.errorSignal.set('Invalid filters. Check date, pagination, and score values.');
+      this.errorSignal.set('departmentOperatorResponses.invalidFilters');
       return;
     }
 
-    this.errorSignal.set('Operator responses are temporarily unavailable.');
+    this.errorSignal.set('departmentOperatorResponses.unavailable');
   }
 }

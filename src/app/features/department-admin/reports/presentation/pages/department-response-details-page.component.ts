@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ArrowLeft, FileText, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import {
   DepartmentResponseAnswer,
@@ -18,7 +19,7 @@ interface ScaleSlot {
 @Component({
   selector: 'app-department-response-details-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, IconComponent],
+  imports: [DatePipe, DecimalPipe, IconComponent, TranslatePipe],
   templateUrl: './department-response-details-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -85,7 +86,21 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
       return answer.textAnswer || answer.displayValue || '-';
     }
 
-    return answer.voiceFileName || answer.displayValue || 'Voice answer';
+    return (
+      answer.voiceFileName ||
+      answer.displayValue ||
+      this.i18n.translate('departmentResponseDetails.voiceAnswer')
+    );
+  }
+
+  questionTypeLabel(answer: DepartmentResponseAnswer): string {
+    if (answer.questionType === 'SingleChoice') return this.i18n.translate('questions.typeSingleChoice');
+    if (answer.questionType === 'StarRating') return this.i18n.translate('questions.typeStarRating');
+    if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
+    if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
+    if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');
+
+    return answer.questionTypeName || answer.questionType;
   }
 
   isActiveScaleSlot(slot: ScaleSlot, value: number | null): boolean {

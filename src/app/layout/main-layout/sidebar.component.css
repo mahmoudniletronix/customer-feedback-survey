@@ -40,14 +40,19 @@
 .brand-logo-container {
   width: 2.75rem;
   height: 2.75rem;
-  background: linear-gradient(135deg, #11a7c9 0%, #0e8bab 100%);
+  background: #ffffff;
   border-radius: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: 0 8px 16px rgba(17, 167, 201, 0.25);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
   flex-shrink: 0;
+}
+
+.brand-logo-image {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
 }
 
 .brand-name {
