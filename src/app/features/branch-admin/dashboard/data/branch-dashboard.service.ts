@@ -278,11 +278,13 @@ export class BranchDashboardService {
 
   private toResponseAnswer(item: ApiRecord): BranchSurveyResponseAnswer {
     return {
+      templateQuestionId: this.readString(item, 'templateQuestionId'),
       questionId: this.readString(item, 'questionId'),
       questionTextEn: this.readString(item, 'questionTextEn'),
       questionTextAr: this.readNullableString(item, 'questionTextAr'),
       questionType: this.toResponseQuestionType(this.readString(item, 'questionType')),
       questionTypeName: this.readString(item, 'questionTypeName'),
+      questionOrder: this.readNumber(item, 'questionOrder') || this.readNumber(item, 'order'),
       selectedQuestionOptionId: this.readNullableString(item, 'selectedQuestionOptionId'),
       selectedOptionTextEn: this.readNullableString(item, 'selectedOptionTextEn'),
       selectedOptionTextAr: this.readNullableString(item, 'selectedOptionTextAr'),
@@ -293,7 +295,17 @@ export class BranchDashboardService {
       voiceFileName: this.readNullableString(item, 'voiceFileName'),
       voiceFileUrl: this.readNullableString(item, 'voiceFileUrl'),
       displayValue: this.readString(item, 'displayValue'),
+      children: this.readResponseAnswerChildren(item).map((answer) => this.toResponseAnswer(answer)),
     };
+  }
+
+  private readResponseAnswerChildren(item: ApiRecord): ApiRecord[] {
+    const children = this.readArray(item['children']);
+    if (children.length > 0) {
+      return children;
+    }
+
+    return this.readArray(item['childAnswers']);
   }
 
   private toResponsesPagination(response: ApiRecord): BranchSurveyResponsesPagination {

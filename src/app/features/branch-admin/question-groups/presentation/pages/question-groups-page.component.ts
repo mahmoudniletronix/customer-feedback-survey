@@ -22,6 +22,7 @@ import {
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -38,6 +39,7 @@ import { QuestionGroupsStore } from '../state/question-groups.store';
   standalone: true,
   imports: [
     ButtonComponent,
+    BackButtonComponent,
     CardComponent,
     DatePipe,
     IconComponent,

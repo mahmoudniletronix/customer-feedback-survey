@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ArrowLeft, FileText, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
@@ -16,10 +16,15 @@ interface ScaleSlot {
   readonly index: number;
 }
 
+interface DepartmentAnswerTreeNode {
+  readonly answer: DepartmentResponseAnswer;
+  readonly children: readonly DepartmentAnswerTreeNode[];
+}
+
 @Component({
   selector: 'app-department-response-details-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, IconComponent, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, IconComponent, NgTemplateOutlet, TranslatePipe],
   templateUrl: './department-response-details-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -39,6 +44,9 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
     { index: 4 },
     { index: 5 },
   ];
+  readonly answerTree = computed<readonly DepartmentAnswerTreeNode[]>(() =>
+    this.toAnswerTree(this.store.details()?.answers ?? []),
+  );
 
   ngOnInit(): void {
     const operatorId = this.route.snapshot.paramMap.get('operatorId') ?? '';
@@ -120,5 +128,14 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
   private localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') return arabicText || englishText || '-';
     return englishText || arabicText || '-';
+  }
+
+  private toAnswerTree(
+    answers: readonly DepartmentResponseAnswer[],
+  ): readonly DepartmentAnswerTreeNode[] {
+    return answers.map((answer) => ({
+      answer,
+      children: this.toAnswerTree(answer.children),
+    }));
   }
 }

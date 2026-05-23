@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -10,10 +10,15 @@ import {
   SystemResponseScore,
 } from '../../domain/system-reports.model';
 
+interface SystemAnswerTreeNode {
+  readonly answer: SystemResponseAnswer;
+  readonly children: readonly SystemAnswerTreeNode[];
+}
+
 @Component({
   selector: 'app-system-response-details-modal',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ModalComponent, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, ModalComponent, NgTemplateOutlet, TranslatePipe],
   templateUrl: './system-response-details-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -25,6 +30,9 @@ export class SystemResponseDetailsModalComponent {
   readonly error = input<string | null>(null);
   readonly details = input<SystemResponseDetails | null>(null);
   readonly closed = output<void>();
+  readonly answerTree = computed<readonly SystemAnswerTreeNode[]>(() =>
+    this.toAnswerTree(this.details()?.answers ?? []),
+  );
 
   localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') return arabicText || englishText || '-';
@@ -96,5 +104,12 @@ export class SystemResponseDetailsModalComponent {
     const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
     const path = answer.voiceFileUrl.startsWith('/') ? answer.voiceFileUrl : `/${answer.voiceFileUrl}`;
     return `${baseUrl}${path}`;
+  }
+
+  private toAnswerTree(answers: readonly SystemResponseAnswer[]): readonly SystemAnswerTreeNode[] {
+    return answers.map((answer) => ({
+      answer,
+      children: this.toAnswerTree(answer.children),
+    }));
   }
 }

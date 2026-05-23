@@ -93,7 +93,9 @@ export class BranchTemplatesStore {
   readonly detailsError = this.detailsErrorSignal.asReadonly();
   readonly questionsSelectionError = this.questionsSelectionErrorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())));
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalItemsSignal() / this.pageSizeSignal())),
+  );
   readonly hasPreviousPage = computed(() => this.currentPageSignal() > 1);
   readonly hasNextPage = computed(() => this.currentPageSignal() < this.totalPages());
   readonly selectedQuestionsCount = computed(
@@ -105,7 +107,10 @@ export class BranchTemplatesStore {
   );
   readonly totalQuestionsSelectionCount = computed(
     () =>
-      this.questionsSelectionSignal()?.groups.reduce((total, group) => total + group.questions.length, 0) ?? 0,
+      this.questionsSelectionSignal()?.groups.reduce(
+        (total, group) => total + group.questions.length,
+        0,
+      ) ?? 0,
   );
 
   load(query: Partial<BranchTemplatesQuery> = {}): void {
@@ -144,7 +149,11 @@ export class BranchTemplatesStore {
       });
   }
 
-  search(searchText: string, isActive: boolean | null = this.isActiveSignal(), orderSort = this.orderSortSignal()): void {
+  search(
+    searchText: string,
+    isActive: boolean | null = this.isActiveSignal(),
+    orderSort = this.orderSortSignal(),
+  ): void {
     this.load({
       pageNumber: this.defaultQuery.pageNumber,
       searchText,
@@ -186,7 +195,11 @@ export class BranchTemplatesStore {
       });
   }
 
-  loadDetails(templateId: string): void {
+  loadDetails(
+    templateId: string,
+    onLoaded: (template: BranchTemplate) => void = () => {},
+    onError: (errorKey: string) => void = () => {},
+  ): void {
     this.detailsLoadingSignal.set(true);
     this.detailsErrorSignal.set(null);
     this.selectedTemplateSignal.set(null);
@@ -199,10 +212,16 @@ export class BranchTemplatesStore {
       )
       .subscribe({
         next: (template) => {
-          this.selectedTemplateSignal.set(template.templateId.length > 0 ? template : null);
+          const selectedTemplate = template.templateId.length > 0 ? template : null;
+          this.selectedTemplateSignal.set(selectedTemplate);
+          if (selectedTemplate) {
+            onLoaded(selectedTemplate);
+          }
         },
         error: (error: unknown) => {
-          this.detailsErrorSignal.set(this.readErrorKey(error, 'branchTemplates.detailsLoadError'));
+          const errorKey = this.readErrorKey(error, 'branchTemplates.detailsLoadError');
+          this.detailsErrorSignal.set(errorKey);
+          onError(errorKey);
         },
       });
   }
@@ -265,7 +284,11 @@ export class BranchTemplatesStore {
       });
   }
 
-  updateTemplate(templateId: string, payload: UpdateBranchTemplatePayload, onUpdated: () => void): void {
+  updateTemplate(
+    templateId: string,
+    payload: UpdateBranchTemplatePayload,
+    onUpdated: () => void,
+  ): void {
     if (this.updatingSignal()) {
       return;
     }
@@ -316,7 +339,11 @@ export class BranchTemplatesStore {
       )
       .subscribe({
         next: (result) => {
-          const selection = this.mergeUpdatedQuestionsSelection(templateId, payload.questionIds, result);
+          const selection = this.mergeUpdatedQuestionsSelection(
+            templateId,
+            payload.questionIds,
+            result,
+          );
           this.questionsSelectionSignal.set(selection);
           this.successSignal.set('branchTemplates.questionsUpdateSuccess');
           const selectedTemplate = this.selectedTemplateSignal();
@@ -359,23 +386,21 @@ export class BranchTemplatesStore {
     this.successSignal.set(null);
 
     const questionsAndSelection$ = questionsChanged
-      ? this.branchTemplatesService
-          .updateQuestionConditions(templateId, { conditions: [] })
-          .pipe(
-            switchMap(() =>
-              this.branchTemplatesService.updateQuestions(templateId, questionsPayload),
-            ),
-            map((result) => {
-              const selection = this.mergeUpdatedQuestionsSelection(
-                templateId,
-                questionsPayload.questionIds,
-                result,
-                [],
-              );
-              this.questionsSelectionSignal.set(selection);
-              return selection;
-            }),
-          )
+      ? this.branchTemplatesService.updateQuestionConditions(templateId, { conditions: [] }).pipe(
+          switchMap(() =>
+            this.branchTemplatesService.updateQuestions(templateId, questionsPayload),
+          ),
+          map((result) => {
+            const selection = this.mergeUpdatedQuestionsSelection(
+              templateId,
+              questionsPayload.questionIds,
+              result,
+              [],
+            );
+            this.questionsSelectionSignal.set(selection);
+            return selection;
+          }),
+        )
       : this.branchTemplatesService.getQuestionsSelection(templateId);
 
     questionsAndSelection$
@@ -536,17 +561,16 @@ export class BranchTemplatesStore {
     const requestedOrderByQuestionId = new Map(
       requestedQuestionIds.map((questionId, index) => [questionId, index + 1]),
     );
-    const baseSelection: BranchTemplateQuestionSelection =
-      currentSelection ?? {
-        templateId: result.templateId || templateId,
-        branchId: result.branchId,
-        templateNameEn: '',
-        templateNameAr: '',
-        status: 'Draft',
-        isActive: true,
-        groups: [],
-        questionConditions: [],
-      };
+    const baseSelection: BranchTemplateQuestionSelection = currentSelection ?? {
+      templateId: result.templateId || templateId,
+      branchId: result.branchId,
+      templateNameEn: '',
+      templateNameAr: '',
+      status: 'Draft',
+      isActive: true,
+      groups: [],
+      questionConditions: [],
+    };
     const groups = baseSelection.groups.map((group) => ({
       ...group,
       questions: group.questions.map((question) => {
@@ -563,8 +587,7 @@ export class BranchTemplatesStore {
         return {
           ...question,
           isSelected: true,
-          templateQuestionId:
-            selectedQuestion.templateQuestionId || question.templateQuestionId,
+          templateQuestionId: selectedQuestion.templateQuestionId || question.templateQuestionId,
           order:
             selectedQuestion.order ||
             requestedOrderByQuestionId.get(question.questionId) ||
@@ -603,16 +626,18 @@ export class BranchTemplatesStore {
   ): BranchTemplateQuestionSelection {
     return {
       ...selection,
-      questionConditions: conditions.map((condition, index): QuestionCondition => ({
-        conditionId: '',
-        parentTemplateQuestionId: condition.parentTemplateQuestionId,
-        childTemplateQuestionId: condition.childTemplateQuestionId,
-        triggerType: condition.triggerType,
-        triggerTypeName: triggerTypeName(condition.triggerType),
-        selectedQuestionOptionId: condition.selectedQuestionOptionId,
-        triggerValue: condition.triggerValue,
-        order: condition.order || index + 1,
-      })),
+      questionConditions: conditions.map(
+        (condition, index): QuestionCondition => ({
+          conditionId: '',
+          parentTemplateQuestionId: condition.parentTemplateQuestionId,
+          childTemplateQuestionId: condition.childTemplateQuestionId,
+          triggerType: condition.triggerType,
+          triggerTypeName: triggerTypeName(condition.triggerType),
+          selectedQuestionOptionId: condition.selectedQuestionOptionId,
+          triggerValue: condition.triggerValue,
+          order: condition.order || index + 1,
+        }),
+      ),
     };
   }
 
@@ -628,7 +653,9 @@ export class BranchTemplatesStore {
       return fallbackKey;
     }
 
-    const code = this.readErrorMarker(error.error).replace(/[\s_.-]/g, '').toLowerCase();
+    const code = this.readErrorMarker(error.error)
+      .replace(/[\s_.-]/g, '')
+      .toLowerCase();
     if (code.includes('namealreadyexists') || code.includes('templatealreadyexists')) {
       return 'branchTemplates.nameAlreadyExists';
     }
@@ -700,7 +727,13 @@ export class BranchTemplatesStore {
     }
 
     const firstError = errorBody.errors?.[0];
-    return [firstError?.code, firstError?.messageName, firstError?.message, errorBody.detail, errorBody.title]
+    return [
+      firstError?.code,
+      firstError?.messageName,
+      firstError?.message,
+      errorBody.detail,
+      errorBody.title,
+    ]
       .filter((value): value is string => typeof value === 'string')
       .join(' ');
   }
@@ -749,10 +782,14 @@ export class BranchTemplatesStore {
   private replaceTemplateInList(template: BranchTemplate): void {
     this.templatesSignal.update((templates) => {
       if (!this.matchesActiveFilter(template)) {
-        if (templates.some((currentTemplate) => currentTemplate.templateId === template.templateId)) {
+        if (
+          templates.some((currentTemplate) => currentTemplate.templateId === template.templateId)
+        ) {
           this.totalItemsSignal.update((totalItems) => Math.max(0, totalItems - 1));
         }
-        return templates.filter((currentTemplate) => currentTemplate.templateId !== template.templateId);
+        return templates.filter(
+          (currentTemplate) => currentTemplate.templateId !== template.templateId,
+        );
       }
 
       return templates.map((currentTemplate) =>
@@ -762,9 +799,14 @@ export class BranchTemplatesStore {
   }
 
   private mergeTemplate(templateId: string, template: BranchTemplate): BranchTemplate {
+    const selectedTemplate = this.selectedTemplateSignal();
+    const listTemplate = this.templatesSignal().find(
+      (current) => current.templateId === templateId,
+    );
     const currentTemplate =
-      this.templatesSignal().find((current) => current.templateId === templateId) ??
-      this.selectedTemplateSignal();
+      selectedTemplate?.templateId === templateId
+        ? selectedTemplate
+        : (listTemplate ?? selectedTemplate);
 
     return {
       templateId: template.templateId || currentTemplate?.templateId || templateId,
@@ -785,9 +827,15 @@ export class BranchTemplatesStore {
       createdBy: template.createdBy ?? currentTemplate?.createdBy ?? null,
       createdOnUtc: template.createdOnUtc || currentTemplate?.createdOnUtc || '',
       customInputs:
-        template.customInputs.length > 0 ? template.customInputs : currentTemplate?.customInputs ?? [],
-      questions: template.questions.length > 0 ? template.questions : currentTemplate?.questions ?? [],
-      questionConditions: template.questionConditions ?? currentTemplate?.questionConditions ?? [],
+        template.customInputs.length > 0
+          ? template.customInputs
+          : (currentTemplate?.customInputs ?? []),
+      questions:
+        template.questions.length > 0 ? template.questions : (currentTemplate?.questions ?? []),
+      questionConditions:
+        template.questionConditions.length > 0
+          ? template.questionConditions
+          : (currentTemplate?.questionConditions ?? []),
     };
   }
 

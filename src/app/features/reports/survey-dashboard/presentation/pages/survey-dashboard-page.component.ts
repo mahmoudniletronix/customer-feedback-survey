@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   BarChart3,
   Building2,
+  ChevronDown,
   ClipboardList,
   Eye,
   FileText,
@@ -29,6 +30,7 @@ import {
   Mic,
   Search,
   TrendingUp,
+  UserCog,
   UsersRound,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
@@ -36,6 +38,15 @@ import { ButtonComponent } from '../../../../../shared/ui/button/button.componen
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { BranchResponseDetailsModalComponent } from '../../../../branch-admin/dashboard/presentation/components/branch-response-details-modal.component';
+import {
+  BranchAdminBranchAdmin,
+  BranchAdminBranchDetails,
+  BranchAdminBranchUser,
+  BranchAdminQuestion,
+  BranchAdminQuestionGroup,
+  BranchAdminTemplate,
+} from '../../../../branch-admin/branch/domain/branch-admin-branch.model';
+import { BranchAdminBranchStore } from '../../../../branch-admin/branch/presentation/state/branch-admin-branch.store';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { SurveyAnonymousResponseDetailsModalComponent } from '../components/survey-anonymous-response-details-modal.component';
 import { SurveyTemplateDetailsModalComponent } from '../components/survey-template-details-modal.component';
@@ -75,6 +86,7 @@ Chart.register(...registerables);
 })
 export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly store = inject(SurveyDashboardStore);
+  readonly branchStore = inject(BranchAdminBranchStore);
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
@@ -87,6 +99,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly alertIcon = AlertTriangle;
   readonly branchIcon = Building2;
   readonly chartIcon = BarChart3;
+  readonly chevronDownIcon = ChevronDown;
   readonly complaintIcon = MessageSquareWarning;
   readonly detailsIcon = Eye;
   readonly filterIcon = Filter;
@@ -98,13 +111,17 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly templateIcon = FileText;
   readonly trendIcon = TrendingUp;
   readonly questionsIcon = ClipboardList;
+  readonly userCogIcon = UserCog;
 
   readonly advancedFiltersOpen = signal(true);
+  readonly branchSnapshotExpanded = signal(false);
+  readonly expandedBranchSections = signal<ReadonlySet<string>>(new Set());
   readonly customInputSegmentsVisible = false;
   readonly validationError = signal<string | null>(null);
   readonly sourceSignal = signal<SurveyDashboardSource>('All');
   readonly selectedBranchId = signal('');
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
+  readonly branchSnapshotVisible = computed(() => this.authStore.role() === 'BRANCH_ADMIN');
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
     source: ['All' as SurveyDashboardSource],
@@ -143,6 +160,10 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.branchSnapshotVisible()) {
+      this.branchStore.load();
+    }
+
     this.store.loadOptions();
     this.store.loadDashboard(this.queryFromForm());
   }
@@ -153,6 +174,27 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
   toggleAdvancedFilters(): void {
     this.advancedFiltersOpen.update((open) => !open);
+  }
+
+  toggleBranchSnapshot(): void {
+    this.branchSnapshotExpanded.update((expanded) => !expanded);
+  }
+
+  isBranchSectionExpanded(sectionKey: string): boolean {
+    return this.expandedBranchSections().has(sectionKey);
+  }
+
+  toggleBranchSection(sectionKey: string): void {
+    this.expandedBranchSections.update((sections) => {
+      const nextSections = new Set(sections);
+      if (nextSections.has(sectionKey)) {
+        nextSections.delete(sectionKey);
+      } else {
+        nextSections.add(sectionKey);
+      }
+
+      return nextSections;
+    });
   }
 
   onSourceChange(): void {
@@ -254,6 +296,55 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
 
     return `${name} - ${this.localized(template.branchNameEn, template.branchNameAr)}`;
+  }
+
+  assignedBranchName(branch: BranchAdminBranchDetails): string {
+    return this.localized(branch.nameEn, branch.nameAr);
+  }
+
+  branchAdminName(admin: BranchAdminBranchAdmin): string {
+    return this.localized(admin.nameEn, admin.nameAr);
+  }
+
+  branchUserName(user: BranchAdminBranchUser): string {
+    return this.localized(user.nameEn, user.nameAr);
+  }
+
+  assignedTemplateName(template: BranchAdminTemplate): string {
+    return this.localized(template.nameEn, template.nameAr);
+  }
+
+  assignedQuestionGroupName(group: BranchAdminQuestionGroup): string {
+    return this.localized(group.nameEn, group.nameAr);
+  }
+
+  assignedQuestionText(question: BranchAdminQuestion): string {
+    return this.localized(question.textEn, question.textAr);
+  }
+
+  branchUserRoles(user: BranchAdminBranchUser): string {
+    return user.roles.map((role) => role.name).filter((role) => role.length > 0).join(', ') || '-';
+  }
+
+  questionTypeLabel(type: string): string {
+    const normalizedType = type.trim().toLowerCase();
+    if (normalizedType === 'singlechoice') {
+      return this.i18n.translate('questions.typeSingleChoice');
+    }
+    if (normalizedType === 'starrating') {
+      return this.i18n.translate('questions.typeStarRating');
+    }
+    if (normalizedType === 'complain') {
+      return this.i18n.translate('questions.typeComplain');
+    }
+    if (normalizedType === 'voice') {
+      return this.i18n.translate('questions.typeVoice');
+    }
+    if (normalizedType === 'smiles') {
+      return this.i18n.translate('questions.typeSmiles');
+    }
+
+    return type || '-';
   }
 
   localized(englishText: string | null | undefined, arabicText: string | null | undefined): string {

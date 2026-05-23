@@ -36,23 +36,28 @@ import {
   QuestionAnswerOptionPayload,
   QuestionAnswerType,
   QuestionAnswerTypeInput,
+  SMILE_LEVELS,
   UpdateQuestionAnswerOptionPayload,
   isSingleChoiceAnswerType,
   questionAnswerTypeLabelKey,
   toQuestionAnswerType,
 } from '../../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
-import { QuestionAnswerPreviewComponent } from '../../../../../shared/ui/question-answer-preview/question-answer-preview.component';
 import {
   CreateQuestionRequest,
   QuestionListItem,
   QuestionTypeOption,
   UpdateQuestionRequest,
 } from '../../domain/question.model';
+import {
+  QuestionAnswerAccordionItem,
+  QuestionAnswersAccordionComponent,
+} from '../components/question-answers-accordion.component';
 import { QuestionsStore } from '../state/questions.store';
 
 const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
@@ -107,11 +112,12 @@ type QuestionOptionFormValue = QuestionFormValue['options'][number];
   standalone: true,
   imports: [
     ButtonComponent,
+    BackButtonComponent,
     DatePipe,
     IconComponent,
     InputComponent,
     ModalComponent,
-    QuestionAnswerPreviewComponent,
+    QuestionAnswersAccordionComponent,
     ReactiveFormsModule,
     TranslatePipe,
   ],
@@ -124,6 +130,8 @@ export class QuestionsPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+
+  private readonly scoreValues: readonly AnswerScaleValue[] = [1, 2, 3, 4, 5];
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -451,6 +459,40 @@ export class QuestionsPageComponent implements OnInit {
     return question.textAr || '-';
   }
 
+  questionAnswerItems(question: QuestionListItem): readonly QuestionAnswerAccordionItem[] {
+    const questionType = toQuestionAnswerType(question.type);
+
+    if (questionType === QUESTION_ANSWER_TYPE.SingleChoice) {
+      return this.singleChoiceAnswerItems(question);
+    }
+
+    if (questionType === QUESTION_ANSWER_TYPE.StarRating) {
+      const scoreLabel = this.i18n.translate('questions.optionValue');
+      return this.scoreValues.map((score) => ({
+        id: `${question.questionId}-star-${score}`,
+        label: '',
+        score,
+        title: `${scoreLabel} ${score}`,
+        variant: 'stars',
+      }));
+    }
+
+    if (questionType === QUESTION_ANSWER_TYPE.Smiles) {
+      return SMILE_LEVELS.map((level) => {
+        const label = `${level.emoji} ${this.i18n.translate(level.labelKey)}`;
+
+        return {
+          id: `${question.questionId}-smile-${level.value}`,
+          label,
+          score: level.value,
+          title: label,
+        };
+      });
+    }
+
+    return [];
+  }
+
   private fieldError(
     field: QuestionMainField,
     touched: boolean,
@@ -753,5 +795,46 @@ export class QuestionsPageComponent implements OnInit {
       return 10;
     }
     return Math.min(Math.max(pageSize, 1), 100);
+  }
+
+  private singleChoiceAnswerItems(question: QuestionListItem): readonly QuestionAnswerAccordionItem[] {
+    const isArabic = this.i18n.language() === 'ar';
+
+    return [...question.options]
+      .filter((option) => option.isActive)
+      .sort((first, second) => first.order - second.order)
+      .map((option, index) => this.toSingleChoiceAnswerItem(option, index, isArabic));
+  }
+
+  private toSingleChoiceAnswerItem(
+    option: QuestionAnswerOption,
+    index: number,
+    isArabic: boolean,
+  ): QuestionAnswerAccordionItem {
+    const label = this.localizedText(option.textEn, option.textAr ?? '', isArabic);
+    const secondaryLabel = this.secondaryLocalizedText(option.textEn, option.textAr ?? '', isArabic);
+
+    return {
+      id: option.optionId || `${option.order}-${index}`,
+      label,
+      score: option.value,
+      title: secondaryLabel ? `${label} - ${secondaryLabel}` : label,
+    };
+  }
+
+  private localizedText(englishText: string, arabicText: string, isArabic: boolean): string {
+    if (isArabic && arabicText.length > 0) {
+      return arabicText;
+    }
+
+    return englishText || arabicText || '-';
+  }
+
+  private secondaryLocalizedText(englishText: string, arabicText: string, isArabic: boolean): string {
+    if (isArabic) {
+      return englishText;
+    }
+
+    return arabicText;
   }
 }

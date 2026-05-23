@@ -90,36 +90,63 @@
           <app-icon class="text-[#11A7C9]" [icon]="messageIcon" [size]="15" />
         </div>
 
-        <div class="divide-y divide-slate-100">
-          @for (answer of response.answers; track answer.answerId || answer.questionId) {
-            <article class="px-3 py-2.5">
+        <ng-template #answerNode let-node let-depth="depth">
+          <article class="px-3 py-2.5">
               <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                   <p class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
-                    {{ questionText(answer) }}
+                    {{ questionText(node.answer) }}
                   </p>
                   <p class="text-[10px] font-semibold text-slate-500">
-                    {{ answer.questionTypeName || answer.questionType || '-' }}
+                    {{ node.answer.questionTypeName || node.answer.questionType || '-' }}
                   </p>
                 </div>
+                @if (depth > 0) {
+                  <span class="w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-700">
+                    {{ 'branchTemplates.followUpQuestion' | t }}
+                  </span>
+                }
               </div>
 
-              <div class="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
-                @if (voiceUrl(answer)) {
+              <div
+                class="mt-2 rounded-md px-2.5 py-2"
+                [class.bg-slate-50]="depth === 0"
+                [class.bg-emerald-50]="depth > 0"
+              >
+                @if (voiceUrl(node.answer)) {
                   <div class="space-y-1.5">
                     <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
                       <app-icon class="text-[#11A7C9]" [icon]="micIcon" [size]="13" />
-                      {{ answerDisplayValue(answer) }}
+                      {{ answerDisplayValue(node.answer) }}
                     </p>
-                    <audio class="h-8 w-full" controls [src]="voiceUrl(answer)"></audio>
+                    <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>
                   </div>
                 } @else {
                   <p class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
-                    {{ answerDisplayValue(answer) }}
+                    {{ answerDisplayValue(node.answer) }}
                   </p>
                 }
               </div>
+
+              @if (node.children.length > 0) {
+                <div class="ms-4 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-3">
+                  @for (childNode of node.children; track childNode.answer.answerId || childNode.answer.questionId) {
+                    <ng-container
+                      [ngTemplateOutlet]="answerNode"
+                      [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
+                    />
+                  }
+                </div>
+              }
             </article>
+        </ng-template>
+
+        <div class="divide-y divide-slate-100">
+          @for (node of answerTree(); track node.answer.answerId || node.answer.questionId) {
+            <ng-container
+              [ngTemplateOutlet]="answerNode"
+              [ngTemplateOutletContext]="{ $implicit: node, depth: 0 }"
+            />
           } @empty {
             <p class="px-3 py-3 text-center text-[11px] font-semibold text-slate-500">
               {{ 'surveyDashboard.noAnswersCaptured' | t }}

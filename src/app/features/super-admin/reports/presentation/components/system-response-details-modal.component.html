@@ -140,50 +140,82 @@
             {{ response.answersCount }} {{ 'systemResponseDetails.answersCaptured' | t }}
           </p>
         </div>
-        <div class="grid gap-2 p-2 lg:grid-cols-2">
-          @for (answer of response.answers; track answer.questionId) {
-            <article class="rounded-lg border border-slate-100 bg-white px-2.5 py-2">
+        <ng-template #answerNode let-node let-depth="depth">
+          <article class="rounded-lg border border-slate-100 bg-white px-2.5 py-2">
               <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0">
                   <p
                     class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
                   >
-                    {{ localized(answer.questionTextEn, answer.questionTextAr) }}
+                    {{ localized(node.answer.questionTextEn, node.answer.questionTextAr) }}
                   </p>
                 </div>
                 <span
                   class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
                 >
-                  {{ questionTypeLabel(answer) }}
+                  {{ questionTypeLabel(node.answer) }}
                 </span>
+                @if (depth > 0) {
+                  <span class="w-fit shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-700">
+                    {{ 'branchTemplates.followUpQuestion' | t }}
+                  </span>
+                }
+                @if (node.answer.questionOrder > 0) {
+                  <span class="w-fit shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[9px] font-black text-[#0d94b3]">
+                    {{ node.answer.questionOrder }}
+                  </span>
+                }
               </div>
-              <div class="mt-1.5 rounded-md bg-slate-50 px-2.5 py-1.5">
-                @if (answer.questionType === 'Voice') {
-                  @if (voiceUrl(answer)) {
+              <div
+                class="mt-1.5 rounded-md px-2.5 py-1.5"
+                [class.bg-slate-50]="depth === 0"
+                [class.bg-emerald-50]="depth > 0"
+              >
+                @if (node.answer.questionType === 'Voice') {
+                  @if (voiceUrl(node.answer)) {
                     <p class="mb-1 text-[10px] font-black uppercase tracking-wide text-slate-400">
-                      {{ answerValueLabel(answer) }}
+                      {{ answerValueLabel(node.answer) }}
                     </p>
-                    <audio class="h-8 w-full" controls [src]="voiceUrl(answer)"></audio>
+                    <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>
                   } @else {
                     <p class="text-[11px] font-semibold text-slate-500">{{ 'systemResponseDetails.noVoiceFile' | t }}</p>
                   }
                 } @else {
                   <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
-                    {{ answerValueLabel(answer) }}
+                    {{ answerValueLabel(node.answer) }}
                   </p>
                   <p
                     class="mt-0.5 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
                   >
-                    {{ displayAnswer(answer) }}
+                    {{ displayAnswer(node.answer) }}
                   </p>
-                  @if (answer.questionType === 'SingleChoice') {
+                  @if (node.answer.questionType === 'SingleChoice') {
                     <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
-                      {{ 'systemResponseDetails.optionScore' | t }}: {{ answer.selectedOptionValue ?? '-' }}
+                      {{ 'systemResponseDetails.optionScore' | t }}: {{ node.answer.selectedOptionValue ?? '-' }}
                     </p>
                   }
                 }
               </div>
+
+              @if (node.children.length > 0) {
+                <div class="ms-4 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-3">
+                  @for (childNode of node.children; track childNode.answer.templateQuestionId || childNode.answer.questionId) {
+                    <ng-container
+                      [ngTemplateOutlet]="answerNode"
+                      [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
+                    />
+                  }
+                </div>
+              }
             </article>
+        </ng-template>
+
+        <div class="grid gap-2 p-2 lg:grid-cols-2">
+          @for (node of answerTree(); track node.answer.templateQuestionId || node.answer.questionId) {
+            <ng-container
+              [ngTemplateOutlet]="answerNode"
+              [ngTemplateOutletContext]="{ $implicit: node, depth: 0 }"
+            />
           } @empty {
             <p class="px-3 py-4 text-center text-[11px] font-semibold text-slate-500">
               {{ 'systemResponseDetails.noAnswers' | t }}

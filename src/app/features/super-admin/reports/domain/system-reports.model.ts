@@ -206,11 +206,13 @@ export interface SystemResponseCustomInput {
 }
 
 export interface SystemResponseAnswer {
+  templateQuestionId: string;
   questionId: string;
   questionTextEn: string;
   questionTextAr: string | null;
   questionType: SystemResponseQuestionType;
   questionTypeName: string;
+  questionOrder: number;
   selectedQuestionOptionId: string | null;
   selectedOptionTextEn: string | null;
   selectedOptionTextAr: string | null;
@@ -221,6 +223,7 @@ export interface SystemResponseAnswer {
   voiceFileName: string | null;
   voiceFileUrl: string | null;
   displayValue: string;
+  children: readonly SystemResponseAnswer[];
 }
 
 export interface ReportBranchOption {

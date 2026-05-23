@@ -2,11 +2,15 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Download, FileText, Filter } from 'lucide-angular';
+import { take } from 'rxjs';
 import { I18nService, Language } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
+import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminBranchStore } from '../../../branch/presentation/state/branch-admin-branch.store';
+import { BranchTemplatesService } from '../../../templates/data/branch-templates.service';
 import {
   BranchTemplatesPdfReportScoreCalculationMode,
   BranchTemplatesPdfReportTemplateKind,
@@ -19,13 +23,16 @@ type TemplateKindFilter = BranchTemplatesPdfReportTemplateKind | '';
 @Component({
   selector: 'app-branch-templates-pdf-report-page',
   standalone: true,
-  imports: [ButtonComponent, IconComponent, ReactiveFormsModule, TranslatePipe],
+  imports: [BackButtonComponent, ButtonComponent, IconComponent, ReactiveFormsModule, TranslatePipe],
   templateUrl: './branch-templates-pdf-report-page.component.html',
+  providers: [BranchTemplatesService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BranchTemplatesPdfReportPageComponent implements OnInit {
   readonly branchStore = inject(BranchAdminBranchStore);
   readonly reportStore = inject(BranchTemplatesPdfReportStore);
+  private readonly authStore = inject(AuthStore);
+  private readonly branchTemplatesService = inject(BranchTemplatesService);
   private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
@@ -34,6 +41,8 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
   readonly fileIcon = FileText;
   readonly filterIcon = Filter;
   readonly templateKindFilter = signal<TemplateKindFilter>('');
+  readonly branchUserNormalTemplates = signal<readonly BranchTemplatesPdfReportTemplateOption[]>([]);
+  readonly normalTemplatesError = signal<string | null>(null);
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
     fromDate: [this.defaultFromDate()],
@@ -44,12 +53,14 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
   });
 
   readonly normalTemplates = computed<readonly BranchTemplatesPdfReportTemplateOption[]>(() =>
-    (this.branchStore.branch()?.templates ?? []).map((template) => ({
-      id: template.templateId,
-      kind: 'Normal',
-      nameEn: template.nameEn,
-      nameAr: template.nameAr,
-    })),
+    this.authStore.role() === 'BRANCH_ADMIN'
+      ? (this.branchStore.branch()?.templates ?? []).map((template) => ({
+          id: template.templateId,
+          kind: 'Normal',
+          nameEn: template.nameEn,
+          nameAr: template.nameAr,
+        }))
+      : this.branchUserNormalTemplates(),
   );
 
   readonly templateOptions = computed<readonly BranchTemplatesPdfReportTemplateOption[]>(() => [
@@ -69,7 +80,12 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.branchStore.load();
+    if (this.authStore.role() === 'BRANCH_ADMIN') {
+      this.branchStore.load();
+    } else {
+      this.loadBranchUserNormalTemplates();
+    }
+
     this.reportStore.loadAnonymousTemplates();
   }
 
@@ -129,6 +145,30 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
 
   private selectedTemplate(templateKey: string): BranchTemplatesPdfReportTemplateOption | undefined {
     return this.templateOptions().find((template) => this.templateValue(template) === templateKey);
+  }
+
+  private loadBranchUserNormalTemplates(): void {
+    this.normalTemplatesError.set(null);
+
+    this.branchTemplatesService
+      .selection()
+      .pipe(take(1))
+      .subscribe({
+        next: (templates) => {
+          this.branchUserNormalTemplates.set(
+            templates.map((template) => ({
+              id: template.id,
+              kind: 'Normal',
+              nameEn: template.nameEn,
+              nameAr: template.nameAr,
+            })),
+          );
+        },
+        error: () => {
+          this.branchUserNormalTemplates.set([]);
+          this.normalTemplatesError.set('branchTemplatesPdf.normalTemplatesLoadError');
+        },
+      });
   }
 
   private saveBlob(blob: Blob, fileName: string): void {

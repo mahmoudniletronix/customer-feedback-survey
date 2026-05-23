@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import {
   Calendar,
   CircleGauge,
@@ -23,6 +23,11 @@ interface ScaleSlot {
   readonly index: number;
 }
 
+interface BranchResponseAnswerTreeNode {
+  readonly answer: BranchSurveyResponseAnswer;
+  readonly children: readonly BranchResponseAnswerTreeNode[];
+}
+
 @Component({
   selector: 'app-branch-response-details-modal',
   standalone: true,
@@ -32,6 +37,7 @@ interface ScaleSlot {
     DecimalPipe,
     IconComponent,
     ModalComponent,
+    NgTemplateOutlet,
     TranslatePipe,
   ],
   templateUrl: './branch-response-details-modal.component.html',
@@ -45,6 +51,9 @@ export class BranchResponseDetailsModalComponent {
   readonly error = input<string | null>(null);
   readonly details = input<BranchSurveyResponseDetails | null>(null);
   readonly closed = output<void>();
+  readonly answerTree = computed<readonly BranchResponseAnswerTreeNode[]>(() =>
+    this.toAnswerTree(this.details()?.answers ?? []),
+  );
 
   readonly calendarIcon = Calendar;
   readonly fileIcon = FileText;
@@ -121,5 +130,14 @@ export class BranchResponseDetailsModalComponent {
     }
 
     return englishText || arabicText || '-';
+  }
+
+  private toAnswerTree(
+    answers: readonly BranchSurveyResponseAnswer[],
+  ): readonly BranchResponseAnswerTreeNode[] {
+    return answers.map((answer) => ({
+      answer,
+      children: this.toAnswerTree(answer.children),
+    }));
   }
 }

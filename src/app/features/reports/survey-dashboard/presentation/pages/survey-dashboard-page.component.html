@@ -207,6 +207,292 @@
     </div>
   </div>
 
+  @if (branchSnapshotVisible()) {
+    @if (branchStore.loading()) {
+      <section
+        class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-600 shadow-sm shadow-slate-200/60"
+      >
+        <span
+          class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+        ></span>
+        {{ 'branchAdmin.loadingBranch' | t }}
+      </section>
+    } @else if (branchStore.error()) {
+      <section
+        class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-700"
+      >
+        {{ branchStore.error() ?? '' | t }}
+      </section>
+    } @else if (branchStore.branch(); as branch) {
+      <section class="rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/60">
+        <div
+          class="flex flex-col gap-2 bg-slate-50/70 p-2.5 lg:flex-row lg:items-center lg:justify-between"
+        >
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
+              >
+                <app-icon [icon]="branchIcon" [size]="15" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[9px] font-black uppercase tracking-wide text-slate-400">
+                  {{ 'surveyDashboard.branchData' | t }}
+                </p>
+                <h2 class="truncate text-sm font-black text-slate-950">
+                  {{ assignedBranchName(branch) }}
+                </h2>
+              </div>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold text-slate-600">
+              <span class="rounded-full bg-white px-2 py-0.5">
+                {{ 'surveyDashboard.branchCode' | t }}: {{ branch.code || '-' }}
+              </span>
+              <span class="rounded-full bg-white px-2 py-0.5">
+                {{ 'branches.address' | t }}: {{ branch.address || '-' }}
+              </span>
+              <span class="rounded-full bg-white px-2 py-0.5">
+                {{ 'branches.createdOn' | t }}:
+                {{ branch.createdOnUtc ? (branch.createdOnUtc | date: 'mediumDate') : '-' }}
+              </span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span
+              class="w-fit rounded-full px-2 py-0.5 text-[10px] font-black"
+              [class.bg-emerald-50]="branch.isActive"
+              [class.text-emerald-700]="branch.isActive"
+              [class.bg-slate-100]="!branch.isActive"
+              [class.text-slate-500]="!branch.isActive"
+            >
+              {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
+            </span>
+            <button
+              class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/15"
+              type="button"
+              [attr.aria-expanded]="branchSnapshotExpanded()"
+              (click)="toggleBranchSnapshot()"
+            >
+              <span
+                class="transition-transform duration-200"
+                [class.rotate-180]="branchSnapshotExpanded()"
+              >
+                <app-icon [icon]="chevronDownIcon" [size]="15" />
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none"
+          [class.grid-rows-[1fr]]="branchSnapshotExpanded()"
+          [class.grid-rows-[0fr]]="!branchSnapshotExpanded()"
+          [class.opacity-100]="branchSnapshotExpanded()"
+          [class.opacity-0]="!branchSnapshotExpanded()"
+        >
+          <div class="min-h-0 overflow-hidden">
+            <div class="grid gap-2 border-t border-slate-100 p-2 sm:grid-cols-2 xl:grid-cols-5">
+              <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                <p class="text-[10px] font-black uppercase text-slate-400">
+                  {{ 'branches.branchAdminsCount' | t }}
+                </p>
+                <p class="mt-0.5 text-lg font-black text-slate-950">
+                  {{ branch.summary.branchAdminsCount }}
+                </p>
+              </div>
+              <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                <p class="text-[10px] font-black uppercase text-slate-400">
+                  {{ 'branches.branchUsersCount' | t }}
+                </p>
+                <p class="mt-0.5 text-lg font-black text-slate-950">
+                  {{ branch.summary.branchUsersCount }}
+                </p>
+              </div>
+              <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                <p class="text-[10px] font-black uppercase text-slate-400">
+                  {{ 'branches.templatesCount' | t }}
+                </p>
+                <p class="mt-0.5 text-lg font-black text-slate-950">
+                  {{ branch.summary.templatesCount }}
+                </p>
+              </div>
+              <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                <p class="text-[10px] font-black uppercase text-slate-400">
+                  {{ 'branches.questionGroupsCount' | t }}
+                </p>
+                <p class="mt-0.5 text-lg font-black text-slate-950">
+                  {{ branch.summary.questionGroupsCount }}
+                </p>
+              </div>
+              <div class="rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                <p class="text-[10px] font-black uppercase text-slate-400">
+                  {{ 'branches.questionsCount' | t }}
+                </p>
+                <p class="mt-0.5 text-lg font-black text-slate-950">
+                  {{ branch.summary.questionsCount }}
+                </p>
+              </div>
+            </div>
+
+            <div class="grid gap-2 border-t border-slate-100 p-2 xl:grid-cols-2">
+              <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
+                <div class="mb-2 flex items-center gap-2">
+                  <app-icon class="text-[#11A7C9]" [icon]="responsesIcon" [size]="15" />
+                  <h3 class="text-xs font-black text-slate-950">
+                    {{ 'branches.branchAdmins' | t }}
+                  </h3>
+                </div>
+                <div class="space-y-2">
+                  @for (admin of branch.branchAdmins; track admin.branchAdminId) {
+                    <div class="rounded-lg bg-white p-2 text-[11px]">
+                      <p class="font-black text-slate-900">{{ branchAdminName(admin) }}</p>
+                      <p class="mt-1 font-semibold text-slate-500">
+                        {{ 'branches.userName' | t }}: {{ admin.userName || '-' }}
+                      </p>
+                      <p class="mt-1 font-semibold text-slate-500">
+                        {{ 'common.email' | t }}: {{ admin.email || '-' }}
+                      </p>
+                      <p class="mt-1 font-semibold text-slate-500">
+                        {{ 'branches.phoneNumber' | t }}: {{ admin.phoneNumber || '-' }}
+                      </p>
+                    </div>
+                  } @empty {
+                    <p
+                      class="rounded-lg bg-white p-2 text-center text-[11px] font-semibold text-slate-500"
+                    >
+                      {{ 'common.noRecords' | t }}
+                    </p>
+                  }
+                </div>
+              </article>
+
+              <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
+                <div class="mb-2 flex items-center gap-2">
+                  <app-icon class="text-[#11A7C9]" [icon]="responsesIcon" [size]="15" />
+                  <h3 class="text-xs font-black text-slate-950">
+                    {{ 'branches.branchUsers' | t }}
+                  </h3>
+                </div>
+                <div class="max-h-52 space-y-2 overflow-y-auto">
+                  @for (user of branch.branchUsers; track user.branchUserId) {
+                    <div class="rounded-lg bg-white p-2 text-[11px]">
+                      <p class="font-black text-slate-900">{{ branchUserName(user) }}</p>
+                      <p class="mt-1 font-semibold text-slate-500">
+                        {{ 'branches.userName' | t }}: {{ user.userName || '-' }}
+                      </p>
+                      <p class="mt-1 font-semibold text-slate-500">
+                        {{ 'common.email' | t }}: {{ user.email || '-' }}
+                      </p>
+                      <p class="mt-2 break-words font-semibold text-slate-500">
+                        {{ 'branchUsers.assignableRoles' | t }}: {{ branchUserRoles(user) }}
+                      </p>
+                    </div>
+                  } @empty {
+                    <p
+                      class="rounded-lg bg-white p-2 text-center text-[11px] font-semibold text-slate-500"
+                    >
+                      {{ 'common.noRecords' | t }}
+                    </p>
+                  }
+                </div>
+              </article>
+
+              <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
+                <div class="mb-2 flex items-center gap-2">
+                  <app-icon class="text-[#11A7C9]" [icon]="templateIcon" [size]="15" />
+                  <h3 class="text-xs font-black text-slate-950">
+                    {{ 'branchTemplates.listTitle' | t }}
+                  </h3>
+                </div>
+                <div class="max-h-52 space-y-2 overflow-y-auto">
+                  @for (template of branch.templates; track template.templateId) {
+                    <div class="rounded-lg bg-white p-2 text-[11px]">
+                      <div class="flex items-start justify-between gap-3">
+                        <p
+                          class="min-w-0 break-words font-black text-slate-900 [overflow-wrap:anywhere]"
+                        >
+                          {{ assignedTemplateName(template) }}
+                        </p>
+                        <span
+                          class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-600"
+                        >
+                          {{ template.status || '-' }}
+                        </span>
+                      </div>
+                      <p class="mt-1 line-clamp-2 font-semibold text-slate-500">
+                        {{ template.description || '-' }}
+                      </p>
+                      <p class="mt-2 font-semibold text-slate-500">
+                        {{ 'branches.questionsCount' | t }}: {{ template.questionsCount }}
+                      </p>
+                    </div>
+                  } @empty {
+                    <p
+                      class="rounded-lg bg-white p-2 text-center text-[11px] font-semibold text-slate-500"
+                    >
+                      {{ 'common.noRecords' | t }}
+                    </p>
+                  }
+                </div>
+              </article>
+
+              <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
+                <div class="mb-2 flex items-center gap-2">
+                  <app-icon class="text-[#11A7C9]" [icon]="questionsIcon" [size]="15" />
+                  <h3 class="text-xs font-black text-slate-950">
+                    {{ 'branches.questionGroups' | t }}
+                  </h3>
+                </div>
+                <div class="max-h-52 space-y-2 overflow-y-auto">
+                  @for (group of branch.questionGroups; track group.groupId) {
+                    <div class="rounded-lg bg-white p-2 text-[11px]">
+                      <div class="flex items-start justify-between gap-3">
+                        <p class="font-black text-slate-900">
+                          {{ assignedQuestionGroupName(group) }}
+                        </p>
+                        <span
+                          class="shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-black text-[#0d94b3]"
+                        >
+                          {{ group.questions.length }} {{ 'branches.questionsCount' | t }}
+                        </span>
+                      </div>
+                      <div class="mt-2 space-y-1.5">
+                        @for (question of group.questions; track question.questionId) {
+                          <div class="rounded-md bg-slate-50 px-2 py-1.5">
+                            <p
+                              class="break-words font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                            >
+                              {{ assignedQuestionText(question) }}
+                            </p>
+                            <p class="mt-0.5 text-[10px] font-bold text-slate-400">
+                              {{ 'questions.type' | t }}: {{ questionTypeLabel(question.type) }}
+                            </p>
+                          </div>
+                        } @empty {
+                          <p
+                            class="rounded-md bg-slate-50 px-2 py-2 text-center font-semibold text-slate-500"
+                          >
+                            {{ 'common.noRecords' | t }}
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  } @empty {
+                    <p
+                      class="rounded-lg bg-white p-2 text-center text-[11px] font-semibold text-slate-500"
+                    >
+                      {{ 'common.noRecords' | t }}
+                    </p>
+                  }
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+  }
+
   @if (validationError()) {
     <section
       class="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-700"

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChevronLeft, ChevronRight, KeyRound, Pencil, RotateCcw, Search, SlidersHorizontal, Trash2, UserPlus, UsersRound } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -17,6 +18,7 @@ import { BranchUsersStore } from '../state/branch-users.store';
   standalone: true,
   imports: [
     ButtonComponent,
+    BackButtonComponent,
     CardComponent,
     DatePipe,
     IconComponent,

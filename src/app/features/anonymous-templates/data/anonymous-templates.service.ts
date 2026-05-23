@@ -571,9 +571,7 @@ export class AnonymousTemplatesService {
       templateNameEn: response.templateNameEn ?? '',
       templateNameAr: response.templateNameAr ?? null,
       customInputValues: customInputs.map((value) => this.toResponseCustomInputValue(value)),
-      answers: (response.answers ?? [])
-        .map((answer) => this.toResponseAnswer(answer))
-        .sort((first, second) => first.questionOrder - second.questionOrder),
+      answers: (response.answers ?? []).map((answer) => this.toResponseAnswer(answer)),
     };
   }
 
@@ -629,6 +627,9 @@ export class AnonymousTemplatesService {
       textAnswer: response.textAnswer ?? null,
       voiceFileName: response.voiceFileName ?? null,
       voiceUrl: response.voiceUrl ?? null,
+      children: (response.children ?? response.childAnswers ?? []).map((childAnswer) =>
+        this.toResponseAnswer(childAnswer),
+      ),
     };
   }
 

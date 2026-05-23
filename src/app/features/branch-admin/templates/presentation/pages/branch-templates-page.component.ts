@@ -1,5 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  WritableSignal,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -12,6 +19,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   BarChart3,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -26,6 +34,7 @@ import {
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -74,6 +83,7 @@ type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
   standalone: true,
   imports: [
     ButtonComponent,
+    BackButtonComponent,
     CardComponent,
     DatePipe,
     IconComponent,
@@ -96,6 +106,7 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
+  readonly expandIcon = ChevronDown;
   readonly dashboardIcon = BarChart3;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
@@ -109,6 +120,10 @@ export class BranchTemplatesPageComponent implements OnInit {
   readonly advancedFiltersOpen = signal(true);
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
+  readonly editTemplateLoadingId = signal<string | null>(null);
+  readonly editTemplateDetailsError = signal<string | null>(null);
+  readonly expandedCustomInputs = signal<ReadonlySet<CustomInputFormGroup>>(new Set());
+  readonly expandedEditCustomInputs = signal<ReadonlySet<CustomInputFormGroup>>(new Set());
   readonly selectedTemplate = signal<BranchTemplate | null>(null);
 
   readonly searchForm = this.formBuilder.nonNullable.group({
@@ -183,6 +198,7 @@ export class BranchTemplatesPageComponent implements OnInit {
       expireTo: '',
     });
     this.customInputsArray.clear();
+    this.expandedCustomInputs.set(new Set());
     this.createModalOpen.set(true);
   }
 
@@ -195,6 +211,7 @@ export class BranchTemplatesPageComponent implements OnInit {
       expireTo: '',
     });
     this.customInputsArray.clear();
+    this.expandedCustomInputs.set(new Set());
     this.createModalOpen.set(false);
   }
 
@@ -203,6 +220,9 @@ export class BranchTemplatesPageComponent implements OnInit {
     this.validateCreateTemplateDates();
     this.validateCustomInputs(this.customInputsArray);
     if (this.templateForm.invalid || this.templatesStore.creating()) {
+      if (this.templateForm.invalid) {
+        this.expandInvalidCustomInputs(this.customInputsArray, this.expandedCustomInputs);
+      }
       return;
     }
 
@@ -223,11 +243,15 @@ export class BranchTemplatesPageComponent implements OnInit {
   }
 
   addCustomInput(): void {
-    this.customInputsArray.push(this.createCustomInputGroup(this.customInputsArray.length + 1));
+    const inputGroup = this.createCustomInputGroup(this.customInputsArray.length + 1);
+    this.customInputsArray.push(inputGroup);
+    this.expandCustomInput(this.expandedCustomInputs, inputGroup);
   }
 
   removeCustomInput(index: number): void {
+    const inputGroup = this.customInputsArray.at(index);
     this.customInputsArray.removeAt(index);
+    this.removeExpandedCustomInput(this.expandedCustomInputs, inputGroup);
     this.validateCustomInputs(this.customInputsArray);
   }
 
@@ -307,13 +331,15 @@ export class BranchTemplatesPageComponent implements OnInit {
   }
 
   addEditCustomInput(): void {
-    this.editCustomInputsArray.push(
-      this.createCustomInputGroup(this.editCustomInputsArray.length + 1),
-    );
+    const inputGroup = this.createCustomInputGroup(this.editCustomInputsArray.length + 1);
+    this.editCustomInputsArray.push(inputGroup);
+    this.expandCustomInput(this.expandedEditCustomInputs, inputGroup);
   }
 
   removeEditCustomInput(index: number): void {
+    const inputGroup = this.editCustomInputsArray.at(index);
     this.editCustomInputsArray.removeAt(index);
+    this.removeExpandedCustomInput(this.expandedEditCustomInputs, inputGroup);
     this.validateCustomInputs(this.editCustomInputsArray);
   }
 
@@ -338,9 +364,59 @@ export class BranchTemplatesPageComponent implements OnInit {
       : this.i18n.translate('branchTemplates.customInputTypeString');
   }
 
+  customInputTitle(inputGroup: CustomInputFormGroup): string {
+    const value = inputGroup.getRawValue();
+    const labelEn = value.labelEn.trim();
+    const labelAr = value.labelAr.trim();
+    const name = value.name.trim();
+
+    if (this.i18n.language() === 'ar') {
+      return labelAr || labelEn || name || this.i18n.translate('branchTemplates.customInputItem');
+    }
+
+    return labelEn || labelAr || name || this.i18n.translate('branchTemplates.customInputItem');
+  }
+
+  isCustomInputExpanded(inputGroup: CustomInputFormGroup): boolean {
+    return this.expandedCustomInputs().has(inputGroup);
+  }
+
+  isEditCustomInputExpanded(inputGroup: CustomInputFormGroup): boolean {
+    return this.expandedEditCustomInputs().has(inputGroup);
+  }
+
+  toggleCustomInput(inputGroup: CustomInputFormGroup): void {
+    this.toggleCustomInputExpansion(this.expandedCustomInputs, inputGroup);
+  }
+
+  toggleEditCustomInput(inputGroup: CustomInputFormGroup): void {
+    this.toggleCustomInputExpansion(this.expandedEditCustomInputs, inputGroup);
+  }
+
   openEditTemplate(event: MouseEvent, template: BranchTemplate): void {
     event.stopPropagation();
+    if (this.editTemplateLoadingId() !== null || template.templateId.length === 0) {
+      return;
+    }
+
     this.templatesStore.clearMessages();
+    this.editTemplateDetailsError.set(null);
+    this.editTemplateLoadingId.set(template.templateId);
+    this.templatesStore.loadDetails(
+      template.templateId,
+      (loadedTemplate) => {
+        this.patchEditTemplateForm(loadedTemplate);
+        this.editTemplateLoadingId.set(null);
+        this.editModalOpen.set(true);
+      },
+      (errorKey) => {
+        this.editTemplateLoadingId.set(null);
+        this.editTemplateDetailsError.set(errorKey);
+      },
+    );
+  }
+
+  private patchEditTemplateForm(template: BranchTemplate): void {
     this.selectedTemplate.set(template);
     this.editTemplateForm.patchValue({
       nameEn: template.nameEn,
@@ -352,13 +428,13 @@ export class BranchTemplatesPageComponent implements OnInit {
       expireTo: template.expireTo ? this.toDateTimeLocalValue(new Date(template.expireTo)) : '',
     });
     this.editCustomInputsArray.clear();
+    this.expandedEditCustomInputs.set(new Set());
     [...template.customInputs]
       .filter((customInput) => customInput.isActive)
       .sort((first, second) => first.order - second.order)
       .forEach((customInput) =>
         this.editCustomInputsArray.push(this.createCustomInputGroup(customInput.order, customInput)),
       );
-    this.editModalOpen.set(true);
   }
 
   openTemplateQuestions(event: MouseEvent, template: BranchTemplate): void {
@@ -369,6 +445,9 @@ export class BranchTemplatesPageComponent implements OnInit {
   closeEditTemplate(): void {
     this.editTemplateForm.reset();
     this.editCustomInputsArray.clear();
+    this.expandedEditCustomInputs.set(new Set());
+    this.editTemplateLoadingId.set(null);
+    this.editTemplateDetailsError.set(null);
     this.selectedTemplate.set(null);
     this.editModalOpen.set(false);
   }
@@ -380,6 +459,9 @@ export class BranchTemplatesPageComponent implements OnInit {
     this.validateCustomInputs(this.editCustomInputsArray);
 
     if (!template || this.editTemplateForm.invalid || this.templatesStore.updating()) {
+      if (this.editTemplateForm.invalid) {
+        this.expandInvalidCustomInputs(this.editCustomInputsArray, this.expandedEditCustomInputs);
+      }
       return;
     }
 
@@ -584,6 +666,53 @@ export class BranchTemplatesPageComponent implements OnInit {
         Validators.required,
         Validators.min(1),
       ]),
+    });
+  }
+
+  private expandCustomInput(
+    expandedInputs: WritableSignal<ReadonlySet<CustomInputFormGroup>>,
+    inputGroup: CustomInputFormGroup,
+  ): void {
+    expandedInputs.update((currentInputs) => new Set(currentInputs).add(inputGroup));
+  }
+
+  private removeExpandedCustomInput(
+    expandedInputs: WritableSignal<ReadonlySet<CustomInputFormGroup>>,
+    inputGroup: CustomInputFormGroup,
+  ): void {
+    expandedInputs.update((currentInputs) => {
+      const nextInputs = new Set(currentInputs);
+      nextInputs.delete(inputGroup);
+      return nextInputs;
+    });
+  }
+
+  private toggleCustomInputExpansion(
+    expandedInputs: WritableSignal<ReadonlySet<CustomInputFormGroup>>,
+    inputGroup: CustomInputFormGroup,
+  ): void {
+    expandedInputs.update((currentInputs) => {
+      const nextInputs = new Set(currentInputs);
+      if (nextInputs.has(inputGroup)) {
+        nextInputs.delete(inputGroup);
+      } else {
+        nextInputs.add(inputGroup);
+      }
+
+      return nextInputs;
+    });
+  }
+
+  private expandInvalidCustomInputs(
+    inputsArray: FormArray<CustomInputFormGroup>,
+    expandedInputs: WritableSignal<ReadonlySet<CustomInputFormGroup>>,
+  ): void {
+    expandedInputs.update((currentInputs) => {
+      const nextInputs = new Set(currentInputs);
+      inputsArray.controls
+        .filter((inputGroup) => inputGroup.invalid)
+        .forEach((inputGroup) => nextInputs.add(inputGroup));
+      return nextInputs;
     });
   }
 

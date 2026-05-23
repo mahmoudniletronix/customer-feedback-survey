@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { Calendar, FileText, Hash, MessageSquareText, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
@@ -13,10 +13,23 @@ import {
   AnonymousTemplateResponseDetails,
 } from '../../../../anonymous-templates/domain/anonymous-template.model';
 
+interface AnonymousResponseAnswerTreeNode {
+  readonly answer: AnonymousTemplateResponseAnswer;
+  readonly children: readonly AnonymousResponseAnswerTreeNode[];
+}
+
 @Component({
   selector: 'app-survey-anonymous-response-details-modal',
   standalone: true,
-  imports: [ButtonComponent, DatePipe, DecimalPipe, IconComponent, ModalComponent, TranslatePipe],
+  imports: [
+    ButtonComponent,
+    DatePipe,
+    DecimalPipe,
+    IconComponent,
+    ModalComponent,
+    NgTemplateOutlet,
+    TranslatePipe,
+  ],
   templateUrl: './survey-anonymous-response-details-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -28,6 +41,9 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   readonly error = input<string | null>(null);
   readonly details = input<AnonymousTemplateResponseDetails | null>(null);
   readonly closed = output<void>();
+  readonly answerTree = computed<readonly AnonymousResponseAnswerTreeNode[]>(() =>
+    this.toAnswerTree(this.details()?.answers ?? []),
+  );
 
   readonly calendarIcon = Calendar;
   readonly fileIcon = FileText;
@@ -93,5 +109,14 @@ export class SurveyAnonymousResponseDetailsModalComponent {
     }
 
     return english || arabic || '-';
+  }
+
+  private toAnswerTree(
+    answers: readonly AnonymousTemplateResponseAnswer[],
+  ): readonly AnonymousResponseAnswerTreeNode[] {
+    return answers.map((answer) => ({
+      answer,
+      children: this.toAnswerTree(answer.children),
+    }));
   }
 }

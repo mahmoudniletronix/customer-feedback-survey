@@ -26,7 +26,12 @@ export const SURVEY_DASHBOARD_ROUTES: Routes = [
     path: '',
     pathMatch: 'full',
     canActivate: [surveyDashboardAccessGuard],
-    providers: [SurveyDashboardService, SurveyDashboardStore],
+    providers: [
+      BranchAdminBranchService,
+      BranchAdminBranchStore,
+      SurveyDashboardService,
+      SurveyDashboardStore,
+    ],
     loadComponent: () =>
       import('./presentation/pages/survey-dashboard-page.component').then(
         (m) => m.SurveyDashboardPageComponent,

@@ -237,11 +237,13 @@ export interface DepartmentResponseCustomInput {
 }
 
 export interface DepartmentResponseAnswer {
+  templateQuestionId: string;
   questionId: string;
   questionTextEn: string;
   questionTextAr: string | null;
   questionType: DepartmentResponseQuestionType;
   questionTypeName: string;
+  questionOrder: number;
   selectedQuestionOptionId: string | null;
   selectedOptionTextEn: string | null;
   selectedOptionTextAr: string | null;
@@ -252,6 +254,7 @@ export interface DepartmentResponseAnswer {
   voiceFileName: string | null;
   voiceFileUrl: string | null;
   displayValue: string;
+  children: readonly DepartmentResponseAnswer[];
 }
 
 export interface DepartmentReportTemplateOption {

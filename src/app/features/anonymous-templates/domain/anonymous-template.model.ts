@@ -317,6 +317,7 @@ export interface AnonymousTemplateResponseAnswer {
   textAnswer: string | null;
   voiceFileName: string | null;
   voiceUrl: string | null;
+  children: readonly AnonymousTemplateResponseAnswer[];
 }
 
 export interface AnonymousTemplatesListQuery {
@@ -610,6 +611,8 @@ export interface AnonymousTemplateResponseAnswerApiResponse {
   textAnswer?: string | null;
   voiceFileName?: string | null;
   voiceUrl?: string | null;
+  children?: readonly AnonymousTemplateResponseAnswerApiResponse[];
+  childAnswers?: readonly AnonymousTemplateResponseAnswerApiResponse[];
 }
 
 export type AnonymousTemplateDashboardGroupBy = 'Day' | 'Month';

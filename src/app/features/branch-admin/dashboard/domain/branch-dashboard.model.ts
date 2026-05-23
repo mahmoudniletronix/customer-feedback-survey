@@ -189,11 +189,13 @@ export interface BranchSurveyResponseCustomInput {
 }
 
 export interface BranchSurveyResponseAnswer {
+  templateQuestionId: string;
   questionId: string;
   questionTextEn: string;
   questionTextAr: string | null;
   questionType: BranchSurveyResponseQuestionType;
   questionTypeName: string;
+  questionOrder: number;
   selectedQuestionOptionId: string | null;
   selectedOptionTextEn: string | null;
   selectedOptionTextAr: string | null;
@@ -204,4 +206,5 @@ export interface BranchSurveyResponseAnswer {
   voiceFileName: string | null;
   voiceFileUrl: string | null;
   displayValue: string;
+  children: readonly BranchSurveyResponseAnswer[];
 }

@@ -488,6 +488,7 @@ export class SurveyDashboardService {
 
   private toInternalResponseAnswer(item: ApiRecord): BranchSurveyResponseAnswer {
     return {
+      templateQuestionId: this.readRecordId(item['templateQuestionId']),
       questionId: this.readRecordId(item['questionId']),
       questionTextEn: this.readString(item, 'questionTextEn'),
       questionTextAr: this.readNullableString(item, 'questionTextAr'),
@@ -495,6 +496,7 @@ export class SurveyDashboardService {
         this.readString(item, 'questionTypeName') || this.readString(item, 'questionType'),
       ),
       questionTypeName: this.readString(item, 'questionTypeName'),
+      questionOrder: this.readNumber(item, 'questionOrder') || this.readNumber(item, 'order'),
       selectedQuestionOptionId: this.readNullableString(item, 'selectedQuestionOptionId'),
       selectedOptionTextEn: this.readNullableString(item, 'selectedOptionTextEn'),
       selectedOptionTextAr: this.readNullableString(item, 'selectedOptionTextAr'),
@@ -506,6 +508,7 @@ export class SurveyDashboardService {
       voiceFileUrl:
         this.readNullableString(item, 'voiceFileUrl') ?? this.readNullableString(item, 'voiceUrl'),
       displayValue: this.readString(item, 'displayValue'),
+      children: this.readAnswerChildren(item).map((answer) => this.toInternalResponseAnswer(answer)),
     };
   }
 
@@ -516,9 +519,9 @@ export class SurveyDashboardService {
     const customInputValues = this.readArray(
       response['customInputValues'] ?? response['customInputs'],
     ).map((input) => this.toAnonymousResponseCustomInput(input));
-    const answers = this.readArray(response['answers'])
-      .map((answer) => this.toAnonymousResponseAnswer(answer))
-      .sort((first, second) => first.questionOrder - second.questionOrder);
+    const answers = this.readArray(response['answers']).map((answer) =>
+      this.toAnonymousResponseAnswer(answer),
+    );
 
     return {
       anonymousSurveyResponseId: this.readRecordId(response['anonymousSurveyResponseId']),
@@ -589,7 +592,19 @@ export class SurveyDashboardService {
       textAnswer: this.readNullableString(item, 'textAnswer'),
       voiceFileName: this.readNullableString(item, 'voiceFileName'),
       voiceUrl: this.readNullableString(item, 'voiceUrl'),
+      children: this.readAnswerChildren(item).map((answer) =>
+        this.toAnonymousResponseAnswer(answer),
+      ),
     };
+  }
+
+  private readAnswerChildren(item: ApiRecord): ApiRecord[] {
+    const children = this.readArray(item['children']);
+    if (children.length > 0) {
+      return children;
+    }
+
+    return this.readArray(item['childAnswers']);
   }
 
   private toInternalTemplateDetails(
