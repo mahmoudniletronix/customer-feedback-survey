@@ -1,7 +1,7 @@
 @keyframes dashboard-rise {
   from {
     opacity: 0;
-    transform: translateY(0.75rem);
+    transform: translateY(0.35rem);
   }
   to {
     opacity: 1;
@@ -10,26 +10,22 @@
 }
 
 .dashboard-card {
-  animation: dashboard-rise 0.45s ease-out both;
+  animation: dashboard-rise 0.25s ease-out both;
 }
 
-.dashboard-card:nth-child(1) { animation-delay: 0.02s; }
-.dashboard-card:nth-child(2) { animation-delay: 0.06s; }
-.dashboard-card:nth-child(3) { animation-delay: 0.1s; }
-.dashboard-card:nth-child(4) { animation-delay: 0.14s; }
-.dashboard-card:nth-child(5) { animation-delay: 0.18s; }
-.dashboard-card:nth-child(6) { animation-delay: 0.22s; }
-.dashboard-card:nth-child(7) { animation-delay: 0.26s; }
-.dashboard-card:nth-child(8) { animation-delay: 0.3s; }
-.dashboard-card:nth-child(9) { animation-delay: 0.34s; }
-.dashboard-card:nth-child(10) { animation-delay: 0.38s; }
+.dashboard-card:nth-child(1) { animation-delay: 0.01s; }
+.dashboard-card:nth-child(2) { animation-delay: 0.03s; }
+.dashboard-card:nth-child(3) { animation-delay: 0.05s; }
+.dashboard-card:nth-child(4) { animation-delay: 0.07s; }
+.dashboard-card:nth-child(5) { animation-delay: 0.09s; }
+.dashboard-card:nth-child(6) { animation-delay: 0.11s; }
+.dashboard-card:nth-child(7) { animation-delay: 0.13s; }
+.dashboard-card:nth-child(8) { animation-delay: 0.15s; }
+.dashboard-card:nth-child(9) { animation-delay: 0.17s; }
+.dashboard-card:nth-child(10) { animation-delay: 0.19s; }
 
 .dashboard-icon-box {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.group:hover .dashboard-icon-box {
-  transform: scale(1.08);
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 canvas {

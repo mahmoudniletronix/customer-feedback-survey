@@ -86,6 +86,9 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     to: [''],
     templateId: [''],
     groupBy: ['Day' as DepartmentReportsGroupBy],
+    topQuestionsCount: ['5'],
+    criticalResponsesCount: ['10'],
+    criticalScoreThreshold: ['40'],
   });
 
   readonly operatorMetrics = computed(() => {
@@ -185,9 +188,9 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
       to: value.to || undefined,
       templateId: value.templateId || undefined,
       groupBy: value.groupBy,
-      topQuestionsCount: 5,
-      criticalResponsesCount: 10,
-      criticalScoreThreshold: 40,
+      topQuestionsCount: this.toOptionalPositiveInteger(value.topQuestionsCount),
+      criticalResponsesCount: this.toOptionalPositiveInteger(value.criticalResponsesCount),
+      criticalScoreThreshold: this.toOptionalPercentage(value.criticalScoreThreshold),
     });
   }
 
@@ -197,6 +200,9 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
       to: '',
       templateId: '',
       groupBy: 'Day',
+      topQuestionsCount: '5',
+      criticalResponsesCount: '10',
+      criticalScoreThreshold: '40',
     });
     this.store.load();
   }
@@ -244,6 +250,26 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     return this.localized(item.questionTextEn, item.questionTextAr);
   }
 
+  questionTypeLabel(item: DepartmentQuestionInsight): string {
+    return this.translateQuestionType(item.questionType, item.questionTypeName);
+  }
+
+  operatorStatusLabel(status: string): string {
+    if (!status || status === '-') return '-';
+    if (status === 'Active') return this.i18n.translate('common.active');
+    if (status === 'Inactive') return this.i18n.translate('branches.inactive');
+    if (status === 'Invited') return this.i18n.translate('common.invited');
+
+    return status;
+  }
+
+  customInputTypeLabel(typeName: string): string {
+    if (typeName === 'String') return this.i18n.translate('branchTemplates.customInputTypeString');
+    if (typeName === 'Integer') return this.i18n.translate('branchTemplates.customInputTypeInteger');
+
+    return typeName || '-';
+  }
+
   riskLabel(riskLevel: DepartmentReportsRiskLevel): string {
     if (riskLevel === 'HighRisk') return this.i18n.translate('departmentDashboard.highRisk');
     if (riskLevel === 'MediumRisk') return this.i18n.translate('departmentDashboard.mediumRisk');
@@ -261,6 +287,34 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   private localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') return arabicText || englishText || '-';
     return englishText || arabicText || '-';
+  }
+
+  private translateQuestionType(type: string, fallback: string): string {
+    if (type === 'SingleChoice') return this.i18n.translate('questions.typeSingleChoice');
+    if (type === 'StarRating') return this.i18n.translate('questions.typeStarRating');
+    if (type === 'Smiles') return this.i18n.translate('questions.typeSmiles');
+    if (type === 'Complain') return this.i18n.translate('questions.typeComplain');
+    if (type === 'Voice') return this.i18n.translate('questions.typeVoice');
+
+    return fallback || type || '-';
+  }
+
+  private toOptionalPositiveInteger(value: string): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return undefined;
+    }
+
+    return parsed;
+  }
+
+  private toOptionalPercentage(value: string): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return undefined;
+    }
+
+    return Math.min(Math.max(parsed, 0), 100);
   }
 
   private renderTrendChart(

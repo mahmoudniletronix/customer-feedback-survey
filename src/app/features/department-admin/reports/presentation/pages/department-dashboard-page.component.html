@@ -1,7 +1,7 @@
-<div class="w-full space-y-4">
+<div class="w-full space-y-3">
   <div class="flex items-center justify-end">
     <button
-      class="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+      class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition-colors hover:bg-slate-50"
       type="button"
       (click)="toggleAdvancedFilters()"
     >
@@ -22,9 +22,9 @@
     [class.opacity-0]="!advancedFiltersOpen()"
   >
     <div class="min-h-0 overflow-hidden">
-    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+    <section class="dashboard-card rounded-lg border border-slate-200 bg-white p-2.5 shadow-sm shadow-slate-200/60">
       <form
-        class="flex flex-col gap-2 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:flex-row sm:flex-wrap sm:items-end"
+        class="flex flex-col gap-1.5 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:flex-row sm:flex-wrap sm:items-end"
         [formGroup]="filtersForm"
         (ngSubmit)="applyFilters()"
         [class.translate-y-0]="advancedFiltersOpen()"
@@ -71,6 +71,34 @@
             <option value="Month">{{ 'departmentDashboard.month' | t }}</option>
           </select>
         </label>
+        <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.topQuestions' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="number"
+            min="1"
+            formControlName="topQuestionsCount"
+          />
+        </label>
+        <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[9rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.criticalResponsesLimit' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="number"
+            min="1"
+            formControlName="criticalResponsesCount"
+          />
+        </label>
+        <label class="flex flex-col gap-0.5 sm:min-w-[7rem] sm:max-w-[9rem]">
+          <span class="text-[9px] font-bold text-slate-500">{{ 'departmentDashboard.criticalThreshold' | t }}</span>
+          <input
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            type="number"
+            min="0"
+            max="100"
+            formControlName="criticalScoreThreshold"
+          />
+        </label>
         <div class="flex gap-1.5">
           <app-button type="submit" size="sm" [loading]="store.loading()">
             <app-icon [icon]="searchIcon" [size]="13" />
@@ -86,13 +114,13 @@
   </div>
 
   @if (store.loading()) {
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       @for (item of [1, 2, 3, 4]; track item) {
-        <div class="dashboard-card h-28 animate-pulse rounded-xl border border-slate-200 bg-white p-4"></div>
+        <div class="dashboard-card h-20 animate-pulse rounded-lg border border-slate-200 bg-white p-3"></div>
       }
     </section>
   } @else if (store.error()) {
-    <section class="dashboard-card rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+    <section class="dashboard-card rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
       <div class="flex items-center gap-2">
         <app-icon [icon]="alertTriangleIcon" [size]="16" />
         <span>{{ store.error() ?? '' | t }}</span>
@@ -100,7 +128,7 @@
     </section>
   } @else if (store.dashboard(); as dashboard) {
     @if (store.isEmpty()) {
-      <section class="dashboard-card rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
+      <section class="dashboard-card rounded-lg border border-dashed border-slate-200 bg-white p-6 text-center">
         <div class="flex flex-col items-center gap-2">
           <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400">
             <app-icon [icon]="barChartIcon" [size]="20" />
@@ -113,70 +141,70 @@
       </section>
     }
 
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
       @if (operatorMetrics(); as m) {
-        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-md">
-          <div class="flex items-start justify-between gap-3">
+        <article class="group dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 transition-colors hover:border-cyan-100">
+          <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.totalOperators' | t }}</p>
-              <p class="mt-1 text-xl font-black text-slate-950">{{ m.active }}<span class="text-sm font-bold text-slate-400">/{{ m.total }}</span></p>
+              <p class="mt-1 text-lg font-black text-slate-950">{{ m.active }}<span class="text-xs font-bold text-slate-400">/{{ m.total }}</span></p>
               <p class="mt-0.5 text-[11px] font-semibold text-slate-500">{{ m.activePercentage }}% {{ 'departmentDashboard.activeOperators' | t | lowercase }}</p>
             </div>
-            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-cyan-50 p-2.5 text-[#11A7C9]">
-              <app-icon [icon]="usersIcon" [size]="20" />
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-md bg-cyan-50 p-2 text-[#0d94b3]">
+              <app-icon [icon]="usersIcon" [size]="17" />
             </div>
           </div>
-          <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+          <div class="mt-2.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
             <div class="h-full rounded-full bg-[#11A7C9] transition-all duration-700" [style.width.%]="m.activePercentage"></div>
           </div>
         </article>
       }
 
       @if (templateMetrics(); as m) {
-        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md">
-          <div class="flex items-start justify-between gap-3">
+        <article class="group dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 transition-colors hover:border-slate-300">
+          <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.totalAssignedTemplates' | t }}</p>
-              <p class="mt-1 text-xl font-black text-slate-950">{{ m.total }}</p>
+              <p class="mt-1 text-lg font-black text-slate-950">{{ m.total }}</p>
               <p class="mt-0.5 text-[11px] font-semibold text-slate-500">{{ m.active }} {{ 'departmentDashboard.activeAssignedTemplates' | t | lowercase }} &middot; {{ m.withResponses }} {{ 'departmentDashboard.templatesWithResponses' | t | lowercase }}</p>
             </div>
-            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-violet-50 p-2.5 text-violet-600">
-              <app-icon [icon]="fileTextIcon" [size]="20" />
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-md bg-slate-100 p-2 text-slate-600">
+              <app-icon [icon]="fileTextIcon" [size]="17" />
             </div>
           </div>
         </article>
       }
 
       @if (responseMetrics(); as m) {
-        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-          <div class="flex items-start justify-between gap-3">
+        <article class="group dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 transition-colors hover:border-cyan-100">
+          <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.totalResponses' | t }}</p>
-              <p class="mt-1 text-xl font-black text-slate-950">{{ m.total }}</p>
+              <p class="mt-1 text-lg font-black text-slate-950">{{ m.total }}</p>
               <p class="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-slate-500">
                 <app-icon [icon]="trendingUpIcon" [size]="12" />
                 {{ m.averageScore.toFixed(1) }}% {{ 'departmentDashboard.averageScore' | t | lowercase }}
               </p>
             </div>
-            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-emerald-50 p-2.5 text-emerald-600">
-              <app-icon [icon]="barChartIcon" [size]="20" />
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-md bg-cyan-50 p-2 text-[#0d94b3]">
+              <app-icon [icon]="barChartIcon" [size]="17" />
             </div>
           </div>
         </article>
       }
 
       @if (issueMetrics(); as m) {
-        <article class="group dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-md">
-          <div class="flex items-start justify-between gap-3">
+        <article class="group dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 transition-colors hover:border-amber-100">
+          <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">{{ 'departmentDashboard.complaints' | t }} &amp; {{ 'departmentDashboard.voiceAnswers' | t }}</p>
-              <p class="mt-1 flex items-center gap-3 text-xl font-black text-slate-950">
-                <span class="flex items-center gap-1.5"><app-icon [icon]="alertTriangleIcon" [size]="16" class="text-amber-500" />{{ m.complaints }}</span>
-                <span class="flex items-center gap-1.5"><app-icon [icon]="micIcon" [size]="16" class="text-cyan-500" />{{ m.voice }}</span>
+              <p class="mt-1 flex items-center gap-3 text-lg font-black text-slate-950">
+                <span class="flex items-center gap-1"><app-icon [icon]="alertTriangleIcon" [size]="14" class="text-amber-500" />{{ m.complaints }}</span>
+                <span class="flex items-center gap-1"><app-icon [icon]="micIcon" [size]="14" class="text-[#0d94b3]" />{{ m.voice }}</span>
               </p>
             </div>
-            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-lg bg-amber-50 p-2.5 text-amber-600">
-              <app-icon [icon]="alertTriangleIcon" [size]="20" />
+            <div class="dashboard-icon-box flex shrink-0 items-center justify-center rounded-md bg-amber-50 p-2 text-amber-600">
+              <app-icon [icon]="alertTriangleIcon" [size]="17" />
             </div>
           </div>
         </article>
@@ -184,15 +212,15 @@
     </section>
 
     @if (satisfactionData(); as s) {
-      <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-        <div class="mb-3 flex items-center gap-2">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-            <app-icon [icon]="smileIcon" [size]="15" />
+      <section class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <div class="mb-2.5 flex items-center gap-2">
+          <div class="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500">
+            <app-icon [icon]="smileIcon" [size]="14" />
           </div>
-          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.satisfactionTrend' | t }}</h2>
+          <h2 class="text-xs font-black text-slate-950">{{ 'departmentDashboard.satisfactionBreakdown' | t }}</h2>
         </div>
-        <div class="space-y-3">
-          <div class="flex h-3 overflow-hidden rounded-full bg-slate-100">
+        <div class="space-y-2.5">
+          <div class="flex h-2.5 overflow-hidden rounded-full bg-slate-100">
             @if (s.satisfiedPercent > 0) {
               <div class="h-full bg-emerald-500 transition-all duration-700" [style.width.%]="s.satisfiedPercent" [title]="s.satisfied + ' ' + ('departmentDashboard.satisfied' | t)"></div>
             }
@@ -203,20 +231,20 @@
               <div class="h-full bg-rose-500 transition-all duration-700" [style.width.%]="s.unhappyPercent" [title]="s.unhappy + ' ' + ('departmentDashboard.unhappy' | t)"></div>
             }
           </div>
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] font-semibold">
-            <span class="flex items-center gap-1.5">
-              <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-              <app-icon [icon]="smileIcon" [size]="13" class="text-emerald-600" />
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-semibold">
+            <span class="flex items-center gap-1">
+              <span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
+              <app-icon [icon]="smileIcon" [size]="12" class="text-emerald-600" />
               {{ 'departmentDashboard.satisfied' | t }} <strong class="text-slate-900">{{ s.satisfied }}</strong>
             </span>
-            <span class="flex items-center gap-1.5">
-              <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-              <app-icon [icon]="mehIcon" [size]="13" class="text-amber-500" />
+            <span class="flex items-center gap-1">
+              <span class="inline-block h-2 w-2 rounded-full bg-amber-400"></span>
+              <app-icon [icon]="mehIcon" [size]="12" class="text-amber-500" />
               {{ 'departmentDashboard.neutral' | t }} <strong class="text-slate-900">{{ s.neutral }}</strong>
             </span>
-            <span class="flex items-center gap-1.5">
-              <span class="inline-block h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-              <app-icon [icon]="frownIcon" [size]="13" class="text-rose-500" />
+            <span class="flex items-center gap-1">
+              <span class="inline-block h-2 w-2 rounded-full bg-rose-500"></span>
+              <app-icon [icon]="frownIcon" [size]="12" class="text-rose-500" />
               {{ 'departmentDashboard.unhappy' | t }} <strong class="text-slate-900">{{ s.unhappy }}</strong>
             </span>
             <span class="ml-auto flex items-center gap-2 text-slate-500">
@@ -228,13 +256,13 @@
       </section>
     }
 
-    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-      <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+    <section class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <div class="mb-2.5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-2">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]">
-            <app-icon [icon]="trendingUpIcon" [size]="15" />
+          <div class="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-50 text-[#0d94b3]">
+            <app-icon [icon]="trendingUpIcon" [size]="14" />
           </div>
-          <h2 class="text-sm font-black text-slate-950">
+          <h2 class="text-xs font-black text-slate-950">
             {{ 'departmentDashboard.satisfactionTrend' | t }}
           </h2>
         </div>
@@ -251,56 +279,56 @@
         </div>
       </div>
       @if (dashboard.satisfactionTrend.length === 0) {
-        <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+        <p class="rounded-md bg-slate-50 p-4 text-center text-xs font-semibold text-slate-500">
           {{ 'departmentDashboard.noTrendData' | t }}
         </p>
       } @else {
-        <div class="h-64">
+        <div class="h-56">
           <canvas #trendCanvas></canvas>
         </div>
       }
     </section>
 
-    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-      <div class="mb-3 flex items-center gap-2">
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
-          <app-icon [icon]="usersIcon" [size]="15" />
+    <section class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <div class="mb-2.5 flex items-center gap-2">
+        <div class="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+          <app-icon [icon]="usersIcon" [size]="14" />
         </div>
-        <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.operatorPerformance' | t }}</h2>
+        <h2 class="text-xs font-black text-slate-950">{{ 'departmentDashboard.operatorPerformance' | t }}</h2>
       </div>
-      <div class="-mx-4 overflow-x-auto sm:mx-0">
-        <div class="inline-block min-w-full rounded-xl border border-slate-200">
+      <div class="-mx-3 overflow-x-auto sm:mx-0">
+        <div class="inline-block min-w-full rounded-lg border border-slate-200">
         <table class="w-full min-w-[42rem] table-fixed">
           <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500">
             <tr>
-              <th class="px-3 py-3 text-start">{{ 'departmentDashboard.operator' | t }}</th>
-              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.status' | t }}</th>
-              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.responses' | t }}</th>
-              <th class="w-28 px-3 py-3 text-start">{{ 'departmentDashboard.avgScore' | t }}</th>
-              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.complaints' | t }}</th>
-              <th class="w-24 px-3 py-3 text-start">{{ 'departmentDashboard.voice' | t }}</th>
-              <th class="w-36 px-3 py-3 text-start">{{ 'departmentDashboard.lastResponse' | t }}</th>
-              <th class="w-28 px-3 py-3 text-start">{{ 'departmentDashboard.risk' | t }}</th>
+              <th class="px-3 py-2 text-start">{{ 'departmentDashboard.operator' | t }}</th>
+              <th class="w-24 px-3 py-2 text-start">{{ 'departmentDashboard.status' | t }}</th>
+              <th class="w-24 px-3 py-2 text-start">{{ 'departmentDashboard.responses' | t }}</th>
+              <th class="w-28 px-3 py-2 text-start">{{ 'departmentDashboard.avgScore' | t }}</th>
+              <th class="w-24 px-3 py-2 text-start">{{ 'departmentDashboard.complaints' | t }}</th>
+              <th class="w-24 px-3 py-2 text-start">{{ 'departmentDashboard.voice' | t }}</th>
+              <th class="w-36 px-3 py-2 text-start">{{ 'departmentDashboard.lastResponse' | t }}</th>
+              <th class="w-28 px-3 py-2 text-start">{{ 'departmentDashboard.risk' | t }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-xs">
             @for (operator of dashboard.operatorPerformance; track operator.operatorId) {
               <tr
-                class="cursor-pointer transition hover:bg-cyan-50/50"
+                class="cursor-pointer transition-colors hover:bg-slate-50"
                 tabindex="0"
                 (click)="openOperatorResponses(operator)"
                 (keyup.enter)="openOperatorResponses(operator)"
               >
-                <td class="px-3 py-3 font-black text-slate-950">{{ operatorName(operator) }}</td>
-                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.status }}</td>
-                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.responsesCount }}</td>
-                <td class="px-3 py-3 font-black text-slate-900">{{ operator.averageScorePercentage | number: '1.0-1' }}%</td>
-                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.complaintsCount }}</td>
-                <td class="px-3 py-3 font-semibold text-slate-600">{{ operator.voiceAnswersCount }}</td>
-                <td class="px-3 py-3 font-semibold text-slate-600">
+                <td class="px-3 py-2.5 font-black text-slate-950">{{ operatorName(operator) }}</td>
+                <td class="px-3 py-2.5 font-semibold text-slate-600">{{ operatorStatusLabel(operator.status) }}</td>
+                <td class="px-3 py-2.5 font-semibold text-slate-600">{{ operator.responsesCount }}</td>
+                <td class="px-3 py-2.5 font-black text-slate-900">{{ operator.averageScorePercentage | number: '1.0-1' }}%</td>
+                <td class="px-3 py-2.5 font-semibold text-slate-600">{{ operator.complaintsCount }}</td>
+                <td class="px-3 py-2.5 font-semibold text-slate-600">{{ operator.voiceAnswersCount }}</td>
+                <td class="px-3 py-2.5 font-semibold text-slate-600">
                   {{ operator.lastResponseOnUtc ? (operator.lastResponseOnUtc | date: 'mediumDate') : '-' }}
                 </td>
-                <td class="px-3 py-3">
+                <td class="px-3 py-2.5">
                   <span
                     class="rounded-full px-2 py-1 text-[10px] font-black"
                     [class.bg-rose-50]="operator.riskLevel === 'HighRisk'"
@@ -316,7 +344,7 @@
               </tr>
             } @empty {
               <tr>
-                <td class="px-3 py-6 text-center text-xs font-semibold text-slate-500" colspan="8">
+                <td class="px-3 py-5 text-center text-xs font-semibold text-slate-500" colspan="8">
                   {{ 'departmentDashboard.noOperatorPerformance' | t }}
                 </td>
               </tr>
@@ -327,55 +355,55 @@
       </div>
     </section>
 
-    <section class="grid gap-4 xl:grid-cols-2">
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-        <div class="mb-3 flex items-center gap-2">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-            <app-icon [icon]="fileTextIcon" [size]="15" />
+    <section class="grid gap-3 xl:grid-cols-2">
+      <article class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <div class="mb-2.5 flex items-center gap-2">
+          <div class="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+            <app-icon [icon]="fileTextIcon" [size]="14" />
           </div>
-          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.templatePerformance' | t }}</h2>
+          <h2 class="text-xs font-black text-slate-950">{{ 'departmentDashboard.templatePerformance' | t }}</h2>
         </div>
-        <div class="mt-3 space-y-2">
+        <div class="mt-2 space-y-1.5">
           @for (template of dashboard.templatePerformance; track template.templateId + template.branchId) {
-            <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
-              <div class="flex items-start justify-between gap-3">
+            <div class="rounded-md border border-slate-100 bg-slate-50/60 p-2.5">
+              <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
                   <p class="truncate text-xs font-black text-slate-950" [title]="templateName(template)">
                     {{ templateName(template) }}
                   </p>
                   <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ branchName(template) }}</p>
                 </div>
-                <span class="shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-black text-slate-700">
+                <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-700">
                   {{ riskLabel(template.riskLevel) }}
                 </span>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600">
+              <div class="mt-2 grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600">
                 <span>{{ template.responsesCount }} {{ 'departmentDashboard.responses' | t }}</span>
                 <span>{{ template.averageScorePercentage | number: '1.0-1' }}% {{ 'departmentDashboard.avg' | t }}</span>
                 <span>{{ template.complaintsCount }} {{ 'departmentDashboard.complaints' | t }}</span>
               </div>
             </div>
           } @empty {
-            <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+            <p class="rounded-md bg-slate-50 p-4 text-center text-xs font-semibold text-slate-500">
               {{ 'departmentDashboard.noTemplatePerformance' | t }}
             </p>
           }
         </div>
       </article>
 
-      <article class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-        <div class="mb-3 flex items-center gap-2">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
-            <app-icon [icon]="alertTriangleIcon" [size]="15" />
+      <article class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+        <div class="mb-2.5 flex items-center gap-2">
+          <div class="flex h-6 w-6 items-center justify-center rounded-md bg-rose-50 text-rose-600">
+            <app-icon [icon]="alertTriangleIcon" [size]="14" />
           </div>
-          <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.lowestRatedQuestions' | t }}</h2>
+          <h2 class="text-xs font-black text-slate-950">{{ 'departmentDashboard.lowestRatedQuestions' | t }}</h2>
         </div>
-        <div class="mt-3 space-y-2">
+        <div class="mt-2 space-y-1.5">
           @for (question of dashboard.lowestRatedQuestions; track question.questionId) {
-            <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+            <div class="rounded-md border border-slate-100 bg-slate-50/60 p-2.5">
               <p class="break-words text-xs font-black text-slate-950 [overflow-wrap:anywhere]">{{ questionText(question) }}</p>
               <p class="mt-1 text-[11px] font-semibold text-slate-500">
-                {{ templateName(question) }} - {{ question.questionTypeName }}
+                {{ templateName(question) }} - {{ questionTypeLabel(question) }}
               </p>
               <div class="mt-2 flex flex-wrap gap-2 text-[11px] font-bold text-slate-600">
                 <span>{{ question.answersCount }} {{ 'departmentDashboard.answers' | t }}</span>
@@ -384,7 +412,7 @@
               </div>
             </div>
           } @empty {
-            <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+            <p class="rounded-md bg-slate-50 p-4 text-center text-xs font-semibold text-slate-500">
               {{ 'departmentDashboard.noRatedQuestions' | t }}
             </p>
           }
@@ -392,22 +420,22 @@
       </article>
     </section>
 
-    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-      <div class="mb-3 flex items-center gap-2">
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-          <app-icon [icon]="barChartIcon" [size]="15" />
+    <section class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <div class="mb-2.5 flex items-center gap-2">
+        <div class="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+          <app-icon [icon]="barChartIcon" [size]="14" />
         </div>
-        <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.customInputSegments' | t }}</h2>
+        <h2 class="text-xs font-black text-slate-950">{{ 'departmentDashboard.customInputSegments' | t }}</h2>
       </div>
       @if (dashboard.customInputSegments.length === 0) {
-        <p class="mt-3 rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+        <p class="mt-2 rounded-md bg-slate-50 p-4 text-center text-xs font-semibold text-slate-500">
           {{ 'departmentDashboard.noCustomSegments' | t }}
         </p>
       } @else {
-        <div class="mt-3 flex gap-2 overflow-x-auto rounded-lg bg-slate-50 p-1">
+        <div class="mt-2 flex gap-1.5 overflow-x-auto rounded-md bg-slate-50 p-1">
           @for (segment of dashboard.customInputSegments; track segment.customInputName) {
             <button
-              class="shrink-0 rounded-md px-3 py-1.5 text-[11px] font-extrabold transition"
+              class="shrink-0 rounded px-2.5 py-1 text-[11px] font-extrabold transition-colors"
               type="button"
               [class.bg-white]="selectedSegment()?.customInputName === segment.customInputName"
               [class.text-cyan-700]="selectedSegment()?.customInputName === segment.customInputName"
@@ -419,13 +447,13 @@
           }
         </div>
         @if (selectedSegment(); as segment) {
-          <div class="mt-3 space-y-2">
+          <div class="mt-2 space-y-1.5">
             <p class="text-[11px] font-semibold text-slate-500">
-              {{ segment.typeName }} - {{ segmentResponsesTotal(segment) }}
+              {{ customInputTypeLabel(segment.typeName) }} - {{ segmentResponsesTotal(segment) }}
               {{ 'departmentDashboard.responses' | t }}
             </p>
             @for (item of segment.segments; track item.value) {
-              <div class="grid gap-2 rounded-lg bg-slate-50 p-3 sm:grid-cols-[minmax(8rem,1fr)_minmax(10rem,18rem)_5rem] sm:items-center">
+              <div class="grid gap-2 rounded-md bg-slate-50 p-2.5 sm:grid-cols-[minmax(8rem,1fr)_minmax(10rem,18rem)_5rem] sm:items-center">
                 <p class="truncate text-xs font-black text-slate-900" [title]="item.value || '-'">{{ item.value || '-' }}</p>
                 <div class="h-2 overflow-hidden rounded-full bg-white">
                   <div class="h-full rounded-full bg-[#11A7C9]" [style.width]="barWidth(item.averageScorePercentage)"></div>
@@ -438,17 +466,17 @@
       }
     </section>
 
-    <section class="dashboard-card rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition-all hover:shadow-md">
-      <div class="mb-3 flex items-center gap-2">
-        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
-          <app-icon [icon]="frownIcon" [size]="15" />
+    <section class="dashboard-card rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+      <div class="mb-2.5 flex items-center gap-2">
+        <div class="flex h-6 w-6 items-center justify-center rounded-md bg-rose-50 text-rose-600">
+          <app-icon [icon]="frownIcon" [size]="14" />
         </div>
-        <h2 class="text-sm font-black text-slate-950">{{ 'departmentDashboard.criticalResponses' | t }}</h2>
+        <h2 class="text-xs font-black text-slate-950">{{ 'departmentDashboard.criticalResponses' | t }}</h2>
       </div>
-      <div class="mt-3 space-y-2">
+      <div class="mt-2 space-y-1.5">
         @for (response of dashboard.criticalResponses; track response.surveyResponseId) {
           <button
-            class="w-full rounded-lg border border-slate-200 bg-white p-3 text-start transition hover:border-rose-200 hover:bg-rose-50/30"
+            class="w-full rounded-md border border-slate-200 bg-white p-2.5 text-start transition-colors hover:border-rose-200 hover:bg-rose-50/30"
             type="button"
             (click)="openCriticalResponse(response)"
           >
@@ -461,7 +489,7 @@
                   {{ branchName(response) }} - {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
                 </p>
               </div>
-              <span class="w-fit shrink-0 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-black text-rose-700">
+              <span class="w-fit shrink-0 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-black text-rose-700">
                 {{ response.scorePercentage | number: '1.0-1' }}%
               </span>
             </div>
@@ -481,7 +509,7 @@
             </div>
           </button>
         } @empty {
-          <p class="rounded-lg bg-slate-50 p-6 text-center text-xs font-semibold text-slate-500">
+          <p class="rounded-md bg-slate-50 p-4 text-center text-xs font-semibold text-slate-500">
             {{ 'departmentDashboard.noCriticalResponses' | t }}
           </p>
         }

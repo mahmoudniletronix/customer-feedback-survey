@@ -254,7 +254,9 @@
                           {{ customInputLabel(input) }}
                         </span>
                       } @empty {
-                        <span class="text-[11px] font-semibold text-slate-400">No custom inputs</span>
+                        <span class="text-[11px] font-semibold text-slate-400">
+                          {{ 'departmentOperatorResponses.noCustomInputs' | t }}
+                        </span>
                       }
                     </div>
                   </td>
