@@ -367,21 +367,21 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'anonymousTemplates.questionsSelectionEyebrow': 'Anonymous template builder',
     'anonymousTemplates.questionsSelectionTitle': 'Anonymous template questions',
     'anonymousTemplates.questionsSelectionSubtitle':
-      'Selected questions and available questions are loaded from the anonymous template scope.',
+      'Selected questions and available Groups are loaded from the anonymous template scope.',
     'anonymousTemplates.questionsSelectionLoading': 'Loading anonymous template questions...',
     'anonymousTemplates.questionsSelectionLoadError':
       'Anonymous template questions are temporarily unavailable. Please try again later.',
     'anonymousTemplates.questionsSelectionSearchMaxLength': 'Search text is too long.',
     'anonymousTemplates.questionsSelectionSearchPlaceholder': 'Search by question text or group',
-    'anonymousTemplates.availableQuestionsTitle': 'Available questions',
+    'anonymousTemplates.availableQuestionsTitle': 'Available Groups',
     'anonymousTemplates.availableQuestionsSubtitle':
       'Questions allowed by this anonymous template scope.',
-    'anonymousTemplates.selectedQuestionsTitle': 'Selected questions',
+    'anonymousTemplates.selectedQuestionsTitle': 'Selected Groups',
     'anonymousTemplates.selectedQuestionsSubtitle':
       'Questions already assigned to this anonymous template.',
     'anonymousTemplates.selectedShort': 'selected',
     'anonymousTemplates.availableShort': 'available',
-    'anonymousTemplates.noAvailableQuestions': 'No available questions found.',
+    'anonymousTemplates.noAvailableQuestions': 'No available Groups found.',
     'anonymousTemplates.noSelectedQuestions': 'No questions are selected yet.',
     'anonymousTemplates.resetQuestions': 'Reset questions',
     'anonymousTemplates.saveQuestions': 'Save questions',
@@ -909,7 +909,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.questionsManagerEyebrow': 'Template questions',
     'branchTemplates.questionsManagerTitle': 'Manage template questions',
     'branchTemplates.questionsManagerLoading': 'Loading template questions...',
-    'branchTemplates.availableQuestionsTitle': 'Available questions',
+    'branchTemplates.availableQuestionsTitle': 'Available Groups',
     'branchTemplates.availableQuestionsSubtitle':
       'Add questions from your branch library to this template.',
     'branchTemplates.availableQuestionsCount': 'available',
@@ -2098,8 +2098,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
       'Invalid filters: from date must be before or equal to to date.',
     'departmentOperatorResponses.invalidDateRange':
       'Invalid filters: date range cannot exceed 12 months.',
-    'departmentOperatorResponses.unavailable':
-      'Operator responses are temporarily unavailable.',
+    'departmentOperatorResponses.unavailable': 'Operator responses are temporarily unavailable.',
     'departmentOperatorResponses.noPermission':
       'You do not have permission to view department reports.',
     'departmentOperatorResponses.operatorNotFound': 'Operator not found or not accessible.',
@@ -2132,8 +2131,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'departmentResponseDetails.noAnswers': 'No answers were submitted.',
     'departmentResponseDetails.voiceAnswer': 'Voice answer',
     'departmentResponseDetails.requiredIds': 'Response id and operator id are required.',
-    'departmentResponseDetails.unavailable':
-      'Response details are temporarily unavailable.',
+    'departmentResponseDetails.unavailable': 'Response details are temporarily unavailable.',
     'departmentResponseDetails.noPermission':
       'You do not have permission to view department reports.',
     'departmentResponseDetails.notFound':
@@ -2242,13 +2240,16 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'publicAnonymousTemplates.textAnswerPlaceholder': 'اكتب إجابتك',
     'publicAnonymousTemplates.voiceUpload': 'إرفاق إجابة صوتية',
     'publicAnonymousTemplates.questionRequiredError': 'أجب على هذا السؤال قبل الإرسال.',
-    'publicAnonymousTemplates.validationError': 'أكمل البيانات المطلوبة وكل الأسئلة الظاهرة قبل الإرسال.',
+    'publicAnonymousTemplates.validationError':
+      'أكمل البيانات المطلوبة وكل الأسئلة الظاهرة قبل الإرسال.',
     'publicAnonymousTemplates.submitNote': 'راجع إجاباتك ثم أرسل التقييم.',
     'publicAnonymousTemplates.submitAction': 'إرسال التقييم',
     'publicAnonymousTemplates.submitting': 'جاري الإرسال...',
     'publicAnonymousTemplates.submitError': 'تعذر إرسال التقييم. حاول مرة أخرى لاحقًا.',
-    'publicAnonymousTemplates.hiddenAnswersRejected': 'تم رفض إجابة غير ظاهرة. راجع الأسئلة وأرسل مرة أخرى.',
-    'publicAnonymousTemplates.missingVisibleAnswers': 'يجب الإجابة على كل الأسئلة الظاهرة قبل الإرسال.',
+    'publicAnonymousTemplates.hiddenAnswersRejected':
+      'تم رفض إجابة غير ظاهرة. راجع الأسئلة وأرسل مرة أخرى.',
+    'publicAnonymousTemplates.missingVisibleAnswers':
+      'يجب الإجابة على كل الأسئلة الظاهرة قبل الإرسال.',
     'publicAnonymousTemplates.customInputValidationError': 'إحدى بيانات العميل غير صحيحة.',
     'publicAnonymousTemplates.optionMismatch': 'أحد الاختيارات لا يتبع السؤال الخاص به.',
     'publicAnonymousTemplates.scaleValueInvalid': 'التقييم يجب أن يكون من 1 إلى 5.',
@@ -2471,13 +2472,11 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'anonymousTemplates.existingCustomInputHint': 'لا يمكن تغيير نوع الحقل الحالي.',
     'anonymousTemplates.updateAction': 'حفظ النموذج العام',
     'anonymousTemplates.updateSuccess': 'تم تحديث النموذج العام بنجاح.',
-    'anonymousTemplates.updateError':
-      'تحديث النموذج العام غير متاح مؤقتًا. حاول مرة أخرى لاحقًا.',
+    'anonymousTemplates.updateError': 'تحديث النموذج العام غير متاح مؤقتًا. حاول مرة أخرى لاحقًا.',
     'anonymousTemplates.deleteTitle': 'حذف نموذج عام',
     'anonymousTemplates.deleteConfirm': 'هل أنت متأكد أنك تريد حذف هذا النموذج العام؟',
     'anonymousTemplates.deleteSuccess': 'تم حذف النموذج العام بنجاح.',
-    'anonymousTemplates.deleteError':
-      'حذف النموذج العام غير متاح مؤقتًا. حاول مرة أخرى لاحقًا.',
+    'anonymousTemplates.deleteError': 'حذف النموذج العام غير متاح مؤقتًا. حاول مرة أخرى لاحقًا.',
     'anonymousTemplates.restoreTitle': 'استعادة نموذج عام',
     'anonymousTemplates.restoreConfirm': 'هل أنت متأكد أنك تريد استعادة هذا النموذج العام؟',
     'anonymousTemplates.restoreSuccess': 'تمت استعادة النموذج العام بنجاح.',
@@ -2504,7 +2503,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'anonymousTemplates.questionsSelectionSearchMaxLength': 'نص البحث طويل جدًا.',
     'anonymousTemplates.questionsSelectionSearchPlaceholder': 'ابحث بنص السؤال أو المجموعة',
     'anonymousTemplates.availableQuestionsTitle': 'الأسئلة المتاحة',
-    'anonymousTemplates.availableQuestionsSubtitle': 'الأسئلة المسموح بها حسب نطاق هذا النموذج العام.',
+    'anonymousTemplates.availableQuestionsSubtitle':
+      'الأسئلة المسموح بها حسب نطاق هذا النموذج العام.',
     'anonymousTemplates.selectedQuestionsTitle': 'الأسئلة المحددة',
     'anonymousTemplates.selectedQuestionsSubtitle': 'الأسئلة المضافة بالفعل لهذا النموذج العام.',
     'anonymousTemplates.selectedShort': 'محدد',
@@ -2529,7 +2529,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'anonymousTemplates.conditionsUpdateError':
       'تعذر حفظ شروط أسئلة النموذج العام. حاول مرة أخرى لاحقًا.',
     'anonymousTemplates.conditionsInvalid': 'شروط الأسئلة غير صحيحة.',
-    'anonymousTemplates.conditionParentChildSame': 'لا يمكن أن يكون السؤال الأب والتابع نفس السؤال.',
+    'anonymousTemplates.conditionParentChildSame':
+      'لا يمكن أن يكون السؤال الأب والتابع نفس السؤال.',
     'anonymousTemplates.conditionCircularFlow': 'تسلسل الأسئلة الدائري غير مسموح.',
     'anonymousTemplates.conditionDuplicated': 'لا يسمح بتكرار شرط السؤال.',
     'anonymousTemplates.conditionOrderInvalid': 'ترتيب الشرط يجب أن يكون أكبر من 0.',
@@ -2537,8 +2538,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
       'السؤال الأب غير مضاف لهذا النموذج العام.',
     'anonymousTemplates.conditionChildQuestionNotFound':
       'السؤال التابع غير مضاف لهذا النموذج العام.',
-    'anonymousTemplates.conditionParentTypeNotAllowed':
-      'نوع السؤال الأب لا يدعم المنطق الشرطي.',
+    'anonymousTemplates.conditionParentTypeNotAllowed': 'نوع السؤال الأب لا يدعم المنطق الشرطي.',
     'anonymousTemplates.conditionSelectedOptionNotFound': 'لم يتم العثور على الاختيار المحدد.',
     'anonymousTemplates.conditionSelectedOptionInactive': 'الاختيار المحدد غير نشط.',
     'anonymousTemplates.conditionSelectedOptionNotParentOption':
@@ -4026,7 +4026,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'departmentOperatorResponses.of': 'من',
     'departmentOperatorResponses.page': 'صفحة',
     'departmentOperatorResponses.noResponsesTitle': 'لا توجد ردود',
-    'departmentOperatorResponses.noResponsesDescription': 'لا توجد ردود للمشغل تطابق الفلاتر المحددة.',
+    'departmentOperatorResponses.noResponsesDescription':
+      'لا توجد ردود للمشغل تطابق الفلاتر المحددة.',
     'departmentOperatorResponses.submittedDate': 'تاريخ الإرسال',
     'departmentOperatorResponses.branch': 'الفرع',
     'departmentOperatorResponses.score': 'النتيجة',
@@ -4048,16 +4049,24 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'departmentOperatorResponses.noVoiceSummary': 'بدون صوت',
     'departmentOperatorResponses.searchSummary': 'بحث',
     'departmentOperatorResponses.operatorIdRequired': 'معرف المشغل مطلوب.',
-    'departmentOperatorResponses.invalidPageNumber': 'الفلاتر غير صحيحة: رقم الصفحة يجب أن يكون أكبر من 0.',
-    'departmentOperatorResponses.invalidPageSize': 'الفلاتر غير صحيحة: حجم الصفحة يجب أن يكون بين 1 و100.',
-    'departmentOperatorResponses.invalidScoreRange': 'الفلاتر غير صحيحة: نسب النتائج يجب أن تكون بين 0 و100.',
-    'departmentOperatorResponses.invalidScoreOrder': 'الفلاتر غير صحيحة: أقل نتيجة لا يمكن أن تكون أكبر من أعلى نتيجة.',
-    'departmentOperatorResponses.invalidDateOrder': 'الفلاتر غير صحيحة: تاريخ البداية يجب أن يكون قبل أو يساوي تاريخ النهاية.',
-    'departmentOperatorResponses.invalidDateRange': 'الفلاتر غير صحيحة: نطاق التاريخ لا يمكن أن يتجاوز 12 شهرًا.',
+    'departmentOperatorResponses.invalidPageNumber':
+      'الفلاتر غير صحيحة: رقم الصفحة يجب أن يكون أكبر من 0.',
+    'departmentOperatorResponses.invalidPageSize':
+      'الفلاتر غير صحيحة: حجم الصفحة يجب أن يكون بين 1 و100.',
+    'departmentOperatorResponses.invalidScoreRange':
+      'الفلاتر غير صحيحة: نسب النتائج يجب أن تكون بين 0 و100.',
+    'departmentOperatorResponses.invalidScoreOrder':
+      'الفلاتر غير صحيحة: أقل نتيجة لا يمكن أن تكون أكبر من أعلى نتيجة.',
+    'departmentOperatorResponses.invalidDateOrder':
+      'الفلاتر غير صحيحة: تاريخ البداية يجب أن يكون قبل أو يساوي تاريخ النهاية.',
+    'departmentOperatorResponses.invalidDateRange':
+      'الفلاتر غير صحيحة: نطاق التاريخ لا يمكن أن يتجاوز 12 شهرًا.',
     'departmentOperatorResponses.unavailable': 'ردود المشغل غير متاحة مؤقتًا.',
     'departmentOperatorResponses.noPermission': 'ليس لديك صلاحية لعرض تقارير القسم.',
-    'departmentOperatorResponses.operatorNotFound': 'لم يتم العثور على المشغل أو لا يمكن الوصول إليه.',
-    'departmentOperatorResponses.invalidFilters': 'الفلاتر غير صحيحة. تحقق من التاريخ والصفحات وقيم النتائج.',
+    'departmentOperatorResponses.operatorNotFound':
+      'لم يتم العثور على المشغل أو لا يمكن الوصول إليه.',
+    'departmentOperatorResponses.invalidFilters':
+      'الفلاتر غير صحيحة. تحقق من التاريخ والصفحات وقيم النتائج.',
     'departmentResponseDetails.backToResponses': 'العودة للردود',
     'departmentResponseDetails.eyebrow': 'تفاصيل الرد',
     'departmentResponseDetails.title': 'تفاصيل رد المشغل',
