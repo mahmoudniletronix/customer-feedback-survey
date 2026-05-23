@@ -640,10 +640,17 @@
           <p class="mt-1 text-2xl font-black text-slate-950">
             {{ scoreLabel(dashboard.summary.averageScorePercentage) }}
           </p>
-          <p class="mt-1 text-[11px] font-semibold text-slate-500">
-            {{ dashboard.summary.satisfiedResponses }} {{ 'surveyDashboard.satisfied' | t }} /
-            {{ dashboard.summary.unhappyResponses }} {{ 'surveyDashboard.unhappy' | t }}
-          </p>
+          <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-black">
+            <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
+              {{ dashboard.summary.satisfiedResponses }} {{ 'surveyDashboard.satisfied' | t }}
+            </span>
+            <span class="rounded-full bg-amber-50 px-2 py-0.5 text-amber-700">
+              {{ dashboard.summary.neutralResponses }} {{ 'surveyDashboard.neutral' | t }}
+            </span>
+            <span class="rounded-full bg-rose-50 px-2 py-0.5 text-rose-700">
+              {{ dashboard.summary.unhappyResponses }} {{ 'surveyDashboard.unhappy' | t }}
+            </span>
+          </div>
         </article>
         <article
           class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60"
@@ -655,8 +662,8 @@
             {{ dashboard.summary.internalResponses }}
           </p>
           <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ 'surveyDashboard.activeInternalTemplates' | t }}:
             {{ dashboard.summary.activeInternalTemplatesCount }}
-            {{ 'surveyDashboard.activeInternalTemplates' | t }}
           </p>
         </article>
         <article
@@ -669,8 +676,8 @@
             {{ dashboard.summary.anonymousResponses }}
           </p>
           <p class="mt-1 text-[11px] font-semibold text-slate-500">
+            {{ 'surveyDashboard.activeAnonymousTemplates' | t }}:
             {{ dashboard.summary.activeAnonymousTemplatesCount }}
-            {{ 'surveyDashboard.activeAnonymousTemplates' | t }}
           </p>
         </article>
         <article
@@ -804,6 +811,17 @@
                     class="h-full rounded-full {{ entry.color }}"
                     [style.width]="barWidth(entry.metrics.averageScorePercentage)"
                   ></div>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-black">
+                  <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                    {{ entry.metrics.satisfiedResponses }} {{ 'surveyDashboard.satisfied' | t }}
+                  </span>
+                  <span class="rounded-full bg-amber-50 px-2 py-0.5 text-amber-700">
+                    {{ entry.metrics.neutralResponses }} {{ 'surveyDashboard.neutral' | t }}
+                  </span>
+                  <span class="rounded-full bg-rose-50 px-2 py-0.5 text-rose-700">
+                    {{ entry.metrics.unhappyResponses }} {{ 'surveyDashboard.unhappy' | t }}
+                  </span>
                 </div>
               </div>
             }
