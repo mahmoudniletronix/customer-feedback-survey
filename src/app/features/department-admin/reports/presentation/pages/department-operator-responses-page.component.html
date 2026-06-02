@@ -346,7 +346,7 @@
               [disabled]="!page.hasPreviousPage"
               (click)="changePage(page.currentPage - 1)"
             >
-              <app-icon [icon]="chevronLeftIcon" [size]="14" />
+              <app-icon [icon]="chevronLeftIcon" [size]="14" [flipRtl]="true" />
               {{ 'departmentOperatorResponses.previous' | t }}
             </button>
             <button
@@ -356,7 +356,7 @@
               (click)="changePage(page.currentPage + 1)"
             >
               {{ 'departmentOperatorResponses.next' | t }}
-              <app-icon [icon]="chevronRightIcon" [size]="14" />
+              <app-icon [icon]="chevronRightIcon" [size]="14" [flipRtl]="true" />
             </button>
           </div>
         </div>

@@ -4,6 +4,11 @@ import { finalize, take } from 'rxjs';
 import { AnonymousTemplatesService } from '../../../../anonymous-templates/data/anonymous-templates.service';
 import { BranchTemplatesPdfReportService } from '../../data/branch-templates-pdf-report.service';
 import {
+  BRANCH_TEMPLATES_PDF_REPORT_LANGUAGES,
+  BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT,
+  BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT,
+  BRANCH_TEMPLATES_PDF_REPORT_SCORE_CALCULATION_MODES,
+  BRANCH_TEMPLATES_PDF_REPORT_TEMPLATE_KINDS,
   BranchTemplatesPdfReportDownloadRequest,
   BranchTemplatesPdfReportQuery,
   BranchTemplatesPdfReportTemplateOption,
@@ -121,8 +126,31 @@ export class BranchTemplatesPdfReportStore {
       return 'branchTemplatesPdf.dateRangeExceeded';
     }
 
-    if (query.templateKind && !query.templateId) {
-      return 'branchTemplatesPdf.templateKindRequiresTemplateId';
+    if (
+      query.templateKind &&
+      !BRANCH_TEMPLATES_PDF_REPORT_TEMPLATE_KINDS.includes(query.templateKind)
+    ) {
+      return 'branchTemplatesPdf.invalidTemplateKind';
+    }
+
+    if (
+      query.scoreCalculationMode &&
+      !BRANCH_TEMPLATES_PDF_REPORT_SCORE_CALCULATION_MODES.includes(query.scoreCalculationMode)
+    ) {
+      return 'branchTemplatesPdf.invalidScoreCalculationMode';
+    }
+
+    if (query.language && !BRANCH_TEMPLATES_PDF_REPORT_LANGUAGES.includes(query.language)) {
+      return 'branchTemplatesPdf.invalidReportLanguage';
+    }
+
+    if (
+      query.topWorstQuestionsCount !== undefined &&
+      (!Number.isInteger(query.topWorstQuestionsCount) ||
+        query.topWorstQuestionsCount < BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT ||
+        query.topWorstQuestionsCount > BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT)
+    ) {
+      return 'branchTemplatesPdf.invalidTopWorstQuestionsCount';
     }
 
     return null;

@@ -15,7 +15,7 @@ import { IconComponent } from '../icon/icon.component';
       [attr.aria-label]="'common.back' | t"
       (click)="goBack()"
     >
-      <app-icon [icon]="chevronLeftIcon" [size]="13" />
+      <app-icon [icon]="chevronLeftIcon" [size]="13" [flipRtl]="true" />
       {{ 'common.back' | t }}
     </button>
   `,

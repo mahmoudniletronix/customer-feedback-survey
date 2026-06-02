@@ -6,7 +6,7 @@
         type="button"
         (click)="goBack()"
       >
-        <app-icon [icon]="chevronLeftIcon" [size]="12" />
+        <app-icon [icon]="chevronLeftIcon" [size]="12" [flipRtl]="true" />
         {{ 'common.back' | t }}
       </button>
     </div>
@@ -423,7 +423,7 @@
               [disabled]="page.currentPage <= 1"
               (click)="changePage(page.currentPage - 1)"
             >
-              <app-icon [icon]="chevronLeftIcon" [size]="14" />
+              <app-icon [icon]="chevronLeftIcon" [size]="14" [flipRtl]="true" />
               {{ 'branchResponsesHistory.previous' | t }}
             </button>
             <button
@@ -433,7 +433,7 @@
               (click)="changePage(page.currentPage + 1)"
             >
               {{ 'branchResponsesHistory.next' | t }}
-              <app-icon [icon]="chevronRightIcon" [size]="14" />
+              <app-icon [icon]="chevronRightIcon" [size]="14" [flipRtl]="true" />
             </button>
           </div>
         </div>

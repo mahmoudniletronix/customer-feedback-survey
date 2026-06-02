@@ -323,7 +323,7 @@
               [disabled]="anonymousTemplatesStore.managingQuestionConditions()"
               (pressed)="backOneFocusedQuestion()"
             >
-              <app-icon [icon]="backIcon" [size]="13" />
+              <app-icon [icon]="backIcon" [size]="13" [flipRtl]="true" />
               {{ 'branchTemplates.backOneStep' | t }}
             </app-button>
             <app-button
@@ -332,7 +332,7 @@
               [disabled]="anonymousTemplatesStore.managingQuestionConditions()"
               (pressed)="clearFocusedQuestion()"
             >
-              <app-icon [icon]="backIcon" [size]="13" />
+              <app-icon [icon]="backIcon" [size]="13" [flipRtl]="true" />
               {{ 'branchTemplates.backToRootQuestions' | t }}
             </app-button>
           </div>

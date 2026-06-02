@@ -24,31 +24,14 @@ import {
 export class QuestionsService {
   private readonly http = inject(HttpClient);
   private readonly questionsUrl = `${environment.apiBaseUrl}/api/questions`;
+  private readonly questionGroupsUrl = `${environment.apiBaseUrl}/api/question-groups`;
 
   list(query: QuestionsFilter): Observable<QuestionsPageResult> {
-    let params = new HttpParams()
-      .set('pageNumber', query.pageNumber)
-      .set('pageSize', Math.min(query.pageSize, 100));
+    return this.getQuestionsPage(this.questionsUrl, query);
+  }
 
-    const searchText = query.searchText.trim();
-    if (searchText.length > 0) {
-      params = params.set('searchText', searchText);
-    }
-
-    if (query.isActive !== null) {
-      params = params.set('isActive', query.isActive);
-    }
-
-    const orderSort = query.orderSort.trim();
-    if (orderSort.length > 0) {
-      params = params.set('orderSort', orderSort);
-    }
-
-    return this.http
-      .get<QuestionsPageApiResponse | readonly QuestionApiResponse[] | QuestionApiResponse>(this.questionsUrl, {
-        params,
-      })
-      .pipe(map((response) => this.toPageResult(response, query)));
+  listByGroup(groupId: string, query: QuestionsFilter): Observable<QuestionsPageResult> {
+    return this.getQuestionsPage(`${this.questionGroupsUrl}/${groupId}/questions`, query);
   }
 
   create(payload: CreateQuestionRequest): Observable<QuestionListItem> {
@@ -73,6 +56,32 @@ export class QuestionsService {
     return this.http
       .put<QuestionApiResponse>(`${this.questionsUrl}/${questionId}/restore`, {})
       .pipe(map((response) => this.toQuestion(response)));
+  }
+
+  private getQuestionsPage(url: string, query: QuestionsFilter): Observable<QuestionsPageResult> {
+    let params = new HttpParams()
+      .set('pageNumber', query.pageNumber)
+      .set('pageSize', Math.min(query.pageSize, 100));
+
+    const searchText = query.searchText.trim();
+    if (searchText.length > 0) {
+      params = params.set('searchText', searchText);
+    }
+
+    if (query.isActive !== null) {
+      params = params.set('isActive', query.isActive);
+    }
+
+    const orderSort = query.orderSort.trim();
+    if (orderSort.length > 0) {
+      params = params.set('orderSort', orderSort);
+    }
+
+    return this.http
+      .get<QuestionsPageApiResponse | readonly QuestionApiResponse[] | QuestionApiResponse>(url, {
+        params,
+      })
+      .pipe(map((response) => this.toPageResult(response, query)));
   }
 
   private toPageResult(
@@ -109,7 +118,7 @@ export class QuestionsService {
   }
 
   private toQuestion(response: QuestionApiResponse): QuestionListItem {
-    const questionId = this.readRecordId(response.questionId);
+    const questionId = this.readRecordId(response.questionId ?? response.id);
 
     return {
       ...toEditableScopeState(response),
@@ -130,7 +139,10 @@ export class QuestionsService {
     };
   }
 
-  private toAnswerType(type: number | undefined, typeName: string | null | undefined): QuestionAnswerType {
+  private toAnswerType(
+    type: number | string | null | undefined,
+    typeName: string | null | undefined,
+  ): QuestionAnswerType {
     return toQuestionAnswerType(type) ?? toQuestionAnswerType(typeName) ?? QUESTION_ANSWER_TYPE.SingleChoice;
   }
 

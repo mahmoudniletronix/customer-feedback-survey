@@ -428,7 +428,7 @@
           [disabled]="!globalQuestionsStore.hasPreviousPage() || globalQuestionsStore.loading()"
           (pressed)="goToPreviousQuestionsPage()"
         >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
           {{ 'branches.previousPage' | t }}
         </app-button>
         <app-button
@@ -439,7 +439,7 @@
           (pressed)="goToNextQuestionsPage()"
         >
           {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" />
+          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
         </app-button>
       </div>
     </div>

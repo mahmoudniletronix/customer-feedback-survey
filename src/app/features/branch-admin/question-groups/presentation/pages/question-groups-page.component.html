@@ -156,7 +156,10 @@
               </tr>
             } @else {
               @for (group of questionGroupsStore.groups(); track group.groupId) {
-                <tr class="align-top transition hover:bg-slate-50">
+                <tr
+                  class="cursor-pointer align-top transition hover:bg-slate-50"
+                  (click)="openGroupQuestions(group)"
+                >
                   <td class="px-3 py-2">
                     <p class="break-words font-semibold text-slate-800 [overflow-wrap:anywhere]">
                       {{ group.nameEn }}
@@ -247,7 +250,8 @@
       } @else {
         @for (group of questionGroupsStore.groups(); track group.groupId) {
           <article
-            class="border border-slate-100 bg-white transition hover:border-cyan-100 hover:bg-slate-50"
+            class="cursor-pointer border border-slate-100 bg-white transition hover:border-cyan-100 hover:bg-slate-50"
+            (click)="openGroupQuestions(group)"
           >
             <div class="flex items-start gap-3">
               <span
@@ -372,7 +376,7 @@
           [disabled]="!questionGroupsStore.hasPreviousPage() || questionGroupsStore.loading()"
           (pressed)="goToPreviousGroupsPage()"
         >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
           {{ 'branches.previousPage' | t }}
         </app-button>
         <app-button
@@ -383,7 +387,7 @@
           (pressed)="goToNextGroupsPage()"
         >
           {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" />
+          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
         </app-button>
       </div>
     </div>

@@ -40,6 +40,7 @@ export class QuestionsStore {
   private readonly currentPageSignal = signal(this.defaultQuery.pageNumber);
   private readonly pageSizeSignal = signal(this.defaultQuery.pageSize);
   private readonly totalItemsSignal = signal(0);
+  private readonly groupIdSignal = signal<string | null>(null);
   private readonly searchTextSignal = signal(this.defaultQuery.searchText);
   private readonly orderSortSignal = signal(this.defaultQuery.orderSort);
   private readonly isActiveSignal = signal<boolean | null>(this.defaultQuery.isActive);
@@ -57,6 +58,7 @@ export class QuestionsStore {
   readonly currentPage = this.currentPageSignal.asReadonly();
   readonly pageSize = this.pageSizeSignal.asReadonly();
   readonly totalItems = this.totalItemsSignal.asReadonly();
+  readonly groupId = this.groupIdSignal.asReadonly();
   readonly searchText = this.searchTextSignal.asReadonly();
   readonly orderSort = this.orderSortSignal.asReadonly();
   readonly isActive = this.isActiveSignal.asReadonly();
@@ -87,8 +89,11 @@ export class QuestionsStore {
     this.orderSortSignal.set(nextQuery.orderSort);
     this.isActiveSignal.set(nextQuery.isActive);
 
-    this.questionsService
-      .list(nextQuery)
+    const questionsPage$ = this.groupIdSignal()
+      ? this.questionsService.listByGroup(this.groupIdSignal() ?? '', nextQuery)
+      : this.questionsService.list(nextQuery);
+
+    questionsPage$
       .pipe(
         take(1),
         finalize(() => this.loadingSignal.set(false)),
@@ -106,6 +111,17 @@ export class QuestionsStore {
           this.errorSignal.set(this.readErrorKey(error, 'questions.loadError'));
         },
       });
+  }
+
+  loadForGroup(groupId: string, query: Partial<QuestionsFilter> = {}): void {
+    this.groupIdSignal.set(groupId);
+    this.load({
+      pageNumber: query.pageNumber ?? this.defaultQuery.pageNumber,
+      pageSize: query.pageSize ?? this.defaultQuery.pageSize,
+      searchText: query.searchText ?? this.defaultQuery.searchText,
+      orderSort: query.orderSort ?? this.defaultQuery.orderSort,
+      isActive: query.isActive !== undefined ? query.isActive : this.defaultQuery.isActive,
+    });
   }
 
   loadGroupsSelection(): void {
@@ -310,7 +326,10 @@ export class QuestionsStore {
 
   private matchesActiveFilter(question: QuestionListItem): boolean {
     const isActive = this.isActiveSignal();
-    return isActive === null || question.isActive === isActive;
+    const matchesActive = isActive === null || question.isActive === isActive;
+    const groupId = this.groupIdSignal();
+    const matchesGroup = groupId === null || question.groupId === groupId;
+    return matchesActive && matchesGroup;
   }
 
   private readErrorKey(error: unknown, fallbackKey: string): string {

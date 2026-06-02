@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Download, FileText, Filter } from 'lucide-angular';
 import { take } from 'rxjs';
-import { I18nService, Language } from '../../../../../core/services/i18n.service';
+import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
@@ -12,6 +12,9 @@ import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminBranchStore } from '../../../branch/presentation/state/branch-admin-branch.store';
 import { BranchTemplatesService } from '../../../templates/data/branch-templates.service';
 import {
+  BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT,
+  BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT,
+  BranchTemplatesPdfReportLanguage,
   BranchTemplatesPdfReportScoreCalculationMode,
   BranchTemplatesPdfReportTemplateKind,
   BranchTemplatesPdfReportTemplateOption,
@@ -19,6 +22,7 @@ import {
 import { BranchTemplatesPdfReportStore } from '../state/branch-templates-pdf-report.store';
 
 type TemplateKindFilter = BranchTemplatesPdfReportTemplateKind | '';
+const DEFAULT_TOP_WORST_QUESTIONS_COUNT = '5';
 
 @Component({
   selector: 'app-branch-templates-pdf-report-page',
@@ -43,6 +47,10 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
   readonly templateKindFilter = signal<TemplateKindFilter>('');
   readonly branchUserNormalTemplates = signal<readonly BranchTemplatesPdfReportTemplateOption[]>([]);
   readonly normalTemplatesError = signal<string | null>(null);
+  readonly minTopWorstQuestionsCount =
+    BRANCH_TEMPLATES_PDF_REPORT_MIN_TOP_WORST_QUESTIONS_COUNT;
+  readonly maxTopWorstQuestionsCount =
+    BRANCH_TEMPLATES_PDF_REPORT_MAX_TOP_WORST_QUESTIONS_COUNT;
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
     fromDate: [this.defaultFromDate()],
@@ -50,6 +58,8 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
     templateKind: ['' as TemplateKindFilter],
     templateKey: [''],
     scoreCalculationMode: ['RootQuestions' as BranchTemplatesPdfReportScoreCalculationMode],
+    topWorstQuestionsCount: [DEFAULT_TOP_WORST_QUESTIONS_COUNT],
+    language: [this.defaultReportLanguage()],
   });
 
   readonly normalTemplates = computed<readonly BranchTemplatesPdfReportTemplateOption[]>(() =>
@@ -92,19 +102,21 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
   downloadReport(): void {
     const value = this.filtersForm.getRawValue();
     const selectedTemplate = this.selectedTemplate(value.templateKey);
+    const reportLanguage = value.language;
 
     this.reportStore.download(
       {
-        language: this.i18n.language(),
         query: {
           fromDate: value.fromDate,
           toDate: value.toDate,
           templateId: selectedTemplate?.id,
-          templateKind: selectedTemplate?.kind,
+          templateKind: selectedTemplate?.kind ?? (value.templateKind || undefined),
           scoreCalculationMode: value.scoreCalculationMode,
+          topWorstQuestionsCount: this.toOptionalPositiveInteger(value.topWorstQuestionsCount),
+          language: reportLanguage,
         },
       },
-      (blob) => this.saveBlob(blob, this.reportFileName(this.i18n.language())),
+      (blob) => this.saveBlob(blob, this.reportFileName(reportLanguage)),
     );
   }
 
@@ -115,6 +127,8 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
       templateKind: '',
       templateKey: '',
       scoreCalculationMode: 'RootQuestions',
+      topWorstQuestionsCount: DEFAULT_TOP_WORST_QUESTIONS_COUNT,
+      language: this.defaultReportLanguage(),
     });
     this.templateKindFilter.set('');
     this.reportStore.clearError();
@@ -145,6 +159,15 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
 
   private selectedTemplate(templateKey: string): BranchTemplatesPdfReportTemplateOption | undefined {
     return this.templateOptions().find((template) => this.templateValue(template) === templateKey);
+  }
+
+  private toOptionalPositiveInteger(value: string): number | undefined {
+    const normalizedValue = value.trim();
+    if (!normalizedValue) {
+      return undefined;
+    }
+
+    return Number(normalizedValue);
   }
 
   private loadBranchUserNormalTemplates(): void {
@@ -188,11 +211,15 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
     view.URL.revokeObjectURL(fileUrl);
   }
 
-  private reportFileName(language: Language): string {
+  private reportFileName(language: BranchTemplatesPdfReportLanguage): string {
     const timestamp = this.fileTimestamp(new Date());
-    return language === 'ar'
-      ? `تقرير-استبيانات-العملاء-${timestamp}.pdf`
+    return language === 'Arabic'
+      ? `customer-survey-report-ar-${timestamp}.pdf`
       : `customer-survey-report-${timestamp}.pdf`;
+  }
+
+  private defaultReportLanguage(): BranchTemplatesPdfReportLanguage {
+    return this.i18n.language() === 'ar' ? 'Arabic' : 'English';
   }
 
   private defaultFromDate(): string {

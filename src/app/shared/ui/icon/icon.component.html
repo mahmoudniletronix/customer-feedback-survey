@@ -10,6 +10,8 @@
   [attr.height]="size()"
   [attr.stroke-width]="strokeWidth()"
   [attr.aria-hidden]="decorative()"
+  [style.transform]="shouldFlip() ? 'scaleX(-1)' : null"
+  [style.transform-origin]="shouldFlip() ? 'center' : null"
 >
   @for (node of nodes(); track node.id) {
     @switch (node.tag) {

@@ -15,6 +15,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -130,6 +131,7 @@ export class QuestionsPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly scoreValues: readonly AnswerScaleValue[] = [1, 2, 3, 4, 5];
 
@@ -143,6 +145,7 @@ export class QuestionsPageComponent implements OnInit {
   readonly searchIcon = Search;
   readonly filterIcon = SlidersHorizontal;
   readonly advancedFiltersOpen = signal(true);
+  readonly scopedGroupId = signal<string | null>(null);
   readonly questionTypeOptions = QUESTION_TYPE_OPTIONS;
 
   readonly createModalOpen = signal(false);
@@ -165,6 +168,36 @@ export class QuestionsPageComponent implements OnInit {
   readonly editIsSingleChoice = computed(
     () => this.editAnswerType() === QUESTION_ANSWER_TYPE.SingleChoice,
   );
+  readonly isGroupScoped = computed(() => this.scopedGroupId() !== null);
+  readonly canSubmitQuestionForm = computed(
+    () => this.isGroupScoped() || this.questionsStore.groupsSelection().length > 0,
+  );
+  readonly selectedGroupLabel = computed(() => {
+    const scopedGroupId = this.scopedGroupId();
+    if (!scopedGroupId) {
+      return '';
+    }
+
+    const group = this.questionsStore.groupsSelection().find((item) => item.id === scopedGroupId);
+    if (group) {
+      return this.localizedText(group.nameEn, group.nameAr ?? '', this.i18n.language() === 'ar');
+    }
+
+    const question = this.questionsStore.questions().find((item) => item.groupId === scopedGroupId);
+    if (question) {
+      if (!question.groupNameEn && !question.groupNameAr) {
+        return scopedGroupId;
+      }
+
+      return this.localizedText(
+        question.groupNameEn,
+        question.groupNameAr ?? '',
+        this.i18n.language() === 'ar',
+      );
+    }
+
+    return scopedGroupId;
+  });
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -185,6 +218,14 @@ export class QuestionsPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const groupId = this.route.snapshot.paramMap.get('groupId');
+    if (groupId) {
+      this.scopedGroupId.set(groupId);
+      this.questionsStore.loadForGroup(groupId);
+      this.questionsStore.loadGroupsSelection();
+      return;
+    }
+
     this.questionsStore.load();
   }
 
@@ -198,7 +239,9 @@ export class QuestionsPageComponent implements OnInit {
     }
 
     this.questionsStore.clearMessages();
-    this.questionsStore.loadGroupsSelection();
+    if (!this.isGroupScoped()) {
+      this.questionsStore.loadGroupsSelection();
+    }
     this.resetCreateQuestionForm();
     this.createModalOpen.set(true);
   }
@@ -210,6 +253,7 @@ export class QuestionsPageComponent implements OnInit {
 
   createQuestion(): void {
     this.questionForm.markAllAsTouched();
+    this.applyScopedGroupToForm(this.questionForm);
     this.createOptionsError.set(this.validateOptions(this.createAnswerType(), this.createOptions));
 
     if (
@@ -233,7 +277,9 @@ export class QuestionsPageComponent implements OnInit {
     }
 
     this.questionsStore.clearMessages();
-    this.questionsStore.loadGroupsSelection();
+    if (!this.isGroupScoped()) {
+      this.questionsStore.loadGroupsSelection();
+    }
     this.selectedQuestion.set(question);
     this.setQuestionOptions(this.editOptions, question.options);
     this.editQuestionForm.patchValue({
@@ -257,6 +303,7 @@ export class QuestionsPageComponent implements OnInit {
   updateSelectedQuestion(): void {
     const question = this.selectedQuestion();
     this.editQuestionForm.markAllAsTouched();
+    this.applyScopedGroupToForm(this.editQuestionForm);
     this.editOptionsError.set(this.validateOptions(this.editAnswerType(), this.editOptions));
 
     if (
@@ -328,11 +375,24 @@ export class QuestionsPageComponent implements OnInit {
 
   searchQuestions(): void {
     const formValue = this.searchForm.getRawValue();
+    const searchQuery = {
+      searchText: formValue.searchText,
+      isActive: this.toIsActiveFilter(formValue.isActive),
+      pageSize: this.toPageSize(formValue.pageSize),
+      orderSort: formValue.orderSort,
+    };
+
+    const scopedGroupId = this.scopedGroupId();
+    if (scopedGroupId) {
+      this.questionsStore.loadForGroup(scopedGroupId, searchQuery);
+      return;
+    }
+
     this.questionsStore.search(
-      formValue.searchText,
-      this.toIsActiveFilter(formValue.isActive),
-      this.toPageSize(formValue.pageSize),
-      formValue.orderSort,
+      searchQuery.searchText,
+      searchQuery.isActive,
+      searchQuery.pageSize,
+      searchQuery.orderSort,
     );
   }
 
@@ -343,6 +403,12 @@ export class QuestionsPageComponent implements OnInit {
       pageSize: '10',
       orderSort: '',
     });
+    const scopedGroupId = this.scopedGroupId();
+    if (scopedGroupId) {
+      this.questionsStore.loadForGroup(scopedGroupId);
+      return;
+    }
+
     this.questionsStore.search('', null, 10, '');
   }
 
@@ -449,6 +515,29 @@ export class QuestionsPageComponent implements OnInit {
     }
 
     return question.textEn || question.textAr || '-';
+  }
+
+  questionGroupPrimaryLabel(question: QuestionListItem): string {
+    const fallbackGroupLabel = this.selectedGroupLabel();
+    const isArabic = this.i18n.language() === 'ar';
+
+    if (question.groupNameEn || question.groupNameAr) {
+      return this.localizedText(question.groupNameEn, question.groupNameAr ?? '', isArabic);
+    }
+
+    return fallbackGroupLabel || '-';
+  }
+
+  questionGroupSecondaryLabel(question: QuestionListItem): string {
+    if (this.isGroupScoped()) {
+      return '';
+    }
+
+    return this.secondaryLocalizedText(
+      question.groupNameEn,
+      question.groupNameAr ?? '',
+      this.i18n.language() === 'ar',
+    );
   }
 
   secondaryQuestionText(question: QuestionListItem): string {
@@ -569,7 +658,17 @@ export class QuestionsPageComponent implements OnInit {
       textAr: '',
       type: String(QUESTION_ANSWER_TYPE.SingleChoice),
     });
+    this.applyScopedGroupToForm(form);
     this.setQuestionOptions(options, []);
+  }
+
+  private applyScopedGroupToForm(form: QuestionFormGroup): void {
+    const scopedGroupId = this.scopedGroupId();
+    if (!scopedGroupId) {
+      return;
+    }
+
+    form.controls.groupId.setValue(scopedGroupId);
   }
 
   private setQuestionOptions(
@@ -713,7 +812,7 @@ export class QuestionsPageComponent implements OnInit {
     const answerType = toQuestionAnswerType(value.type) ?? QUESTION_ANSWER_TYPE.SingleChoice;
 
     return {
-      groupId: value.groupId,
+      groupId: this.scopedGroupId() ?? value.groupId,
       textEn: value.textEn.trim(),
       textAr: textAr.length > 0 ? textAr : null,
       type: answerType,

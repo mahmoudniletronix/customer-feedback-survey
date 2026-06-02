@@ -47,7 +47,7 @@
               class="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-600 transition hover:bg-slate-50"
               (click)="closeResponseWizard()"
             >
-              <app-icon [icon]="arrowLeftIcon" [size]="14" />
+              <app-icon [icon]="arrowLeftIcon" [size]="14" [flipRtl]="true" />
               {{ 'operatorTemplates.backToTemplates' | t }}
             </button>
             <p class="text-[10px] font-bold uppercase text-[#0d94b3]">
@@ -365,7 +365,7 @@
               <div class="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
                 <app-button type="button" (pressed)="goToNextStep()">
                   {{ 'operatorTemplates.nextQuestion' | t }}
-                  <app-icon [icon]="arrowRightIcon" [size]="15" />
+                  <app-icon [icon]="arrowRightIcon" [size]="15" [flipRtl]="true" />
                 </app-button>
               </div>
             </div>
@@ -441,7 +441,7 @@
 
               <div class="mt-4 flex flex-wrap justify-between gap-2 border-t border-slate-100 pt-4">
                 <app-button type="button" variant="secondary" (pressed)="goToPreviousStep()">
-                  <app-icon [icon]="arrowLeftIcon" [size]="15" />
+                  <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
                   {{ 'operatorTemplates.previousQuestion' | t }}
                 </app-button>
                 <app-button
@@ -744,7 +744,7 @@
                   [disabled]="currentQuestionIndex() === 0 && template.customInputs.length === 0"
                   (pressed)="goToPreviousStep()"
                 >
-                  <app-icon [icon]="arrowLeftIcon" [size]="15" />
+                  <app-icon [icon]="arrowLeftIcon" [size]="15" [flipRtl]="true" />
                   {{ 'operatorTemplates.previousQuestion' | t }}
                 </app-button>
                 <app-button type="button" (pressed)="goToNextStep()">
@@ -753,7 +753,7 @@
                   } @else {
                     {{ 'operatorTemplates.nextQuestion' | t }}
                   }
-                  <app-icon [icon]="arrowRightIcon" [size]="15" />
+                  <app-icon [icon]="arrowRightIcon" [size]="15" [flipRtl]="true" />
                 </app-button>
               </div>
             </div>
@@ -1067,7 +1067,7 @@
                     [disabled]="!template.isActive || template.questions.length === 0"
                     (pressed)="startTemplateResponse(template)"
                   >
-                    <app-icon [icon]="arrowRightIcon" [size]="15" />
+                    <app-icon [icon]="arrowRightIcon" [size]="15" [flipRtl]="true" />
                     @if (template.hasAnswered) {
                       {{ 'operatorTemplates.submitAnotherResponse' | t }}
                     } @else {

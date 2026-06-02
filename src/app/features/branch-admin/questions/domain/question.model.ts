@@ -64,6 +64,7 @@ export interface QuestionTypeOption {
 }
 
 export interface QuestionApiResponse extends EditableScopeApiFields {
+  id?: string | number;
   questionId?: string | number;
   branchId?: string | number | null;
   groupId?: string | number;
@@ -72,7 +73,7 @@ export interface QuestionApiResponse extends EditableScopeApiFields {
   groupNameAr?: string | null;
   textEn?: string;
   textAr?: string | null;
-  type?: number;
+  type?: number | string | null;
   typeName?: string | null;
   isActive?: boolean;
   createdBy?: CreatedByUserApiResponse | null;

@@ -354,7 +354,7 @@
           [disabled]="!operatorsStore.hasPreviousPage() || operatorsStore.loading()"
           (pressed)="goToPreviousOperatorsPage()"
         >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
           {{ 'branches.previousPage' | t }}
         </app-button>
         <app-button
@@ -365,7 +365,7 @@
           (pressed)="goToNextOperatorsPage()"
         >
           {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" />
+          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
         </app-button>
       </div>
     </div>

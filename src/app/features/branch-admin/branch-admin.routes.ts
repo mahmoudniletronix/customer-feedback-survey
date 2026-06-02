@@ -102,6 +102,15 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
           ),
       },
       {
+        path: 'question-groups/:groupId/questions',
+        canActivate: [questionGroupsAccessGuard, questionsAccessGuard],
+        providers: [QuestionGroupsService, QuestionsService, QuestionsStore],
+        loadComponent: () =>
+          import('./questions/presentation/pages/questions-page.component').then(
+            (m) => m.QuestionsPageComponent,
+          ),
+      },
+      {
         path: 'question-groups',
         canActivate: [questionGroupsAccessGuard],
         providers: [QuestionGroupsService, QuestionGroupsStore],

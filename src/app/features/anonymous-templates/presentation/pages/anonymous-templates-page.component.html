@@ -373,7 +373,7 @@
           [disabled]="!anonymousTemplatesStore.hasPreviousPage() || anonymousTemplatesStore.loading()"
           (pressed)="goToPreviousTemplatesPage()"
         >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
           {{ 'branches.previousPage' | t }}
         </app-button>
         <app-button
@@ -384,7 +384,7 @@
           (pressed)="goToNextTemplatesPage()"
         >
           {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" />
+          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
         </app-button>
       </div>
     </div>

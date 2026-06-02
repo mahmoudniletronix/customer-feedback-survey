@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
     <div class="flex flex-col gap-2.5 sm:flex-row sm:items-start">
       <app-button type="button" variant="secondary" (pressed)="goBack()">
-        <app-icon [icon]="arrowLeftIcon" [size]="17" />
+        <app-icon [icon]="arrowLeftIcon" [size]="17" [flipRtl]="true" />
         {{ 'common.back' | t }}
       </app-button>
       <div class="min-w-0">

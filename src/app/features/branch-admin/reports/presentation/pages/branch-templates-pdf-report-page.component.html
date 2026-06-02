@@ -37,7 +37,7 @@
     </div>
 
     <form
-      class="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(8rem,10rem)_minmax(8rem,10rem)_minmax(10rem,12rem)_minmax(14rem,1fr)_minmax(12rem,16rem)_auto]"
+      class="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-[minmax(8rem,10rem)_minmax(8rem,10rem)_minmax(10rem,12rem)_minmax(14rem,1fr)_minmax(9rem,12rem)_minmax(12rem,16rem)_minmax(9rem,11rem)_auto]"
       [formGroup]="filtersForm"
       (ngSubmit)="downloadReport()"
     >
@@ -95,6 +95,21 @@
 
       <label class="flex min-w-0 flex-col gap-1">
         <span class="text-[10px] font-bold text-slate-500">
+          {{ 'branchTemplatesPdf.topWorstQuestionsCount' | t }}
+        </span>
+        <input
+          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          type="number"
+          [min]="minTopWorstQuestionsCount"
+          [max]="maxTopWorstQuestionsCount"
+          step="1"
+          inputmode="numeric"
+          formControlName="topWorstQuestionsCount"
+        />
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1">
+        <span class="text-[10px] font-bold text-slate-500">
           {{ 'branchTemplatesPdf.scoreCalculationMode' | t }}
         </span>
         <select
@@ -110,7 +125,20 @@
         </select>
       </label>
 
-      <div class="flex items-end gap-2 md:col-span-2 xl:col-span-1">
+      <label class="flex min-w-0 flex-col gap-1">
+        <span class="text-[10px] font-bold text-slate-500">
+          {{ 'branchTemplatesPdf.reportLanguage' | t }}
+        </span>
+        <select
+          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="language"
+        >
+          <option value="Arabic">{{ 'branchTemplatesPdf.reportLanguageArabic' | t }}</option>
+          <option value="English">{{ 'branchTemplatesPdf.reportLanguageEnglish' | t }}</option>
+        </select>
+      </label>
+
+      <div class="flex items-end gap-2 md:col-span-2 xl:col-span-2 2xl:col-span-1">
         <app-button type="submit" size="sm" [loading]="reportStore.downloading()">
           <app-icon [icon]="downloadIcon" [size]="14" />
           {{ 'branchTemplatesPdf.downloadPdf' | t }}

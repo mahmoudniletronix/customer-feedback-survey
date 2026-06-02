@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import {
   BranchTemplatesPdfReportDownloadRequest,
+  BranchTemplatesPdfReportLanguage,
   BranchTemplatesPdfReportQuery,
 } from '../domain/branch-templates-pdf-report.model';
 
@@ -16,7 +17,7 @@ export class BranchTemplatesPdfReportService {
     return this.http.get(this.reportUrl, {
       params: this.toParams(request.query),
       headers: new HttpHeaders({
-        'Accept-Language': request.language,
+        'Accept-Language': this.toAcceptLanguage(request.query.language),
       }),
       responseType: 'blob',
     });
@@ -39,6 +40,18 @@ export class BranchTemplatesPdfReportService {
       params = params.set('scoreCalculationMode', query.scoreCalculationMode);
     }
 
+    if (query.topWorstQuestionsCount !== undefined) {
+      params = params.set('topWorstQuestionsCount', String(query.topWorstQuestionsCount));
+    }
+
+    if (query.language) {
+      params = params.set('language', query.language);
+    }
+
     return params;
+  }
+
+  private toAcceptLanguage(language: BranchTemplatesPdfReportLanguage | undefined): string {
+    return language === 'Arabic' ? 'ar' : 'en';
   }
 }

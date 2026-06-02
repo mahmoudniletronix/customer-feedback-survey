@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -57,6 +58,7 @@ export class QuestionGroupsPageComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
 
   readonly chevronLeftIcon = ChevronLeft;
   readonly chevronRightIcon = ChevronRight;
@@ -235,6 +237,14 @@ export class QuestionGroupsPageComponent implements OnInit {
     }
 
     this.questionGroupsStore.restoreGroup(group.groupId, () => undefined);
+  }
+
+  openGroupQuestions(group: QuestionGroupListItem): void {
+    if (group.groupId.length === 0) {
+      return;
+    }
+
+    void this.router.navigate(['/branch-admin/question-groups', group.groupId, 'questions']);
   }
 
   canEditGroup(group: QuestionGroupListItem): boolean {

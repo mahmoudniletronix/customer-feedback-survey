@@ -146,7 +146,7 @@
           [disabled]="!branchesStore.hasPreviousPage() || branchesStore.loading()"
           (pressed)="goToPreviousBranchesPage()"
         >
-          <app-icon [icon]="chevronLeftIcon" [size]="15" />
+          <app-icon [icon]="chevronLeftIcon" [size]="15" [flipRtl]="true" />
           {{ 'branches.previousPage' | t }}
         </app-button>
         <app-button
@@ -157,7 +157,7 @@
           (pressed)="goToNextBranchesPage()"
         >
           {{ 'branches.nextPage' | t }}
-          <app-icon [icon]="chevronRightIcon" [size]="15" />
+          <app-icon [icon]="chevronRightIcon" [size]="15" [flipRtl]="true" />
         </app-button>
       </div>
     </div>
