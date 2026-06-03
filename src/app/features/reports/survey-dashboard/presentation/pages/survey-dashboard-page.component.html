@@ -23,16 +23,38 @@
         <h1 class="text-sm font-black text-slate-950">{{ 'surveyDashboard.title' | t }}</h1>
       </div>
     </div>
-    <button
-      class="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
-      type="button"
-      (click)="toggleAdvancedFilters()"
-    >
-      <app-icon [icon]="filterIcon" [size]="12" />
-      {{
-        (advancedFiltersOpen() ? 'surveyDashboard.hideFilters' : 'surveyDashboard.showFilters') | t
-      }}
-    </button>
+    <div class="flex flex-wrap items-center justify-end gap-2">
+      @if (canOpenAuthorizedTemplatesDashboard()) {
+        <button
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[10px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          type="button"
+          (click)="openAuthorizedTemplatesDashboard()"
+        >
+          <app-icon [icon]="templateIcon" [size]="12" />
+          {{ 'surveyDashboard.authorizedTemplatesDashboard' | t }}
+        </button>
+      }
+      @if (canOpenAnonymousTemplatesDashboard()) {
+        <button
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-violet-100 bg-violet-50 px-3 text-[10px] font-extrabold text-violet-700 transition hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-400/20"
+          type="button"
+          (click)="openAnonymousTemplatesDashboard()"
+        >
+          <app-icon [icon]="layersIcon" [size]="12" />
+          {{ 'surveyDashboard.anonymousTemplatesDashboard' | t }}
+        </button>
+      }
+      <button
+        class="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50"
+        type="button"
+        (click)="toggleAdvancedFilters()"
+      >
+        <app-icon [icon]="filterIcon" [size]="12" />
+        {{
+          (advancedFiltersOpen() ? 'surveyDashboard.hideFilters' : 'surveyDashboard.showFilters') | t
+        }}
+      </button>
+    </div>
   </div>
 
   <div

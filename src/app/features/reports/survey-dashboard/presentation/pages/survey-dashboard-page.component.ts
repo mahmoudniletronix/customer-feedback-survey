@@ -122,6 +122,14 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly selectedBranchId = signal('');
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
   readonly branchSnapshotVisible = computed(() => this.authStore.role() === 'BRANCH_ADMIN');
+  readonly canOpenAuthorizedTemplatesDashboard = computed(() =>
+    this.authStore.canAccessBranchDashboard(),
+  );
+  readonly canOpenAnonymousTemplatesDashboard = computed(
+    () =>
+      (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.role() === 'BRANCH_USER') &&
+      this.authStore.hasPermission('AnonymousTemplates.ViewResponses'),
+  );
 
   readonly filtersForm = this.formBuilder.nonNullable.group({
     source: ['All' as SurveyDashboardSource],
@@ -242,6 +250,22 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     this.selectedBranchId.set('');
     this.validationError.set(null);
     this.store.loadDashboard(this.queryFromForm());
+  }
+
+  openAuthorizedTemplatesDashboard(): void {
+    if (!this.canOpenAuthorizedTemplatesDashboard()) {
+      return;
+    }
+
+    void this.router.navigate(['/branch-admin/templates/dashboard']);
+  }
+
+  openAnonymousTemplatesDashboard(): void {
+    if (!this.canOpenAnonymousTemplatesDashboard()) {
+      return;
+    }
+
+    void this.router.navigate(['/anonymous-templates/dashboard']);
   }
 
   openNavigation(navigation: SurveyDashboardNavigation | null): void {

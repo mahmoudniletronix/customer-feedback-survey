@@ -575,7 +575,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
   private canUseTemplateAction(template: AnonymousTemplateListItem): boolean {
     if (this.authStore.role() === 'SUPER_ADMIN') {
-      return template.isGlobal;
+      return true;
     }
 
     if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {

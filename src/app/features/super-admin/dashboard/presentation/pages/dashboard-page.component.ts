@@ -47,6 +47,7 @@ export class DashboardPageComponent implements OnInit {
     if (role === 'SUPER_ADMIN') {
       const superAdminActions: WorkspaceAction[] = [
         { labelKey: 'dashboard.actionManageBranches', path: '/branches', icon: this.buildingIcon },
+        { labelKey: 'superAdminTemplates.title', path: '/templates', icon: this.fileTextIcon },
         { labelKey: 'operators.title', path: '/operators', icon: this.userCogIcon },
       ];
       if (this.authStore.canAccessSystemReports()) {

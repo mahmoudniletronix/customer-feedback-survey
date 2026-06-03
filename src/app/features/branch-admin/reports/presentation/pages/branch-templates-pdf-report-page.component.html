@@ -37,7 +37,7 @@
     </div>
 
     <form
-      class="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-[minmax(8rem,10rem)_minmax(8rem,10rem)_minmax(10rem,12rem)_minmax(14rem,1fr)_minmax(9rem,12rem)_minmax(12rem,16rem)_minmax(9rem,11rem)_auto]"
+      class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
       [formGroup]="filtersForm"
       (ngSubmit)="downloadReport()"
       novalidate
@@ -47,7 +47,7 @@
           {{ 'branchTemplatesPdf.fromDate' | t }}
         </span>
         <input
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           type="date"
           formControlName="fromDate"
         />
@@ -58,7 +58,7 @@
           {{ 'branchTemplatesPdf.toDate' | t }}
         </span>
         <input
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           type="date"
           formControlName="toDate"
         />
@@ -69,7 +69,7 @@
           {{ 'branchTemplatesPdf.templateKind' | t }}
         </span>
         <select
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="templateKind"
           (change)="resetTemplateSelection()"
         >
@@ -84,7 +84,7 @@
           {{ 'branchTemplatesPdf.template' | t }}
         </span>
         <select
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="templateKey"
         >
           <option value="">{{ 'branchTemplatesPdf.allTemplates' | t }}</option>
@@ -99,7 +99,7 @@
           {{ 'branchTemplatesPdf.topWorstQuestionsCount' | t }}
         </span>
         <input
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           type="number"
           [min]="minTopWorstQuestionsCount"
           [max]="maxTopWorstQuestionsCount"
@@ -114,7 +114,7 @@
           {{ 'branchTemplatesPdf.scoreCalculationMode' | t }}
         </span>
         <select
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="scoreCalculationMode"
         >
           <option value="RootQuestions">
@@ -131,7 +131,7 @@
           {{ 'branchTemplatesPdf.reportLanguage' | t }}
         </span>
         <select
-          class="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
           formControlName="language"
         >
           <option value="Arabic">{{ 'branchTemplatesPdf.reportLanguageArabic' | t }}</option>
@@ -139,10 +139,10 @@
         </select>
       </label>
 
-      <div class="flex items-end gap-2 md:col-span-2 xl:col-span-2 2xl:col-span-1">
+      <div class="flex min-w-0 flex-wrap items-end gap-2 sm:col-span-2 xl:col-span-3 2xl:col-span-1 2xl:self-end">
         <button
           type="submit"
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#11A7C9] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          class="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#11A7C9] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           [disabled]="reportStore.downloading()"
         >
           @if (reportStore.downloading()) {

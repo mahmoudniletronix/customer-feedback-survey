@@ -1,0 +1,436 @@
+<div class="w-full space-y-3 text-[11px]">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+      <p class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase text-[#11A7C9]">
+        <app-icon [icon]="fileTextIcon" [size]="13" />
+        {{ 'superAdminTemplates.eyebrow' | t }}
+      </p>
+      <h2 class="mt-1 text-sm font-black text-slate-950">{{ 'superAdminTemplates.title' | t }}</h2>
+      <p class="mt-0.5 text-[11px] font-semibold text-slate-500">
+        {{ 'superAdminTemplates.description' | t }}
+      </p>
+    </div>
+    <div class="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-[11px] font-extrabold text-[#0d94b3]">
+      {{ templatesStore.totalItems() }} {{ 'superAdminTemplates.totalItems' | t }}
+    </div>
+  </div>
+
+  @if (copiedMessageKey()) {
+    <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+      {{ copiedMessageKey() ?? '' | t }}
+    </div>
+  }
+
+  @if (templatesStore.error()) {
+    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+      {{ templatesStore.error() ?? '' | t }}
+    </div>
+  }
+
+  <section class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+    <form
+      class="grid gap-2 rounded-lg bg-slate-50/80 p-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[minmax(12rem,1fr)_minmax(11rem,0.8fr)_8rem_7rem_6rem_7rem_auto]"
+      [formGroup]="searchForm"
+      (ngSubmit)="searchTemplates()"
+    >
+      <label class="flex min-w-0 flex-col gap-0.5 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.search' | t }}</span>
+        <input
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="searchText"
+          [placeholder]="'superAdminTemplates.searchPlaceholder' | t"
+        />
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-0.5">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.branchFilter' | t }}</span>
+        <select
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="branchId"
+        >
+          <option value="">
+            {{ branchOptionsLoading() ? ('superAdminTemplates.loadingBranches' | t) : ('superAdminTemplates.allBranches' | t) }}
+          </option>
+          @for (branch of branchOptions(); track branch.id) {
+            <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-0.5">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.typeFilter' | t }}</span>
+        <select
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="templateKind"
+        >
+          <option value="">{{ 'superAdminTemplates.allTypes' | t }}</option>
+          <option value="Authorized">{{ 'superAdminTemplates.authorized' | t }}</option>
+          <option value="Anonymous">{{ 'superAdminTemplates.anonymous' | t }}</option>
+        </select>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-0.5">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.statusFilter' | t }}</span>
+        <select
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="isActive"
+        >
+          <option value="">{{ 'superAdminTemplates.allStatuses' | t }}</option>
+          <option value="true">{{ 'common.active' | t }}</option>
+          <option value="false">{{ 'branches.inactive' | t }}</option>
+        </select>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-0.5">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.pageSize' | t }}</span>
+        <select
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="pageSize"
+        >
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-0.5">
+        <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.orderSort' | t }}</span>
+        <select
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          formControlName="orderSort"
+        >
+          <option value="">{{ 'superAdminTemplates.defaultSort' | t }}</option>
+          <option value="Newest">{{ 'superAdminTemplates.newest' | t }}</option>
+          <option value="Oldest">{{ 'superAdminTemplates.oldest' | t }}</option>
+        </select>
+      </label>
+
+      <div class="flex items-end gap-1.5">
+        <app-button size="sm" type="submit" [loading]="templatesStore.loading()">
+          <app-icon [icon]="searchIcon" [size]="14" />
+          {{ 'common.search' | t }}
+        </app-button>
+        <app-button size="sm" type="button" variant="secondary" (pressed)="clearSearch()">
+          <app-icon [icon]="filterIcon" [size]="13" />
+          {{ 'common.clear' | t }}
+        </app-button>
+      </div>
+    </form>
+  </section>
+
+  <section class="overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60">
+    <div class="overflow-x-auto">
+      <table class="min-w-[78rem] w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50 text-[10px] font-bold uppercase text-slate-500">
+          <tr>
+            <th class="px-2.5 py-2 text-start">{{ 'common.name' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.typeColumn' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.branchColumn' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'common.status' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.countsColumn' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.activeFrom' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.expireTo' | t }}</th>
+            <th class="px-2.5 py-2 text-start">{{ 'superAdminTemplates.createdBy' | t }}</th>
+            <th class="px-2.5 py-2 text-end">{{ 'branches.actions' | t }}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white">
+          @if (templatesStore.loading()) {
+            <tr>
+              <td class="px-2.5 py-8 text-center text-[11px] font-semibold text-slate-500" colspan="9">
+                <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                {{ 'superAdminTemplates.loading' | t }}
+              </td>
+            </tr>
+          } @else {
+            @for (template of templatesStore.templates(); track template.templateId) {
+              <tr class="align-top transition hover:bg-slate-50" [class.bg-slate-50]="!template.isActive">
+                <td class="max-w-[18rem] px-2.5 py-2">
+                  <p class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
+                    {{ templateDisplayName(template) }}
+                  </p>
+                  @if (template.description) {
+                    <p class="mt-0.5 line-clamp-2 break-words text-[10px] font-semibold text-slate-500 [overflow-wrap:anywhere]">
+                      {{ template.description }}
+                    </p>
+                  }
+                </td>
+                <td class="px-2.5 py-2">
+                  <span
+                    class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                    [class.bg-cyan-50]="template.templateKind === 'Authorized'"
+                    [class.text-[#0d94b3]]="template.templateKind === 'Authorized'"
+                    [class.bg-violet-50]="template.templateKind === 'Anonymous'"
+                    [class.text-violet-700]="template.templateKind === 'Anonymous'"
+                  >
+                    {{ typeLabelKey(template) | t }}
+                  </span>
+                </td>
+                <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
+                  <p class="max-w-[12rem] break-words [overflow-wrap:anywhere]">{{ branchDisplayName(template) }}</p>
+                </td>
+                <td class="px-2.5 py-2">
+                  <div class="flex flex-col gap-1">
+                    <span class="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-extrabold text-slate-700">
+                      {{ template.statusName || template.status || '-' }}
+                    </span>
+                    <span
+                      class="w-fit rounded-full px-2 py-0.5 text-[10px] font-extrabold"
+                      [class.bg-emerald-50]="template.isActive"
+                      [class.text-emerald-700]="template.isActive"
+                      [class.bg-rose-50]="!template.isActive"
+                      [class.text-rose-700]="!template.isActive"
+                    >
+                      {{ template.isActive ? ('common.active' | t) : ('branches.inactive' | t) }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-2.5 py-2">
+                  <div class="flex flex-col gap-1">
+                    <span class="w-fit rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-extrabold text-[#0d94b3]">
+                      {{ template.questionsCount }} {{ 'superAdminTemplates.questionsShort' | t }}
+                    </span>
+                    <span class="w-fit rounded-md bg-slate-50 px-2 py-1 text-[10px] font-extrabold text-slate-600">
+                      {{ template.customInputsCount }} {{ 'superAdminTemplates.inputsShort' | t }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
+                  {{ template.activeFrom ? (template.activeFrom | date: 'mediumDate') : '-' }}
+                </td>
+                <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
+                  {{ template.expireTo ? (template.expireTo | date: 'mediumDate') : ('superAdminTemplates.openEnded' | t) }}
+                </td>
+                <td class="px-2.5 py-2 text-[11px] font-semibold text-slate-700">
+                  <p>{{ createdByDisplayName(template) }}</p>
+                  @if (template.createdOnUtc) {
+                    <p class="mt-0.5 text-[10px] text-slate-500">{{ template.createdOnUtc | date: 'mediumDate' }}</p>
+                  }
+                </td>
+                <td class="px-2.5 py-2">
+                  <div class="flex justify-end gap-1.5">
+                    <button
+                      type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cyan-100 bg-cyan-50 text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                      [attr.aria-label]="'superAdminTemplates.copyToBranch' | t"
+                      [title]="'superAdminTemplates.copyToBranch' | t"
+                      (click)="openCopyModal(template)"
+                    >
+                      <app-icon [icon]="filePlusIcon" [size]="14" />
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-cyan-50 hover:text-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                      [attr.aria-label]="'superAdminTemplates.copyTemplateId' | t"
+                      [title]="'superAdminTemplates.copyTemplateId' | t"
+                      (click)="copyTemplateId(template)"
+                    >
+                      <app-icon [icon]="copyIcon" [size]="14" />
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-cyan-50 hover:text-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                      [disabled]="!template.publicUrl"
+                      [attr.aria-label]="template.publicUrl ? ('superAdminTemplates.copyPublicUrl' | t) : ('superAdminTemplates.noPublicUrl' | t)"
+                      [title]="template.publicUrl ? ('superAdminTemplates.copyPublicUrl' | t) : ('superAdminTemplates.noPublicUrl' | t)"
+                      (click)="copyPublicUrl(template)"
+                    >
+                      <app-icon [icon]="externalLinkIcon" [size]="14" />
+                    </button>
+                  </div>
+                  @if (copiedTemplateId() === template.templateId && copiedMessageKey()) {
+                    <p class="mt-1 text-end text-[10px] font-bold text-emerald-700">{{ copiedMessageKey() ?? '' | t }}</p>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="px-2.5 py-8 text-center text-[11px] font-semibold text-slate-500" colspan="9">
+                  {{ 'common.noRecords' | t }}
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-[11px] font-semibold text-slate-500">
+        {{ 'superAdminTemplates.page' | t }}
+        {{ templatesStore.currentPage() }}
+        /
+        {{ templatesStore.totalPages() }}
+      </p>
+      <div class="flex gap-2">
+        <app-button size="sm" type="button" variant="secondary" [disabled]="!templatesStore.hasPreviousPage()" (pressed)="previousPage()">
+          <app-icon [icon]="chevronLeftIcon" [size]="14" [flipRtl]="true" />
+          {{ 'superAdminTemplates.previous' | t }}
+        </app-button>
+        <app-button size="sm" type="button" variant="secondary" [disabled]="!templatesStore.hasNextPage()" (pressed)="nextPage()">
+          {{ 'superAdminTemplates.next' | t }}
+          <app-icon [icon]="chevronRightIcon" [size]="14" [flipRtl]="true" />
+        </app-button>
+      </div>
+    </div>
+  </section>
+
+  @if (copyModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
+      <section class="w-full max-w-2xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-950/20">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 p-4">
+          <div class="min-w-0">
+            <h3 class="text-sm font-black text-slate-950">{{ 'superAdminTemplates.copyToBranch' | t }}</h3>
+            <p class="mt-1 text-[11px] font-semibold text-slate-500">
+              {{ 'superAdminTemplates.copyToBranchDescription' | t }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50"
+            [attr.aria-label]="'superAdminTemplates.closeCopyDialog' | t"
+            (click)="closeCopyModal()"
+          >
+            <app-icon [icon]="closeIcon" [size]="15" />
+          </button>
+        </div>
+
+        <form class="space-y-3 p-4" [formGroup]="copyForm" (ngSubmit)="copySelectedTemplate()">
+          @if (selectedTemplateForCopy(); as template) {
+            <div class="grid gap-2 sm:grid-cols-2">
+              <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <p class="text-[10px] font-extrabold uppercase text-slate-500">
+                  {{ 'superAdminTemplates.sourceTemplate' | t }}
+                </p>
+                <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
+                  {{ templateDisplayName(template) }}
+                </p>
+                <p class="mt-1 text-[11px] font-semibold text-slate-500">
+                  {{ typeLabelKey(template) | t }}
+                </p>
+              </div>
+              <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <p class="text-[10px] font-extrabold uppercase text-slate-500">
+                  {{ 'superAdminTemplates.sourceBranch' | t }}
+                </p>
+                <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
+                  {{ branchDisplayName(template) }}
+                </p>
+              </div>
+            </div>
+          }
+
+          <label class="flex min-w-0 flex-col gap-1">
+            <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.targetBranch' | t }}</span>
+            <select
+              class="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              formControlName="branchId"
+              [disabled]="branchOptionsLoading() || templatesStore.copying()"
+            >
+              <option value="">
+                {{ branchOptionsLoading() ? ('superAdminTemplates.loadingBranches' | t) : ('superAdminTemplates.selectTargetBranch' | t) }}
+              </option>
+              @for (branch of branchOptions(); track branch.id) {
+                <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
+              }
+            </select>
+            @if (copyForm.controls.branchId.touched && copyForm.controls.branchId.invalid) {
+              <span class="text-[10px] font-bold text-[#D94B5A]">
+                {{ 'superAdminTemplates.targetBranchRequired' | t }}
+              </span>
+            }
+          </label>
+
+          @if (templatesStore.copyError()) {
+            <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+              {{ templatesStore.copyError() ?? '' | t }}
+            </div>
+          }
+
+          @if (templatesStore.copySuccess()) {
+            <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+              {{ templatesStore.copySuccess() ?? '' | t }}
+            </div>
+          }
+
+          @if (templatesStore.copyResult(); as result) {
+            <div class="rounded-lg border border-cyan-100 bg-cyan-50/70 p-3">
+              <div class="grid gap-2 sm:grid-cols-2">
+                <div>
+                  <p class="text-[10px] font-extrabold uppercase text-slate-500">
+                    {{ 'superAdminTemplates.newTemplateId' | t }}
+                  </p>
+                  <p class="mt-1 break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
+                    {{ result.templateId || '-' }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-[10px] font-extrabold uppercase text-slate-500">
+                    {{ 'superAdminTemplates.copiedTemplateType' | t }}
+                  </p>
+                  <p class="mt-1 text-[11px] font-black text-slate-950">
+                    {{ copyResultTypeLabelKey(result) | t }}
+                  </p>
+                </div>
+              </div>
+
+              @if (copyResultDisplayName(result) !== '-') {
+                <p class="mt-2 break-words text-[11px] font-semibold text-slate-600 [overflow-wrap:anywhere]">
+                  {{ copyResultDisplayName(result) }}
+                </p>
+              }
+
+              @if (result.templateKind === 'Anonymous') {
+                <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <div>
+                    <p class="text-[10px] font-extrabold uppercase text-slate-500">
+                      {{ 'superAdminTemplates.copiedPublicUrl' | t }}
+                    </p>
+                    @if (result.publicUrl) {
+                      <a
+                        class="mt-1 block break-words text-[11px] font-bold text-[#0d94b3] underline-offset-2 hover:underline [overflow-wrap:anywhere]"
+                        [href]="result.publicUrl"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {{ result.publicUrl }}
+                      </a>
+                    } @else {
+                      <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ 'superAdminTemplates.noPublicUrl' | t }}</p>
+                    }
+                  </div>
+                  @if (result.qrCode) {
+                    <div class="flex flex-col items-center gap-1 rounded-lg border border-cyan-100 bg-white p-2">
+                      <app-icon [icon]="qrCodeIcon" [size]="14" />
+                      <img
+                        class="h-20 w-20 rounded-md object-contain"
+                        [src]="copyResultQrCodeSrc(result)"
+                        [alt]="'superAdminTemplates.copiedQrCode' | t"
+                      />
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <div class="flex justify-end gap-2 border-t border-slate-100 pt-3">
+            <app-button size="sm" type="button" variant="secondary" (pressed)="closeCopyModal()">
+              {{ 'common.cancel' | t }}
+            </app-button>
+            <app-button
+              size="sm"
+              type="submit"
+              [loading]="templatesStore.copying()"
+              [disabled]="copyForm.invalid || branchOptionsLoading()"
+            >
+              <app-icon [icon]="filePlusIcon" [size]="14" />
+              {{ 'superAdminTemplates.copySubmit' | t }}
+            </app-button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</div>

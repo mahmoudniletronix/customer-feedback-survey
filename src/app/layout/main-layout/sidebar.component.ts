@@ -144,6 +144,14 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: ['SUPER_ADMIN'],
   },
   {
+    label: 'Templates',
+    labelKey: 'nav.templates',
+    path: '/templates',
+    icon: FileText,
+    roles: ['SUPER_ADMIN'],
+    exact: true,
+  },
+  {
     label: 'Departments',
     labelKey: 'nav.departments',
     path: '/departments',

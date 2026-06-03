@@ -306,7 +306,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     }
 
     if (this.authStore.role() === 'SUPER_ADMIN') {
-      return template.isGlobal;
+      return true;
     }
 
     if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
@@ -325,7 +325,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     }
 
     if (this.authStore.role() === 'SUPER_ADMIN') {
-      return template.isGlobal;
+      return true;
     }
 
     if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
@@ -344,7 +344,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     }
 
     if (this.authStore.role() === 'SUPER_ADMIN') {
-      return template.isGlobal;
+      return true;
     }
 
     if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {

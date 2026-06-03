@@ -64,6 +64,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'templates',
+        loadChildren: () =>
+          import('./features/super-admin/templates/templates.routes').then(
+            (m) => m.SUPER_ADMIN_TEMPLATES_ROUTES,
+          ),
+      },
+      {
         path: 'global-question-groups',
         loadChildren: () =>
           import('./features/super-admin/global-question-groups/global-question-groups.routes').then(
