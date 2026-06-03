@@ -5,7 +5,7 @@ import {
   HttpInterceptorFn,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, tap, throwError } from 'rxjs';
+import { catchError, from, mergeMap, of, tap, throwError } from 'rxjs';
 import { I18nService } from '../services/i18n.service';
 import { ToastService } from '../../shared/ui/toast/toast.service';
 
@@ -38,8 +38,12 @@ export const errorToastInterceptor: HttpInterceptorFn = (request, next) => {
     }),
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && !request.context.get(SKIP_ERROR_TOAST)) {
-        const problem = readProblemDetails(error);
-        toastService.error(problem.title, problem.detail || problem.errors.join('\n'));
+        return resolveProblemDetails(error).pipe(
+          mergeMap((problem) => {
+            toastService.error(problem.title, problem.detail || problem.errors.join('\n'));
+            return throwError(() => error);
+          }),
+        );
       }
 
       return throwError(() => error);
@@ -55,18 +59,47 @@ function isAuthRequest(url: string): boolean {
   return url.includes('/api/auth/');
 }
 
-function readProblemDetails(error: HttpErrorResponse): ApiProblemDetails {
+function resolveProblemDetails(error: HttpErrorResponse) {
   const body = error.error;
+  if (body instanceof Blob) {
+    return from(readBlobProblemDetails(error, body));
+  }
+
+  return of(readProblemDetails(error, body));
+}
+
+async function readBlobProblemDetails(error: HttpErrorResponse, blob: Blob): Promise<ApiProblemDetails> {
+  const text = (await blob.text()).trim();
+  if (!text) {
+    return readProblemDetails(error, {});
+  }
+
+  return readProblemDetails(error, parseProblemText(text));
+}
+
+function readProblemDetails(error: HttpErrorResponse, body: unknown): ApiProblemDetails {
   const problem = isRecord(body) ? body : {};
   const errors = readErrorMessages(problem['errors']);
-  const detail = readString(problem['detail']);
+  const detail =
+    readString(problem['detail']) ||
+    readString(problem['message']) ||
+    (typeof body === 'string' ? body.trim() : '');
+  const safeDetail = isHttpClientFailureMessage(detail) ? '' : detail;
   const title = readString(problem['title']) || statusTitle(error.status);
 
   return {
     title,
-    detail: errors.length > 0 ? errors.slice(0, 3).join('\n') : detail || error.message,
+    detail: errors.length > 0 ? errors.slice(0, 3).join('\n') : safeDetail || statusDescription(error.status),
     errors,
   };
+}
+
+function parseProblemText(text: string): unknown {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
+  }
 }
 
 function readErrorMessages(errors: unknown): readonly string[] {
@@ -103,6 +136,31 @@ function statusTitle(status: number): string {
   }
 
   return 'Request failed';
+}
+
+function statusDescription(status: number): string {
+  if (status === 0) {
+    return 'Unable to reach the server. Please check your connection.';
+  }
+  if (status === 401) {
+    return 'Please sign in again to continue.';
+  }
+  if (status === 403) {
+    return 'You do not have permission to complete this action.';
+  }
+  if (status === 404) {
+    return 'The requested resource was not found.';
+  }
+  if (status === 422 || status === 400) {
+    return 'Please review the submitted data and try again.';
+  }
+
+  return 'The request could not be completed. Please try again.';
+}
+
+function isHttpClientFailureMessage(value: string): boolean {
+  const normalizedValue = value.toLowerCase();
+  return normalizedValue.includes('http failure response for') || normalizedValue.includes('/api/');
 }
 
 function readString(value: unknown): string {

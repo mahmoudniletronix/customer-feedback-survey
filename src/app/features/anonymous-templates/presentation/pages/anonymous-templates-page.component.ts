@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Copy,
   Download,
+  Edit,
   Eye,
   FileText,
   Globe2,
@@ -108,6 +109,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly chevronRightIcon = ChevronRight;
   readonly copyIcon = Copy;
   readonly downloadIcon = Download;
+  readonly editIcon = Edit;
   readonly detailsIcon = Eye;
   readonly fileTextIcon = FileText;
   readonly globeIcon = Globe2;
@@ -134,6 +136,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
   readonly canCreate = computed(() => this.authStore.canManageAnonymousTemplates('Create'));
   readonly canDelete = computed(() => this.authStore.canManageAnonymousTemplates('Delete'));
+  readonly canUpdate = computed(() => this.authStore.canManageAnonymousTemplates('Update'));
   readonly canRestore = computed(() => this.authStore.canManageAnonymousTemplates('Restore'));
   readonly canViewDetails = computed(() =>
     this.authStore.canManageAnonymousTemplates('ViewDetails'),
@@ -294,6 +297,16 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     void this.router.navigate(['/anonymous-templates', anonymousTemplateId]);
   }
 
+  openTemplateEdit(template: AnonymousTemplateListItem): void {
+    if (!this.canUpdateTemplate(template)) {
+      return;
+    }
+
+    void this.router.navigate(['/anonymous-templates', template.anonymousTemplateId], {
+      queryParams: { edit: 'true' },
+    });
+  }
+
   openTemplateResponses(template: AnonymousTemplateListItem): void {
     if (!this.canViewTemplateResponses(template)) {
       return;
@@ -376,6 +389,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
   canViewTemplateResponses(template: AnonymousTemplateListItem): boolean {
     return this.canViewResponses() && this.canUseTemplateAction(template);
+  }
+
+  canUpdateTemplate(template: AnonymousTemplateListItem): boolean {
+    return this.canUpdate() && template.isActive && this.canUseTemplateAction(template);
   }
 
   resetForm(): void {
@@ -566,6 +583,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     }
 
     return this.authStore.hasPermission('AnonymousTemplates.Delete') ||
+      this.authStore.hasPermission('AnonymousTemplates.Update') ||
       this.authStore.hasPermission('AnonymousTemplates.Restore') ||
       this.authStore.hasPermission('AnonymousTemplates.ViewResponses');
   }

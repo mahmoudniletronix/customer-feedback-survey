@@ -286,6 +286,16 @@
                           <app-icon [icon]="detailsIcon" [size]="14" />
                         </app-button>
                       }
+                      @if (canUpdateTemplate(template)) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          (pressed)="openTemplateEdit(template)"
+                        >
+                          <app-icon [icon]="editIcon" [size]="14" />
+                        </app-button>
+                      }
                       @if (canViewTemplateResponses(template)) {
                         <app-button
                           size="sm"

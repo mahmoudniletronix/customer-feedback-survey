@@ -1,17 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
+  BadgeQuestionMark,
   Building2,
-  ChartNoAxesColumnIncreasing,
+  ChartSpline,
   ClipboardList,
   FileText,
-  HelpCircle,
-  History,
+  FileClock,
+  Gauge,
+  LayoutDashboard,
+  ListTree,
   LucideIconData,
   Network,
   PanelLeftClose,
   PanelLeftOpen,
-  QrCode,
+  ScanQrCode,
   UserCog,
   UsersRound,
 } from 'lucide-angular';
@@ -40,7 +43,6 @@ interface MenuItem {
     | 'departmentReports'
     | 'branchDashboard';
   exact?: boolean;
-  child?: boolean;
 }
 
 const MENU_ITEMS: readonly MenuItem[] = [
@@ -49,7 +51,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'nav.dashboard',
     superAdminLabelKey: 'nav.branchesDashboard',
     path: '/reports/survey-dashboard',
-    icon: ChartNoAxesColumnIncreasing,
+    icon: LayoutDashboard,
     roles: [],
     feature: 'surveyDashboard',
     exact: true,
@@ -58,7 +60,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     label: 'System Dashboard',
     labelKey: 'nav.systemDashboard',
     path: '/reports/system-dashboard',
-    icon: ChartNoAxesColumnIncreasing,
+    icon: Gauge,
     roles: [],
     feature: 'systemReports',
     exact: true,
@@ -67,17 +69,16 @@ const MENU_ITEMS: readonly MenuItem[] = [
     label: 'System Responses History',
     labelKey: 'nav.systemResponsesHistory',
     path: '/reports/system-responses',
-    icon: History,
+    icon: FileClock,
     roles: [],
     feature: 'systemReports',
     exact: true,
-    child: true,
   },
   {
     label: 'Department Reports',
     labelKey: 'nav.reports',
     path: '/reports/department/dashboard',
-    icon: ChartNoAxesColumnIncreasing,
+    icon: ChartSpline,
     roles: [],
     feature: 'departmentReports',
     exact: true,
@@ -90,7 +91,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: [],
     feature: 'branchDashboard',
     exact: true,
-    child: true,
   },
   {
     label: 'Branch users',
@@ -99,7 +99,6 @@ const MENU_ITEMS: readonly MenuItem[] = [
     icon: UsersRound,
     roles: ['BRANCH_ADMIN'],
     exact: true,
-    child: true,
   },
   {
     label: 'Authorized Template',
@@ -109,13 +108,12 @@ const MENU_ITEMS: readonly MenuItem[] = [
     roles: ['BRANCH_ADMIN'],
     feature: 'templates',
     exact: true,
-    child: true,
   },
   {
     label: 'Anonymous Templates',
     labelKey: 'nav.publicTemplates',
     path: '/anonymous-templates',
-    icon: QrCode,
+    icon: ScanQrCode,
     roles: [],
     feature: 'anonymousTemplates',
     exact: true,
@@ -124,21 +122,19 @@ const MENU_ITEMS: readonly MenuItem[] = [
     label: 'Questions',
     labelKey: 'questions.title',
     path: '/branch-admin/questions',
-    icon: HelpCircle,
+    icon: BadgeQuestionMark,
     roles: ['BRANCH_ADMIN'],
     feature: 'questions',
     exact: true,
-    child: true,
   },
   {
     label: 'Question groups',
     labelKey: 'questionGroups.title',
     path: '/branch-admin/question-groups',
-    icon: ClipboardList,
+    icon: ListTree,
     roles: ['BRANCH_ADMIN'],
     feature: 'questionGroups',
     exact: true,
-    child: true,
   },
   {
     label: 'Branches',
@@ -158,7 +154,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     label: 'Global question groups',
     labelKey: 'nav.globalQuestionGroups',
     path: '/global-question-groups',
-    icon: ClipboardList,
+    icon: ListTree,
     roles: [],
     feature: 'globalQuestionGroups',
   },
@@ -166,7 +162,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     label: 'Global questions',
     labelKey: 'nav.globalQuestions',
     path: '/global-questions',
-    icon: HelpCircle,
+    icon: BadgeQuestionMark,
     roles: [],
     feature: 'globalQuestions',
   },

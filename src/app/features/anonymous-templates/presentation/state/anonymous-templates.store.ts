@@ -240,6 +240,7 @@ export class AnonymousTemplatesStore {
     this.anonymousTemplatesService
       .update(anonymousTemplateId, payload)
       .pipe(
+        switchMap(() => this.anonymousTemplatesService.details(anonymousTemplateId)),
         take(1),
         finalize(() => this.updatingSignal.set(false)),
       )

@@ -33,7 +33,6 @@
           routerLinkActive="nav-item-active"
           [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
           class="nav-item group"
-          [class.nav-item-child]="item.child"
           (click)="close.emit()"
         >
           <div class="nav-icon-box">

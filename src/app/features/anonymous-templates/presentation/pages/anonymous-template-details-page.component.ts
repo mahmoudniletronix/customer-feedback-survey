@@ -1,5 +1,13 @@
 import { DOCUMENT, DatePipe, Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   AbstractControl,
@@ -123,6 +131,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
   readonly buildingIcon = Building2;
   readonly copiedPublicUrl = signal(false);
   readonly editModalOpen = signal(false);
+  private readonly openEditFromRoute = signal(false);
   readonly canUpdate = computed(() => this.authStore.canManageAnonymousTemplates('Update'));
   readonly canAssignQuestions = computed(() =>
     this.authStore.canManageAnonymousTemplates('AssignQuestions'),
@@ -175,6 +184,20 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     this.conditionViews().filter((conditionView) => conditionView.parent === null),
   );
 
+  private readonly openRequestedEditModal = effect(() => {
+    if (!this.openEditFromRoute() || this.editModalOpen()) {
+      return;
+    }
+
+    const template = this.anonymousTemplatesStore.selectedTemplate();
+    if (!template || !this.canUpdateTemplate(template)) {
+      return;
+    }
+
+    this.openEditFromRoute.set(false);
+    this.openEditTemplate(template);
+  });
+
   ngOnInit(): void {
     const anonymousTemplateId = this.route.snapshot.paramMap.get('anonymousTemplateId') ?? '';
     if (anonymousTemplateId.length === 0) {
@@ -182,6 +205,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return;
     }
 
+    this.openEditFromRoute.set(this.route.snapshot.queryParamMap.get('edit') === 'true');
     this.anonymousTemplatesStore.loadDetails(anonymousTemplateId);
   }
 
