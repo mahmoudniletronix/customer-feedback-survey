@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {
   Bell,
@@ -40,6 +40,7 @@ export class MainLayoutComponent {
   readonly notificationIcon = Bell;
   readonly chevronDownIcon = ChevronDown;
   readonly branchIcon = Store;
+  private readonly desktopSidebarMediaQuery = '(min-width: 1280px)';
 
   readonly userInitial = computed(
     () => this.authStore.user()?.name?.charAt(0).toUpperCase() ?? 'U',
@@ -146,6 +147,11 @@ export class MainLayoutComponent {
   }
 
   openMobileSidebar(): void {
+    if (this.isDesktopSidebarViewport()) {
+      this.mobileSidebarOpen.set(false);
+      return;
+    }
+
     this.mobileSidebarOpen.set(true);
   }
 
@@ -153,7 +159,18 @@ export class MainLayoutComponent {
     this.mobileSidebarOpen.set(false);
   }
 
+  @HostListener('window:resize')
+  closeMobileSidebarOnDesktop(): void {
+    if (this.isDesktopSidebarViewport()) {
+      this.mobileSidebarOpen.set(false);
+    }
+  }
+
   logout(): void {
     this.authStore.logout();
+  }
+
+  private isDesktopSidebarViewport(): boolean {
+    return globalThis.matchMedia?.(this.desktopSidebarMediaQuery).matches ?? false;
   }
 }

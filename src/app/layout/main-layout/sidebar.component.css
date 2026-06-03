@@ -10,7 +10,7 @@
   will-change: transform, width;
 }
 
-@media (max-width: 1535px) {
+@media (max-width: 1279px) {
   .app-sidebar {
     position: fixed;
     inset-block: 0;
@@ -188,7 +188,7 @@
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 1535px) {
+@media (max-width: 1279px) {
   .brand-section {
     margin-bottom: 1rem;
   }
@@ -211,7 +211,7 @@
   }
 }
 
-@media (min-width: 1536px) {
+@media (min-width: 1280px) {
   .app-sidebar.sidebar-collapsed {
     width: 5.25rem;
   }

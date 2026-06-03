@@ -58,43 +58,59 @@
         [class.opacity-0]="!advancedFiltersOpen()"
       >
         <div class="min-h-0 overflow-hidden">
-        <form
-          class="mb-3 grid grid-cols-1 gap-2 rounded-lg bg-slate-50/80 p-2 ring-1 ring-slate-100 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:grid-cols-[minmax(12rem,1fr)_minmax(8rem,10rem)_auto]"
-          [formGroup]="searchForm"
-          (ngSubmit)="searchBranchUsers()"
-          [class.translate-y-0]="advancedFiltersOpen()"
-          [class.-translate-y-2]="!advancedFiltersOpen()"
-          [class.pointer-events-none]="!advancedFiltersOpen()"
-          [attr.aria-hidden]="!advancedFiltersOpen()"
-          [attr.inert]="advancedFiltersOpen() ? null : ''"
-        >
-        <app-input
-          size="sm"
-          [label]="'branchUsers.search' | t"
-          [placeholder]="'branchUsers.searchPlaceholder' | t"
-          formControlName="searchText"
-        />
-        <label class="flex min-w-0 flex-col gap-0.5">
-          <span class="text-[9px] font-bold text-slate-500">{{ 'branchUsers.isActiveFilter' | t }}</span>
-          <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
-            formControlName="isActive"
+          <form
+            class="mb-3 grid grid-cols-1 gap-2 rounded-lg bg-slate-50/80 p-2 ring-1 ring-slate-100 transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none sm:grid-cols-[minmax(18rem,36rem)_10rem_auto] sm:items-end sm:justify-start xl:grid-cols-[minmax(22rem,40rem)_10rem_auto]"
+            [formGroup]="searchForm"
+            (ngSubmit)="searchBranchUsers()"
+            [class.translate-y-0]="advancedFiltersOpen()"
+            [class.-translate-y-2]="!advancedFiltersOpen()"
+            [class.pointer-events-none]="!advancedFiltersOpen()"
+            [attr.aria-hidden]="!advancedFiltersOpen()"
+            [attr.inert]="advancedFiltersOpen() ? null : ''"
           >
-            <option value="">{{ 'branchUsers.allUsers' | t }}</option>
-            <option value="true">{{ 'common.active' | t }}</option>
-            <option value="false">{{ 'branches.inactive' | t }}</option>
-          </select>
-        </label>
-        <div class="grid grid-cols-2 gap-1.5 sm:flex sm:items-end">
-          <app-button type="submit" size="sm" [loading]="branchUsersStore.loading()">
-            <app-icon [icon]="searchIcon" [size]="13" />
-            {{ 'branches.searchAction' | t }}
-          </app-button>
-          <app-button type="button" size="sm" variant="secondary" (pressed)="clearBranchUserSearch()">
-            {{ 'branches.clearSearch' | t }}
-          </app-button>
-        </div>
-      </form>
+            <app-input
+              class="min-w-0"
+              size="sm"
+              [label]="'branchUsers.search' | t"
+              [placeholder]="'branchUsers.searchPlaceholder' | t"
+              formControlName="searchText"
+            />
+            <label class="flex min-w-0 flex-col gap-0.5 sm:w-40">
+              <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                {{ 'branchUsers.isActiveFilter' | t }}
+              </span>
+              <select
+                class="h-8 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                formControlName="isActive"
+              >
+                <option value="">{{ 'branchUsers.allUsers' | t }}</option>
+                <option value="true">{{ 'common.active' | t }}</option>
+                <option value="false">{{ 'branches.inactive' | t }}</option>
+              </select>
+            </label>
+            <div class="grid grid-cols-2 gap-1.5 sm:flex sm:h-8 sm:items-stretch sm:gap-2">
+              <app-button
+                class="block w-20"
+                type="submit"
+                size="sm"
+                [fullWidth]="true"
+                [loading]="branchUsersStore.loading()"
+              >
+                <app-icon [icon]="searchIcon" [size]="13" />
+                {{ 'branches.searchAction' | t }}
+              </app-button>
+              <app-button
+                class="block w-20"
+                type="button"
+                size="sm"
+                variant="secondary"
+                [fullWidth]="true"
+                (pressed)="clearBranchUserSearch()"
+              >
+                {{ 'branches.clearSearch' | t }}
+              </app-button>
+            </div>
+          </form>
         </div>
       </div>
 

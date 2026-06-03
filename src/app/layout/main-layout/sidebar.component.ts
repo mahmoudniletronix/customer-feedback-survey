@@ -102,7 +102,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     child: true,
   },
   {
-    label: 'Templates',
+    label: 'Authorized Template',
     labelKey: 'nav.protectedTemplates',
     path: '/branch-admin/templates',
     icon: FileText,
@@ -112,7 +112,7 @@ const MENU_ITEMS: readonly MenuItem[] = [
     child: true,
   },
   {
-    label: 'Anonymous templates',
+    label: 'Anonymous Templates',
     labelKey: 'nav.publicTemplates',
     path: '/anonymous-templates',
     icon: QrCode,

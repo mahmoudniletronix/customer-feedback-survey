@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronLeft, ChevronRight, FileText, Pencil, Plus, Search, SlidersHorizontal, UserCog } from 'lucide-angular';
+import { ChevronDown, ChevronLeft, ChevronRight, FileText, Pencil, Plus, Search, SlidersHorizontal, UserCog } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -12,6 +12,14 @@ import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
 import { OperatorListItem, OperatorTemplateSelectionItem } from '../../domain/operator.model';
 import { OperatorsStore } from '../state/operators.store';
+
+interface OperatorTemplateBranchGroup {
+  readonly branchKey: string;
+  readonly branchName: string;
+  readonly branchCode: string;
+  readonly expanded: boolean;
+  readonly templates: readonly OperatorTemplateSelectionItem[];
+}
 
 @Component({
   selector: 'app-operators-page',
@@ -37,6 +45,7 @@ export class OperatorsPageComponent implements OnInit {
   private readonly i18n = inject(I18nService);
 
   readonly chevronLeftIcon = ChevronLeft;
+  readonly chevronDownIcon = ChevronDown;
   readonly chevronRightIcon = ChevronRight;
   readonly editIcon = Pencil;
   readonly templatesIcon = FileText;
@@ -54,6 +63,7 @@ export class OperatorsPageComponent implements OnInit {
   readonly selectedTemplatesOperator = signal<OperatorListItem | null>(null);
   readonly templatesSearchText = signal('');
   readonly selectedTemplateIds = signal<readonly string[]>([]);
+  readonly expandedTemplateBranchKeys = signal<readonly string[]>([]);
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
   readonly isDepartmentAdmin = computed(() => this.authStore.role() === 'DEPARTMENT_ADMIN');
   readonly currentDepartmentId = computed(() => this.authStore.user()?.departmentId ?? '');
@@ -87,6 +97,9 @@ export class OperatorsPageComponent implements OnInit {
     const selectedIds = new Set(this.selectedTemplateIds());
     return this.allTemplatesForModal().filter((template) => selectedIds.has(template.templateId));
   });
+  readonly selectedTemplateBranchGroups = computed<readonly OperatorTemplateBranchGroup[]>(() =>
+    this.groupTemplatesByBranch(this.selectedTemplatesForModal(), new Set(this.expandedTemplateBranchKeys())),
+  );
   readonly availableTemplatesForModal = computed(() => {
     const selectedIds = new Set(this.selectedTemplateIds());
     return this.allTemplatesForModal().filter((template) => !selectedIds.has(template.templateId));
@@ -109,6 +122,7 @@ export class OperatorsPageComponent implements OnInit {
     }
 
     this.selectedTemplateIds.set(selection.selectedTemplates.map((template) => template.templateId));
+    this.expandedTemplateBranchKeys.set(this.templateBranchKeys(selection.selectedTemplates));
   });
 
   readonly searchForm = this.formBuilder.nonNullable.group({
@@ -250,6 +264,7 @@ export class OperatorsPageComponent implements OnInit {
     this.selectedTemplatesOperator.set(null);
     this.templatesSearchText.set('');
     this.selectedTemplateIds.set([]);
+    this.expandedTemplateBranchKeys.set([]);
     this.operatorsStore.clearTemplatesSelection();
   }
 
@@ -282,10 +297,28 @@ export class OperatorsPageComponent implements OnInit {
     }
 
     this.selectedTemplateIds.update((templateIds) => [...templateIds, templateId]);
+    const template = this.allTemplatesForModal().find((currentTemplate) => currentTemplate.templateId === templateId);
+    if (template) {
+      this.expandTemplateBranch(template);
+    }
   }
 
   removeOperatorTemplate(templateId: string): void {
     this.selectedTemplateIds.update((templateIds) => templateIds.filter((currentTemplateId) => currentTemplateId !== templateId));
+  }
+
+  toggleTemplateBranch(branchKey: string): void {
+    this.expandedTemplateBranchKeys.update((branchKeys) =>
+      branchKeys.includes(branchKey)
+        ? branchKeys.filter((currentBranchKey) => currentBranchKey !== branchKey)
+        : [...branchKeys, branchKey],
+    );
+  }
+
+  templateBranchName(template: OperatorTemplateSelectionItem): string {
+    const primaryName = this.i18n.language() === 'ar' ? template.branchNameAr : template.branchNameEn;
+    const fallbackName = this.i18n.language() === 'ar' ? template.branchNameEn : template.branchNameAr;
+    return primaryName.trim() || fallbackName.trim() || template.branchCode.trim() || this.i18n.translate('operators.branch');
   }
 
   saveOperatorTemplates(): void {
@@ -419,6 +452,55 @@ export class OperatorsPageComponent implements OnInit {
       return 10;
     }
     return Math.min(Math.max(pageSize, 1), 100);
+  }
+
+  private groupTemplatesByBranch(
+    templates: readonly OperatorTemplateSelectionItem[],
+    expandedBranchKeys: ReadonlySet<string>,
+  ): readonly OperatorTemplateBranchGroup[] {
+    const branchGroups = new Map<string, OperatorTemplateBranchGroup>();
+
+    for (const template of templates) {
+      const branchKey = this.templateBranchKey(template);
+      const currentGroup = branchGroups.get(branchKey);
+
+      if (currentGroup) {
+        branchGroups.set(branchKey, {
+          ...currentGroup,
+          templates: [...currentGroup.templates, template],
+        });
+        continue;
+      }
+
+      branchGroups.set(branchKey, {
+        branchKey,
+        branchName: this.templateBranchName(template),
+        branchCode: template.branchCode.trim(),
+        expanded: expandedBranchKeys.has(branchKey),
+        templates: [template],
+      });
+    }
+
+    return [...branchGroups.values()];
+  }
+
+  private templateBranchKeys(templates: readonly OperatorTemplateSelectionItem[]): readonly string[] {
+    return [...new Set(templates.map((template) => this.templateBranchKey(template)))];
+  }
+
+  private expandTemplateBranch(template: OperatorTemplateSelectionItem): void {
+    const branchKey = this.templateBranchKey(template);
+    this.expandedTemplateBranchKeys.update((branchKeys) => (branchKeys.includes(branchKey) ? branchKeys : [...branchKeys, branchKey]));
+  }
+
+  private templateBranchKey(template: OperatorTemplateSelectionItem): string {
+    return (
+      template.branchId.trim() ||
+      template.branchCode.trim() ||
+      template.branchNameEn.trim() ||
+      template.branchNameAr.trim() ||
+      'operators-unassigned-branch'
+    );
   }
 
   private configureDepartmentControls(): void {

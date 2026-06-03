@@ -38,10 +38,10 @@
                 <app-icon [icon]="calendarIcon" [size]="12" />
                 {{ response.submittedOnUtc ? (response.submittedOnUtc | date: 'medium') : '-' }}
               </span>
-              <span class="inline-flex min-w-0 items-center gap-1">
+              <!-- <span class="inline-flex min-w-0 items-center gap-1">
                 <app-icon [icon]="hashIcon" [size]="12" />
                 <span class="truncate">{{ response.surveyResponseId }}</span>
-              </span>
+              </span> -->
             </div>
           </div>
 
@@ -174,127 +174,127 @@
 
         <ng-template #answerNode let-node let-depth="depth">
           <article class="px-3 py-2.5">
-              <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0">
-                  <p
-                    class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
-                  >
-                    {{ questionText(node.answer) }}
-                  </p>
-                  <p class="text-[10px] font-semibold text-slate-500">
-                    {{ node.answer.questionTypeName }}
-                  </p>
-                </div>
-                <span
-                  class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <p
+                  class="break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]"
                 >
-                  {{ node.answer.questionType }}
-                </span>
-                @if (depth > 0) {
-                  <span
-                    class="w-fit shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-700"
-                  >
-                    {{ 'branchTemplates.followUpQuestion' | t }}
-                  </span>
-                }
-                @if (node.answer.questionOrder > 0) {
-                  <span
-                    class="w-fit shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[9px] font-black text-[#0d94b3]"
-                  >
-                    {{ node.answer.questionOrder }}
-                  </span>
-                }
+                  {{ questionText(node.answer) }}
+                </p>
+                <p class="text-[10px] font-semibold text-slate-500">
+                  {{ node.answer.questionTypeName }}
+                </p>
               </div>
-
-              <div
-                class="mt-2 rounded-md px-2.5 py-2"
-                [class.bg-slate-50]="depth === 0"
-                [class.bg-emerald-50]="depth > 0"
+              <span
+                class="w-fit shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-600"
               >
-                @switch (node.answer.questionType) {
-                  @case ('SingleChoice') {
-                    <p class="text-[11px] font-bold text-slate-900">
-                      {{ 'branchResponseDetails.selectedOption' | t }}:
-                      {{ displayAnswer(node.answer) }}
-                    </p>
-                    <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
-                      {{ 'branchResponseDetails.optionValue' | t }}:
-                      {{ node.answer.selectedOptionValue ?? '-' }}
-                    </p>
-                  }
-                  @case ('StarRating') {
-                    <div class="flex items-center gap-2">
-                      <div class="flex gap-1">
-                        @for (slot of scaleSlots; track slot.index) {
-                          <span
-                            class="h-2 w-2 rounded-full"
-                            [class.bg-amber-400]="
-                              isActiveScaleSlot(slot, node.answer.starRatingValue)
-                            "
-                            [class.bg-slate-200]="
-                              !isActiveScaleSlot(slot, node.answer.starRatingValue)
-                            "
-                          ></span>
-                        }
-                      </div>
-                      <span class="text-[11px] font-black text-slate-900">{{
-                        displayAnswer(node.answer)
-                      }}</span>
+                {{ node.answer.questionType }}
+              </span>
+              @if (depth > 0) {
+                <span
+                  class="w-fit shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black text-emerald-700"
+                >
+                  {{ 'branchTemplates.followUpQuestion' | t }}
+                </span>
+              }
+              @if (node.answer.questionOrder > 0) {
+                <span
+                  class="w-fit shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[9px] font-black text-[#0d94b3]"
+                >
+                  {{ node.answer.questionOrder }}
+                </span>
+              }
+            </div>
+
+            <div
+              class="mt-2 rounded-md px-2.5 py-2"
+              [class.bg-slate-50]="depth === 0"
+              [class.bg-emerald-50]="depth > 0"
+            >
+              @switch (node.answer.questionType) {
+                @case ('SingleChoice') {
+                  <p class="text-[11px] font-bold text-slate-900">
+                    {{ 'branchResponseDetails.selectedOption' | t }}:
+                    {{ displayAnswer(node.answer) }}
+                  </p>
+                  <p class="mt-0.5 text-[10px] font-semibold text-slate-500">
+                    {{ 'branchResponseDetails.optionValue' | t }}:
+                    {{ node.answer.selectedOptionValue ?? '-' }}
+                  </p>
+                }
+                @case ('StarRating') {
+                  <div class="flex items-center gap-2">
+                    <div class="flex gap-1">
+                      @for (slot of scaleSlots; track slot.index) {
+                        <span
+                          class="h-2 w-2 rounded-full"
+                          [class.bg-amber-400]="
+                            isActiveScaleSlot(slot, node.answer.starRatingValue)
+                          "
+                          [class.bg-slate-200]="
+                            !isActiveScaleSlot(slot, node.answer.starRatingValue)
+                          "
+                        ></span>
+                      }
                     </div>
-                  }
-                  @case ('Smiles') {
-                    <div class="flex items-center gap-2">
-                      <div class="flex gap-1">
-                        @for (slot of scaleSlots; track slot.index) {
-                          <span
-                            class="h-2 w-2 rounded-full"
-                            [class.bg-emerald-400]="isActiveScaleSlot(slot, node.answer.smileValue)"
-                            [class.bg-slate-200]="!isActiveScaleSlot(slot, node.answer.smileValue)"
-                          ></span>
-                        }
-                      </div>
-                      <span class="text-[11px] font-black text-slate-900">
-                        {{ 'branchResponseDetails.smileValue' | t }}:
+                    <span class="text-[11px] font-black text-slate-900">{{
+                      displayAnswer(node.answer)
+                    }}</span>
+                  </div>
+                }
+                @case ('Smiles') {
+                  <div class="flex items-center gap-2">
+                    <div class="flex gap-1">
+                      @for (slot of scaleSlots; track slot.index) {
+                        <span
+                          class="h-2 w-2 rounded-full"
+                          [class.bg-emerald-400]="isActiveScaleSlot(slot, node.answer.smileValue)"
+                          [class.bg-slate-200]="!isActiveScaleSlot(slot, node.answer.smileValue)"
+                        ></span>
+                      }
+                    </div>
+                    <span class="text-[11px] font-black text-slate-900">
+                      {{ 'branchResponseDetails.smileValue' | t }}:
+                      {{ displayAnswer(node.answer) }}
+                    </span>
+                  </div>
+                }
+                @case ('Complain') {
+                  <p
+                    class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
+                  >
+                    {{ displayAnswer(node.answer) }}
+                  </p>
+                }
+                @case ('Voice') {
+                  @if (voiceUrl(node.answer)) {
+                    <div class="space-y-1.5">
+                      <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+                        <app-icon class="text-[#11A7C9]" [icon]="micIcon" [size]="13" />
                         {{ displayAnswer(node.answer) }}
-                      </span>
-                    </div>
-                  }
-                  @case ('Complain') {
-                    <p
-                      class="break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]"
-                    >
-                      {{ displayAnswer(node.answer) }}
-                    </p>
-                  }
-                  @case ('Voice') {
-                    @if (voiceUrl(node.answer)) {
-                      <div class="space-y-1.5">
-                        <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-                          <app-icon class="text-[#11A7C9]" [icon]="micIcon" [size]="13" />
-                          {{ displayAnswer(node.answer) }}
-                        </p>
-                        <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>
-                      </div>
-                    } @else {
-                      <p class="text-[11px] font-semibold text-slate-500">
-                        {{ 'branchResponseDetails.noVoiceFile' | t }}
                       </p>
-                    }
+                      <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>
+                    </div>
+                  } @else {
+                    <p class="text-[11px] font-semibold text-slate-500">
+                      {{ 'branchResponseDetails.noVoiceFile' | t }}
+                    </p>
                   }
                 }
-              </div>
-
-              @if (node.children.length > 0) {
-                <div class="ms-4 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-3">
-                  @for (childNode of node.children; track childNode.answer.questionId) {
-                    <ng-container
-                      [ngTemplateOutlet]="answerNode"
-                      [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
-                    />
-                  }
-                </div>
               }
-            </article>
+            </div>
+
+            @if (node.children.length > 0) {
+              <div class="ms-4 mt-2 space-y-2 border-s-2 border-dashed border-slate-200 ps-3">
+                @for (childNode of node.children; track childNode.answer.questionId) {
+                  <ng-container
+                    [ngTemplateOutlet]="answerNode"
+                    [ngTemplateOutletContext]="{ $implicit: childNode, depth: depth + 1 }"
+                  />
+                }
+              </div>
+            }
+          </article>
         </ng-template>
 
         <div class="divide-y divide-slate-100">

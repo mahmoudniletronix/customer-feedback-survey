@@ -40,6 +40,7 @@
       class="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-[minmax(8rem,10rem)_minmax(8rem,10rem)_minmax(10rem,12rem)_minmax(14rem,1fr)_minmax(9rem,12rem)_minmax(12rem,16rem)_minmax(9rem,11rem)_auto]"
       [formGroup]="filtersForm"
       (ngSubmit)="downloadReport()"
+      novalidate
     >
       <label class="flex min-w-0 flex-col gap-1">
         <span class="text-[10px] font-bold text-slate-500">
@@ -139,10 +140,19 @@
       </label>
 
       <div class="flex items-end gap-2 md:col-span-2 xl:col-span-2 2xl:col-span-1">
-        <app-button type="submit" size="sm" [loading]="reportStore.downloading()">
-          <app-icon [icon]="downloadIcon" [size]="14" />
+        <button
+          type="button"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#11A7C9] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="reportStore.downloading()"
+          (click)="downloadReport()"
+        >
+          @if (reportStore.downloading()) {
+            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+          } @else {
+            <app-icon [icon]="downloadIcon" [size]="14" />
+          }
           {{ 'branchTemplatesPdf.downloadPdf' | t }}
-        </app-button>
+        </button>
         <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
           {{ 'common.clear' | t }}
         </app-button>

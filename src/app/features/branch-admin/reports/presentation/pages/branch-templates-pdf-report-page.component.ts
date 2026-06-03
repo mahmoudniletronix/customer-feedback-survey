@@ -207,8 +207,10 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
     link.style.display = 'none';
     this.document.body.appendChild(link);
     link.click();
-    link.remove();
-    view.URL.revokeObjectURL(fileUrl);
+    view.setTimeout(() => {
+      link.remove();
+      view.URL.revokeObjectURL(fileUrl);
+    }, 1000);
   }
 
   private reportFileName(language: BranchTemplatesPdfReportLanguage): string {

@@ -1,11 +1,11 @@
 <div
-  class="h-dvh overflow-hidden bg-[#F7F9FC] 2xl:grid 2xl:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] 2xl:transition-[grid-template-columns] 2xl:duration-300"
+  class="h-dvh overflow-hidden bg-[#F7F9FC] xl:grid xl:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] xl:transition-[grid-template-columns] xl:duration-300"
   [style.--sidebar-width]="sidebarCollapsed() ? '5.25rem' : '18rem'"
 >
   @if (mobileSidebarOpen()) {
     <button
       type="button"
-      class="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[2px] 2xl:hidden"
+      class="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[2px] xl:hidden"
       [attr.aria-label]="'common.closeSidebar' | t"
       (click)="closeMobileSidebar()"
     ></button>
@@ -23,7 +23,7 @@
         <div class="header-left flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
-            class="mobile-menu-btn 2xl:!hidden"
+            class="mobile-menu-btn xl:!hidden"
             [attr.aria-label]="'common.openSidebar' | t"
             (click)="openMobileSidebar()"
           >

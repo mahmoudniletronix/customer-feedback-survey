@@ -668,52 +668,90 @@
           </span>
         </div>
 
-        <div class="grid min-w-0 gap-2">
-          @for (template of selectedTemplatesForModal(); track template.templateId) {
-            <article class="min-w-0 rounded-xl border border-cyan-100 bg-white p-3 shadow-sm shadow-cyan-100/40">
-              <div class="grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-                <div class="min-w-0">
-                  <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
-                    {{ template.nameEn }}
-                  </p>
-                  @if (template.nameAr) {
-                    <p
-                      class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+        @if (selectedTemplateBranchGroups().length > 0) {
+          <div class="grid min-w-0 gap-2">
+            @for (group of selectedTemplateBranchGroups(); track group.branchKey) {
+              <section class="min-w-0 overflow-hidden rounded-xl border border-cyan-100 bg-white shadow-sm shadow-cyan-100/40">
+                <button
+                  type="button"
+                  class="flex w-full min-w-0 items-center justify-between gap-3 bg-cyan-50/70 p-2.5 text-start transition hover:bg-cyan-50"
+                  [attr.aria-expanded]="group.expanded"
+                  (click)="toggleTemplateBranch(group.branchKey)"
+                >
+                  <span class="flex min-w-0 items-center gap-2">
+                    <span
+                      class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white text-[#11A7C9] shadow-sm shadow-cyan-100/70"
                     >
-                      {{ template.nameAr }}
-                    </p>
-                  }
-                  @if (template.description) {
-                    <p class="mt-1 line-clamp-2 break-words text-[11px] leading-4 text-slate-500 [overflow-wrap:anywhere]">
-                      {{ template.description }}
-                    </p>
-                  }
-                </div>
-                <div class="flex min-w-0 flex-wrap gap-1.5 md:justify-end">
-                  <span
-                    class="max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600"
-                  >
-                    {{ template.branchCode || template.branchNameEn || ('operators.branch' | t) }}
+                      <app-icon
+                        [icon]="group.expanded ? chevronDownIcon : chevronRightIcon"
+                        [size]="15"
+                      />
+                    </span>
+                    <span class="min-w-0">
+                      <span class="block truncate text-xs font-bold text-slate-900">
+                        {{ group.branchName }}
+                      </span>
+                      @if (group.branchCode) {
+                        <span class="mt-0.5 block truncate text-[10px] font-bold text-cyan-700">
+                          {{ group.branchCode }}
+                        </span>
+                      }
+                    </span>
                   </span>
-                  <app-button
-                    size="sm"
-                    type="button"
-                    variant="secondary"
-                    (pressed)="removeOperatorTemplate(template.templateId)"
-                  >
-                    {{ 'operators.removeTemplate' | t }}
-                  </app-button>
-                </div>
-              </div>
-            </article>
-          } @empty {
-            <div
-              class="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center text-xs font-semibold text-slate-500"
-            >
-              {{ 'operators.noSelectedTemplates' | t }}
-            </div>
-          }
-        </div>
+                  <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#11A7C9]">
+                    {{ group.templates.length }}
+                  </span>
+                </button>
+
+                @if (group.expanded) {
+                  <div class="divide-y divide-cyan-50 border-t border-cyan-100">
+                    @for (template of group.templates; track template.templateId) {
+                      <article class="min-w-0 p-3">
+                        <div class="grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+                          <div class="min-w-0">
+                            <p class="break-words text-xs font-bold text-slate-900 [overflow-wrap:anywhere]">
+                              {{ template.nameEn }}
+                            </p>
+                            @if (template.nameAr) {
+                              <p
+                                class="mt-0.5 break-words text-[11px] font-semibold text-slate-500 [overflow-wrap:anywhere]"
+                              >
+                                {{ template.nameAr }}
+                              </p>
+                            }
+                            @if (template.description) {
+                              <p
+                                class="mt-1 line-clamp-2 break-words text-[11px] leading-4 text-slate-500 [overflow-wrap:anywhere]"
+                              >
+                                {{ template.description }}
+                              </p>
+                            }
+                          </div>
+                          <div class="flex min-w-0 flex-wrap gap-1.5 md:justify-end">
+                            <app-button
+                              size="sm"
+                              type="button"
+                              variant="secondary"
+                              (pressed)="removeOperatorTemplate(template.templateId)"
+                            >
+                              {{ 'operators.removeTemplate' | t }}
+                            </app-button>
+                          </div>
+                        </div>
+                      </article>
+                    }
+                  </div>
+                }
+              </section>
+            }
+          </div>
+        } @else {
+          <div
+            class="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center text-xs font-semibold text-slate-500"
+          >
+            {{ 'operators.noSelectedTemplates' | t }}
+          </div>
+        }
       </section>
 
       <section class="space-y-2">
@@ -748,7 +786,7 @@
                   }
                   <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold text-slate-500">
                     <span class="rounded-full bg-slate-50 px-2 py-0.5">
-                      {{ template.branchNameEn || ('operators.branch' | t) }}
+                      {{ templateBranchName(template) }}
                     </span>
                   </div>
                 </div>

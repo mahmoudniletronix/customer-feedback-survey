@@ -16,7 +16,7 @@
       @if (mobileOpen()) {
         <button
           type="button"
-          class="sidebar-close-btn ms-auto 2xl:hidden"
+          class="sidebar-close-btn ms-auto xl:hidden"
           [attr.aria-label]="'common.closeSidebar' | t"
           (click)="close.emit()"
         >
@@ -45,7 +45,7 @@
     </nav>
 
     <!-- Footer / Collapse -->
-    <div class="sidebar-footer mt-auto hidden border-t border-white/5 pt-3 2xl:block">
+    <div class="sidebar-footer mt-auto hidden border-t border-white/5 pt-3 xl:block">
       <button
         type="button"
         class="collapse-btn"
