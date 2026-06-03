@@ -141,10 +141,9 @@
 
       <div class="flex items-end gap-2 md:col-span-2 xl:col-span-2 2xl:col-span-1">
         <button
-          type="button"
+          type="submit"
           class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#11A7C9] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           [disabled]="reportStore.downloading()"
-          (click)="downloadReport()"
         >
           @if (reportStore.downloading()) {
             <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>

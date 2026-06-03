@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Download, FileText, Filter } from 'lucide-angular';
 import { take } from 'rxjs';
@@ -32,7 +32,7 @@ const DEFAULT_TOP_WORST_QUESTIONS_COUNT = '5';
   providers: [BranchTemplatesService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BranchTemplatesPdfReportPageComponent implements OnInit {
+export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy {
   readonly branchStore = inject(BranchAdminBranchStore);
   readonly reportStore = inject(BranchTemplatesPdfReportStore);
   private readonly authStore = inject(AuthStore);
@@ -40,6 +40,9 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly downloadObjectUrls = new Set<string>();
+  private readonly downloadCleanupHandles = new Set<number>();
+  private readonly downloadCleanupDelayMs = 60000;
 
   readonly downloadIcon = Download;
   readonly fileIcon = FileText;
@@ -99,7 +102,15 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
     this.reportStore.loadAnonymousTemplates();
   }
 
+  ngOnDestroy(): void {
+    this.cleanupDownloadResources();
+  }
+
   downloadReport(): void {
+    if (this.reportStore.downloading()) {
+      return;
+    }
+
     const value = this.filtersForm.getRawValue();
     const selectedTemplate = this.selectedTemplate(value.templateKey);
     const reportLanguage = value.language;
@@ -161,8 +172,8 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
     return this.templateOptions().find((template) => this.templateValue(template) === templateKey);
   }
 
-  private toOptionalPositiveInteger(value: string): number | undefined {
-    const normalizedValue = value.trim();
+  private toOptionalPositiveInteger(value: string | number | null | undefined): number | undefined {
+    const normalizedValue = String(value ?? '').trim();
     if (!normalizedValue) {
       return undefined;
     }
@@ -207,10 +218,31 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit {
     link.style.display = 'none';
     this.document.body.appendChild(link);
     link.click();
-    view.setTimeout(() => {
+    this.downloadObjectUrls.add(fileUrl);
+    const cleanupHandle = view.setTimeout(() => {
       link.remove();
       view.URL.revokeObjectURL(fileUrl);
-    }, 1000);
+      this.downloadObjectUrls.delete(fileUrl);
+      this.downloadCleanupHandles.delete(cleanupHandle);
+    }, this.downloadCleanupDelayMs);
+    this.downloadCleanupHandles.add(cleanupHandle);
+  }
+
+  private cleanupDownloadResources(): void {
+    const view = this.document.defaultView;
+    if (!view) {
+      return;
+    }
+
+    for (const cleanupHandle of this.downloadCleanupHandles) {
+      view.clearTimeout(cleanupHandle);
+    }
+    this.downloadCleanupHandles.clear();
+
+    for (const fileUrl of this.downloadObjectUrls) {
+      view.URL.revokeObjectURL(fileUrl);
+    }
+    this.downloadObjectUrls.clear();
   }
 
   private reportFileName(language: BranchTemplatesPdfReportLanguage): string {
