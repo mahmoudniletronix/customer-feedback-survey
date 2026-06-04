@@ -1,10 +1,10 @@
 <article class="border border-slate-100 bg-white shadow-sm shadow-slate-200/70">
   <div class="flex items-start justify-between">
     <p class="font-bold text-slate-500">{{ report().titleKey | t }}</p>
-    <span class="flex shrink-0 items-center justify-center bg-cyan-50 text-[#11A7C9]">
+    <span class="flex shrink-0 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]">
       <app-icon [icon]="icons[report().icon]" [size]="19" />
     </span>
   </div>
-  <p class="mt-3 font-bold text-[#1F3A56]">{{ report().metric }}</p>
+  <p class="mt-3 font-bold text-[var(--theme-color-primary)]">{{ report().metric }}</p>
   <p class="mt-3 leading-6 text-slate-600">{{ report().descriptionKey | t }}</p>
 </article>

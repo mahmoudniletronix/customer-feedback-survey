@@ -108,6 +108,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'publicAnonymousTemplates.requiredError': 'This field is required.',
     'publicAnonymousTemplates.minLength': 'Minimum length',
     'publicAnonymousTemplates.maxLength': 'Maximum length',
+    'publicAnonymousTemplates.startWithHint': 'Value must start with:',
+    'publicAnonymousTemplates.startWithError': 'Value must start with:',
     'publicAnonymousTemplates.integerError': 'Enter a valid integer number.',
     'publicAnonymousTemplates.minValue': 'Minimum score',
     'publicAnonymousTemplates.maxValue': 'Maximum score',
@@ -824,6 +826,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'operatorTemplates.customInputRequired': 'This field is required.',
     'operatorTemplates.customInputMinLength': 'This score is shorter than the minimum length.',
     'operatorTemplates.customInputMaxLength': 'This score exceeds the maximum length.',
+    'operatorTemplates.customInputStartWith': 'Value must start with the required prefix.',
+    'operatorTemplates.customInputStartWithHint': 'Value must start with:',
     'operatorTemplates.customInputInteger': 'Enter a valid integer number.',
     'operatorTemplates.customInputMinValue': 'This score is less than the minimum allowed score.',
     'operatorTemplates.customInputMaxValue':
@@ -937,6 +941,10 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.customInputOrder': 'Order',
     'branchTemplates.customInputMinLength': 'Min length',
     'branchTemplates.customInputMaxLength': 'Max length',
+    'branchTemplates.customInputStartWith': 'Starts with',
+    'branchTemplates.customInputStartWithPlaceholder': 'Example: 011',
+    'branchTemplates.customInputStartWithHint':
+      'Submitted value must start with this prefix.',
     'branchTemplates.customInputMinValue': 'Min score',
     'branchTemplates.customInputMaxValue': 'Max score',
     'branchTemplates.open': 'Open',
@@ -1087,6 +1095,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.customInputNameRequired': 'Custom input name is required.',
     'branchTemplates.customInputNameMaxLength': 'Custom input name must not exceed 100 characters.',
     'branchTemplates.customInputNameDuplicated': 'Custom input name must be unique.',
+    'branchTemplates.customInputStartWithMaxLength':
+      'Start prefix must not exceed 100 characters.',
+    'branchTemplates.customInputStartWithEmpty': 'Start prefix cannot be empty.',
     'branchTemplates.customInputLabelEnMaxLength':
       'Custom input English label must not exceed 200 characters.',
     'branchTemplates.customInputLabelArMaxLength':
@@ -1336,6 +1347,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'questions.typeSingleChoice': 'Multi choice',
     'questions.typeVoice': 'Voice',
     'questions.typeStarRating': 'Star rating',
+    'questions.ratingScaleHint': 'Lowest rating: 1 / Highest rating: 5.',
     'questions.typeComplain': 'Free Text',
     'questions.typeSmiles': 'Smiles',
     'questions.options': 'Options',
@@ -1721,12 +1733,19 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplatesPdf.allTemplates': 'All templates',
     'branchTemplatesPdf.scoreCalculationMode': 'Score calculation',
     'branchTemplatesPdf.topWorstQuestionsCount': 'Best / worst questions',
+    'branchTemplatesPdf.worstQuestionsMaxScorePercentage': 'Worst Questions Max Score %',
+    'branchTemplatesPdf.worstQuestionsMaxScoreDescription':
+      'Show questions with score from 0% up to this value.',
+    'branchTemplatesPdf.bestQuestionsMinScorePercentage': 'Best Questions Min Score %',
+    'branchTemplatesPdf.bestQuestionsMinScoreDescription':
+      'Show questions with score from this value up to 100%.',
     'branchTemplatesPdf.reportLanguage': 'PDF language',
     'branchTemplatesPdf.reportLanguageArabic': 'Arabic',
     'branchTemplatesPdf.reportLanguageEnglish': 'English',
     'branchTemplatesPdf.rootQuestionsOnly': 'Root questions only',
     'branchTemplatesPdf.lowestConditionLevel': 'Lowest condition level',
     'branchTemplatesPdf.downloadPdf': 'Download PDF',
+    'branchTemplatesPdf.downloadExcel': 'Download Excel',
     'branchTemplatesPdf.fromRequired': 'From date is required.',
     'branchTemplatesPdf.toRequired': 'To date is required.',
     'branchTemplatesPdf.invalidDateFormat': 'Dates must use yyyy-MM-dd format.',
@@ -1734,11 +1753,21 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplatesPdf.dateRangeExceeded': 'Maximum report duration is 12 months.',
     'branchTemplatesPdf.invalidTopWorstQuestionsCount':
       'Best/worst questions count must be between 1 and 50.',
+    'branchTemplatesPdf.invalidWorstQuestionsMaxScorePercentage':
+      'Worst Questions Max Score must be between 0 and 100.',
+    'branchTemplatesPdf.invalidBestQuestionsMinScorePercentage':
+      'Best Questions Min Score must be between 0 and 100.',
+    'branchTemplatesPdf.invalidQuestionThresholdOrder':
+      'Worst Questions threshold must be less than or equal to Best Questions threshold.',
     'branchTemplatesPdf.invalidTemplateKind': 'Template type is invalid.',
     'branchTemplatesPdf.invalidScoreCalculationMode': 'Score calculation mode is invalid.',
     'branchTemplatesPdf.invalidReportLanguage': 'PDF language is invalid.',
     'branchTemplatesPdf.templateKindRequiresTemplateId': 'Template kind requires template id.',
+    'branchTemplatesPdf.previewLoadError':
+      'Templates report preview could not be loaded. Please try again.',
     'branchTemplatesPdf.downloadError': 'PDF report could not be downloaded. Please try again.',
+    'branchTemplatesPdf.excelDownloadError':
+      'Excel report could not be downloaded. Please try again.',
     'branchTemplatesPdf.branchProfileNotFound': 'Current user branch profile was not found.',
     'branchTemplatesPdf.normalTemplatesLoadError':
       'Protected templates could not be loaded. You can still download all templates.',
@@ -2309,6 +2338,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'publicAnonymousTemplates.requiredError': 'هذا الحقل مطلوب.',
     'publicAnonymousTemplates.minLength': 'أقل عدد أحرف',
     'publicAnonymousTemplates.maxLength': 'أقصى عدد أحرف',
+    'publicAnonymousTemplates.startWithHint': 'القيمة يجب أن تبدأ بـ:',
+    'publicAnonymousTemplates.startWithError': 'القيمة يجب أن تبدأ بـ:',
     'publicAnonymousTemplates.integerError': 'أدخل رقمًا صحيحًا.',
     'publicAnonymousTemplates.minValue': 'أقل قيمة',
     'publicAnonymousTemplates.maxValue': 'أقصى قيمة',
@@ -2930,6 +2961,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'operatorTemplates.customInputRequired': 'هذا الحقل مطلوب.',
     'operatorTemplates.customInputMinLength': 'الدرجة أقصر من أقل طول مسموح.',
     'operatorTemplates.customInputMaxLength': 'الدرجة أطول من أقصى طول مسموح.',
+    'operatorTemplates.customInputStartWith': 'القيمة يجب أن تبدأ بالبادئة المطلوبة.',
+    'operatorTemplates.customInputStartWithHint': 'القيمة يجب أن تبدأ بـ:',
     'operatorTemplates.customInputInteger': 'أدخل رقمًا صحيحًا.',
     'operatorTemplates.customInputMinValue': 'الدرجة أقل من الحد الأدنى المسموح.',
     'operatorTemplates.customInputMaxValue': 'الدرجة أكبر من الحد الأقصى المسموح.',
@@ -3035,6 +3068,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.customInputOrder': 'الترتيب',
     'branchTemplates.customInputMinLength': 'أقل طول',
     'branchTemplates.customInputMaxLength': 'أقصى طول',
+    'branchTemplates.customInputStartWith': 'يبدأ بـ',
+    'branchTemplates.customInputStartWithPlaceholder': 'مثال: 011',
+    'branchTemplates.customInputStartWithHint': 'القيمة المدخلة يجب أن تبدأ بهذه البادئة.',
     'branchTemplates.customInputMinValue': 'أقل درجة',
     'branchTemplates.customInputMaxValue': 'أقصى درجة',
     'branchTemplates.open': 'مفتوح',
@@ -3173,6 +3209,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplates.customInputNameRequired': 'اسم المدخل مطلوب.',
     'branchTemplates.customInputNameMaxLength': 'اسم المدخل يجب ألا يزيد عن 100 حرف.',
     'branchTemplates.customInputNameDuplicated': 'اسم المدخل يجب أن يكون غير مكرر.',
+    'branchTemplates.customInputStartWithMaxLength':
+      'بادئة الإدخال يجب ألا تزيد عن 100 حرف.',
+    'branchTemplates.customInputStartWithEmpty': 'بادئة الإدخال لا يمكن أن تكون فارغة.',
     'branchTemplates.customInputLabelEnMaxLength':
       'عنوان المدخل بالإنجليزية يجب ألا يزيد عن 200 حرف.',
     'branchTemplates.customInputLabelArMaxLength': 'عنوان المدخل بالعربية يجب ألا يزيد عن 200 حرف.',
@@ -3405,6 +3444,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'questions.typeSingleChoice': 'اختيارات متعددة',
     'questions.typeVoice': 'صوت',
     'questions.typeStarRating': 'تقييم بالنجوم',
+    'questions.ratingScaleHint': 'أقل تقييم: 1 / أعلى تقييم: 5.',
     'questions.typeComplain': 'نص حر',
     'questions.typeSmiles': 'تقييم بالوجوه',
     'questions.options': 'الاختيارات',
@@ -3762,12 +3802,19 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplatesPdf.allTemplates': 'كل النماذج',
     'branchTemplatesPdf.scoreCalculationMode': 'طريقة حساب التقييم',
     'branchTemplatesPdf.topWorstQuestionsCount': 'أفضل/أسوأ الأسئلة',
+    'branchTemplatesPdf.worstQuestionsMaxScorePercentage': 'أقصى نتيجة للأسئلة الأسوأ %',
+    'branchTemplatesPdf.worstQuestionsMaxScoreDescription':
+      'اعرض الأسئلة التي نتيجتها من 0% حتى هذه القيمة.',
+    'branchTemplatesPdf.bestQuestionsMinScorePercentage': 'أقل نتيجة للأسئلة الأفضل %',
+    'branchTemplatesPdf.bestQuestionsMinScoreDescription':
+      'اعرض الأسئلة التي نتيجتها من هذه القيمة حتى 100%.',
     'branchTemplatesPdf.reportLanguage': 'لغة التقرير',
     'branchTemplatesPdf.reportLanguageArabic': 'العربية',
     'branchTemplatesPdf.reportLanguageEnglish': 'الإنجليزية',
     'branchTemplatesPdf.rootQuestionsOnly': 'الأسئلة الرئيسية فقط',
     'branchTemplatesPdf.lowestConditionLevel': 'أقل مستوى في الأسئلة الشرطية',
     'branchTemplatesPdf.downloadPdf': 'تحميل PDF',
+    'branchTemplatesPdf.downloadExcel': 'تحميل Excel',
     'branchTemplatesPdf.fromRequired': 'تاريخ البداية مطلوب.',
     'branchTemplatesPdf.toRequired': 'تاريخ النهاية مطلوب.',
     'branchTemplatesPdf.invalidDateFormat': 'يجب أن تكون التواريخ بصيغة yyyy-MM-dd.',
@@ -3776,11 +3823,19 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'branchTemplatesPdf.dateRangeExceeded': 'أقصى مدة للتقرير هي 12 شهرًا.',
     'branchTemplatesPdf.invalidTopWorstQuestionsCount':
       'عدد أفضل/أسوأ الأسئلة يجب أن يكون بين 1 و50.',
+    'branchTemplatesPdf.invalidWorstQuestionsMaxScorePercentage':
+      'أقصى نتيجة للأسئلة الأسوأ يجب أن تكون بين 0 و100.',
+    'branchTemplatesPdf.invalidBestQuestionsMinScorePercentage':
+      'أقل نتيجة للأسئلة الأفضل يجب أن تكون بين 0 و100.',
+    'branchTemplatesPdf.invalidQuestionThresholdOrder':
+      'حد الأسئلة الأسوأ يجب أن يكون أقل من أو يساوي حد الأسئلة الأفضل.',
     'branchTemplatesPdf.invalidTemplateKind': 'نوع النموذج غير صحيح.',
     'branchTemplatesPdf.invalidScoreCalculationMode': 'طريقة حساب التقييم غير صحيحة.',
     'branchTemplatesPdf.invalidReportLanguage': 'لغة ملف PDF غير صحيحة.',
     'branchTemplatesPdf.templateKindRequiresTemplateId': 'نوع النموذج يتطلب تحديد النموذج.',
+    'branchTemplatesPdf.previewLoadError': 'تعذر تحميل معاينة تقرير النماذج. حاول مرة أخرى.',
     'branchTemplatesPdf.downloadError': 'تعذر تحميل تقرير PDF. حاول مرة أخرى.',
+    'branchTemplatesPdf.excelDownloadError': 'تعذر تحميل تقرير Excel. حاول مرة أخرى.',
     'branchTemplatesPdf.branchProfileNotFound': 'لم يتم العثور على ملف فرع المستخدم الحالي.',
     'branchTemplatesPdf.normalTemplatesLoadError':
       'تعذر تحميل النماذج المحمية. لا يزال بإمكانك تحميل تقرير كل النماذج.',

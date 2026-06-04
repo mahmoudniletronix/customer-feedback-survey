@@ -1,0 +1,252 @@
+:root {
+  color-scheme: light;
+
+  --theme-font-family-base:
+    Cairo, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --theme-color-primary: #003b71;
+  --theme-color-secondary: #0066a1;
+  --theme-color-accent: #0099d8;
+  --theme-color-background: #ffffff;
+  --theme-color-text: #333333;
+  --theme-color-success: #00a9a5;
+  --theme-color-warning: #ffc107;
+  --theme-color-danger: #d32f2f;
+
+  --theme-color-page: #f7f9fc;
+  --theme-color-surface: #ffffff;
+  --theme-color-border: #e2e8f0;
+  --theme-color-border-strong: #cbd5e1;
+  --theme-color-heading: #0f172a;
+  --theme-color-muted-text: #64748b;
+  --theme-color-on-primary: #ffffff;
+  --theme-color-on-primary-muted: #d8e7f3;
+  --theme-color-overlay: rgb(2 6 23 / 45%);
+  --theme-color-grid-line: #e5eaf1;
+
+  --theme-color-accent-softest: color-mix(
+    in srgb,
+    var(--theme-color-accent) 4%,
+    var(--theme-color-surface)
+  );
+  --theme-color-accent-subtle: color-mix(
+    in srgb,
+    var(--theme-color-accent) 8%,
+    var(--theme-color-surface)
+  );
+  --theme-color-accent-soft: color-mix(
+    in srgb,
+    var(--theme-color-accent) 18%,
+    var(--theme-color-surface)
+  );
+  --theme-color-success-soft: color-mix(
+    in srgb,
+    var(--theme-color-success) 12%,
+    var(--theme-color-surface)
+  );
+  --theme-color-warning-soft: color-mix(
+    in srgb,
+    var(--theme-color-warning) 18%,
+    var(--theme-color-surface)
+  );
+  --theme-color-danger-soft: color-mix(
+    in srgb,
+    var(--theme-color-danger) 10%,
+    var(--theme-color-surface)
+  );
+
+  --theme-primary-rgb: 0 59 113;
+  --theme-secondary-rgb: 0 102 161;
+  --theme-accent-rgb: 0 153 216;
+  --theme-surface-rgb: 255 255 255;
+  --theme-border-rgb: 226 232 240;
+  --theme-shadow-rgb: 15 23 42;
+  --theme-on-primary-rgb: 255 255 255;
+  --theme-success-rgb: 0 169 165;
+  --theme-warning-rgb: 255 193 7;
+  --theme-danger-rgb: 211 47 47;
+
+  --theme-sidebar-bg: linear-gradient(180deg, var(--theme-color-primary) 0%, #002b52 100%);
+  --theme-focus-ring: rgb(var(--theme-accent-rgb) / 18%);
+
+  /* Backward-compatible aliases for existing global styles. */
+  --color-primary: var(--theme-color-primary);
+  --color-secondary: var(--theme-color-secondary);
+  --color-accent: var(--theme-color-accent);
+  --color-background: var(--theme-color-page);
+  --color-text: var(--theme-color-text);
+  --color-success: var(--theme-color-success);
+  --color-warning: var(--theme-color-warning);
+  --color-danger: var(--theme-color-danger);
+
+  /* Tailwind v4 token bridge: existing utility classes now follow this theme. */
+  --font-sans: var(--theme-font-family-base);
+  --default-font-family: var(--theme-font-family-base);
+
+  --color-white: var(--theme-color-surface);
+
+  --color-slate-50: var(--theme-color-page);
+  --color-slate-100: color-mix(in srgb, var(--theme-color-border) 55%, var(--theme-color-surface));
+  --color-slate-200: var(--theme-color-border);
+  --color-slate-300: var(--theme-color-border-strong);
+  --color-slate-400: color-mix(
+    in srgb,
+    var(--theme-color-muted-text) 66%,
+    var(--theme-color-surface)
+  );
+  --color-slate-500: var(--theme-color-muted-text);
+  --color-slate-600: color-mix(in srgb, var(--theme-color-text) 78%, var(--theme-color-primary));
+  --color-slate-700: var(--theme-color-text);
+  --color-slate-800: color-mix(in srgb, var(--theme-color-heading) 88%, var(--theme-color-text));
+  --color-slate-900: var(--theme-color-heading);
+  --color-slate-950: #020617;
+
+  --color-gray-50: var(--color-slate-50);
+  --color-gray-100: var(--color-slate-100);
+  --color-gray-200: var(--color-slate-200);
+  --color-gray-300: var(--color-slate-300);
+  --color-gray-400: var(--color-slate-400);
+  --color-gray-500: var(--color-slate-500);
+  --color-gray-600: var(--color-slate-600);
+  --color-gray-700: var(--color-slate-700);
+  --color-gray-800: var(--color-slate-800);
+  --color-gray-900: var(--color-slate-900);
+  --color-gray-950: var(--color-slate-950);
+
+  --color-cyan-50: var(--theme-color-accent-subtle);
+  --color-cyan-100: var(--theme-color-accent-soft);
+  --color-cyan-200: color-mix(in srgb, var(--theme-color-accent) 28%, var(--theme-color-surface));
+  --color-cyan-300: color-mix(in srgb, var(--theme-color-accent) 42%, var(--theme-color-surface));
+  --color-cyan-400: color-mix(in srgb, var(--theme-color-accent) 74%, var(--theme-color-surface));
+  --color-cyan-500: var(--theme-color-accent);
+  --color-cyan-600: var(--theme-color-secondary);
+  --color-cyan-700: var(--theme-color-secondary);
+  --color-cyan-800: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 86%,
+    var(--theme-color-primary)
+  );
+  --color-cyan-900: var(--theme-color-primary);
+
+  --color-sky-50: var(--theme-color-accent-subtle);
+  --color-sky-100: var(--theme-color-accent-soft);
+  --color-sky-200: var(--color-cyan-200);
+  --color-sky-300: var(--color-cyan-300);
+  --color-sky-400: var(--color-cyan-400);
+  --color-sky-500: var(--theme-color-accent);
+  --color-sky-600: var(--theme-color-secondary);
+  --color-sky-700: var(--theme-color-secondary);
+
+  --color-blue-50: var(--theme-color-accent-subtle);
+  --color-blue-100: var(--theme-color-accent-soft);
+  --color-blue-200: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 26%,
+    var(--theme-color-surface)
+  );
+  --color-blue-300: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 42%,
+    var(--theme-color-surface)
+  );
+  --color-blue-400: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 70%,
+    var(--theme-color-surface)
+  );
+  --color-blue-500: var(--theme-color-secondary);
+  --color-blue-600: var(--theme-color-primary);
+  --color-blue-700: var(--theme-color-primary);
+
+  --color-indigo-50: var(--theme-color-accent-subtle);
+  --color-indigo-100: var(--theme-color-accent-soft);
+  --color-indigo-500: var(--theme-color-secondary);
+  --color-indigo-600: var(--theme-color-primary);
+  --color-indigo-700: var(--theme-color-primary);
+
+  --color-violet-50: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 8%,
+    var(--theme-color-surface)
+  );
+  --color-violet-100: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 14%,
+    var(--theme-color-surface)
+  );
+  --color-violet-200: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 24%,
+    var(--theme-color-surface)
+  );
+  --color-violet-400: color-mix(
+    in srgb,
+    var(--theme-color-secondary) 66%,
+    var(--theme-color-surface)
+  );
+  --color-violet-500: var(--theme-color-secondary);
+  --color-violet-600: var(--theme-color-primary);
+  --color-violet-700: var(--theme-color-primary);
+
+  --color-emerald-50: var(--theme-color-success-soft);
+  --color-emerald-100: color-mix(
+    in srgb,
+    var(--theme-color-success) 18%,
+    var(--theme-color-surface)
+  );
+  --color-emerald-200: color-mix(
+    in srgb,
+    var(--theme-color-success) 28%,
+    var(--theme-color-surface)
+  );
+  --color-emerald-400: color-mix(
+    in srgb,
+    var(--theme-color-success) 74%,
+    var(--theme-color-surface)
+  );
+  --color-emerald-500: var(--theme-color-success);
+  --color-emerald-600: color-mix(in srgb, var(--theme-color-success) 86%, #006b68);
+  --color-emerald-700: color-mix(in srgb, var(--theme-color-success) 74%, #004d4b);
+  --color-emerald-800: color-mix(in srgb, var(--theme-color-success) 54%, #003331);
+  --color-emerald-900: color-mix(in srgb, var(--theme-color-success) 38%, #002725);
+
+  --color-amber-50: var(--theme-color-warning-soft);
+  --color-amber-100: color-mix(in srgb, var(--theme-color-warning) 24%, var(--theme-color-surface));
+  --color-amber-200: color-mix(in srgb, var(--theme-color-warning) 36%, var(--theme-color-surface));
+  --color-amber-300: color-mix(in srgb, var(--theme-color-warning) 54%, var(--theme-color-surface));
+  --color-amber-400: color-mix(in srgb, var(--theme-color-warning) 78%, var(--theme-color-surface));
+  --color-amber-500: var(--theme-color-warning);
+  --color-amber-600: color-mix(in srgb, var(--theme-color-warning) 82%, #8a5d00);
+  --color-amber-700: color-mix(in srgb, var(--theme-color-warning) 62%, #664200);
+  --color-amber-800: color-mix(in srgb, var(--theme-color-warning) 48%, #4a3100);
+  --color-amber-900: color-mix(in srgb, var(--theme-color-warning) 36%, #332100);
+
+  --color-yellow-50: var(--color-amber-50);
+  --color-yellow-100: var(--color-amber-100);
+  --color-yellow-200: var(--color-amber-200);
+  --color-yellow-300: var(--color-amber-300);
+  --color-yellow-400: var(--color-amber-400);
+  --color-yellow-500: var(--theme-color-warning);
+  --color-yellow-600: var(--color-amber-600);
+  --color-yellow-700: var(--color-amber-700);
+
+  --color-rose-50: var(--theme-color-danger-soft);
+  --color-rose-100: color-mix(in srgb, var(--theme-color-danger) 16%, var(--theme-color-surface));
+  --color-rose-200: color-mix(in srgb, var(--theme-color-danger) 28%, var(--theme-color-surface));
+  --color-rose-300: color-mix(in srgb, var(--theme-color-danger) 42%, var(--theme-color-surface));
+  --color-rose-400: color-mix(in srgb, var(--theme-color-danger) 72%, var(--theme-color-surface));
+  --color-rose-500: var(--theme-color-danger);
+  --color-rose-600: color-mix(in srgb, var(--theme-color-danger) 86%, #8f1b1b);
+  --color-rose-700: color-mix(in srgb, var(--theme-color-danger) 74%, #681212);
+  --color-rose-800: color-mix(in srgb, var(--theme-color-danger) 58%, #4a0d0d);
+  --color-rose-900: color-mix(in srgb, var(--theme-color-danger) 44%, #330808);
+
+  --color-red-50: var(--color-rose-50);
+  --color-red-100: var(--color-rose-100);
+  --color-red-200: var(--color-rose-200);
+  --color-red-300: var(--color-rose-300);
+  --color-red-400: var(--color-rose-400);
+  --color-red-500: var(--theme-color-danger);
+  --color-red-600: var(--color-rose-600);
+  --color-red-700: var(--color-rose-700);
+}

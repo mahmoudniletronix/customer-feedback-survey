@@ -29,6 +29,7 @@ export interface PublicAnonymousTemplateCustomInput {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
 }
 
@@ -93,6 +94,7 @@ export interface PublicAnonymousTemplateCustomInputApiResponse {
   maxLength?: number | null;
   minValue?: number | null;
   maxValue?: number | null;
+  startWith?: string | null;
   order?: number | null;
 }
 

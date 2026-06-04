@@ -14,6 +14,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 import { BarChart3, Frown, MessageSquareText, Mic, Smile, TrendingUp } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { ThemeColorService } from '../../../../../core/theme/theme-color.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -38,6 +39,7 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
   readonly reportStore = inject(BranchSatisfactionReportStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
+  private readonly themeColors = inject(ThemeColorService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chart: Chart<'line', number[], string> | null = null;
 
@@ -158,8 +160,8 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
           {
             label: this.i18n.translate('branchReports.score'),
             data: trend.map((point) => point.score),
-            borderColor: '#11A7C9',
-            backgroundColor: 'rgba(17, 167, 201, 0.14)',
+            borderColor: this.themeColors.color('accent'),
+            backgroundColor: this.themeColors.rgba('accent', 0.14),
             fill: true,
             tension: 0.35,
             pointRadius: 3,
@@ -192,7 +194,7 @@ export class BranchSatisfactionReportPanelComponent implements OnInit, OnDestroy
             beginAtZero: true,
             suggestedMax: 100,
             grace: '5%',
-            grid: { color: '#E5EAF1' },
+            grid: { color: this.themeColors.color('gridLine') },
           },
           x: {
             grid: { display: false },

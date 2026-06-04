@@ -49,7 +49,7 @@ export class InputComponent implements ControlValueAccessor {
         : 'h-10 rounded-lg px-3 py-2 text-sm';
 
     return [
-      'w-full border text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10 disabled:bg-slate-100',
+      'w-full border text-[var(--theme-color-text)] shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-focus-ring)] disabled:bg-slate-100',
       size,
       this.canTogglePassword() ? 'pe-12' : '',
     ].join(' ');

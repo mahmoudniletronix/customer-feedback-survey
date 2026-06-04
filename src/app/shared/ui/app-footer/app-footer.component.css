@@ -8,14 +8,19 @@
   justify-content: center;
   gap: 0.45rem;
   padding: 0.5rem 0.75rem;
-  border-top: var(--app-footer-border, 1px solid rgba(17, 167, 201, 0.18));
+  border-top: var(--app-footer-border, 1px solid rgb(var(--theme-accent-rgb) / 18%));
   border-radius: var(--app-footer-radius, 0);
   background: var(
     --app-footer-background,
-    linear-gradient(90deg, rgba(31, 58, 86, 0.98), rgba(24, 78, 103, 0.96)), #1f3a56
+    linear-gradient(
+      90deg,
+      rgb(var(--theme-primary-rgb) / 98%),
+      rgb(var(--theme-secondary-rgb) / 96%)
+    ),
+    var(--theme-color-primary)
   );
-  color: var(--app-footer-color, #d8e7f3);
-  box-shadow: var(--app-footer-shadow, 0 -10px 24px rgba(15, 23, 42, 0.05));
+  color: var(--app-footer-color, var(--theme-color-on-primary-muted));
+  box-shadow: var(--app-footer-shadow, 0 -10px 24px rgb(var(--theme-shadow-rgb) / 5%));
 }
 
 .app-footer-text {

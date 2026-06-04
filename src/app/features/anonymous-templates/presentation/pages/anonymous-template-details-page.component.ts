@@ -63,6 +63,7 @@ type CustomInputFieldName =
   | 'maxLength'
   | 'minValue'
   | 'maxValue'
+  | 'startWith'
   | 'order';
 
 interface CustomInputFormControls {
@@ -77,6 +78,7 @@ interface CustomInputFormControls {
   maxLength: FormControl<number | null>;
   minValue: FormControl<number | null>;
   maxValue: FormControl<number | null>;
+  startWith: FormControl<string>;
   order: FormControl<number>;
 }
 
@@ -272,6 +274,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
         maxLength: null,
         minValue: null,
         maxValue: null,
+        startWith: '',
         order: this.customInputsArray.length + 1,
       }),
     );
@@ -291,6 +294,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     } else {
       inputGroup.controls.minLength.setValue(null);
       inputGroup.controls.maxLength.setValue(null);
+      inputGroup.controls.startWith.setValue('');
     }
 
     this.validateCustomInputs();
@@ -409,6 +413,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return 'anonymousTemplates.customInputTypeCannotBeChanged';
     }
 
+    if (control.hasError('startWithEmpty')) {
+      return 'branchTemplates.customInputStartWithEmpty';
+    }
+
     if (control.hasError('stringValidation') || control.hasError('max')) {
       return 'branchTemplates.customInputStringValidationInvalid';
     }
@@ -465,6 +473,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     maxLength: number | null;
     minValue: number | null;
     maxValue: number | null;
+    startWith: string | null;
   }): string {
     const validationParts: string[] = [];
 
@@ -477,6 +486,11 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       if (input.maxLength !== null) {
         validationParts.push(
           `${this.i18n.translate('branchTemplates.customInputMaxLength')}: ${input.maxLength}`,
+        );
+      }
+      if (input.startWith) {
+        validationParts.push(
+          `${this.i18n.translate('branchTemplates.customInputStartWith')}: ${input.startWith}`,
         );
       }
     } else {
@@ -625,12 +639,13 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
           labelAr: customInput.labelAr ?? '',
           type: customInput.type,
           isRequired: customInput.isRequired,
-          minLength: customInput.minLength,
-          maxLength: customInput.maxLength,
-          minValue: customInput.minValue,
-          maxValue: customInput.maxValue,
-          order: customInput.order,
-        }),
+        minLength: customInput.minLength,
+        maxLength: customInput.maxLength,
+        minValue: customInput.minValue,
+        maxValue: customInput.maxValue,
+        startWith: customInput.startWith ?? '',
+        order: customInput.order,
+      }),
       );
     });
   }
@@ -657,6 +672,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     maxLength: number | null;
     minValue: number | null;
     maxValue: number | null;
+    startWith: string;
     order: number;
   }): CustomInputFormGroup {
     const type = String(value.type) === '2' ? '2' : '1';
@@ -679,6 +695,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       maxLength: new FormControl<number | null>(value.maxLength, [Validators.max(3000)]),
       minValue: new FormControl<number | null>(value.minValue),
       maxValue: new FormControl<number | null>(value.maxValue),
+      startWith: this.formBuilder.nonNullable.control(value.startWith, [Validators.maxLength(100)]),
       order: this.formBuilder.nonNullable.control(value.order, [
         Validators.required,
         Validators.min(1),
@@ -729,6 +746,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       } else {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.startWith.setValue('', { emitEvent: false });
         this.validateIntegerCustomInput(inputGroup);
       }
     });
@@ -773,6 +791,11 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
     if (minLength !== null && maxLength !== null && maxLength < minLength) {
       this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
     }
+
+    const startWith = inputGroup.controls.startWith.value;
+    if (startWith.length > 0 && startWith.trim().length === 0) {
+      this.setControlError(inputGroup.controls.startWith, 'startWithEmpty');
+    }
   }
 
   private validateIntegerCustomInput(inputGroup: CustomInputFormGroup): void {
@@ -798,6 +821,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
         stringValidation: _stringValidation,
         integerValidation: _integerValidation,
         typeChanged: _typeChanged,
+        startWithEmpty: _startWithEmpty,
         required: _manualRequired,
         ...remainingErrors
       } = errors;
@@ -839,6 +863,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
         maxLength: type === 1 ? value.maxLength : null,
         minValue: type === 2 ? value.minValue : null,
         maxValue: type === 2 ? value.maxValue : null,
+        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
         order: value.order,
       };
     });

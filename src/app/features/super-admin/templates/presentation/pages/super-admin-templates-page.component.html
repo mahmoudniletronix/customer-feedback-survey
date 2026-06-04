@@ -1,7 +1,7 @@
 <div class="w-full space-y-3 text-[11px]">
   <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
-      <p class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase text-[#11A7C9]">
+      <p class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase text-[var(--theme-color-accent)]">
         <app-icon [icon]="fileTextIcon" [size]="13" />
         {{ 'superAdminTemplates.eyebrow' | t }}
       </p>
@@ -10,7 +10,7 @@
         {{ 'superAdminTemplates.description' | t }}
       </p>
     </div>
-    <div class="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-[11px] font-extrabold text-[#0d94b3]">
+    <div class="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-[11px] font-extrabold text-[var(--theme-color-secondary)]">
       {{ templatesStore.totalItems() }} {{ 'superAdminTemplates.totalItems' | t }}
     </div>
   </div>
@@ -22,7 +22,7 @@
   }
 
   @if (templatesStore.error()) {
-    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
       {{ templatesStore.error() ?? '' | t }}
     </div>
   }
@@ -36,7 +36,7 @@
       <label class="flex min-w-0 flex-col gap-0.5 sm:col-span-2 lg:col-span-2 xl:col-span-1">
         <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.search' | t }}</span>
         <input
-          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="searchText"
           [placeholder]="'superAdminTemplates.searchPlaceholder' | t"
         />
@@ -45,7 +45,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.branchFilter' | t }}</span>
         <select
-          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="branchId"
         >
           <option value="">
@@ -60,7 +60,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.typeFilter' | t }}</span>
         <select
-          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="templateKind"
         >
           <option value="">{{ 'superAdminTemplates.allTypes' | t }}</option>
@@ -72,7 +72,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.statusFilter' | t }}</span>
         <select
-          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="isActive"
         >
           <option value="">{{ 'superAdminTemplates.allStatuses' | t }}</option>
@@ -84,7 +84,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.pageSize' | t }}</span>
         <select
-          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="pageSize"
         >
           <option value="10">10</option>
@@ -97,7 +97,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'superAdminTemplates.orderSort' | t }}</span>
         <select
-          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="orderSort"
         >
           <option value="">{{ 'superAdminTemplates.defaultSort' | t }}</option>
@@ -139,7 +139,7 @@
           @if (templatesStore.loading()) {
             <tr>
               <td class="px-2.5 py-8 text-center text-[11px] font-semibold text-slate-500" colspan="9">
-                <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
                 {{ 'superAdminTemplates.loading' | t }}
               </td>
             </tr>
@@ -160,7 +160,7 @@
                   <span
                     class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-extrabold"
                     [class.bg-cyan-50]="template.templateKind === 'Authorized'"
-                    [class.text-[#0d94b3]]="template.templateKind === 'Authorized'"
+                    [class.text-[var(--theme-color-secondary)]]="template.templateKind === 'Authorized'"
                     [class.bg-violet-50]="template.templateKind === 'Anonymous'"
                     [class.text-violet-700]="template.templateKind === 'Anonymous'"
                   >
@@ -188,7 +188,7 @@
                 </td>
                 <td class="px-2.5 py-2">
                   <div class="flex flex-col gap-1">
-                    <span class="w-fit rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-extrabold text-[#0d94b3]">
+                    <span class="w-fit rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-extrabold text-[var(--theme-color-secondary)]">
                       {{ template.questionsCount }} {{ 'superAdminTemplates.questionsShort' | t }}
                     </span>
                     <span class="w-fit rounded-md bg-slate-50 px-2 py-1 text-[10px] font-extrabold text-slate-600">
@@ -212,7 +212,7 @@
                   <div class="flex justify-end gap-1.5">
                     <button
                       type="button"
-                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cyan-100 bg-cyan-50 text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cyan-100 bg-cyan-50 text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
                       [attr.aria-label]="'superAdminTemplates.copyToBranch' | t"
                       [title]="'superAdminTemplates.copyToBranch' | t"
                       (click)="openCopyModal(template)"
@@ -221,7 +221,7 @@
                     </button>
                     <button
                       type="button"
-                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-cyan-50 hover:text-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-cyan-50 hover:text-[var(--theme-color-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
                       [attr.aria-label]="'superAdminTemplates.copyTemplateId' | t"
                       [title]="'superAdminTemplates.copyTemplateId' | t"
                       (click)="copyTemplateId(template)"
@@ -230,7 +230,7 @@
                     </button>
                     <button
                       type="button"
-                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-cyan-50 hover:text-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                      class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-cyan-50 hover:text-[var(--theme-color-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20 disabled:cursor-not-allowed disabled:opacity-40"
                       [disabled]="!template.publicUrl"
                       [attr.aria-label]="template.publicUrl ? ('superAdminTemplates.copyPublicUrl' | t) : ('superAdminTemplates.noPublicUrl' | t)"
                       [title]="template.publicUrl ? ('superAdminTemplates.copyPublicUrl' | t) : ('superAdminTemplates.noPublicUrl' | t)"
@@ -324,7 +324,7 @@
           <label class="flex min-w-0 flex-col gap-1">
             <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.targetBranch' | t }}</span>
             <select
-              class="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               formControlName="branchId"
               [disabled]="branchOptionsLoading() || templatesStore.copying()"
             >
@@ -336,14 +336,14 @@
               }
             </select>
             @if (copyForm.controls.branchId.touched && copyForm.controls.branchId.invalid) {
-              <span class="text-[10px] font-bold text-[#D94B5A]">
+              <span class="text-[10px] font-bold text-[var(--theme-color-danger)]">
                 {{ 'superAdminTemplates.targetBranchRequired' | t }}
               </span>
             }
           </label>
 
           @if (templatesStore.copyError()) {
-            <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+            <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
               {{ templatesStore.copyError() ?? '' | t }}
             </div>
           }
@@ -389,7 +389,7 @@
                     </p>
                     @if (result.publicUrl) {
                       <a
-                        class="mt-1 block break-words text-[11px] font-bold text-[#0d94b3] underline-offset-2 hover:underline [overflow-wrap:anywhere]"
+                        class="mt-1 block break-words text-[11px] font-bold text-[var(--theme-color-secondary)] underline-offset-2 hover:underline [overflow-wrap:anywhere]"
                         [href]="result.publicUrl"
                         target="_blank"
                         rel="noopener"

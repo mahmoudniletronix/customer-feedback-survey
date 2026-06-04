@@ -7,7 +7,11 @@
     <!-- Brand -->
     <div class="brand-section mb-6 flex items-center gap-3 px-1.5">
       <div class="brand-logo-container">
-        <img class="brand-logo-image" src="images/Tab-logo.png" [attr.alt]="'common.niletronixLogoAlt' | t" />
+        <img
+          class="brand-logo-image"
+          [src]="brandAssets.sidebarLogo"
+          [attr.alt]="'common.niletronixLogoAlt' | t"
+        />
       </div>
       <div class="brand-text min-w-0">
         <p class="brand-name truncate">{{ 'app.brand' | t }}</p>

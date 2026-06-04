@@ -6,7 +6,7 @@
         {{ 'common.back' | t }}
       </app-button>
       <div class="min-w-0">
-        <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]">
+        <p class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]">
           {{ 'anonymousTemplates.responsesEyebrow' | t }}
         </p>
         <h2 class="mt-1 break-words text-lg font-bold text-slate-900 [overflow-wrap:anywhere]">
@@ -26,7 +26,7 @@
         {{ 'anonymousTemplates.title' | t }}
       </a>
       <button
-        class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
         type="button"
         (click)="toggleAdvancedFilters()"
       >
@@ -70,7 +70,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.template' | t }}</span>
               <select
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="anonymousTemplateId"
               >
                 <option value="">{{ 'branchResponsesHistory.allTemplates' | t }}</option>
@@ -83,7 +83,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.fromDate' | t }}</span>
               <input
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 type="date"
                 formControlName="from"
               />
@@ -92,7 +92,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.toDate' | t }}</span>
               <input
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 type="date"
                 formControlName="to"
               />
@@ -101,7 +101,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.minScore' | t }}</span>
               <input
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 type="number"
                 min="0"
                 max="100"
@@ -112,7 +112,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.maxScore' | t }}</span>
               <input
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 type="number"
                 min="0"
                 max="100"
@@ -123,7 +123,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'branchResponsesHistory.complaint' | t }}</span>
               <select
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="hasComplaint"
               >
                 <option value="">{{ 'branchResponsesHistory.all' | t }}</option>
@@ -135,7 +135,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'branchResponsesHistory.voice' | t }}</span>
               <select
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="hasVoice"
               >
                 <option value="">{{ 'branchResponsesHistory.all' | t }}</option>
@@ -147,7 +147,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'common.search' | t }}</span>
               <input
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 type="search"
                 formControlName="searchText"
                 [placeholder]="'branchResponsesHistory.searchPlaceholder' | t"
@@ -157,7 +157,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.orderSort' | t }}</span>
               <select
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="orderSort"
               >
                 <option value="Newest">{{ 'globalQuestionGroups.newest' | t }}</option>
@@ -168,7 +168,7 @@
             <label class="flex min-w-0 flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-500">{{ 'branchResponsesHistory.pageSize' | t }}</span>
               <select
-                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="pageSize"
               >
                 <option value="10">10</option>
@@ -193,13 +193,13 @@
     </app-card>
 
     @if (filterError()) {
-      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
         {{ filterError() ?? '' | t }}
       </div>
     }
 
     @if (responsesStore.error()) {
-      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+      <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
         {{ responsesStore.error() ?? '' | t }}
       </div>
     }
@@ -239,7 +239,7 @@
               @if (responsesStore.loading()) {
                 <tr>
                   <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="7">
-                    <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                    <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
                     {{ 'anonymousTemplates.responsesLoading' | t }}
                   </td>
                 </tr>
@@ -288,7 +288,7 @@
                       <span
                         class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                         [class.bg-cyan-50]="response.hasVoice"
-                        [class.text-[#0d94b3]]="response.hasVoice"
+                        [class.text-[var(--theme-color-secondary)]]="response.hasVoice"
                         [class.bg-slate-100]="!response.hasVoice"
                         [class.text-slate-500]="!response.hasVoice"
                       >
@@ -315,7 +315,7 @@
                     <td class="px-2.5 py-2">
                       <div class="flex justify-end">
                         <a
-                          class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                          class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
                           [routerLink]="[
                             '/anonymous-templates',
                             response.anonymousTemplateId,

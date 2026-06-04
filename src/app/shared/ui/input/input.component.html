@@ -3,8 +3,8 @@
   <div class="relative">
     <input
       [class]="inputClasses()"
-      [class.border-[#D94B5A]]="invalid()"
       [class.border-slate-200]="!invalid()"
+      [style.border-color]="invalid() ? 'var(--theme-color-danger)' : null"
       [type]="inputType()"
       [placeholder]="placeholder()"
       [disabled]="disabled()"
@@ -15,7 +15,7 @@
 
     @if (canTogglePassword()) {
       <button
-        class="password-toggle absolute inset-y-1 end-1 inline-flex w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-[#11A7C9] focus:outline-none focus:ring-4 focus:ring-[#11A7C9]/10 disabled:pointer-events-none disabled:opacity-50"
+        class="password-toggle absolute inset-y-1 end-1 inline-flex w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-[var(--theme-color-accent)] focus:outline-none focus:ring-4 focus:ring-[var(--theme-focus-ring)] disabled:pointer-events-none disabled:opacity-50"
         type="button"
         [disabled]="disabled()"
         [attr.aria-label]="passwordToggleLabel()"
@@ -30,6 +30,8 @@
     <span [class]="feedbackClasses() + ' text-slate-500'">{{ hint() }}</span>
   }
   @if (error()) {
-    <span [class]="feedbackClasses() + ' font-medium text-[#D94B5A]'">{{ error() }}</span>
+    <span [class]="feedbackClasses() + ' font-medium text-[var(--theme-color-danger)]'">{{
+      error()
+    }}</span>
   }
 </label>

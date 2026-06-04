@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LogIn } from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { BRAND_ASSETS } from '../../../../core/theme/brand-assets';
 import { AuthStore } from '../state/auth.store';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
@@ -27,6 +28,7 @@ import { AppFooterComponent } from '../../../../shared/ui/app-footer/app-footer.
 export class LoginPageComponent {
   readonly authStore = inject(AuthStore);
   readonly i18n = inject(I18nService);
+  readonly brandAssets = BRAND_ASSETS;
   readonly loginIcon = LogIn;
 
   private readonly formBuilder = inject(FormBuilder);

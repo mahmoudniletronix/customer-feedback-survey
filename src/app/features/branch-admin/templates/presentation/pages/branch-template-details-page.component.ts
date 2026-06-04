@@ -68,6 +68,7 @@ type CustomInputFieldName =
   | 'isRequired'
   | 'minLength'
   | 'maxLength'
+  | 'startWith'
   | 'minValue'
   | 'maxValue'
   | 'order';
@@ -82,6 +83,7 @@ interface CustomInputFormControls {
   isRequired: FormControl<boolean>;
   minLength: FormControl<number | null>;
   maxLength: FormControl<number | null>;
+  startWith: FormControl<string>;
   minValue: FormControl<number | null>;
   maxValue: FormControl<number | null>;
   order: FormControl<number>;
@@ -324,6 +326,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     } else {
       inputGroup.controls.minLength.setValue(null);
       inputGroup.controls.maxLength.setValue(null);
+      inputGroup.controls.startWith.setValue('');
     }
 
     this.validateCustomInputs();
@@ -343,6 +346,10 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
     if (control.hasError('maxlength')) {
       return `branchTemplates.customInput${this.capitalizeField(field)}MaxLength`;
+    }
+
+    if (control.hasError('startWithEmpty')) {
+      return 'branchTemplates.customInputStartWithEmpty';
     }
 
     if (control.hasError('min') || control.hasError('invalidOrder')) {
@@ -483,7 +490,18 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     if (customInput.type === 1) {
       const minLength = customInput.minLength ?? '-';
       const maxLength = customInput.maxLength ?? '-';
-      return `${this.i18n.translate('branchTemplates.customInputMinLength')}: ${minLength} / ${this.i18n.translate('branchTemplates.customInputMaxLength')}: ${maxLength}`;
+      const validations = [
+        `${this.i18n.translate('branchTemplates.customInputMinLength')}: ${minLength}`,
+        `${this.i18n.translate('branchTemplates.customInputMaxLength')}: ${maxLength}`,
+      ];
+
+      if (customInput.startWith) {
+        validations.push(
+          `${this.i18n.translate('branchTemplates.customInputStartWith')}: ${customInput.startWith}`,
+        );
+      }
+
+      return validations.join(' / ');
     }
 
     const minValue = customInput.minValue ?? '-';
@@ -661,6 +679,9 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       maxLength: new FormControl<number | null>(customInput?.maxLength ?? null, [
         Validators.max(3000),
       ]),
+      startWith: this.formBuilder.nonNullable.control(customInput?.startWith ?? '', [
+        Validators.maxLength(100),
+      ]),
       minValue: new FormControl<number | null>(customInput?.minValue ?? null),
       maxValue: new FormControl<number | null>(customInput?.maxValue ?? null),
       order: this.formBuilder.nonNullable.control(customInput?.order ?? order, [
@@ -702,6 +723,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       } else {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.startWith.setValue('', { emitEvent: false });
         this.validateIntegerCustomInput(inputGroup);
       }
     });
@@ -740,6 +762,11 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     if (minLength !== null && maxLength !== null && maxLength < minLength) {
       this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
     }
+
+    const startWith = inputGroup.controls.startWith.value;
+    if (startWith.length > 0 && startWith.trim().length === 0) {
+      this.setControlError(inputGroup.controls.startWith, 'startWithEmpty');
+    }
   }
 
   private validateIntegerCustomInput(inputGroup: CustomInputFormGroup): void {
@@ -765,6 +792,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         typeCannotBeChanged: _typeCannotBeChanged,
         stringValidation: _stringValidation,
         integerValidation: _integerValidation,
+        startWithEmpty: _startWithEmpty,
         required: _manualRequired,
         ...remainingErrors
       } = errors;
@@ -804,6 +832,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
         isRequired: value.isRequired,
         minLength: type === 1 ? value.minLength : null,
         maxLength: type === 1 ? value.maxLength : null,
+        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
         minValue: type === 2 ? value.minValue : null,
         maxValue: type === 2 ? value.maxValue : null,
         order: value.order,

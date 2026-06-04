@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { ThemeColorService } from '../../../../../core/theme/theme-color.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TrendPoint } from '../../domain/dashboard.model';
 
@@ -27,6 +28,7 @@ export class TrendChartComponent implements OnDestroy {
   readonly data = input<readonly TrendPoint[]>([]);
   private readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   private readonly i18n = inject(I18nService);
+  private readonly themeColors = inject(ThemeColorService);
   private chart: Chart<'bar', number[], string> | null = null;
 
   constructor() {
@@ -55,7 +57,7 @@ export class TrendChartComponent implements OnDestroy {
           {
             label: this.i18n.translate('survey.responses'),
             data: data.map((point) => point.value),
-            backgroundColor: '#11A7C9',
+            backgroundColor: this.themeColors.color('accent'),
             borderRadius: 12
           }
         ]
@@ -69,7 +71,7 @@ export class TrendChartComponent implements OnDestroy {
         scales: {
           y: {
             beginAtZero: true,
-            grid: { color: '#E5EAF1' }
+            grid: { color: this.themeColors.color('gridLine') }
           },
           x: {
             grid: { display: false }

@@ -114,6 +114,7 @@ export class PublicAnonymousTemplateService {
       maxLength: response.maxLength ?? null,
       minValue: response.minValue ?? null,
       maxValue: response.maxValue ?? null,
+      startWith: response.startWith ?? null,
       order: response.order ?? 0,
     };
   }

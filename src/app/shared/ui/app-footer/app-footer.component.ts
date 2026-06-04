@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { BRAND_ASSETS } from '../../../core/theme/brand-assets';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
@@ -9,4 +10,6 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   styleUrl: './app-footer.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppFooterComponent {}
+export class AppFooterComponent {
+  readonly brandAssets = BRAND_ASSETS;
+}

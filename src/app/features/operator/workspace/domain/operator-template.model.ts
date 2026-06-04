@@ -23,6 +23,8 @@ export interface OperatorAssignedTemplate {
   nameEn: string;
   nameAr: string;
   description: string;
+  descriptionEn: string;
+  descriptionAr: string;
   branchId: string;
   branchNameEn: string;
   branchNameAr: string;
@@ -53,6 +55,7 @@ export interface OperatorAssignedTemplateCustomInput {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
 }
 
@@ -149,6 +152,8 @@ export interface OperatorAssignedTemplateApiResponse {
   nameEn?: string;
   nameAr?: string | null;
   description?: string | null;
+  descriptionEn?: string | null;
+  descriptionAr?: string | null;
   branchId?: string | number;
   branchNameEn?: string;
   branchNameAr?: string | null;
@@ -177,6 +182,7 @@ export interface OperatorAssignedTemplateCustomInputApiResponse {
   maxLength?: number | null;
   minValue?: number | null;
   maxValue?: number | null;
+  startWith?: string | null;
   order?: number | null;
 }
 

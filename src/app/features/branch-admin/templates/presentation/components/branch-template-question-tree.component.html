@@ -6,7 +6,7 @@
   >
     <div
       class="absolute inset-y-3 start-0 w-1 rounded-e-full"
-      [class.bg-[#11A7C9]]="depth === 0"
+      [class.bg-[var(--theme-color-accent)]]="depth === 0"
       [class.bg-emerald-500]="depth > 0"
     ></div>
     <div class="ms-2 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -15,7 +15,7 @@
           <span
             class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[10px] font-black"
             [class.bg-cyan-50]="depth === 0"
-            [class.text-[#0d94b3]]="depth === 0"
+            [class.text-[var(--theme-color-secondary)]]="depth === 0"
             [class.bg-emerald-50]="depth > 0"
             [class.text-emerald-700]="depth > 0"
           >
@@ -40,7 +40,7 @@
           <span
             class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
             [class.bg-cyan-50]="depth === 0"
-            [class.text-[#0d94b3]]="depth === 0"
+            [class.text-[var(--theme-color-secondary)]]="depth === 0"
             [class.bg-emerald-50]="depth > 0"
             [class.text-emerald-700]="depth > 0"
           >

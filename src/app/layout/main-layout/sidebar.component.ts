@@ -21,6 +21,7 @@ import {
 import { Role } from '../../shared/models/role.model';
 import { AuthStore } from '../../features/auth/presentation/state/auth.store';
 import { I18nService } from '../../core/services/i18n.service';
+import { BRAND_ASSETS } from '../../core/theme/brand-assets';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
@@ -217,6 +218,7 @@ export class SidebarComponent {
   readonly mobileOpen = input(false);
   readonly toggle = output<void>();
   readonly close = output<void>();
+  readonly brandAssets = BRAND_ASSETS;
   readonly panelLeftCloseIcon = PanelLeftClose;
   readonly panelLeftOpenIcon = PanelLeftOpen;
 

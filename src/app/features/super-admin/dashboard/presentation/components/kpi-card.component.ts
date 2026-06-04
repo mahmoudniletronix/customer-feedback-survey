@@ -38,10 +38,10 @@ export class KpiCardComponent {
   readonly badgeClasses = computed(() => {
     const tone = this.kpi().tone;
     if (tone === 'primary') {
-      return 'bg-cyan-50 text-[#11A7C9]';
+      return 'bg-cyan-50 text-[var(--theme-color-accent)]';
     }
     if (tone === 'accent') {
-      return 'bg-rose-50 text-[#D94B5A]';
+      return 'bg-rose-50 text-[var(--theme-color-danger)]';
     }
     return 'bg-slate-100 text-slate-600';
   });
@@ -49,10 +49,10 @@ export class KpiCardComponent {
   readonly iconClasses = computed(() => {
     const tone = this.kpi().tone;
     if (tone === 'primary') {
-      return 'bg-cyan-50 text-[#11A7C9]';
+      return 'bg-cyan-50 text-[var(--theme-color-accent)]';
     }
     if (tone === 'accent') {
-      return 'bg-rose-50 text-[#D94B5A]';
+      return 'bg-rose-50 text-[var(--theme-color-danger)]';
     }
     return 'bg-slate-100 text-slate-600';
   });

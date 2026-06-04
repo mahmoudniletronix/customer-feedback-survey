@@ -1,13 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap");
-@import "tailwindcss";
-
-:root {
-  color-scheme: light;
-  --color-primary: #11A7C9;
-  --color-sidebar: #1F3A56;
-  --color-accent: #D94B5A;
-  --color-background: #F7F9FC;
-}
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+@import './styles/theme.css';
 
 html,
 body {
@@ -17,14 +10,15 @@ body {
 
 html {
   font-size: 14px;
+  font-family: var(--theme-font-family-base);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   background: var(--color-background);
-  color: #122033;
-  font-family: Cairo, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--color-text);
+  font-family: var(--theme-font-family-base);
   font-size: 13px;
   line-height: 1.45;
   direction: inherit;
@@ -35,7 +29,7 @@ button:not(:disabled),
 a[href],
 select:not(:disabled),
 label[for],
-[role="button"],
+[role='button'],
 [routerLink],
 [ng-reflect-router-link],
 [onclick],
@@ -88,23 +82,32 @@ td {
   padding-block: 0.75rem;
 }
 
-main :where(
-  article[class*="border-slate-100"][class*="bg-white"],
-  article[class*="border-slate-200"][class*="bg-white"],
-  section[class*="border-slate-100"][class*="bg-white"],
-  section[class*="border-slate-200"][class*="bg-white"],
-  div[class*="border-slate-100"][class*="bg-white"],
-  div[class*="border-slate-200"][class*="bg-white"]
-) {
+main
+  :where(
+    article[class*='border-slate-100'][class*='bg-white'],
+    article[class*='border-slate-200'][class*='bg-white'],
+    section[class*='border-slate-100'][class*='bg-white'],
+    section[class*='border-slate-200'][class*='bg-white'],
+    div[class*='border-slate-100'][class*='bg-white'],
+    div[class*='border-slate-200'][class*='bg-white']
+  ) {
   border-radius: 0.625rem;
   padding: 1rem;
 }
 
-main :where([class*="bg-slate-50"], [class*="bg-cyan-50"], [class*="bg-emerald-50"], [class*="bg-rose-50"], [class*="bg-amber-50"], [class*="bg-violet-50"]) {
+main
+  :where(
+    [class*='bg-slate-50'],
+    [class*='bg-cyan-50'],
+    [class*='bg-emerald-50'],
+    [class*='bg-rose-50'],
+    [class*='bg-amber-50'],
+    [class*='bg-violet-50']
+  ) {
   border-radius: 0.5rem;
 }
 
-main :where([class*="items-center"][class*="justify-center"][class*="bg-cyan-50"]) {
+main :where([class*='items-center'][class*='justify-center'][class*='bg-cyan-50']) {
   min-width: 2.25rem;
   min-height: 2.25rem;
 }
@@ -132,7 +135,7 @@ app-card form.grid {
   margin-bottom: 0.125rem;
   font-size: 0.5625rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--theme-color-muted-text);
 }
 
 .compact-filter-form app-button button {
@@ -141,9 +144,13 @@ app-card form.grid {
   font-size: 0.6875rem;
 }
 
-main :is(div[class*="overflow-hidden"][class*="border-slate-100"], div[class*="overflow-hidden"][class*="border-slate-200"]) {
+main
+  :is(
+    div[class*='overflow-hidden'][class*='border-slate-100'],
+    div[class*='overflow-hidden'][class*='border-slate-200']
+  ) {
   border-radius: 0.75rem;
-  background: #fff;
+  background: var(--theme-color-surface);
 }
 
 main table :is(th[class], td[class]) {
@@ -152,14 +159,18 @@ main table :is(th[class], td[class]) {
 }
 
 main table thead {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--theme-color-border);
 }
 
 main table tbody tr {
   min-height: 3rem;
 }
 
-app-card :is(div[class*="border-t"][class*="border-slate-100"], div[class*="border-t"][class*="border-slate-200"]) {
+app-card
+  :is(
+    div[class*='border-t'][class*='border-slate-100'],
+    div[class*='border-t'][class*='border-slate-200']
+  ) {
   margin-top: 1rem;
   padding-top: 1rem;
 }

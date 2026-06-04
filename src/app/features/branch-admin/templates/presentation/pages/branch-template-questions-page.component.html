@@ -7,7 +7,7 @@
       </app-button>
       <div class="min-w-0">
         <p
-          class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
+          class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[var(--theme-color-secondary)]"
         >
           {{ 'branchTemplates.questionsManagerEyebrow' | t }}
         </p>
@@ -63,7 +63,7 @@
       type="button"
       class="inline-flex items-center gap-2 rounded-lg px-3 text-xs font-bold transition"
       [class.bg-cyan-50]="activeTab() === 'questions'"
-      [class.text-[#0d94b3]]="activeTab() === 'questions'"
+      [class.text-[var(--theme-color-secondary)]]="activeTab() === 'questions'"
       [class.text-slate-600]="activeTab() !== 'questions'"
       (click)="setActiveTab('questions')"
     >
@@ -74,7 +74,7 @@
       type="button"
       class="inline-flex items-center gap-2 rounded-lg px-3 text-xs font-bold transition"
       [class.bg-cyan-50]="activeTab() === 'preview'"
-      [class.text-[#0d94b3]]="activeTab() === 'preview'"
+      [class.text-[var(--theme-color-secondary)]]="activeTab() === 'preview'"
       [class.text-slate-600]="activeTab() !== 'preview'"
       (click)="setActiveTab('preview')"
     >
@@ -93,7 +93,7 @@
 
   @if (templatesStore.questionsSelectionError()) {
     <div
-      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
     >
       {{ templatesStore.questionsSelectionError() ?? '' | t }}
     </div>
@@ -104,7 +104,7 @@
       class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
     >
       <span
-        class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
       ></span>
       {{ 'branchTemplates.questionsManagerLoading' | t }}
     </div>
@@ -127,7 +127,7 @@
             {{ 'branchTemplates.searchQuestions' | t }}
           </span>
           <span
-            class="flex items-center gap-2 border border-slate-200 bg-white px-3 shadow-sm shadow-slate-200/60 transition focus-within:border-[#11A7C9] focus-within:ring-2 focus-within:ring-[#11A7C9]/15"
+            class="flex items-center gap-2 border border-slate-200 bg-white px-3 shadow-sm shadow-slate-200/60 transition focus-within:border-[var(--theme-color-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-color-accent)]/15"
           >
             <app-icon class="text-slate-400" [icon]="searchIcon" [size]="17" />
             <input
@@ -151,7 +151,7 @@
                   (click)="toggleAvailableGroup(group.groupId)"
                 >
                   <span
-                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-[#0d94b3] ring-1 ring-slate-200"
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--theme-color-secondary)] ring-1 ring-slate-200"
                   >
                     <app-icon
                       [icon]="isAvailableGroupExpanded(group.groupId) ? chevronUpIcon : plusIcon"
@@ -239,7 +239,7 @@
       >
         <div
           card-actions
-          class="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-xs font-bold text-[#0d94b3]"
+          class="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-xs font-bold text-[var(--theme-color-secondary)]"
         >
           <app-icon [icon]="listChecksIcon" [size]="16" />
           {{ selectedQuestions().length }} {{ 'branchTemplates.questionsSelected' | t }}
@@ -269,7 +269,7 @@
                 >
                   <div class="flex min-w-0 flex-1 items-center gap-2">
                     <span
-                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-xs font-bold text-[#0d94b3]"
+                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-xs font-bold text-[var(--theme-color-secondary)]"
                     >
                       {{ index + 1 }}
                     </span>

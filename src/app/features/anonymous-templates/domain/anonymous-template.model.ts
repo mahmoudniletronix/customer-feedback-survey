@@ -20,6 +20,7 @@ export interface AnonymousTemplateCustomInput {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
   isActive: boolean;
 }
@@ -357,6 +358,7 @@ export interface CreateAnonymousTemplateCustomInputPayload {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
 }
 
@@ -426,6 +428,7 @@ export interface AnonymousTemplateCustomInputApiResponse {
   maxLength?: number | null;
   minValue?: number | null;
   maxValue?: number | null;
+  startWith?: string | null;
   order?: number | null;
   isActive?: boolean;
 }

@@ -10,7 +10,7 @@ import { IconComponent } from '../icon/icon.component';
   imports: [IconComponent, TranslatePipe],
   template: `
     <button
-      class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+      class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
       type="button"
       [attr.aria-label]="'common.back' | t"
       (click)="goBack()"

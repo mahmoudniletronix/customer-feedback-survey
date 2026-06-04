@@ -7,7 +7,7 @@
     <div class="flex justify-end sm:shrink-0">
       <div class="flex flex-wrap items-center justify-end gap-2">
         <button
-          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
           type="button"
           (click)="toggleAdvancedFilters()"
         >
@@ -36,7 +36,7 @@
 
   @if (operatorsStore.error()) {
     <div
-      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
     >
       {{ operatorsStore.error() ?? '' | t }}
     </div>
@@ -79,7 +79,7 @@
       <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
         <span class="text-[9px] font-bold text-slate-500">{{ 'operators.department' | t }}</span>
         <select
-          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100 disabled:text-slate-400"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 disabled:bg-slate-100 disabled:text-slate-400"
           formControlName="departmentId"
           [disabled]="!isSuperAdmin()"
         >
@@ -104,7 +104,7 @@
       <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
         <span class="text-[9px] font-bold text-slate-500">{{ 'questionGroups.pageSize' | t }}</span>
         <select
-          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="pageSize"
         >
           <option value="10">10</option>
@@ -157,7 +157,7 @@
               <tr>
                 <td class="py-8 text-center text-slate-500" colspan="7">
                   <span
-                    class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                    class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
                   ></span>
                   {{ 'operators.loading' | t }}
                 </td>
@@ -245,7 +245,7 @@
       @if (operatorsStore.loading()) {
         <div class="border border-slate-100 bg-white text-center text-slate-500">
           <span
-            class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+            class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
           ></span>
           {{ 'operators.loading' | t }}
         </div>
@@ -256,7 +256,7 @@
           >
             <div class="flex items-start gap-3">
               <span
-                class="flex shrink-0 items-center justify-center bg-cyan-50 text-[#11A7C9]"
+                class="flex shrink-0 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]"
               >
                 <app-icon [icon]="operatorIcon" [size]="18" />
               </span>
@@ -387,8 +387,8 @@
         {{ 'operators.department' | t }}
       </span>
       <select
-        class="w-full border px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 disabled:bg-slate-100 disabled:text-slate-400"
-        [class.border-[#D94B5A]]="operatorFieldError('departmentId').length > 0"
+        class="w-full border px-3 text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 disabled:bg-slate-100 disabled:text-slate-400"
+        [class.border-[var(--theme-color-danger)]]="operatorFieldError('departmentId').length > 0"
         [class.border-slate-200]="operatorFieldError('departmentId').length === 0"
         formControlName="departmentId"
         [disabled]="!isSuperAdmin()"
@@ -408,7 +408,7 @@
         }
       </select>
       @if (operatorFieldError('departmentId')) {
-        <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
           {{ operatorFieldError('departmentId') | t }}
         </span>
       }
@@ -547,7 +547,7 @@
               {{ operator.email }}
             </p>
           </div>
-          <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#11A7C9]">
+          <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-accent)]">
             {{ operator.departmentNameEn || ('operators.department' | t) }}
           </span>
         </div>
@@ -563,7 +563,7 @@
           <p class="mt-0.5 text-sm font-bold text-slate-900">
             @if (operatorsStore.activeTemplatesLoading()) {
               <span
-                class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
               ></span>
             } @else {
               {{ operatorsStore.activeTemplates().length }}
@@ -594,7 +594,7 @@
         </span>
         <input
           type="text"
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 shadow-sm shadow-slate-200/60 outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           [placeholder]="'operators.templatesSearchPlaceholder' | t"
           [value]="templatesSearchText()"
           (input)="updateTemplatesSearchText($event)"
@@ -626,7 +626,7 @@
         class="rounded-lg border border-slate-100 bg-white p-3 text-center text-[11px] font-semibold text-slate-500"
       >
         <span
-          class="mx-auto mb-1.5 block h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+          class="mx-auto mb-1.5 block h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
         ></span>
         {{ 'operators.templatesSelectionLoading' | t }}
       </div>
@@ -634,7 +634,7 @@
 
     @if (operatorsStore.templatesSelectionError()) {
       <div
-        class="rounded-lg border border-rose-100 bg-rose-50 p-2.5 text-[11px] font-semibold text-[#D94B5A]"
+        class="rounded-lg border border-rose-100 bg-rose-50 p-2.5 text-[11px] font-semibold text-[var(--theme-color-danger)]"
       >
         {{ operatorsStore.templatesSelectionError() ?? '' | t }}
       </div>
@@ -663,7 +663,7 @@
       <section class="space-y-2">
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-xs font-bold text-slate-900">{{ 'operators.selectedTemplates' | t }}</h3>
-          <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[#11A7C9]">
+          <span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-accent)]">
             {{ selectedTemplatesForModal().length }}
           </span>
         </div>
@@ -680,7 +680,7 @@
                 >
                   <span class="flex min-w-0 items-center gap-2">
                     <span
-                      class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white text-[#11A7C9] shadow-sm shadow-cyan-100/70"
+                      class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white text-[var(--theme-color-accent)] shadow-sm shadow-cyan-100/70"
                     >
                       <app-icon
                         [icon]="group.expanded ? chevronDownIcon : chevronRightIcon"
@@ -698,7 +698,7 @@
                       }
                     </span>
                   </span>
-                  <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#11A7C9]">
+                  <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-accent)]">
                     {{ group.templates.length }}
                   </span>
                 </button>

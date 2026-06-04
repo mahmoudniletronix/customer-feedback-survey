@@ -34,6 +34,7 @@ import {
   UsersRound,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { ThemeColorService } from '../../../../../core/theme/theme-color.service';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -91,10 +92,14 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly themeColors = inject(ThemeColorService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
+  private readonly templatePerformanceSection =
+    viewChild<ElementRef<HTMLElement>>('templatePerformanceSection');
   readonly backIcon = ArrowLeft;
 
   private trendChart: Chart<'line', (number | null)[], string> | null = null;
+  private templatePerformanceFocusTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly alertIcon = AlertTriangle;
   readonly branchIcon = Building2;
@@ -116,6 +121,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly advancedFiltersOpen = signal(true);
   readonly branchSnapshotExpanded = signal(false);
   readonly expandedBranchSections = signal<ReadonlySet<string>>(new Set());
+  readonly templatePerformanceFocused = signal(false);
   readonly customInputSegmentsVisible = false;
   readonly validationError = signal<string | null>(null);
   readonly sourceSignal = signal<SurveyDashboardSource>('All');
@@ -178,6 +184,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.trendChart?.destroy();
+    this.clearTemplatePerformanceFocusTimer();
   }
 
   toggleAdvancedFilters(): void {
@@ -266,6 +273,22 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
 
     void this.router.navigate(['/anonymous-templates/dashboard']);
+  }
+
+  focusTemplatePerformance(): void {
+    const section = this.templatePerformanceSection()?.nativeElement;
+    if (!section) {
+      return;
+    }
+
+    this.clearTemplatePerformanceFocusTimer();
+    this.templatePerformanceFocused.set(true);
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    section.focus({ preventScroll: true });
+    this.templatePerformanceFocusTimer = setTimeout(() => {
+      this.templatePerformanceFocused.set(false);
+      this.templatePerformanceFocusTimer = null;
+    }, 2000);
   }
 
   openNavigation(navigation: SurveyDashboardNavigation | null): void {
@@ -602,6 +625,15 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  private clearTemplatePerformanceFocusTimer(): void {
+    if (!this.templatePerformanceFocusTimer) {
+      return;
+    }
+
+    clearTimeout(this.templatePerformanceFocusTimer);
+    this.templatePerformanceFocusTimer = null;
+  }
+
   private toPositiveInteger(value: string, fallback: number): number {
     const parsed = Number(value);
     return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
@@ -638,8 +670,8 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
           {
             label: this.i18n.translate('surveyDashboard.combined'),
             data: trend.map((point) => point.averageScorePercentage),
-            borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14, 165, 233, 0.10)',
+            borderColor: this.themeColors.color('accent'),
+            backgroundColor: this.themeColors.rgba('accent', 0.1),
             fill: true,
             tension: 0.35,
             pointRadius: 3,
@@ -648,8 +680,8 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
           {
             label: this.i18n.translate('surveyDashboard.sourceInternal'),
             data: trend.map((point) => point.internalAverageScorePercentage),
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+            borderColor: this.themeColors.color('success'),
+            backgroundColor: this.themeColors.rgba('success', 0.08),
             fill: false,
             tension: 0.35,
             pointRadius: 3,
@@ -658,8 +690,8 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
           {
             label: this.i18n.translate('surveyDashboard.sourceAnonymous'),
             data: trend.map((point) => point.anonymousAverageScorePercentage),
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.08)',
+            borderColor: this.themeColors.color('secondary'),
+            backgroundColor: this.themeColors.rgba('secondary', 0.08),
             fill: false,
             tension: 0.35,
             pointRadius: 3,
@@ -697,7 +729,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
             beginAtZero: true,
             suggestedMax: 100,
             grace: '5%',
-            grid: { color: '#E5EAF1' },
+            grid: { color: this.themeColors.color('gridLine') },
           },
           x: {
             grid: { display: false },

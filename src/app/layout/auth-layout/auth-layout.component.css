@@ -16,7 +16,7 @@
   width: 34rem;
   height: 34rem;
   border-radius: 9999px;
-  background: rgba(17, 167, 201, 0.16);
+  background: rgb(var(--theme-accent-rgb) / 16%);
   filter: blur(4px);
 }
 
@@ -51,8 +51,8 @@
 
 .stat-card:hover {
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  background: rgb(var(--theme-surface-rgb) / 14%);
+  box-shadow: 0 18px 40px rgb(var(--theme-shadow-rgb) / 12%);
 }
 
 .stat-card:nth-child(1) {
@@ -80,7 +80,12 @@
 @media (max-width: 1023px) {
   .auth-page {
     background:
-      linear-gradient(180deg, #f3f7fb 0%, #f8fafc 48%, #eef5f8 100%);
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--theme-color-primary) 5%, var(--theme-color-surface)) 0%,
+        var(--theme-color-page) 48%,
+        color-mix(in srgb, var(--theme-color-accent) 8%, var(--theme-color-surface)) 100%
+      );
   }
 
   .login-stage {

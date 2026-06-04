@@ -85,6 +85,7 @@ interface OperatorCustomInputView {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
 }
 
@@ -338,6 +339,22 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
+    effect(() => {
+      const activeTemplate = this.activeTemplate();
+      if (!activeTemplate) {
+        return;
+      }
+
+      const localizedTemplate = this.templates().find(
+        (template) => template.templateId === activeTemplate.templateId,
+      );
+      if (!localizedTemplate || localizedTemplate === activeTemplate) {
+        return;
+      }
+
+      this.activeTemplate.set(localizedTemplate);
+    });
+
     effect(() => {
       const templateId = this.pendingRuntimeRefreshTemplateId();
       if (templateId.length === 0) {
@@ -794,13 +811,6 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  optionSecondaryLabel(option: QuestionAnswerOption): string {
-    const isArabic = this.i18n.language() === 'ar';
-    return this.toCustomerFacingOptionText(
-      this.secondaryLocalizedText(option.textEn, option.textAr ?? '', isArabic),
-    );
-  }
-
   private toCustomerFacingOptionText(value: string): string {
     return value.replace(/\s*(?:[-–—|]\s*)?(?:Value|Score)\s+[1-5]\s*$/i, '').trim();
   }
@@ -853,8 +863,12 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     return {
       templateId: template.templateId,
       name: this.localizedText(template.nameEn, template.nameAr, isArabic),
-      secondaryName: this.secondaryLocalizedText(template.nameEn, template.nameAr, isArabic),
-      description: template.description,
+      secondaryName: '',
+      description: this.localizedOptionalText(
+        template.descriptionEn,
+        template.descriptionAr,
+        isArabic,
+      ),
       branchId: template.branchId,
       branchName: this.localizedText(template.branchNameEn, template.branchNameAr, isArabic),
       branchCode: template.branchCode,
@@ -890,11 +904,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       label:
         this.localizedText(customInput.labelEn ?? '', customInput.labelAr ?? '', isArabic) ||
         customInput.name,
-      secondaryLabel: this.secondaryLocalizedText(
-        customInput.labelEn ?? '',
-        customInput.labelAr ?? '',
-        isArabic,
-      ),
+      secondaryLabel: '',
       type: customInput.type,
       typeName:
         customInput.type === 2
@@ -905,6 +915,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       maxLength: customInput.maxLength,
       minValue: customInput.minValue,
       maxValue: customInput.maxValue,
+      startWith: customInput.startWith,
       order: customInput.order,
     };
   }
@@ -919,7 +930,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       questionBranchId: question.questionBranchId,
       order: question.order,
       text: this.localizedText(question.textEn, question.textAr, isArabic),
-      secondaryText: this.secondaryLocalizedText(question.textEn, question.textAr, isArabic),
+      secondaryText: '',
       type: question.type,
       scopeName: question.scopeName,
       isGlobal: question.isGlobal,
@@ -1315,6 +1326,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         return 'operatorTemplates.customInputMaxLength';
       }
 
+      if (customInput.startWith && !value.startsWith(customInput.startWith)) {
+        return `${this.i18n.translate('operatorTemplates.customInputStartWithHint')} ${customInput.startWith}`;
+      }
+
       return '';
     }
 
@@ -1634,14 +1649,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     return englishText || arabicText;
   }
 
-  private secondaryLocalizedText(
+  private localizedOptionalText(
     englishText: string,
     arabicText: string,
     isArabic: boolean,
   ): string {
-    if (isArabic) {
-      return englishText;
-    }
-    return arabicText;
+    return (isArabic ? arabicText : englishText).trim();
   }
 }

@@ -10,6 +10,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertCircle, Languages, Mic, Send, Star } from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { BRAND_ASSETS } from '../../../../core/theme/brand-assets';
 import {
   QUESTION_ANSWER_TYPE,
   toQuestionAnswerType,
@@ -54,6 +55,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   readonly micIcon = Mic;
   readonly sendIcon = Send;
   readonly starIcon = Star;
+  readonly brandAssets = BRAND_ASSETS;
   readonly ratingValues = RATING_VALUES;
 
   readonly customInputValues = signal<Readonly<Record<string, string>>>({});
@@ -161,6 +163,9 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
       }
       if (input.maxLength !== null && value.length > input.maxLength) {
         return `${this.i18n.translate('publicAnonymousTemplates.maxLength')} ${input.maxLength}`;
+      }
+      if (input.startWith && !value.startsWith(input.startWith)) {
+        return `${this.i18n.translate('publicAnonymousTemplates.startWithError')} ${input.startWith}`;
       }
     }
 

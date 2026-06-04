@@ -14,7 +14,7 @@
       <header class="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div class="min-w-0">
-            <p class="text-[9px] font-black uppercase tracking-wide text-[#0d94b3]">
+            <p class="text-[9px] font-black uppercase tracking-wide text-[var(--theme-color-secondary)]">
               {{ 'surveyDashboard.anonymousResponse' | t }}
             </p>
             <h3 class="mt-0.5 break-words text-sm font-black text-slate-950 [overflow-wrap:anywhere]">
@@ -56,7 +56,7 @@
               {{ response.customInputValuesCount }} {{ 'surveyDashboard.submittedFields' | t }}
             </p>
           </div>
-          <app-icon class="text-[#11A7C9]" [icon]="fileIcon" [size]="15" />
+          <app-icon class="text-[var(--theme-color-accent)]" [icon]="fileIcon" [size]="15" />
         </div>
 
         @if (response.customInputValues.length === 0) {
@@ -87,7 +87,7 @@
               {{ response.answersCount }} {{ 'surveyDashboard.answersCaptured' | t }}
             </p>
           </div>
-          <app-icon class="text-[#11A7C9]" [icon]="messageIcon" [size]="15" />
+          <app-icon class="text-[var(--theme-color-accent)]" [icon]="messageIcon" [size]="15" />
         </div>
 
         <ng-template #answerNode let-node let-depth="depth">
@@ -116,7 +116,7 @@
                 @if (voiceUrl(node.answer)) {
                   <div class="space-y-1.5">
                     <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-                      <app-icon class="text-[#11A7C9]" [icon]="micIcon" [size]="13" />
+                      <app-icon class="text-[var(--theme-color-accent)]" [icon]="micIcon" [size]="13" />
                       {{ answerDisplayValue(node.answer) }}
                     </p>
                     <audio class="h-8 w-full" controls [src]="voiceUrl(node.answer)"></audio>

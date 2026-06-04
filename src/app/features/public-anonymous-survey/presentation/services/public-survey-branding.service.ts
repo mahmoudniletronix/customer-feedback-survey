@@ -1,10 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-
-const PUBLIC_SURVEY_TITLE = 'Cleopatra Feedback Survey';
-const PUBLIC_SURVEY_FAVICON_HREF = 'images/favicon.ico';
-const PUBLIC_SURVEY_FAVICON_TYPE = 'image/x-icon';
+import { BRAND_ASSETS, BRANDING } from '../../../../core/theme/brand-assets';
 
 interface BrowserTabBranding {
   readonly title: string;
@@ -19,8 +16,8 @@ export class PublicSurveyBrandingService {
   private readonly appBranding = this.readCurrentBranding();
 
   applyPublicSurveyBranding(): void {
-    this.title.setTitle(PUBLIC_SURVEY_TITLE);
-    this.setFavicon(PUBLIC_SURVEY_FAVICON_HREF, PUBLIC_SURVEY_FAVICON_TYPE);
+    this.title.setTitle(BRANDING.publicSurveyTitle);
+    this.setFavicon(BRAND_ASSETS.favicon, BRANDING.faviconType);
   }
 
   restoreAppBranding(): void {

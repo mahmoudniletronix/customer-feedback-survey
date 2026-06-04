@@ -26,11 +26,11 @@ export class ButtonComponent {
     const width = this.fullWidth() ? 'w-full' : '';
     const variant: Record<ButtonVariant, string> = {
       primary:
-        'bg-[#11A7C9] text-white shadow-sm shadow-cyan-900/10 hover:bg-[#0d94b3] focus:ring-[#11A7C9]',
+        'bg-[var(--theme-color-primary)] text-white shadow-sm shadow-cyan-900/10 hover:bg-[var(--theme-color-secondary)] focus:ring-[var(--theme-color-accent)]',
       secondary:
-        'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-300',
+        'border border-[var(--theme-color-border)] bg-[var(--theme-color-surface)] text-[var(--theme-color-text)] hover:bg-slate-50 focus:ring-[var(--theme-color-accent)]',
       ghost: 'text-slate-600 hover:bg-slate-100 focus:ring-slate-300',
-      danger: 'bg-[#D94B5A] text-white shadow-sm hover:bg-[#c43e4d] focus:ring-[#D94B5A]',
+      danger: 'bg-[var(--theme-color-danger)] text-white shadow-sm hover:brightness-95 focus:ring-[var(--theme-color-danger)]',
     };
 
     return [base, size, width, variant[this.variant()]].join(' ');

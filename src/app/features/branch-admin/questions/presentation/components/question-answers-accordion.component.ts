@@ -19,7 +19,7 @@ export interface QuestionAnswerAccordionItem {
   template: `
     @if (answers().length > 0) {
       <button
-        class="mt-2 inline-flex h-7 items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50/70 px-2 text-[11px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        class="mt-2 inline-flex h-7 items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50/70 px-2 text-[11px] font-extrabold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
         type="button"
         [attr.aria-expanded]="expanded()"
         (click)="toggle()"
@@ -69,7 +69,7 @@ export interface QuestionAnswerAccordionItem {
                 }
                 @if (answer.score !== null) {
                   <span
-                    class="rounded-full bg-cyan-50 px-1.5 py-0.5 text-[10px] font-extrabold text-[#0d94b3]"
+                    class="rounded-full bg-cyan-50 px-1.5 py-0.5 text-[10px] font-extrabold text-[var(--theme-color-secondary)]"
                   >
                     {{ 'questions.optionValue' | t }} {{ answer.score }}
                   </span>

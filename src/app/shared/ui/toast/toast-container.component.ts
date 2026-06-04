@@ -49,7 +49,7 @@ export class ToastContainerComponent {
       success: 'bg-emerald-500',
       error: 'bg-rose-500',
       warning: 'bg-amber-500',
-      info: 'bg-[#11A7C9]',
+      info: 'bg-[var(--theme-color-accent)]',
     };
 
     return classes[toast.variant];
@@ -60,7 +60,7 @@ export class ToastContainerComponent {
       success: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
       error: 'bg-rose-50 text-rose-700 ring-rose-100',
       warning: 'bg-amber-50 text-amber-700 ring-amber-100',
-      info: 'bg-cyan-50 text-[#0d94b3] ring-cyan-100',
+      info: 'bg-cyan-50 text-[var(--theme-color-secondary)] ring-cyan-100',
     };
 
     return classes[toast.variant];

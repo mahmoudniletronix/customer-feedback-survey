@@ -4,7 +4,7 @@
       <app-back-button />
       <div class="min-w-0">
         <div class="mb-2 flex items-center gap-2">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]">
             <app-icon [icon]="fileIcon" [size]="16" />
           </span>
           <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
@@ -47,7 +47,7 @@
           {{ 'branchTemplatesPdf.fromDate' | t }}
         </span>
         <input
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           type="date"
           formControlName="fromDate"
         />
@@ -58,7 +58,7 @@
           {{ 'branchTemplatesPdf.toDate' | t }}
         </span>
         <input
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           type="date"
           formControlName="toDate"
         />
@@ -69,7 +69,7 @@
           {{ 'branchTemplatesPdf.templateKind' | t }}
         </span>
         <select
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="templateKind"
           (change)="resetTemplateSelection()"
         >
@@ -84,7 +84,7 @@
           {{ 'branchTemplatesPdf.template' | t }}
         </span>
         <select
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="templateKey"
         >
           <option value="">{{ 'branchTemplatesPdf.allTemplates' | t }}</option>
@@ -99,7 +99,7 @@
           {{ 'branchTemplatesPdf.topWorstQuestionsCount' | t }}
         </span>
         <input
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           type="number"
           [min]="minTopWorstQuestionsCount"
           [max]="maxTopWorstQuestionsCount"
@@ -110,11 +110,49 @@
       </label>
 
       <label class="flex min-w-0 flex-col gap-1">
+        <span
+          class="text-[10px] font-bold text-slate-500"
+          [title]="'branchTemplatesPdf.worstQuestionsMaxScoreDescription' | t"
+        >
+          {{ 'branchTemplatesPdf.worstQuestionsMaxScorePercentage' | t }}
+        </span>
+        <input
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
+          type="number"
+          [min]="minScorePercentage"
+          [max]="maxScorePercentage"
+          step="0.1"
+          inputmode="decimal"
+          formControlName="worstQuestionsMaxScorePercentage"
+          [title]="'branchTemplatesPdf.worstQuestionsMaxScoreDescription' | t"
+        />
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1">
+        <span
+          class="text-[10px] font-bold text-slate-500"
+          [title]="'branchTemplatesPdf.bestQuestionsMinScoreDescription' | t"
+        >
+          {{ 'branchTemplatesPdf.bestQuestionsMinScorePercentage' | t }}
+        </span>
+        <input
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
+          type="number"
+          [min]="minScorePercentage"
+          [max]="maxScorePercentage"
+          step="0.1"
+          inputmode="decimal"
+          formControlName="bestQuestionsMinScorePercentage"
+          [title]="'branchTemplatesPdf.bestQuestionsMinScoreDescription' | t"
+        />
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1">
         <span class="text-[10px] font-bold text-slate-500">
           {{ 'branchTemplatesPdf.scoreCalculationMode' | t }}
         </span>
         <select
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="scoreCalculationMode"
         >
           <option value="RootQuestions">
@@ -131,7 +169,7 @@
           {{ 'branchTemplatesPdf.reportLanguage' | t }}
         </span>
         <select
-          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="language"
         >
           <option value="Arabic">{{ 'branchTemplatesPdf.reportLanguageArabic' | t }}</option>
@@ -142,7 +180,7 @@
       <div class="flex min-w-0 flex-wrap items-end gap-2 sm:col-span-2 xl:col-span-3 2xl:col-span-1 2xl:self-end">
         <button
           type="submit"
-          class="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#11A7C9] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[#0d94b3] focus:outline-none focus:ring-2 focus:ring-[#11A7C9] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          class="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[var(--theme-color-accent)] px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-cyan-900/10 transition hover:bg-[var(--theme-color-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           [disabled]="reportStore.downloading()"
         >
           @if (reportStore.downloading()) {
@@ -152,6 +190,19 @@
           }
           {{ 'branchTemplatesPdf.downloadPdf' | t }}
         </button>
+        <button
+          type="button"
+          class="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-600 px-3 text-[11px] font-extrabold leading-none text-white shadow-sm shadow-emerald-900/10 transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="reportStore.excelDownloading()"
+          (click)="downloadExcelReport()"
+        >
+          @if (reportStore.excelDownloading()) {
+            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+          } @else {
+            <app-icon [icon]="downloadIcon" [size]="14" />
+          }
+          {{ 'branchTemplatesPdf.downloadExcel' | t }}
+        </button>
         <app-button type="button" size="sm" variant="secondary" (pressed)="clearFilters()">
           {{ 'common.clear' | t }}
         </app-button>
@@ -160,7 +211,7 @@
 
     @if (reportStore.error()) {
       <div
-        class="mt-3 rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+        class="mt-3 rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
       >
         {{ reportStore.error() ?? '' | t }}
       </div>

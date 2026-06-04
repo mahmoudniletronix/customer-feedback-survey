@@ -60,6 +60,7 @@ type CustomInputFieldName =
   | 'maxLength'
   | 'minValue'
   | 'maxValue'
+  | 'startWith'
   | 'order';
 
 interface CustomInputFormControls {
@@ -72,6 +73,7 @@ interface CustomInputFormControls {
   maxLength: FormControl<number | null>;
   minValue: FormControl<number | null>;
   maxValue: FormControl<number | null>;
+  startWith: FormControl<string>;
   order: FormControl<number>;
 }
 
@@ -430,6 +432,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     } else {
       inputGroup.controls.minLength.setValue(null);
       inputGroup.controls.maxLength.setValue(null);
+      inputGroup.controls.startWith.setValue('');
     }
 
     this.validateCustomInputs();
@@ -484,6 +487,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
     if (control.hasError('duplicatedOrder')) {
       return 'branchTemplates.customInputOrderDuplicated';
+    }
+
+    if (control.hasError('startWithEmpty')) {
+      return 'branchTemplates.customInputStartWithEmpty';
     }
 
     if (control.hasError('stringValidation') || control.hasError('max')) {
@@ -634,6 +641,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       maxLength: new FormControl<number | null>(null, [Validators.max(3000)]),
       minValue: new FormControl<number | null>(null),
       maxValue: new FormControl<number | null>(null),
+      startWith: this.formBuilder.nonNullable.control('', [Validators.maxLength(100)]),
       order: this.formBuilder.nonNullable.control(order, [
         Validators.required,
         Validators.min(1),
@@ -669,6 +677,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       } else {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.startWith.setValue('', { emitEvent: false });
         this.validateIntegerCustomInput(inputGroup);
       }
     });
@@ -705,6 +714,11 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     if (minLength !== null && maxLength !== null && maxLength < minLength) {
       this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
     }
+
+    const startWith = inputGroup.controls.startWith.value;
+    if (startWith.length > 0 && startWith.trim().length === 0) {
+      this.setControlError(inputGroup.controls.startWith, 'startWithEmpty');
+    }
   }
 
   private validateIntegerCustomInput(inputGroup: CustomInputFormGroup): void {
@@ -729,6 +743,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
         invalidOrder: _invalidOrder,
         stringValidation: _stringValidation,
         integerValidation: _integerValidation,
+        startWithEmpty: _startWithEmpty,
         required: _manualRequired,
         ...remainingErrors
       } = errors;
@@ -769,6 +784,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
         maxLength: type === 1 ? value.maxLength : null,
         minValue: type === 2 ? value.minValue : null,
         maxValue: type === 2 ? value.maxValue : null,
+        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
         order: value.order,
       };
     });

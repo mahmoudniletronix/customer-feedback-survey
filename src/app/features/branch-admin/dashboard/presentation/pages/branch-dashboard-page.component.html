@@ -1,7 +1,7 @@
 <div class="w-full space-y-3 sm:space-y-4">
   <div class="flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
-      <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#11A7C9]/10 text-[#11A7C9]">
+      <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--theme-color-accent)]/10 text-[var(--theme-color-accent)]">
         <app-icon [icon]="chartIcon" [size]="15" />
       </div>
       <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
@@ -10,7 +10,7 @@
     </div>
     <div class="flex items-center gap-1.5">
       <a
-        class="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        class="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-extrabold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
         routerLink="/branch-admin/templates/responses"
       >
         <app-icon [icon]="chartIcon" [size]="12" />
@@ -55,7 +55,7 @@
         <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
           <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.from' | t }}</span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             type="date"
             formControlName="from"
           />
@@ -64,7 +64,7 @@
         <label class="flex flex-col gap-0.5 sm:min-w-[8rem] sm:max-w-[9.5rem]">
           <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.to' | t }}</span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             type="date"
             formControlName="to"
           />
@@ -73,7 +73,7 @@
         <label class="flex flex-col gap-0.5 sm:min-w-[6rem] sm:max-w-[8rem]">
           <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.groupBy' | t }}</span>
           <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="groupBy"
           >
             <option value="Day">{{ 'branchDashboard.day' | t }}</option>
@@ -84,7 +84,7 @@
         <label class="flex flex-col gap-0.5 sm:min-w-[10rem] sm:max-w-[14rem]">
           <span class="text-[9px] font-bold text-slate-500">{{ 'branchDashboard.template' | t }}</span>
           <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="templateId"
           >
             <option value="">{{ 'branchDashboard.allTemplates' | t }}</option>
@@ -99,7 +99,7 @@
             {{ 'branchDashboard.topQuestions' | t }}
           </span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             type="number"
             min="1"
             formControlName="topQuestionsCount"
@@ -111,7 +111,7 @@
             {{ 'branchDashboard.criticalResponsesLimit' | t }}
           </span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             type="number"
             min="1"
             formControlName="criticalResponsesCount"
@@ -123,7 +123,7 @@
             {{ 'branchDashboard.criticalThreshold' | t }}
           </span>
           <input
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             type="number"
             min="0"
             max="100"
@@ -166,7 +166,7 @@
     </section>
   } @else if (dashboardStore.error()) {
     <div
-      class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-[#D94B5A]"
+      class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-[var(--theme-color-danger)]"
     >
       {{ dashboardStore.error() ?? '' | t }}
     </div>
@@ -217,7 +217,7 @@
                     cx="50"
                     cy="50"
                     r="42"
-                    stroke="#f1f5f9"
+                    stroke="var(--color-slate-100)"
                     stroke-width="8"
                     fill="transparent"
                   />
@@ -225,7 +225,7 @@
                     cx="50"
                     cy="50"
                     r="38"
-                    stroke="#e2e8f0"
+                    stroke="var(--theme-color-border)"
                     stroke-width="5"
                     fill="transparent"
                   />
@@ -571,7 +571,7 @@
                 {{ dashboard.period.groupBy }}
               </p>
             </div>
-            <app-icon class="text-[#11A7C9]" [icon]="trendIcon" [size]="18" />
+            <app-icon class="text-[var(--theme-color-accent)]" [icon]="trendIcon" [size]="18" />
           </div>
           @if (dashboard.satisfactionTrend.length === 0) {
             <p
@@ -596,7 +596,7 @@
                 {{ 'branchDashboard.lowestTemplatesFirst' | t }}
               </p>
             </div>
-            <app-icon class="text-[#11A7C9]" [icon]="layersIcon" [size]="18" />
+            <app-icon class="text-[var(--theme-color-accent)]" [icon]="layersIcon" [size]="18" />
           </div>
 
           @if (dashboard.templatePerformance.length === 0) {
@@ -662,7 +662,7 @@
                       </td>
                       <td class="px-3 py-3">
                         <button
-                          class="inline-flex items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-2.5 py-1.5 text-[10px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                          class="inline-flex items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-2.5 py-1.5 text-[10px] font-extrabold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
                           type="button"
                           (click)="openTemplateDetails($event, item.templateId)"
                         >
@@ -730,7 +730,7 @@
                     </span>
                   </div>
                   <button
-                    class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-2.5 py-1.5 text-[10px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+                    class="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-2.5 py-1.5 text-[10px] font-extrabold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
                     type="button"
                     (click)="openTemplateDetails($event, item.templateId)"
                   >
@@ -1095,7 +1095,7 @@
 >
   @if (templateDetailsLoading()) {
     <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs font-semibold text-slate-600">
-      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
       {{ 'branchTemplates.detailsLoading' | t }}
     </div>
   } @else if (templateDetailsError()) {
@@ -1142,7 +1142,7 @@
           >
             {{ (template.isActive ? 'common.active' : 'branches.inactive') | t }}
           </span>
-          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-black text-[#0d94b3]">
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-black text-[var(--theme-color-secondary)]">
             {{ template.questionsCount }} {{ 'branches.questionsCount' | t }}
           </span>
           <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600">

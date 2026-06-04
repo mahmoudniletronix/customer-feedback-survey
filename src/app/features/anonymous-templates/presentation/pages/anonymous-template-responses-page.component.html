@@ -7,7 +7,7 @@
       </app-button>
       <div class="min-w-0">
         <p
-          class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0d94b3]"
+          class="inline-flex rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--theme-color-secondary)]"
         >
           {{ 'anonymousTemplates.responsesEyebrow' | t }}
         </p>
@@ -50,7 +50,7 @@
             'anonymousTemplates.fromDate' | t
           }}</span>
           <input
-            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 sm:h-7"
             type="date"
             formControlName="fromDate"
           />
@@ -61,7 +61,7 @@
             'anonymousTemplates.toDate' | t
           }}</span>
           <input
-            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 sm:h-7"
             type="date"
             formControlName="toDate"
           />
@@ -72,7 +72,7 @@
             'anonymousTemplates.minScore' | t
           }}</span>
           <input
-            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 sm:h-7"
             type="number"
             min="0"
             max="100"
@@ -85,7 +85,7 @@
             'anonymousTemplates.maxScore' | t
           }}</span>
           <input
-            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 sm:h-7"
             type="number"
             min="0"
             max="100"
@@ -98,7 +98,7 @@
             'globalQuestionGroups.pageSize' | t
           }}</span>
           <select
-            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 sm:h-7"
             formControlName="pageSize"
           >
             <option value="10">10</option>
@@ -113,7 +113,7 @@
             'globalQuestionGroups.orderSort' | t
           }}</span>
           <select
-            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15 sm:h-7"
+            class="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15 sm:h-7"
             formControlName="orderSort"
           >
             <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
@@ -140,7 +140,7 @@
 
     @if (anonymousTemplatesStore.responsesError()) {
       <div
-        class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]"
+        class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]"
       >
         {{ anonymousTemplatesStore.responsesError() ?? '' | t }}
       </div>
@@ -156,7 +156,7 @@
             class="rounded-xl border border-slate-100 bg-slate-50 p-6 text-center text-[11px] font-semibold text-slate-500"
           >
             <span
-              class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+              class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
             ></span>
             {{ 'anonymousTemplates.responsesLoading' | t }}
           </div>
@@ -248,7 +248,7 @@
                     colspan="6"
                   >
                     <span
-                      class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                      class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
                     ></span>
                     {{ 'anonymousTemplates.responsesLoading' | t }}
                   </td>

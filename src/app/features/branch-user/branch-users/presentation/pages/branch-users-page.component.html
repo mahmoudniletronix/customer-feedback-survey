@@ -10,7 +10,7 @@
       </div>
       <div class="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap sm:items-center sm:justify-end">
         <button
-        class="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        class="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
           type="button"
           (click)="toggleAdvancedFilters()"
         >
@@ -43,7 +43,7 @@
 
     @if (branchUsersStore.error()) {
       <div
-        class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+        class="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
       >
         {{ branchUsersStore.error() ?? '' | t }}
       </div>
@@ -80,7 +80,7 @@
                 {{ 'branchUsers.isActiveFilter' | t }}
               </span>
               <select
-                class="h-8 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-8 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="isActive"
               >
                 <option value="">{{ 'branchUsers.allUsers' | t }}</option>
@@ -135,7 +135,7 @@
                 <tr>
                   <td class="px-4 py-8 text-center text-slate-500" colspan="7">
                     <span
-                      class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+                      class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
                     ></span>
                     {{ 'branchUsers.subtitle' | t }}
                   </td>
@@ -189,7 +189,7 @@
                         @if (user.isActive) {
                           <button
                             type="button"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3]"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[var(--theme-color-secondary)]"
                             [title]="'branchUsers.assignRoles' | t"
                             [attr.aria-label]="'branchUsers.assignRoles' | t"
                             (click)="openAssignRoles(user)"
@@ -198,7 +198,7 @@
                           </button>
                           <button
                             type="button"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3]"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[var(--theme-color-secondary)]"
                             [title]="'common.edit' | t"
                             [attr.aria-label]="'common.edit' | t"
                             (click)="openEditBranchUser(user)"
@@ -207,7 +207,7 @@
                           </button>
                           <button
                             type="button"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3]"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[var(--theme-color-secondary)]"
                             [title]="'branchUsers.resetPassword' | t"
                             [attr.aria-label]="'branchUsers.resetPassword' | t"
                             (click)="openResetPassword(user)"
@@ -216,7 +216,7 @@
                           </button>
                           <button
                             type="button"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#D94B5A] text-white shadow-sm transition hover:bg-[#c43e4d] disabled:cursor-not-allowed disabled:opacity-60"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--theme-color-danger)] text-white shadow-sm transition hover:bg-[var(--theme-color-danger)] disabled:cursor-not-allowed disabled:opacity-60"
                             [title]="'common.delete' | t"
                             [attr.aria-label]="'common.delete' | t"
                             [disabled]="branchUsersStore.deleting()"
@@ -227,7 +227,7 @@
                         } @else {
                           <button
                             type="button"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[#0d94b3] disabled:cursor-not-allowed disabled:opacity-60"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-[var(--theme-color-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
                             [title]="'common.restore' | t"
                             [attr.aria-label]="'common.restore' | t"
                             [disabled]="branchUsersStore.restoring()"
@@ -261,7 +261,7 @@
         @if (branchUsersStore.loading()) {
           <div class="rounded-lg border border-slate-100 bg-white p-6 text-center text-slate-500">
             <span
-              class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+              class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
             ></span>
             {{ 'branchUsers.subtitle' | t }}
           </div>
@@ -506,7 +506,7 @@
             >
               <input
                 type="checkbox"
-                class="h-4 w-4 rounded border-slate-300 text-[#11A7C9]"
+                class="h-4 w-4 rounded border-slate-300 text-[var(--theme-color-accent)]"
                 [checked]="isCreateRoleSelected(role.id)"
                 (change)="toggleCreateRole(role.id)"
               />
@@ -517,7 +517,7 @@
           }
         </div>
         @if (createRolesError()) {
-          <p class="text-xs font-semibold text-[#D94B5A]">{{ createRolesError() | t }}</p>
+          <p class="text-xs font-semibold text-[var(--theme-color-danger)]">{{ createRolesError() | t }}</p>
         }
       </div>
 
@@ -539,7 +539,7 @@
           class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700"
         >
           {{ 'branchUsers.selectedUser' | t }}:
-          <span class="text-[#0d94b3]">{{ user.nameEn }} - {{ user.userName }}</span>
+          <span class="text-[var(--theme-color-secondary)]">{{ user.nameEn }} - {{ user.userName }}</span>
         </div>
       }
 
@@ -602,7 +602,7 @@
           class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700"
         >
           {{ 'branchUsers.selectedUser' | t }}:
-          <span class="text-[#0d94b3]">{{ user.nameEn }} - {{ user.userName }}</span>
+          <span class="text-[var(--theme-color-secondary)]">{{ user.nameEn }} - {{ user.userName }}</span>
         </div>
       }
 
@@ -637,7 +637,7 @@
           class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700"
         >
           {{ 'branchUsers.selectedUser' | t }}:
-          <span class="text-[#0d94b3]">{{ user.nameEn }} - {{ user.userName }}</span>
+          <span class="text-[var(--theme-color-secondary)]">{{ user.nameEn }} - {{ user.userName }}</span>
         </div>
       }
 
@@ -650,7 +650,7 @@
             >
               <input
                 type="checkbox"
-                class="h-4 w-4 rounded border-slate-300 text-[#11A7C9]"
+                class="h-4 w-4 rounded border-slate-300 text-[var(--theme-color-accent)]"
                 [checked]="isAssignRoleSelected(role.id)"
                 (change)="toggleAssignRole(role.id)"
               />
@@ -661,7 +661,7 @@
           }
         </div>
         @if (assignRolesError()) {
-          <p class="text-xs font-semibold text-[#D94B5A]">{{ assignRolesError() | t }}</p>
+          <p class="text-xs font-semibold text-[var(--theme-color-danger)]">{{ assignRolesError() | t }}</p>
         }
       </div>
 

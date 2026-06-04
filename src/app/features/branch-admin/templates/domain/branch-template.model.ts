@@ -58,6 +58,7 @@ export interface BranchTemplateCustomInput {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
   isActive: boolean;
 }
@@ -190,6 +191,7 @@ export interface CreateBranchTemplateCustomInputPayload {
   maxLength: number | null;
   minValue: number | null;
   maxValue: number | null;
+  startWith: string | null;
   order: number;
 }
 
@@ -233,6 +235,7 @@ export interface BranchTemplateCustomInputApiResponse {
   maxLength?: number | null;
   minValue?: number | null;
   maxValue?: number | null;
+  startWith?: string | null;
   order?: number | null;
   isActive?: boolean;
 }

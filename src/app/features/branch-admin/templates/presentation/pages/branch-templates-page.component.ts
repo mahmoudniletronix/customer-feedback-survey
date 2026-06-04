@@ -59,6 +59,7 @@ type CustomInputFieldName =
   | 'maxLength'
   | 'minValue'
   | 'maxValue'
+  | 'startWith'
   | 'order';
 
 interface CustomInputFormControls {
@@ -73,6 +74,7 @@ interface CustomInputFormControls {
   maxLength: FormControl<number | null>;
   minValue: FormControl<number | null>;
   maxValue: FormControl<number | null>;
+  startWith: FormControl<string>;
   order: FormControl<number>;
 }
 
@@ -270,6 +272,7 @@ export class BranchTemplatesPageComponent implements OnInit {
     } else {
       inputGroup.controls.minLength.setValue(null);
       inputGroup.controls.maxLength.setValue(null);
+      inputGroup.controls.startWith.setValue('');
     }
 
     this.validateCustomInputs(this.customInputsArray);
@@ -313,6 +316,10 @@ export class BranchTemplatesPageComponent implements OnInit {
 
     if (control.hasError('typeCannotBeChanged')) {
       return 'branchTemplates.customInputTypeCannotBeChanged';
+    }
+
+    if (control.hasError('startWithEmpty')) {
+      return 'branchTemplates.customInputStartWithEmpty';
     }
 
     if (control.hasError('stringValidation')) {
@@ -534,7 +541,7 @@ export class BranchTemplatesPageComponent implements OnInit {
       return 'bg-amber-50 text-amber-700';
     }
     if (labelKey === 'branchTemplates.open') {
-      return 'bg-cyan-50 text-[#0d94b3]';
+      return 'bg-cyan-50 text-[var(--theme-color-secondary)]';
     }
     return 'bg-emerald-50 text-emerald-700';
   }
@@ -662,6 +669,9 @@ export class BranchTemplatesPageComponent implements OnInit {
       ]),
       minValue: new FormControl<number | null>(customInput?.minValue ?? null),
       maxValue: new FormControl<number | null>(customInput?.maxValue ?? null),
+      startWith: this.formBuilder.nonNullable.control(customInput?.startWith ?? '', [
+        Validators.maxLength(100),
+      ]),
       order: this.formBuilder.nonNullable.control(customInput?.order ?? order, [
         Validators.required,
         Validators.min(1),
@@ -748,6 +758,7 @@ export class BranchTemplatesPageComponent implements OnInit {
       } else {
         inputGroup.controls.minLength.setValue(null, { emitEvent: false });
         inputGroup.controls.maxLength.setValue(null, { emitEvent: false });
+        inputGroup.controls.startWith.setValue('', { emitEvent: false });
         this.validateIntegerCustomInput(inputGroup);
       }
     });
@@ -786,6 +797,11 @@ export class BranchTemplatesPageComponent implements OnInit {
     if (minLength !== null && maxLength !== null && maxLength < minLength) {
       this.setControlError(inputGroup.controls.maxLength, 'stringValidation');
     }
+
+    const startWith = inputGroup.controls.startWith.value;
+    if (startWith.length > 0 && startWith.trim().length === 0) {
+      this.setControlError(inputGroup.controls.startWith, 'startWithEmpty');
+    }
   }
 
   private validateIntegerCustomInput(inputGroup: CustomInputFormGroup): void {
@@ -811,6 +827,7 @@ export class BranchTemplatesPageComponent implements OnInit {
         typeCannotBeChanged: _typeCannotBeChanged,
         stringValidation: _stringValidation,
         integerValidation: _integerValidation,
+        startWithEmpty: _startWithEmpty,
         required: _manualRequired,
         ...remainingErrors
       } = errors;
@@ -851,6 +868,7 @@ export class BranchTemplatesPageComponent implements OnInit {
         maxLength: type === 1 ? value.maxLength : null,
         minValue: type === 2 ? value.minValue : null,
         maxValue: type === 2 ? value.maxValue : null,
+        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
         order: value.order,
       };
     });
@@ -872,6 +890,7 @@ export class BranchTemplatesPageComponent implements OnInit {
         maxLength: type === 1 ? value.maxLength : null,
         minValue: type === 2 ? value.minValue : null,
         maxValue: type === 2 ? value.maxValue : null,
+        startWith: type === 1 ? this.toNullableTrimmedText(value.startWith) : null,
         order: value.order,
       };
     });

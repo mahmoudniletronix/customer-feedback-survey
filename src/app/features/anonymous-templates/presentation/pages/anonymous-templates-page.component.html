@@ -24,7 +24,7 @@
         </app-button>
       }
       <button
-        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-extrabold text-slate-600 shadow-sm shadow-slate-200/50 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
         type="button"
         (click)="toggleAdvancedFilters()"
       >
@@ -36,7 +36,7 @@
         }}
       </button>
       <div
-        class="inline-flex h-8 w-fit items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[11px] font-extrabold text-[#0d94b3]"
+        class="inline-flex h-8 w-fit items-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[11px] font-extrabold text-[var(--theme-color-secondary)]"
       >
         <app-icon [icon]="scopeIcon()" [size]="15" />
         {{ scopeLabelKey() | t }}
@@ -51,7 +51,7 @@
   }
 
   @if (anonymousTemplatesStore.error()) {
-    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[#D94B5A]">
+    <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
       {{ anonymousTemplatesStore.error() ?? '' | t }}
     </div>
   }
@@ -94,7 +94,7 @@
         <label class="flex min-w-0 flex-col gap-0.5">
           <span class="text-[9px] font-bold text-slate-500">{{ 'common.scope' | t }}</span>
           <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="scope"
           >
             <option value="">{{ 'anonymousTemplates.allScopes' | t }}</option>
@@ -106,7 +106,7 @@
         <label class="flex min-w-0 flex-col gap-0.5 xl:col-span-2">
           <span class="text-[9px] font-bold text-slate-500">{{ 'anonymousTemplates.branchFilter' | t }}</span>
           <select
-            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+            class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
             formControlName="branchId"
           >
             <option value="">{{ branchOptionsLoading() ? ('anonymousTemplates.loading' | t) : ('anonymousTemplates.allBranches' | t) }}</option>
@@ -120,7 +120,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.isActiveFilter' | t }}</span>
         <select
-          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="isActive"
         >
           <option value="">{{ 'anonymousTemplates.allTemplates' | t }}</option>
@@ -132,7 +132,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.pageSize' | t }}</span>
         <select
-          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="pageSize"
         >
           <option value="10">10</option>
@@ -145,7 +145,7 @@
       <label class="flex min-w-0 flex-col gap-0.5">
         <span class="text-[9px] font-bold text-slate-500">{{ 'globalQuestionGroups.orderSort' | t }}</span>
         <select
-          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+          class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
           formControlName="orderSort"
         >
           <option value="">{{ 'globalQuestionGroups.defaultSort' | t }}</option>
@@ -189,7 +189,7 @@
             @if (anonymousTemplatesStore.loading()) {
               <tr>
                 <td class="px-2.5 py-6 text-center text-[11px] font-semibold text-slate-500" colspan="11">
-                  <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+                  <span class="mx-auto mb-2 block h-5 w-5 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
                   {{ 'anonymousTemplates.loading' | t }}
                 </td>
               </tr>
@@ -212,7 +212,7 @@
                       [class.bg-violet-50]="template.isGlobal"
                       [class.text-violet-700]="template.isGlobal"
                       [class.bg-cyan-50]="!template.isGlobal"
-                      [class.text-[#0d94b3]]="!template.isGlobal"
+                      [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
                     >
                       {{ template.scopeName }}
                     </span>
@@ -244,7 +244,7 @@
                   </td>
                   <td class="px-2.5 py-2">
                     <div class="flex flex-col gap-1 text-[10px] font-bold text-slate-600">
-                      <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[#0d94b3]">
+                      <span class="w-fit rounded-full bg-cyan-50 px-2 py-0.5 text-[var(--theme-color-secondary)]">
                         {{ template.questionsCount }} {{ 'anonymousTemplates.questionsShort' | t }}
                       </span>
                       <span class="w-fit rounded-full bg-slate-50 px-2 py-0.5">
@@ -420,7 +420,7 @@
               [class.bg-violet-50]="template.isGlobal"
               [class.text-violet-700]="template.isGlobal"
               [class.bg-cyan-50]="!template.isGlobal"
-              [class.text-[#0d94b3]]="!template.isGlobal"
+              [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
             >
               {{ template.scopeName }}
             </span>
@@ -465,7 +465,7 @@
               [class.bg-violet-50]="template.isGlobal"
               [class.text-violet-700]="template.isGlobal"
               [class.bg-cyan-50]="!template.isGlobal"
-              [class.text-[#0d94b3]]="!template.isGlobal"
+              [class.text-[var(--theme-color-secondary)]]="!template.isGlobal"
             >
               {{ template.scopeName }}
             </span>
@@ -530,14 +530,14 @@
               {{ 'branchTemplates.activeFrom' | t }}
             </span>
             <input
-              class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10 disabled:bg-slate-100"
-              [class.border-[#D94B5A]]="templateFieldError('activeFrom').length > 0"
+              class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+              [class.border-[var(--theme-color-danger)]]="templateFieldError('activeFrom').length > 0"
               [class.border-slate-200]="templateFieldError('activeFrom').length === 0"
               type="datetime-local"
               formControlName="activeFrom"
             />
             @if (templateFieldError('activeFrom')) {
-              <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+              <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                 {{ templateFieldError('activeFrom') | t }}
               </span>
             }
@@ -548,8 +548,8 @@
               {{ 'branchTemplates.expireTo' | t }}
             </span>
             <input
-              class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10 disabled:bg-slate-100"
-              [class.border-[#D94B5A]]="templateFieldError('expireTo').length > 0"
+              class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10 disabled:bg-slate-100"
+              [class.border-[var(--theme-color-danger)]]="templateFieldError('expireTo').length > 0"
               [class.border-slate-200]="templateFieldError('expireTo').length === 0"
               type="datetime-local"
               formControlName="expireTo"
@@ -558,7 +558,7 @@
               {{ 'branchTemplates.expireToHint' | t }}
             </span>
             @if (templateFieldError('expireTo')) {
-              <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+              <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                 {{ templateFieldError('expireTo') | t }}
               </span>
             }
@@ -616,14 +616,14 @@
                         {{ 'branchTemplates.customInputName' | t }}
                       </span>
                       <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                        [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'name').length > 0"
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'name').length > 0"
                         [class.border-slate-200]="customInputFieldError(inputIndex, 'name').length === 0"
                         formControlName="name"
                         [placeholder]="'branchTemplates.customInputNamePlaceholder' | t"
                       />
                       @if (customInputFieldError(inputIndex, 'name')) {
-                        <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                           {{ customInputFieldError(inputIndex, 'name') | t }}
                         </span>
                       }
@@ -634,14 +634,14 @@
                         {{ 'branchTemplates.customInputLabelEn' | t }}
                       </span>
                       <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                        [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'labelEn').length > 0"
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'labelEn').length > 0"
                         [class.border-slate-200]="customInputFieldError(inputIndex, 'labelEn').length === 0"
                         formControlName="labelEn"
                         [placeholder]="'branchTemplates.customInputLabelEnPlaceholder' | t"
                       />
                       @if (customInputFieldError(inputIndex, 'labelEn')) {
-                        <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                           {{ customInputFieldError(inputIndex, 'labelEn') | t }}
                         </span>
                       }
@@ -652,14 +652,14 @@
                         {{ 'branchTemplates.customInputLabelAr' | t }}
                       </span>
                       <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                        [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'labelAr').length > 0"
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'labelAr').length > 0"
                         [class.border-slate-200]="customInputFieldError(inputIndex, 'labelAr').length === 0"
                         formControlName="labelAr"
                         [placeholder]="'branchTemplates.customInputLabelArPlaceholder' | t"
                       />
                       @if (customInputFieldError(inputIndex, 'labelAr')) {
-                        <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                           {{ customInputFieldError(inputIndex, 'labelAr') | t }}
                         </span>
                       }
@@ -672,7 +672,7 @@
                         {{ 'branchTemplates.customInputType' | t }}
                       </span>
                       <select
-                        class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
+                        class="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
                         formControlName="type"
                         (change)="changeCustomInputType(inputGroup)"
                       >
@@ -686,15 +686,15 @@
                         {{ 'branchTemplates.customInputOrder' | t }}
                       </span>
                       <input
-                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                        [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'order').length > 0"
+                        class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                        [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'order').length > 0"
                         [class.border-slate-200]="customInputFieldError(inputIndex, 'order').length === 0"
                         type="number"
                         min="1"
                         formControlName="order"
                       />
                       @if (customInputFieldError(inputIndex, 'order')) {
-                        <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                        <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                           {{ customInputFieldError(inputIndex, 'order') | t }}
                         </span>
                       }
@@ -702,7 +702,7 @@
 
                     <label class="flex h-8 items-center gap-2 self-end rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 shadow-sm">
                       <input
-                        class="h-4 w-4 rounded border-slate-300 text-[#11A7C9] focus:ring-[#11A7C9]"
+                        class="h-4 w-4 rounded border-slate-300 text-[var(--theme-color-accent)] focus:ring-[var(--theme-color-accent)]"
                         type="checkbox"
                         formControlName="isRequired"
                       />
@@ -711,14 +711,14 @@
                   </div>
 
                   @if (inputGroup.controls.type.value === '1') {
-                    <div class="mt-2 grid gap-2 md:grid-cols-2">
+                    <div class="mt-2 grid gap-2 md:grid-cols-3">
                       <label class="block">
                         <span class="mb-1 block text-[10px] font-semibold text-slate-700">
                           {{ 'branchTemplates.customInputMinLength' | t }}
                         </span>
                         <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                          [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'minLength').length > 0"
+                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'minLength').length > 0"
                           [class.border-slate-200]="customInputFieldError(inputIndex, 'minLength').length === 0"
                           type="number"
                           min="0"
@@ -726,7 +726,7 @@
                           formControlName="minLength"
                         />
                         @if (customInputFieldError(inputIndex, 'minLength')) {
-                          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                             {{ customInputFieldError(inputIndex, 'minLength') | t }}
                           </span>
                         }
@@ -737,8 +737,8 @@
                           {{ 'branchTemplates.customInputMaxLength' | t }}
                         </span>
                         <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                          [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'maxLength').length > 0"
+                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'maxLength').length > 0"
                           [class.border-slate-200]="customInputFieldError(inputIndex, 'maxLength').length === 0"
                           type="number"
                           min="0"
@@ -746,8 +746,31 @@
                           formControlName="maxLength"
                         />
                         @if (customInputFieldError(inputIndex, 'maxLength')) {
-                          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                             {{ customInputFieldError(inputIndex, 'maxLength') | t }}
+                          </span>
+                        }
+                      </label>
+
+                      <label class="block">
+                        <span class="mb-1 block text-[10px] font-semibold text-slate-700">
+                          {{ 'branchTemplates.customInputStartWith' | t }}
+                        </span>
+                        <input
+                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'startWith').length > 0"
+                          [class.border-slate-200]="customInputFieldError(inputIndex, 'startWith').length === 0"
+                          type="text"
+                          maxlength="100"
+                          formControlName="startWith"
+                          [placeholder]="'branchTemplates.customInputStartWithPlaceholder' | t"
+                        />
+                        <span class="mt-1 block text-[10px] font-semibold text-slate-500">
+                          {{ 'branchTemplates.customInputStartWithHint' | t }}
+                        </span>
+                        @if (customInputFieldError(inputIndex, 'startWith')) {
+                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
+                            {{ customInputFieldError(inputIndex, 'startWith') | t }}
                           </span>
                         }
                       </label>
@@ -759,14 +782,14 @@
                           {{ 'branchTemplates.customInputMinValue' | t }}
                         </span>
                         <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                          [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'minValue').length > 0"
+                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'minValue').length > 0"
                           [class.border-slate-200]="customInputFieldError(inputIndex, 'minValue').length === 0"
                           type="number"
                           formControlName="minValue"
                         />
                         @if (customInputFieldError(inputIndex, 'minValue')) {
-                          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                             {{ customInputFieldError(inputIndex, 'minValue') | t }}
                           </span>
                         }
@@ -777,14 +800,14 @@
                           {{ 'branchTemplates.customInputMaxValue' | t }}
                         </span>
                         <input
-                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/10"
-                          [class.border-[#D94B5A]]="customInputFieldError(inputIndex, 'maxValue').length > 0"
+                          class="h-8 w-full rounded-md border px-2.5 py-1.5 text-[11px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/10"
+                          [class.border-[var(--theme-color-danger)]]="customInputFieldError(inputIndex, 'maxValue').length > 0"
                           [class.border-slate-200]="customInputFieldError(inputIndex, 'maxValue').length === 0"
                           type="number"
                           formControlName="maxValue"
                         />
                         @if (customInputFieldError(inputIndex, 'maxValue')) {
-                          <span class="mt-2 block text-xs font-medium text-[#D94B5A]">
+                          <span class="mt-2 block text-xs font-medium text-[var(--theme-color-danger)]">
                             {{ customInputFieldError(inputIndex, 'maxValue') | t }}
                           </span>
                         }
@@ -828,7 +851,7 @@
                   <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                     {{ template.statusName }}
                   </span>
-                  <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#0d94b3]">
+                  <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[var(--theme-color-secondary)]">
                     {{ template.scopeName }}
                   </span>
                 </div>

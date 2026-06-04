@@ -28,6 +28,7 @@ import {
   Mic,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { ThemeColorService } from '../../../../../core/theme/theme-color.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -59,6 +60,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly themeColors = inject(ThemeColorService);
   private readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('trendCanvas');
   private trendChart: Chart<'line', number[], string> | null = null;
 
@@ -332,8 +334,8 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
           {
             label: this.i18n.translate('departmentDashboard.averageScore'),
             data: trend.map((point) => point.averageScorePercentage),
-            borderColor: '#11A7C9',
-            backgroundColor: 'rgba(17, 167, 201, 0.14)',
+            borderColor: this.themeColors.color('accent'),
+            backgroundColor: this.themeColors.rgba('accent', 0.14),
             fill: true,
             tension: 0.35,
             pointRadius: 3,
@@ -358,7 +360,11 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
           },
         },
         scales: {
-          y: { beginAtZero: true, suggestedMax: 100, grid: { color: '#E5EAF1' } },
+          y: {
+            beginAtZero: true,
+            suggestedMax: 100,
+            grid: { color: this.themeColors.color('gridLine') },
+          },
           x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
         },
       },

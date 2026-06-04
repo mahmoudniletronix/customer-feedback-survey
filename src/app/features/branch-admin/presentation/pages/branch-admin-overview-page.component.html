@@ -1,7 +1,7 @@
 <div class="w-full space-y-4">
   <!-- <div>
     <p
-      class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[#0d94b3]"
+      class="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-bold uppercase text-[var(--theme-color-secondary)]"
     >
       {{ 'common.branchAdmin' | t }}
     </p>
@@ -14,13 +14,13 @@
       class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600"
     >
       <span
-        class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+        class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
       ></span>
       {{ 'branchAdmin.loadingBranch' | t }}
     </div>
   } @else if (branchStore.error()) {
     <div
-      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]"
+      class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]"
     >
       {{ branchStore.error() ?? '' | t }}
     </div>
@@ -57,7 +57,7 @@
           <div
             class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm shadow-slate-200/50"
           >
-            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="usersIcon" [size]="15" />
+            <app-icon class="shrink-0 text-[var(--theme-color-accent)]" [icon]="usersIcon" [size]="15" />
             <span class="min-w-0 flex-1 truncate text-[10px] font-bold uppercase text-slate-400">
               {{ 'branches.branchUsersCount' | t }}
             </span>
@@ -68,7 +68,7 @@
           <div
             class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm shadow-slate-200/50"
           >
-            <app-icon class="shrink-0 text-[#11A7C9]" [icon]="templateIcon" [size]="15" />
+            <app-icon class="shrink-0 text-[var(--theme-color-accent)]" [icon]="templateIcon" [size]="15" />
             <span class="min-w-0 flex-1 truncate text-[10px] font-bold uppercase text-slate-400">
               {{ 'branches.templatesCount' | t }}
             </span>
@@ -92,7 +92,7 @@
             </p>
           </div>
           <span
-            class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold text-[#0d94b3]"
+            class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold text-[var(--theme-color-secondary)]"
           >
             {{ branch.templates.length }}
           </span>

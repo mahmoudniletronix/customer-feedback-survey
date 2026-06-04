@@ -70,12 +70,15 @@ export class OperatorTemplatesService {
       .map((customInput) => this.toCustomInput(customInput))
       .filter((customInput) => customInput.customInputId.length > 0)
       .sort((first, second) => first.order - second.order);
+    const legacyDescription = response.description ?? '';
 
     return {
       templateId: this.readRecordId(response.templateId),
       nameEn: response.nameEn ?? '',
       nameAr: response.nameAr ?? '',
-      description: response.description ?? '',
+      description: legacyDescription,
+      descriptionEn: response.descriptionEn ?? legacyDescription,
+      descriptionAr: response.descriptionAr ?? '',
       branchId: this.readRecordId(response.branchId),
       branchNameEn: response.branchNameEn ?? '',
       branchNameAr: response.branchNameAr ?? '',
@@ -137,6 +140,7 @@ export class OperatorTemplatesService {
       maxLength: response.maxLength ?? null,
       minValue: response.minValue ?? null,
       maxValue: response.maxValue ?? null,
+      startWith: response.startWith ?? null,
       order: response.order ?? 0,
     };
   }

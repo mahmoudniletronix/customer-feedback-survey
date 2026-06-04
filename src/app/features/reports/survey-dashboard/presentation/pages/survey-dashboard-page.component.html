@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <!-- <div class="back">
       <button
-        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-extrabold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
         type="button"
         (click)="goBack()"
       >
@@ -12,7 +12,7 @@
     </div> -->
     <div class="flex items-center gap-2">
       <div
-        class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#11A7C9]/10 text-[#11A7C9]"
+        class="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--theme-color-accent)]/10 text-[var(--theme-color-accent)]"
       >
         <app-icon [icon]="chartIcon" [size]="15" />
       </div>
@@ -26,7 +26,7 @@
     <div class="flex flex-wrap items-center justify-end gap-2">
       @if (canOpenAuthorizedTemplatesDashboard()) {
         <button
-          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[10px] font-extrabold text-[#0d94b3] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/20"
+          class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-cyan-100 bg-cyan-50 px-3 text-[10px] font-extrabold text-[var(--theme-color-secondary)] transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/20"
           type="button"
           (click)="openAuthorizedTemplatesDashboard()"
         >
@@ -83,7 +83,7 @@
               'surveyDashboard.source' | t
             }}</span>
             <select
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               formControlName="source"
               (change)="onSourceChange()"
             >
@@ -99,7 +99,7 @@
                 'surveyDashboard.branch' | t
               }}</span>
               <select
-                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="branchId"
                 (change)="onBranchChange()"
               >
@@ -117,7 +117,7 @@
                 'surveyDashboard.template' | t
               }}</span>
               <select
-                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="templateId"
               >
                 <option value="">{{ 'surveyDashboard.allInternalTemplates' | t }}</option>
@@ -134,7 +134,7 @@
                 'surveyDashboard.anonymousTemplate' | t
               }}</span>
               <select
-                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
                 formControlName="anonymousTemplateId"
               >
                 <option value="">{{ 'surveyDashboard.allAnonymousTemplates' | t }}</option>
@@ -150,7 +150,7 @@
               'surveyDashboard.from' | t
             }}</span>
             <input
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               type="date"
               formControlName="from"
             />
@@ -159,7 +159,7 @@
           <label class="flex flex-col gap-0.5 sm:min-w-[8rem]">
             <span class="text-[9px] font-bold text-slate-500">{{ 'surveyDashboard.to' | t }}</span>
             <input
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               type="date"
               formControlName="to"
             />
@@ -170,7 +170,7 @@
               'surveyDashboard.group' | t
             }}</span>
             <select
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               formControlName="groupBy"
             >
               <option value="Day">{{ 'surveyDashboard.day' | t }}</option>
@@ -183,7 +183,7 @@
               'surveyDashboard.topQuestions' | t
             }}</span>
             <input
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               type="number"
               min="1"
               formControlName="topQuestionsCount"
@@ -195,7 +195,7 @@
               'surveyDashboard.criticalCount' | t
             }}</span>
             <input
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               type="number"
               min="1"
               formControlName="criticalResponsesCount"
@@ -207,7 +207,7 @@
               'surveyDashboard.criticalScore' | t
             }}</span>
             <input
-              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[#11A7C9] focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               type="number"
               min="0"
               max="100"
@@ -235,7 +235,7 @@
         class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs font-semibold text-slate-600 shadow-sm shadow-slate-200/60"
       >
         <span
-          class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"
+          class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"
         ></span>
         {{ 'branchAdmin.loadingBranch' | t }}
       </section>
@@ -253,7 +253,7 @@
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <span
-                class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
+                class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
               >
                 <app-icon [icon]="branchIcon" [size]="15" />
               </span>
@@ -290,7 +290,7 @@
               {{ (branch.isActive ? 'common.active' : 'branches.inactive') | t }}
             </span>
             <button
-              class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#11A7C9]/15"
+              class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
               type="button"
               [attr.aria-expanded]="branchSnapshotExpanded()"
               (click)="toggleBranchSnapshot()"
@@ -359,7 +359,7 @@
             <div class="grid gap-2 border-t border-slate-100 p-2 xl:grid-cols-2">
               <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
                 <div class="mb-2 flex items-center gap-2">
-                  <app-icon class="text-[#11A7C9]" [icon]="responsesIcon" [size]="15" />
+                  <app-icon class="text-[var(--theme-color-accent)]" [icon]="responsesIcon" [size]="15" />
                   <h3 class="text-xs font-black text-slate-950">
                     {{ 'branches.branchAdmins' | t }}
                   </h3>
@@ -390,7 +390,7 @@
 
               <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
                 <div class="mb-2 flex items-center gap-2">
-                  <app-icon class="text-[#11A7C9]" [icon]="responsesIcon" [size]="15" />
+                  <app-icon class="text-[var(--theme-color-accent)]" [icon]="responsesIcon" [size]="15" />
                   <h3 class="text-xs font-black text-slate-950">
                     {{ 'branches.branchUsers' | t }}
                   </h3>
@@ -421,7 +421,7 @@
 
               <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
                 <div class="mb-2 flex items-center gap-2">
-                  <app-icon class="text-[#11A7C9]" [icon]="templateIcon" [size]="15" />
+                  <app-icon class="text-[var(--theme-color-accent)]" [icon]="templateIcon" [size]="15" />
                   <h3 class="text-xs font-black text-slate-950">
                     {{ 'branchTemplates.listTitle' | t }}
                   </h3>
@@ -460,7 +460,7 @@
 
               <article class="rounded-xl border border-slate-100 bg-slate-50/60 p-2">
                 <div class="mb-2 flex items-center gap-2">
-                  <app-icon class="text-[#11A7C9]" [icon]="questionsIcon" [size]="15" />
+                  <app-icon class="text-[var(--theme-color-accent)]" [icon]="questionsIcon" [size]="15" />
                   <h3 class="text-xs font-black text-slate-950">
                     {{ 'branches.questionGroups' | t }}
                   </h3>
@@ -473,7 +473,7 @@
                           {{ assignedQuestionGroupName(group) }}
                         </p>
                         <span
-                          class="shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-black text-[#0d94b3]"
+                          class="shrink-0 rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-black text-[var(--theme-color-secondary)]"
                         >
                           {{ group.questions.length }} {{ 'branches.questionsCount' | t }}
                         </span>
@@ -702,8 +702,10 @@
             {{ dashboard.summary.activeAnonymousTemplatesCount }}
           </p>
         </article>
-        <article
-          class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60"
+        <button
+          class="rounded-xl border border-slate-200 bg-white p-4 text-start shadow-sm shadow-slate-200/60 transition hover:border-rose-200 hover:bg-rose-50/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
+          type="button"
+          (click)="focusTemplatePerformance()"
         >
           <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
             {{ 'surveyDashboard.complaints' | t }}
@@ -714,7 +716,7 @@
           <p class="mt-1 text-[11px] font-semibold text-slate-500">
             {{ 'surveyDashboard.requiresFollowUp' | t }}
           </p>
-        </article>
+        </button>
         <article
           class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60"
         >
@@ -765,7 +767,7 @@
         >
           <div class="mb-3 flex items-center gap-2">
             <div
-              class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
+              class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
             >
               <app-icon [icon]="trendIcon" [size]="15" />
             </div>
@@ -857,7 +859,7 @@
         >
           <div class="mb-3 flex items-center gap-2">
             <div
-              class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[#11A7C9]"
+              class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 text-[var(--theme-color-accent)]"
             >
               <app-icon [icon]="branchIcon" [size]="15" />
             </div>
@@ -989,7 +991,13 @@
 
       <section class="grid gap-4">
         <article
-          class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60"
+          #templatePerformanceSection
+          class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 transition duration-300 focus:outline-none"
+          [class.border-cyan-300]="templatePerformanceFocused()"
+          [class.ring-4]="templatePerformanceFocused()"
+          [class.ring-cyan-100]="templatePerformanceFocused()"
+          [class.shadow-cyan-200/80]="templatePerformanceFocused()"
+          tabindex="-1"
         >
           <div class="mb-3 flex items-center gap-2">
             <div
@@ -1127,7 +1135,7 @@
                     </td>
                     <td class="px-3 py-3">
                       <p
-                        class="max-w-[16rem] truncate font-black text-slate-950 transition hover:text-[#0d94b3]"
+                        class="max-w-[16rem] truncate font-black text-slate-950 transition hover:text-[var(--theme-color-secondary)]"
                         [title]="localized(template.templateNameEn, template.templateNameAr)"
                       >
                         {{ localized(template.templateNameEn, template.templateNameAr) }}
@@ -1437,7 +1445,7 @@
                       </p>
                       <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          class="h-full rounded-full bg-[#11A7C9]"
+                          class="h-full rounded-full bg-[var(--theme-color-accent)]"
                           [style.width]="barWidth(item.averageScorePercentage)"
                         ></div>
                       </div>

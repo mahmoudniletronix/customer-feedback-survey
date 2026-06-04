@@ -29,11 +29,11 @@
 
   @if (branchesStore.detailsLoading()) {
     <div class="flex items-center gap-2 border border-slate-100 bg-white p-3 text-xs font-semibold text-slate-600">
-      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[#11A7C9]/30 border-t-[#11A7C9]"></span>
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--theme-color-accent)]/30 border-t-[var(--theme-color-accent)]"></span>
       {{ 'branches.detailsLoading' | t }}
     </div>
   } @else if (branchesStore.detailsError()) {
-    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+    <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
       {{ branchesStore.detailsError() ?? '' | t }}
     </div>
   } @else if (branchesStore.selectedBranchDetails(); as branch) {
@@ -48,7 +48,7 @@
       </div>
     }
     @if (departmentAdminsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
         {{ departmentAdminsStore.error() ?? '' | t }}
       </div>
     }
@@ -58,7 +58,7 @@
       </div>
     }
     @if (branchAdminsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
         {{ branchAdminsStore.error() ?? '' | t }}
       </div>
     }
@@ -68,7 +68,7 @@
       </div>
     }
     @if (departmentsStore.error()) {
-      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[#D94B5A]">
+      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
         {{ departmentsStore.error() ?? '' | t }}
       </div>
     }
@@ -159,7 +159,7 @@
           @for (admin of branch.branchAdmins; track admin.branchAdminId) {
             <button
               type="button"
-              class="w-full border border-slate-100 p-3 text-start transition hover:border-[#11A7C9]/40 hover:bg-cyan-50/40"
+              class="w-full border border-slate-100 p-3 text-start transition hover:border-[var(--theme-color-accent)]/40 hover:bg-cyan-50/40"
               (click)="openBranchAdminDetails(admin)"
             >
               <p class="font-bold text-slate-900">{{ localizedDisplayName(admin) }}</p>
@@ -180,7 +180,7 @@
             <div
               role="button"
               tabindex="0"
-              class="border border-slate-100 p-3 transition hover:border-[#11A7C9]/40 hover:bg-cyan-50/40"
+              class="border border-slate-100 p-3 transition hover:border-[var(--theme-color-accent)]/40 hover:bg-cyan-50/40"
               (click)="openDepartmentDetails(department)"
               (keydown.enter)="openDepartmentDetails(department)"
               (keydown.space)="$event.preventDefault(); openDepartmentDetails(department)"
@@ -417,7 +417,7 @@
     @if (selectedDepartment(); as department) {
       <div class="border border-cyan-100 bg-cyan-50 p-3 text-xs font-semibold text-slate-700">
         {{ 'departments.selectedDepartment' | t }}:
-        <span class="text-[#0d94b3]">{{ codedDisplayName(department) }}</span>
+        <span class="text-[var(--theme-color-secondary)]">{{ codedDisplayName(department) }}</span>
       </div>
     }
 

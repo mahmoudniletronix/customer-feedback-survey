@@ -170,19 +170,14 @@ export class BranchTemplatePreviewComponent {
     return this.localizedText(question.textEn, question.textAr, isArabic) || '-';
   }
 
-  questionSecondaryText(question: TemplatePreviewQuestion): string {
+  questionGroupName(question: TemplatePreviewQuestion): string {
     const isArabic = this.i18n.language() === 'ar';
-    return this.secondaryLocalizedText(question.textEn, question.textAr, isArabic);
+    return this.localizedText(question.groupNameEn, question.groupNameAr, isArabic);
   }
 
   optionLabel(option: QuestionAnswerOption): string {
     const isArabic = this.i18n.language() === 'ar';
     return this.localizedText(option.textEn, option.textAr ?? '', isArabic) || '-';
-  }
-
-  optionSecondaryLabel(option: QuestionAnswerOption): string {
-    const isArabic = this.i18n.language() === 'ar';
-    return this.secondaryLocalizedText(option.textEn, option.textAr ?? '', isArabic);
   }
 
   answerTypeLabel(question: TemplatePreviewQuestion): string {
@@ -295,16 +290,5 @@ export class BranchTemplatePreviewComponent {
       return arabicText;
     }
     return englishText || arabicText;
-  }
-
-  private secondaryLocalizedText(
-    englishText: string,
-    arabicText: string,
-    isArabic: boolean,
-  ): string {
-    if (isArabic) {
-      return englishText;
-    }
-    return arabicText;
   }
 }

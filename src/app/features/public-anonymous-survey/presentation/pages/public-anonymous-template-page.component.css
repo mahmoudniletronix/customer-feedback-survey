@@ -38,8 +38,10 @@
   top: -1rem;
   width: 0.75rem;
   height: 2.25rem;
-  border-inline-start: 2px solid rgba(183, 234, 244, 0.95);
-  border-bottom: 2px solid rgba(183, 234, 244, 0.95);
+  border-inline-start: 2px solid
+    color-mix(in srgb, var(--theme-color-accent) 28%, var(--theme-color-surface));
+  border-bottom: 2px solid
+    color-mix(in srgb, var(--theme-color-accent) 28%, var(--theme-color-surface));
   border-end-start-radius: 0.5rem;
   pointer-events: none;
 }
