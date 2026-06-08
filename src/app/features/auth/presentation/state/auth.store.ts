@@ -383,11 +383,17 @@ export class AuthStore {
   }
 
   canDeactivateOperators(): boolean {
-    return this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Operators.Deactivate');
+    return (
+      (this.role() === 'SUPER_ADMIN' || this.role() === 'DEPARTMENT_ADMIN') &&
+      this.hasPermission('Operators.Deactivate')
+    );
   }
 
   canRestoreOperators(): boolean {
-    return this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Operators.Restore');
+    return (
+      (this.role() === 'SUPER_ADMIN' || this.role() === 'DEPARTMENT_ADMIN') &&
+      this.hasPermission('Operators.Restore')
+    );
   }
 
   canAccessBranchUsers(): boolean {
