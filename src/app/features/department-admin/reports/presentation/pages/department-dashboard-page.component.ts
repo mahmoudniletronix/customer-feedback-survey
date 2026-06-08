@@ -297,6 +297,7 @@ export class DepartmentDashboardPageComponent implements OnInit, OnDestroy {
     if (type === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (type === 'Complain') return this.i18n.translate('questions.typeComplain');
     if (type === 'Voice') return this.i18n.translate('questions.typeVoice');
+    if (type === 'Image') return this.i18n.translate('questions.typeImage');
 
     return fallback || type || '-';
   }

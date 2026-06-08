@@ -1,8 +1,12 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
-import { Calendar, FileText, Hash, MessageSquareText, Mic } from 'lucide-angular';
+import { Calendar, FileText, Hash, Image as ImageIcon, MessageSquareText, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import {
+  QUESTION_ANSWER_TYPE,
+  toQuestionAnswerType,
+} from '../../../../../shared/models/question-answer.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -48,6 +52,7 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   readonly calendarIcon = Calendar;
   readonly fileIcon = FileText;
   readonly hashIcon = Hash;
+  readonly imageIcon = ImageIcon;
   readonly messageIcon = MessageSquareText;
   readonly micIcon = Mic;
 
@@ -64,18 +69,21 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   }
 
   answerDisplayValue(answer: AnonymousTemplateResponseAnswer): string {
-    const type = (answer.questionTypeName || String(answer.questionType ?? '')).toLowerCase();
-    if (type.includes('single')) {
+    const answerType = toQuestionAnswerType(answer.questionTypeName || answer.questionType);
+    if (answerType === QUESTION_ANSWER_TYPE.SingleChoice) {
       return this.localized(answer.selectedOptionTextEn ?? '', answer.selectedOptionTextAr);
     }
-    if (type.includes('star')) {
+    if (answerType === QUESTION_ANSWER_TYPE.StarRating) {
       return answer.starRatingValue === null ? '-' : `${answer.starRatingValue} / 5`;
     }
-    if (type.includes('smile')) {
+    if (answerType === QUESTION_ANSWER_TYPE.Smiles) {
       return answer.smileValue === null ? '-' : `${answer.smileValue} / 5`;
     }
-    if (type.includes('complain')) {
+    if (answerType === QUESTION_ANSWER_TYPE.Complain) {
       return answer.textAnswer?.trim() || '-';
+    }
+    if (answerType === QUESTION_ANSWER_TYPE.Image) {
+      return answer.imageFileName?.trim() || answer.imageFileUrl?.trim() || '-';
     }
 
     return answer.voiceFileName?.trim() || answer.voiceUrl?.trim() || '-';
@@ -86,18 +94,11 @@ export class SurveyAnonymousResponseDetailsModalComponent {
   }
 
   voiceUrl(answer: AnonymousTemplateResponseAnswer): string {
-    const voiceUrl = answer.voiceUrl;
-    if (!voiceUrl) {
-      return '';
-    }
+    return this.toMediaUrl(answer.voiceUrl);
+  }
 
-    if (/^https?:\/\//i.test(voiceUrl)) {
-      return voiceUrl;
-    }
-
-    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
-    const path = voiceUrl.startsWith('/') ? voiceUrl : `/${voiceUrl}`;
-    return `${baseUrl}${path}`;
+  imageUrl(answer: AnonymousTemplateResponseAnswer): string {
+    return this.toMediaUrl(answer.imageFileUrl);
   }
 
   private localized(englishText: string | null | undefined, arabicText: string | null | undefined): string {
@@ -109,6 +110,19 @@ export class SurveyAnonymousResponseDetailsModalComponent {
     }
 
     return english || arabic || '-';
+  }
+
+  private toMediaUrl(url: string | null): string {
+    if (!url) {
+      return '';
+    }
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${baseUrl}${path}`;
   }
 
   private toAnswerTree(

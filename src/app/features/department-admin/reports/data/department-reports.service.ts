@@ -405,6 +405,9 @@ export class DepartmentReportsService {
       textAnswer: this.readNullableString(item, 'textAnswer'),
       voiceFileName: this.readNullableString(item, 'voiceFileName'),
       voiceFileUrl: this.readNullableString(item, 'voiceFileUrl'),
+      imageFileName: this.readNullableString(item, 'imageFileName'),
+      imageFileUrl:
+        this.readNullableString(item, 'imageFileUrl') ?? this.readNullableString(item, 'imageUrl'),
       displayValue: this.readString(item, 'displayValue'),
       children: this.readAnswerChildren(item).map((answer) => this.toResponseAnswer(answer)),
     };
@@ -453,7 +456,8 @@ export class DepartmentReportsService {
       value === 'StarRating' ||
       value === 'Smiles' ||
       value === 'Complain' ||
-      value === 'Voice'
+      value === 'Voice' ||
+      value === 'Image'
     ) {
       return value;
     }

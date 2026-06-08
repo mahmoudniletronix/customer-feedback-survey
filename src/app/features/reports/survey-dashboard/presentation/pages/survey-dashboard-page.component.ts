@@ -61,6 +61,7 @@ import {
   SurveyDashboardQuery,
   SurveyDashboardSource,
   SurveyDashboardSourceMetrics,
+  SurveyDashboardTemplateKind,
   SurveyDashboardTemplateOption,
   SurveyDashboardTemplatePerformance,
   SurveyDashboardTrendPoint,
@@ -127,13 +128,13 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   readonly sourceSignal = signal<SurveyDashboardSource>('All');
   readonly selectedBranchId = signal('');
   readonly isSuperAdmin = computed(() => this.authStore.role() === 'SUPER_ADMIN');
-  readonly branchSnapshotVisible = computed(() => this.authStore.role() === 'BRANCH_ADMIN');
+  readonly branchSnapshotVisible = computed(() => this.authStore.isBranchScopedActor());
   readonly canOpenAuthorizedTemplatesDashboard = computed(() =>
     this.authStore.canAccessBranchDashboard(),
   );
   readonly canOpenAnonymousTemplatesDashboard = computed(
     () =>
-      (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.role() === 'BRANCH_USER') &&
+      this.authStore.isBranchScopedActor() &&
       this.authStore.hasPermission('AnonymousTemplates.ViewResponses'),
   );
 
@@ -141,7 +142,6 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     source: ['All' as SurveyDashboardSource],
     branchId: [''],
     templateId: [''],
-    anonymousTemplateId: [''],
     from: [''],
     to: [''],
     groupBy: ['Day' as SurveyDashboardGroupBy],
@@ -150,11 +150,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     criticalScoreThreshold: ['40'],
   });
 
-  readonly internalTemplateOptions = computed(() =>
-    this.filterTemplatesByBranch(this.store.internalTemplates()),
-  );
-  readonly anonymousTemplateOptions = computed(() =>
-    this.filterTemplatesByBranch(this.store.anonymousTemplates()),
+  readonly templateOptions = computed(() => this.filterTemplatesByBranch(this.store.templates()));
+  readonly templatesSelectionDisabled = computed(
+    () => this.isSuperAdmin() && this.selectedBranchId().length === 0,
   );
 
   constructor() {
@@ -217,7 +215,6 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     this.sourceSignal.set(source);
     this.filtersForm.patchValue({
       templateId: '',
-      anonymousTemplateId: '',
     });
   }
 
@@ -226,8 +223,8 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     this.selectedBranchId.set(branchId);
     this.filtersForm.patchValue({
       templateId: '',
-      anonymousTemplateId: '',
     });
+    this.store.loadTemplateOptions(branchId ? { branchId } : {});
   }
 
   applyFilters(): void {
@@ -245,7 +242,6 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
       source: 'All',
       branchId: '',
       templateId: '',
-      anonymousTemplateId: '',
       from: '',
       to: '',
       groupBy: 'Day',
@@ -256,6 +252,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     this.sourceSignal.set('All');
     this.selectedBranchId.set('');
     this.validationError.set(null);
+    this.store.loadTemplateOptions();
     this.store.loadDashboard(this.queryFromForm());
   }
 
@@ -337,12 +334,26 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   templateOptionName(template: SurveyDashboardTemplateOption): string {
-    const name = this.localized(template.nameEn, template.nameAr);
+    const name = template.displayName || this.localized(template.nameEn, template.nameAr);
+    const kind = this.templateKindLabel(template.templateKind);
+    const label = `${name} - ${kind}`;
     if (!this.isSuperAdmin() || !template.branchNameEn) {
-      return name;
+      return label;
     }
 
-    return `${name} - ${this.localized(template.branchNameEn, template.branchNameAr)}`;
+    const branchName = this.localized(template.branchNameEn, template.branchNameAr);
+    const branchLabel = template.branchCode ? `${branchName} (${template.branchCode})` : branchName;
+    return `${label} - ${branchLabel}`;
+  }
+
+  templateKindLabel(templateKind: SurveyDashboardTemplateKind): string {
+    return templateKind === 'Anonymous'
+      ? this.i18n.translate('surveyDashboard.templateKindAnonymous')
+      : this.i18n.translate('surveyDashboard.templateKindAuthorized');
+  }
+
+  templateKindClass(templateKind: SurveyDashboardTemplateKind): string {
+    return templateKind === 'Anonymous' ? 'bg-violet-50 text-violet-700' : 'bg-cyan-50 text-cyan-700';
   }
 
   assignedBranchName(branch: BranchAdminBranchDetails): string {
@@ -386,6 +397,9 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     }
     if (normalizedType === 'voice') {
       return this.i18n.translate('questions.typeVoice');
+    }
+    if (normalizedType === 'image') {
+      return this.i18n.translate('questions.typeImage');
     }
     if (normalizedType === 'smiles') {
       return this.i18n.translate('questions.typeSmiles');
@@ -487,9 +501,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
 
   private queryFromForm(): SurveyDashboardQuery {
     const value = this.filtersForm.getRawValue();
-    const source = value.source;
     const query: SurveyDashboardQuery = {
-      source,
       branchId: this.isSuperAdmin() ? value.branchId || undefined : undefined,
       from: this.toStartOfDay(value.from),
       to: this.toEndOfDay(value.to),
@@ -499,11 +511,10 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
       criticalScoreThreshold: this.toPercentage(value.criticalScoreThreshold, 40),
     };
 
-    if (source === 'Internal') {
+    if (value.templateId) {
       query.templateId = value.templateId || undefined;
-    }
-    if (source === 'Anonymous') {
-      query.anonymousTemplateId = value.anonymousTemplateId || undefined;
+    } else {
+      query.source = value.source;
     }
 
     return query;
@@ -549,6 +560,7 @@ export class SurveyDashboardPageComponent implements OnInit, OnDestroy {
     if (this.isSuperAdmin() && branchId) {
       this.filtersForm.patchValue({ branchId });
       this.selectedBranchId.set(branchId);
+      this.store.loadTemplateOptions({ branchId });
     }
 
     this.store.loadDashboardFromNavigation(navigation);

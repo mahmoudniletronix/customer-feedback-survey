@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertCircle, Languages, Mic, Send, Star } from 'lucide-angular';
+import { AlertCircle, Image as ImageIcon, Languages, Mic, Send, Star } from 'lucide-angular';
 import { I18nService } from '../../../../core/services/i18n.service';
 import { BRAND_ASSETS } from '../../../../core/theme/brand-assets';
 import {
@@ -34,6 +34,9 @@ import { PublicSurveyBrandingService } from '../services/public-survey-branding.
 import { PublicAnonymousTemplateStore } from '../state/public-anonymous-template.store';
 
 const RATING_VALUES = [1, 2, 3, 4, 5] as const;
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_IMAGE_FILE_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-public-anonymous-template-page',
@@ -51,6 +54,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   private readonly publicSurveyBranding = inject(PublicSurveyBrandingService);
 
   readonly alertIcon = AlertCircle;
+  readonly imageIcon = ImageIcon;
   readonly languageIcon = Languages;
   readonly micIcon = Mic;
   readonly sendIcon = Send;
@@ -60,6 +64,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
 
   readonly customInputValues = signal<Readonly<Record<string, string>>>({});
   readonly answers = signal<Readonly<Record<string, PublicAnonymousAnswerDraft>>>({});
+  readonly imagePreviewUrls = signal<Readonly<Record<string, string>>>({});
   readonly validationSubmitted = signal(false);
   readonly validationError = signal<string | null>(null);
 
@@ -105,6 +110,7 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.revokeAllImagePreviews();
     this.publicAnonymousTemplateStore.clear();
     this.publicSurveyBranding.restoreAppBranding();
   }
@@ -208,6 +214,8 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
         smileValue: null,
         textAnswer: '',
         voiceFileName: '',
+        imageFileName: '',
+        imageFile: null,
       },
     }));
     this.clearHiddenAnswers();
@@ -224,6 +232,8 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
         smileValue: null,
         textAnswer: '',
         voiceFileName: '',
+        imageFileName: '',
+        imageFile: null,
       },
     }));
     this.clearHiddenAnswers();
@@ -240,6 +250,8 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
         smileValue: value,
         textAnswer: '',
         voiceFileName: '',
+        imageFileName: '',
+        imageFile: null,
       },
     }));
     this.clearHiddenAnswers();
@@ -257,6 +269,8 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
         smileValue: null,
         textAnswer: value,
         voiceFileName: '',
+        imageFileName: '',
+        imageFile: null,
       },
     }));
     this.clearHiddenAnswers();
@@ -276,9 +290,29 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
         smileValue: null,
         textAnswer: '',
         voiceFileName: fileName,
+        imageFileName: '',
+        imageFile: null,
       },
     }));
     this.clearHiddenAnswers();
+  }
+
+  updateImageFile(questionId: string, event: Event): void {
+    const input = event.target instanceof HTMLInputElement ? event.target : null;
+    const imageFile = input?.files?.item(0) ?? null;
+    this.setImageFile(questionId, imageFile);
+
+    if (input) {
+      input.value = '';
+    }
+  }
+
+  discardImageAnswer(questionId: string): void {
+    this.setImageFile(questionId, null);
+  }
+
+  imagePreviewUrl(questionId: string): string {
+    return this.imagePreviewUrls()[questionId] ?? '';
   }
 
   questionKind(question: PublicAnonymousTemplateQuestion): PublicQuestionKind {
@@ -295,6 +329,9 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     }
     if (answerType === QUESTION_ANSWER_TYPE.Complain) {
       return 'complain';
+    }
+    if (answerType === QUESTION_ANSWER_TYPE.Image) {
+      return 'image';
     }
 
     return 'voice';
@@ -321,35 +358,16 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
   }
 
   hasAnswer(question: PublicAnonymousTemplateQuestion): boolean {
-    const answer = this.answers()[question.anonymousTemplateQuestionId];
-    if (!answer) {
-      return false;
-    }
-
-    const kind = this.questionKind(question);
-
-    if (kind === 'singleChoice') {
-      return answer.selectedQuestionOptionId.length > 0;
-    }
-    if (kind === 'starRating') {
-      return answer.starRatingValue !== null;
-    }
-    if (kind === 'smiles') {
-      return answer.smileValue !== null;
-    }
-    if (kind === 'complain') {
-      return answer.textAnswer.trim().length > 0;
-    }
-
-    return answer.voiceFileName.length > 0;
+    return this.questionAnswerError(question).length === 0;
   }
 
   questionError(question: PublicAnonymousTemplateQuestion): string {
-    if (!this.validationSubmitted() || this.hasAnswer(question)) {
+    if (!this.validationSubmitted()) {
       return '';
     }
 
-    return this.i18n.translate('publicAnonymousTemplates.questionRequiredError');
+    const errorKey = this.questionAnswerError(question);
+    return errorKey.length > 0 ? this.i18n.translate(errorKey) : '';
   }
 
   submitSurvey(): void {
@@ -427,7 +445,51 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
       smileValue: kind === 'smiles' ? answer.smileValue : null,
       textAnswer: kind === 'complain' ? answer.textAnswer.trim() : null,
       voiceFileName: kind === 'voice' ? answer.voiceFileName : null,
+      imageFile: kind === 'image' ? answer.imageFile : null,
     };
+  }
+
+  private questionAnswerError(question: PublicAnonymousTemplateQuestion): string {
+    const answer = this.answers()[question.anonymousTemplateQuestionId];
+    if (!answer) {
+      return 'publicAnonymousTemplates.questionRequiredError';
+    }
+
+    const kind = this.questionKind(question);
+
+    if (kind === 'singleChoice') {
+      return answer.selectedQuestionOptionId.length > 0
+        ? ''
+        : 'publicAnonymousTemplates.questionRequiredError';
+    }
+    if (kind === 'starRating') {
+      return answer.starRatingValue !== null ? '' : 'publicAnonymousTemplates.questionRequiredError';
+    }
+    if (kind === 'smiles') {
+      return answer.smileValue !== null ? '' : 'publicAnonymousTemplates.questionRequiredError';
+    }
+    if (kind === 'complain') {
+      return answer.textAnswer.trim().length > 0
+        ? ''
+        : 'publicAnonymousTemplates.questionRequiredError';
+    }
+    if (kind === 'image') {
+      if (!answer.imageFile) {
+        return 'publicAnonymousTemplates.imageRequired';
+      }
+
+      const extension = this.fileExtension(answer.imageFile.name);
+      const mimeType = answer.imageFile.type.toLowerCase();
+      if (!IMAGE_EXTENSIONS.has(extension) || !IMAGE_MIME_TYPES.has(mimeType)) {
+        return 'publicAnonymousTemplates.imageInvalidType';
+      }
+
+      return answer.imageFile.size <= MAX_IMAGE_FILE_BYTES
+        ? ''
+        : 'publicAnonymousTemplates.imageTooLarge';
+    }
+
+    return answer.voiceFileName.length > 0 ? '' : 'publicAnonymousTemplates.questionRequiredError';
   }
 
   private isConditionMatched(
@@ -456,7 +518,9 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.answers.update((answers) => this.visibleAnswerSubset(template, answers));
+    const visibleAnswers = this.visibleAnswerSubset(template, this.answers());
+    this.revokeHiddenImagePreviews(new Set(Object.keys(visibleAnswers)));
+    this.answers.set(visibleAnswers);
   }
 
   private visibleAnswerSubset(
@@ -605,6 +669,8 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
       smileValue: null,
       textAnswer: '',
       voiceFileName: '',
+      imageFileName: '',
+      imageFile: null,
     };
   }
 
@@ -612,5 +678,61 @@ export class PublicAnonymousTemplatePageComponent implements OnInit, OnDestroy {
     return event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement
       ? event.target.value
       : '';
+  }
+
+  private setImageFile(questionId: string, imageFile: File | null): void {
+    this.revokeImagePreview(questionId);
+    this.answers.update((answers) => ({
+      ...answers,
+      [questionId]: {
+        ...this.emptyAnswer(),
+        ...answers[questionId],
+        selectedQuestionOptionId: '',
+        starRatingValue: null,
+        smileValue: null,
+        textAnswer: '',
+        voiceFileName: '',
+        imageFileName: imageFile?.name ?? '',
+        imageFile,
+      },
+    }));
+    this.clearHiddenAnswers();
+
+    if (!imageFile) {
+      return;
+    }
+
+    this.imagePreviewUrls.update((urls) => ({
+      ...urls,
+      [questionId]: URL.createObjectURL(imageFile),
+    }));
+  }
+
+  private revokeImagePreview(questionId: string): void {
+    const previewUrl = this.imagePreviewUrls()[questionId];
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    this.imagePreviewUrls.update((urls) => {
+      const { [questionId]: removedUrl, ...remainingUrls } = urls;
+      return remainingUrls;
+    });
+  }
+
+  private revokeHiddenImagePreviews(visibleQuestionIds: ReadonlySet<string>): void {
+    Object.keys(this.imagePreviewUrls())
+      .filter((questionId) => !visibleQuestionIds.has(questionId))
+      .forEach((questionId) => this.revokeImagePreview(questionId));
+  }
+
+  private revokeAllImagePreviews(): void {
+    Object.values(this.imagePreviewUrls()).forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+    this.imagePreviewUrls.set({});
+  }
+
+  private fileExtension(fileName: string): string {
+    const extension = fileName.split('.').pop();
+    return extension ? extension.toLowerCase() : '';
   }
 }

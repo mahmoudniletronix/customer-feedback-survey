@@ -1,7 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import {
+  SKIP_ERROR_TOAST,
+  SKIP_SUCCESS_TOAST,
+} from '../../../../core/interceptors/error-toast.interceptor';
 import { toQuestionAnswerOption } from '../../../../shared/models/question-answer.model';
 import { toQuestionCondition } from '../../../../shared/models/question-condition.model';
 import { toScopeState } from '../../../../shared/models/resource-scope.model';
@@ -49,6 +53,11 @@ export class OperatorTemplatesService {
       .post<OperatorTemplateResponseApiResponse>(
         `${this.myTemplatesUrl}/${templateId}/responses`,
         this.toResponseFormData(answers, customInputs),
+        {
+          context: new HttpContext()
+            .set(SKIP_SUCCESS_TOAST, true)
+            .set(SKIP_ERROR_TOAST, true),
+        },
       )
       .pipe(map((response) => this.toResponseResult(response, templateId)));
   }
@@ -171,6 +180,8 @@ export class OperatorTemplatesService {
       textAnswer: response.textAnswer ?? null,
       voiceFileName: response.voiceFileName ?? null,
       voiceFileUrl: response.voiceFileUrl ? this.toMediaUrl(response.voiceFileUrl) : null,
+      imageFileName: response.imageFileName ?? null,
+      imageFileUrl: response.imageFileUrl ? this.toMediaUrl(response.imageFileUrl) : null,
     };
   }
 
@@ -227,6 +238,9 @@ export class OperatorTemplatesService {
       }
       if (answer.voiceFile) {
         formData.append(`${prefix}.VoiceFile`, answer.voiceFile, answer.voiceFile.name);
+      }
+      if (answer.imageFile) {
+        formData.append(`${prefix}.ImageFile`, answer.imageFile, answer.imageFile.name);
       }
     });
 

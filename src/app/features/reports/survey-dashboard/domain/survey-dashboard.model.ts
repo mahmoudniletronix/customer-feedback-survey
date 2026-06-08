@@ -7,6 +7,8 @@ import { QuestionCondition } from '../../../../shared/models/question-condition.
 export type SurveyDashboardSource = 'All' | 'Internal' | 'Anonymous';
 export type SurveyDashboardGroupBy = 'Day' | 'Month';
 export type SurveyDashboardRiskLevel = 'Healthy' | 'MediumRisk' | 'HighRisk' | string;
+export type SurveyDashboardTemplateKind = 'Authorized' | 'Anonymous';
+export type SurveyDashboardTemplateDashboardSource = 'Internal' | 'Anonymous';
 
 export interface SurveyDashboardQuery {
   branchId?: string;
@@ -21,6 +23,12 @@ export interface SurveyDashboardQuery {
   criticalScoreThreshold?: number;
 }
 
+export interface SurveyDashboardTemplatesSelectionQuery {
+  branchId?: string;
+  searchText?: string;
+  templateKind?: SurveyDashboardTemplateKind;
+}
+
 export interface SurveyDashboardNavigation {
   routeType: string;
   method: string;
@@ -31,6 +39,7 @@ export interface SurveyDashboardResponse {
   period: SurveyDashboardPeriod;
   scope: SurveyDashboardScope;
   filters: SurveyDashboardAppliedFilters;
+  appliedFilters: SurveyDashboardAppliedFilters;
   summary: SurveyDashboardSummary;
   sourceBreakdown: SurveyDashboardSourceBreakdown;
   branchesSummary: readonly SurveyDashboardBranchSummary[];
@@ -61,6 +70,10 @@ export interface SurveyDashboardAppliedFilters {
   branchId: string | null;
   templateId: string | null;
   anonymousTemplateId: string | null;
+  templateKind: SurveyDashboardTemplateKind | null;
+  from: string | null;
+  to: string | null;
+  groupBy: SurveyDashboardGroupBy;
   topQuestionsCount: number;
   criticalResponsesCount: number;
   criticalScoreThreshold: number;
@@ -218,11 +231,15 @@ export interface SurveyDashboardBranchOption {
 
 export interface SurveyDashboardTemplateOption {
   id: string;
+  templateKind: SurveyDashboardTemplateKind;
+  dashboardSource: SurveyDashboardTemplateDashboardSource;
   nameEn: string;
   nameAr: string | null;
+  displayName: string;
   branchId: string | null;
   branchNameEn: string | null;
   branchNameAr: string | null;
+  branchCode: string;
 }
 
 export interface SurveyDashboardTemplateDetails {

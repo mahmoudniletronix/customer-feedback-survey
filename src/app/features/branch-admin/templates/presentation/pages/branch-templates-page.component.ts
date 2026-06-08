@@ -4,6 +4,7 @@ import {
   Component,
   OnInit,
   WritableSignal,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -33,6 +34,7 @@ import {
   Trash2,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
@@ -101,6 +103,7 @@ type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
 })
 export class BranchTemplatesPageComponent implements OnInit {
   readonly templatesStore = inject(BranchTemplatesStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly route = inject(ActivatedRoute);
@@ -127,6 +130,13 @@ export class BranchTemplatesPageComponent implements OnInit {
   readonly expandedCustomInputs = signal<ReadonlySet<CustomInputFormGroup>>(new Set());
   readonly expandedEditCustomInputs = signal<ReadonlySet<CustomInputFormGroup>>(new Set());
   readonly selectedTemplate = signal<BranchTemplate | null>(null);
+  readonly canCreate = computed(() => this.authStore.canManageTemplates('Create'));
+  readonly canUpdate = computed(() => this.authStore.canManageTemplates('Update'));
+  readonly canDelete = computed(() => this.authStore.canManageTemplates('Delete'));
+  readonly canRestore = computed(() => this.authStore.canManageTemplates('Update'));
+  readonly canAssignQuestions = computed(() =>
+    this.authStore.canManageTemplates('AssignQuestions'),
+  );
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -191,6 +201,10 @@ export class BranchTemplatesPageComponent implements OnInit {
   }
 
   openCreateTemplate(): void {
+    if (!this.canCreate()) {
+      return;
+    }
+
     this.templatesStore.clearMessages();
     this.templateForm.reset({
       nameEn: '',
@@ -221,7 +235,7 @@ export class BranchTemplatesPageComponent implements OnInit {
     this.templateForm.markAllAsTouched();
     this.validateCreateTemplateDates();
     this.validateCustomInputs(this.customInputsArray);
-    if (this.templateForm.invalid || this.templatesStore.creating()) {
+    if (this.templateForm.invalid || this.templatesStore.creating() || !this.canCreate()) {
       if (this.templateForm.invalid) {
         this.expandInvalidCustomInputs(this.customInputsArray, this.expandedCustomInputs);
       }
@@ -402,7 +416,11 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   openEditTemplate(event: MouseEvent, template: BranchTemplate): void {
     event.stopPropagation();
-    if (this.editTemplateLoadingId() !== null || template.templateId.length === 0) {
+    if (
+      !this.canUpdate() ||
+      this.editTemplateLoadingId() !== null ||
+      template.templateId.length === 0
+    ) {
       return;
     }
 
@@ -446,6 +464,10 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   openTemplateQuestions(event: MouseEvent, template: BranchTemplate): void {
     event.stopPropagation();
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     void this.router.navigate([template.templateId, 'questions'], { relativeTo: this.route });
   }
 
@@ -465,7 +487,12 @@ export class BranchTemplatesPageComponent implements OnInit {
     this.validateTemplateDates(this.editTemplateForm);
     this.validateCustomInputs(this.editCustomInputsArray);
 
-    if (!template || this.editTemplateForm.invalid || this.templatesStore.updating()) {
+    if (
+      !template ||
+      this.editTemplateForm.invalid ||
+      this.templatesStore.updating() ||
+      !this.canUpdate()
+    ) {
       if (this.editTemplateForm.invalid) {
         this.expandInvalidCustomInputs(this.editCustomInputsArray, this.expandedEditCustomInputs);
       }
@@ -491,7 +518,7 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   deleteTemplate(event: MouseEvent, template: BranchTemplate): void {
     event.stopPropagation();
-    if (!template.isActive || this.templatesStore.deleting()) {
+    if (!this.canDelete() || !template.isActive || this.templatesStore.deleting()) {
       return;
     }
 
@@ -505,7 +532,7 @@ export class BranchTemplatesPageComponent implements OnInit {
 
   restoreTemplate(event: MouseEvent, template: BranchTemplate): void {
     event.stopPropagation();
-    if (template.isActive || this.templatesStore.restoring()) {
+    if (!this.canRestore() || template.isActive || this.templatesStore.restoring()) {
       return;
     }
 

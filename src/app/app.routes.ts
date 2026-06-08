@@ -9,6 +9,14 @@ import { AuthStore } from './features/auth/presentation/state/auth.store';
 const dashboardRedirectGuard: CanActivateFn = () => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
+  if (authStore.passwordChangeRequired()) {
+    return router.createUrlTree(['/auth/change-password']);
+  }
+
+  if (authStore.branchSelectionRequired()) {
+    return router.createUrlTree(['/auth/login']);
+  }
+
   const targetPath = authStore.redirectPath();
 
   if (targetPath !== '/dashboard') {
@@ -55,6 +63,13 @@ export const routes: Routes = [
         path: 'branches',
         loadChildren: () =>
           import('./features/super-admin/super-admin.routes').then((m) => m.SUPER_ADMIN_ROUTES),
+      },
+      {
+        path: 'branch-areas',
+        loadChildren: () =>
+          import('./features/super-admin/branch-areas/branch-areas.routes').then(
+            (m) => m.BRANCH_AREAS_ROUTES,
+          ),
       },
       {
         path: 'departments',

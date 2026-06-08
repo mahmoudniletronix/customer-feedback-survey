@@ -1,8 +1,9 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ChevronLeft, ChevronRight, KeyRound, Pencil, RotateCcw, Search, SlidersHorizontal, Trash2, UserPlus, UsersRound } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
@@ -10,7 +11,16 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
-import { BranchUser } from '../../domain/branch-user.model';
+import {
+  ResetPasswordModalComponent,
+  ResetPasswordModalValue,
+} from '../../../../../shared/ui/reset-password-modal/reset-password-modal.component';
+import {
+  BranchUser,
+  BranchUsersOrderSort,
+  CreateBranchUserPayload,
+  UpdateBranchUserPayload,
+} from '../../domain/branch-user.model';
 import { BranchUsersStore } from '../state/branch-users.store';
 
 @Component({
@@ -25,6 +35,7 @@ import { BranchUsersStore } from '../state/branch-users.store';
     InputComponent,
     ModalComponent,
     ReactiveFormsModule,
+    ResetPasswordModalComponent,
     TranslatePipe,
   ],
   templateUrl: './branch-users-page.component.html',
@@ -33,6 +44,7 @@ import { BranchUsersStore } from '../state/branch-users.store';
 })
 export class BranchUsersPageComponent implements OnInit {
   readonly branchUsersStore = inject(BranchUsersStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
 
@@ -57,10 +69,30 @@ export class BranchUsersPageComponent implements OnInit {
   readonly selectedBranchUser = signal<BranchUser | null>(null);
   readonly createRoleIds = signal<readonly string[]>([]);
   readonly assignRoleIds = signal<readonly string[]>([]);
+  readonly canCreate = computed(() => this.authStore.canManageBranchUsers('Create'));
+  readonly canUpdate = computed(() => this.authStore.canManageBranchUsers('Update'));
+  readonly canDelete = computed(() => this.authStore.canManageBranchUsers('Delete'));
+  readonly canRestore = computed(() => this.authStore.canManageBranchUsers('Restore'));
+  readonly canResetBranchUserPassword = computed(() =>
+    this.authStore.canResetBranchUserPassword(),
+  );
+  readonly canAssignRoles = computed(() => this.authStore.canManageBranchUsers('AssignRoles'));
+  readonly canUseActiveActions = computed(
+    () =>
+      this.canAssignRoles() ||
+      this.canUpdate() ||
+      this.canResetBranchUserPassword() ||
+      this.canDelete(),
+  );
+  readonly selectedResetPasswordUserLabel = computed(() => {
+    const user = this.selectedBranchUser();
+    return user ? `${user.nameEn} - ${user.userName}` : '';
+  });
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
-    isActive: [''],
+    pageSize: [10],
+    orderSort: this.formBuilder.nonNullable.control<BranchUsersOrderSort>('Newest'),
   });
 
   readonly branchUserForm = this.formBuilder.nonNullable.group({
@@ -79,33 +111,47 @@ export class BranchUsersPageComponent implements OnInit {
     phoneNumber: ['', Validators.maxLength(50)],
   });
 
-  readonly resetPasswordForm = this.formBuilder.nonNullable.group({
-    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(200)]],
-  });
-
   toggleAdvancedFilters(): void {
     this.advancedFiltersOpen.update((open) => !open);
   }
 
   ngOnInit(): void {
-    this.branchUsersStore.loadRoles();
+    if (this.canCreate() || this.canAssignRoles()) {
+      this.branchUsersStore.loadRoles();
+    }
     this.branchUsersStore.load();
   }
 
   searchBranchUsers(): void {
     const formValue = this.searchForm.getRawValue();
-    this.branchUsersStore.search(
-      formValue.searchText,
-      this.toIsActiveFilter(formValue.isActive),
-    );
+    this.branchUsersStore.search(formValue.searchText);
   }
 
   clearBranchUserSearch(): void {
     this.searchForm.setValue({
       searchText: '',
-      isActive: '',
+      pageSize: 10,
+      orderSort: 'Newest',
     });
-    this.branchUsersStore.search('', null);
+    this.branchUsersStore.load({
+      pageNumber: 1,
+      pageSize: 10,
+      searchText: '',
+      orderSort: 'Newest',
+    });
+  }
+
+  changePageSizeFromEvent(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    this.searchForm.controls.pageSize.setValue(value);
+    this.branchUsersStore.changePageSize(value);
+  }
+
+  changeOrderSortFromEvent(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    const orderSort: BranchUsersOrderSort = value === 'Oldest' ? 'Oldest' : 'Newest';
+    this.searchForm.controls.orderSort.setValue(orderSort);
+    this.branchUsersStore.changeOrderSort(orderSort);
   }
 
   goToPreviousBranchUsersPage(): void {
@@ -140,10 +186,7 @@ export class BranchUsersPageComponent implements OnInit {
     }
 
     this.branchUsersStore.createBranchUser(
-      {
-        ...this.branchUserForm.getRawValue(),
-        roleIds: this.createRoleIds(),
-      },
+      this.buildCreatePayload(),
       () => this.closeCreateBranchUser(),
     );
   }
@@ -173,7 +216,7 @@ export class BranchUsersPageComponent implements OnInit {
       return;
     }
 
-    this.branchUsersStore.updateBranchUser(user.applicationUserId, this.editBranchUserForm.getRawValue(), () =>
+    this.branchUsersStore.updateBranchUser(user.applicationUserId, this.buildUpdatePayload(), () =>
       this.closeEditBranchUser(),
     );
   }
@@ -200,26 +243,27 @@ export class BranchUsersPageComponent implements OnInit {
   }
 
   openResetPassword(user: BranchUser): void {
+    if (!this.canResetPassword(user)) {
+      return;
+    }
+
     this.branchUsersStore.clearMessages();
     this.selectedBranchUser.set(user);
-    this.resetPasswordForm.reset();
     this.resetPasswordModalOpen.set(true);
   }
 
   closeResetPassword(): void {
-    this.resetPasswordForm.reset();
     this.selectedBranchUser.set(null);
     this.resetPasswordModalOpen.set(false);
   }
 
-  resetPassword(): void {
+  resetPassword(payload: ResetPasswordModalValue): void {
     const user = this.selectedBranchUser();
-    this.resetPasswordForm.markAllAsTouched();
-    if (!user || this.resetPasswordForm.invalid || this.branchUsersStore.resettingPassword()) {
+    if (!user || this.branchUsersStore.resettingPassword()) {
       return;
     }
 
-    this.branchUsersStore.resetPassword(user.applicationUserId, this.resetPasswordForm.getRawValue(), () =>
+    this.branchUsersStore.resetPassword(user.applicationUserId, payload, () =>
       this.closeResetPassword(),
     );
   }
@@ -259,15 +303,22 @@ export class BranchUsersPageComponent implements OnInit {
   }
 
   toggleCreateRole(roleId: string): void {
+    this.branchUsersStore.clearCreateFieldError('roleIds');
     this.createRoleIds.update((roleIds) => this.toggleRoleId(roleIds, roleId));
   }
 
   toggleAssignRole(roleId: string): void {
+    this.branchUsersStore.clearAssignRolesError();
     this.assignRoleIds.update((roleIds) => this.toggleRoleId(roleIds, roleId));
   }
 
   branchUserFieldError(field: keyof typeof this.branchUserForm.controls): string {
     const control = this.branchUserForm.controls[field];
+    const backendError = this.createBackendFieldError(field);
+    if (backendError.length > 0) {
+      return backendError;
+    }
+
     if (!control.touched || control.valid) {
       return '';
     }
@@ -293,6 +344,11 @@ export class BranchUsersPageComponent implements OnInit {
 
   editBranchUserFieldError(field: keyof typeof this.editBranchUserForm.controls): string {
     const control = this.editBranchUserForm.controls[field];
+    const backendError = field === 'email' ? this.branchUsersStore.updateEmailError() ?? '' : '';
+    if (backendError.length > 0) {
+      return backendError;
+    }
+
     if (!control.touched || control.valid) {
       return '';
     }
@@ -326,34 +382,21 @@ export class BranchUsersPageComponent implements OnInit {
     return 'branches.fieldRequired';
   }
 
-  resetPasswordFieldError(): string {
-    const control = this.resetPasswordForm.controls.newPassword;
-    if (!control.touched || control.valid) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'departmentAdmins.passwordRequired';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'departmentAdmins.passwordMinLength';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'departmentAdmins.passwordMaxLength';
-    }
-
-    return 'branches.fieldRequired';
-  }
-
   createRolesError(): string {
-    return this.branchUserForm.touched && this.createRoleIds().length === 0
-      ? 'branchUsers.roleIdsRequired'
-      : '';
+    const backendError = this.branchUsersStore.createRoleIdsError();
+    if (backendError) {
+      return backendError;
+    }
+
+    return this.branchUserForm.touched && this.createRoleIds().length === 0 ? 'branchUsers.roleIdsRequired' : '';
   }
 
   assignRolesError(): string {
+    const backendError = this.branchUsersStore.assignRoleIdsError();
+    if (backendError) {
+      return backendError;
+    }
+
     return this.assignRoleIds().length === 0 ? 'branchUsers.roleIdsRequired' : '';
   }
 
@@ -367,6 +410,60 @@ export class BranchUsersPageComponent implements OnInit {
     }
 
     return user.createdBy.nameEn || user.createdBy.nameAr || '-';
+  }
+
+  clearCreateFieldError(field: 'userName' | 'email'): void {
+    this.branchUsersStore.clearCreateFieldError(field);
+  }
+
+  clearUpdateFieldError(field: 'email'): void {
+    this.branchUsersStore.clearUpdateFieldError(field);
+  }
+
+  canResetPassword(user: BranchUser): boolean {
+    return user.isActive && this.authStore.canResetBranchUserPassword(user.applicationUserId);
+  }
+
+  private buildCreatePayload(): CreateBranchUserPayload {
+    const value = this.branchUserForm.getRawValue();
+
+    return {
+      nameEn: value.nameEn.trim(),
+      nameAr: this.toNullableText(value.nameAr),
+      userName: value.userName.trim(),
+      email: value.email.trim(),
+      phoneNumber: this.toNullableText(value.phoneNumber),
+      password: value.password,
+      roleIds: this.createRoleIds(),
+    };
+  }
+
+  private buildUpdatePayload(): UpdateBranchUserPayload {
+    const value = this.editBranchUserForm.getRawValue();
+
+    return {
+      nameEn: value.nameEn.trim(),
+      nameAr: this.toNullableText(value.nameAr),
+      email: value.email.trim(),
+      phoneNumber: this.toNullableText(value.phoneNumber),
+    };
+  }
+
+  private toNullableText(value: string): string | null {
+    const text = value.trim();
+    return text.length > 0 ? text : null;
+  }
+
+  private createBackendFieldError(field: keyof typeof this.branchUserForm.controls): string {
+    if (field === 'userName') {
+      return this.branchUsersStore.createUserNameError() ?? '';
+    }
+
+    if (field === 'email') {
+      return this.branchUsersStore.createEmailError() ?? '';
+    }
+
+    return '';
   }
 
   private toggleRoleId(roleIds: readonly string[], roleId: string): readonly string[] {
@@ -401,13 +498,4 @@ export class BranchUsersPageComponent implements OnInit {
     return errorKeys[field];
   }
 
-  private toIsActiveFilter(value: string): boolean | null {
-    if (value === 'true') {
-      return true;
-    }
-    if (value === 'false') {
-      return false;
-    }
-    return null;
-  }
 }

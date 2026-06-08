@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, finalize, forkJoin, of, take } from 'rxjs';
+import { catchError, finalize, of, take } from 'rxjs';
 import { AnonymousTemplateResponseDetails } from '../../../../anonymous-templates/domain/anonymous-template.model';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchSurveyResponseDetails } from '../../../../branch-admin/dashboard/domain/branch-dashboard.model';
@@ -14,6 +14,7 @@ import {
   SurveyDashboardTemplateDetails,
   SurveyDashboardTemplateOption,
   SurveyDashboardTemplatePerformance,
+  SurveyDashboardTemplatesSelectionQuery,
 } from '../../domain/survey-dashboard.model';
 
 @Injectable()
@@ -34,8 +35,7 @@ export class SurveyDashboardStore {
   });
 
   private readonly branchesSignal = signal<readonly SurveyDashboardBranchOption[]>([]);
-  private readonly internalTemplatesSignal = signal<readonly SurveyDashboardTemplateOption[]>([]);
-  private readonly anonymousTemplatesSignal = signal<readonly SurveyDashboardTemplateOption[]>([]);
+  private readonly templatesSignal = signal<readonly SurveyDashboardTemplateOption[]>([]);
   private readonly optionsLoadingSignal = signal(false);
 
   private readonly internalDetailsOpenSignal = signal(false);
@@ -58,8 +58,7 @@ export class SurveyDashboardStore {
   readonly error = this.errorSignal.asReadonly();
   readonly query = this.querySignal.asReadonly();
   readonly branches = this.branchesSignal.asReadonly();
-  readonly internalTemplates = this.internalTemplatesSignal.asReadonly();
-  readonly anonymousTemplates = this.anonymousTemplatesSignal.asReadonly();
+  readonly templates = this.templatesSignal.asReadonly();
   readonly optionsLoading = this.optionsLoadingSignal.asReadonly();
   readonly isEmpty = computed(() => (this.dashboardSignal()?.summary.totalResponses ?? 0) === 0);
 
@@ -79,38 +78,49 @@ export class SurveyDashboardStore {
   readonly templateDetailsError = this.templateDetailsErrorSignal.asReadonly();
 
   loadOptions(): void {
-    this.optionsLoadingSignal.set(true);
+    if (this.authStore.role() !== 'SUPER_ADMIN') {
+      this.branchesSignal.set([]);
+      this.loadTemplateOptions();
+      return;
+    }
 
-    forkJoin({
-      branches: this.authStore.role() === 'SUPER_ADMIN'
-        ? this.dashboardService
-            .getBranchOptions()
-            .pipe(catchError(() => of([] as readonly SurveyDashboardBranchOption[])))
-        : of([] as readonly SurveyDashboardBranchOption[]),
-      internalTemplates: this.authStore.role() === 'SUPER_ADMIN'
-        ? of([] as readonly SurveyDashboardTemplateOption[])
-        : this.dashboardService
-            .getInternalTemplateOptions()
-            .pipe(catchError(() => of([] as readonly SurveyDashboardTemplateOption[]))),
-      anonymousTemplates: this.dashboardService
-        .getAnonymousTemplateOptions()
-        .pipe(catchError(() => of([] as readonly SurveyDashboardTemplateOption[]))),
-    })
+    this.optionsLoadingSignal.set(true);
+    this.templatesSignal.set([]);
+
+    this.dashboardService
+      .getBranchOptions()
       .pipe(
+        catchError(() => of([] as readonly SurveyDashboardBranchOption[])),
         take(1),
         finalize(() => this.optionsLoadingSignal.set(false)),
       )
       .subscribe({
-        next: ({ branches, internalTemplates, anonymousTemplates }) => {
-          this.branchesSignal.set(branches);
-          this.internalTemplatesSignal.set(internalTemplates);
-          this.anonymousTemplatesSignal.set(anonymousTemplates);
-        },
+        next: (branches) => this.branchesSignal.set(branches),
         error: () => {
           this.branchesSignal.set([]);
-          this.internalTemplatesSignal.set([]);
-          this.anonymousTemplatesSignal.set([]);
+          this.templatesSignal.set([]);
         },
+      });
+  }
+
+  loadTemplateOptions(query: SurveyDashboardTemplatesSelectionQuery = {}): void {
+    if (this.authStore.role() === 'SUPER_ADMIN' && !query.branchId) {
+      this.templatesSignal.set([]);
+      return;
+    }
+
+    this.optionsLoadingSignal.set(true);
+
+    this.dashboardService
+      .getDashboardTemplateOptions(query)
+      .pipe(
+        catchError(() => of([] as readonly SurveyDashboardTemplateOption[])),
+        take(1),
+        finalize(() => this.optionsLoadingSignal.set(false)),
+      )
+      .subscribe({
+        next: (templates) => this.templatesSignal.set(templates),
+        error: () => this.templatesSignal.set([]),
       });
   }
 
@@ -148,7 +158,7 @@ export class SurveyDashboardStore {
     this.errorSignal.set(null);
 
     this.dashboardService
-      .getDashboardByPath(navigation.path)
+      .getDashboardByPath(this.scopedNavigationPath(navigation.path))
       .pipe(
         take(1),
         finalize(() => this.loadingSignal.set(false)),
@@ -177,7 +187,7 @@ export class SurveyDashboardStore {
     this.internalDetailsLoadingSignal.set(true);
 
     this.dashboardService
-      .getInternalResponseDetailsByPath(navigation.path)
+      .getInternalResponseDetailsByPath(this.scopedNavigationPath(navigation.path))
       .pipe(
         take(1),
         finalize(() => this.internalDetailsLoadingSignal.set(false)),
@@ -204,7 +214,7 @@ export class SurveyDashboardStore {
     this.anonymousDetailsLoadingSignal.set(true);
 
     this.dashboardService
-      .getAnonymousResponseDetailsByPath(navigation.path)
+      .getAnonymousResponseDetailsByPath(this.scopedNavigationPath(navigation.path))
       .pipe(
         take(1),
         finalize(() => this.anonymousDetailsLoadingSignal.set(false)),
@@ -272,10 +282,8 @@ export class SurveyDashboardStore {
   }
 
   private normalizeQuery(query: SurveyDashboardQuery): SurveyDashboardQuery {
-    const source = query.source ?? 'All';
     const normalized: SurveyDashboardQuery = {
       branchId: this.authStore.role() === 'SUPER_ADMIN' ? query.branchId || undefined : undefined,
-      source,
       from: query.from || undefined,
       to: query.to || undefined,
       groupBy: query.groupBy ?? 'Day',
@@ -284,14 +292,33 @@ export class SurveyDashboardStore {
       criticalScoreThreshold: this.percentage(query.criticalScoreThreshold, 40),
     };
 
-    if (source === 'Internal') {
+    if (query.templateId) {
       normalized.templateId = query.templateId || undefined;
-    }
-    if (source === 'Anonymous') {
-      normalized.anonymousTemplateId = query.anonymousTemplateId || undefined;
+    } else {
+      normalized.source = query.source ?? 'All';
     }
 
     return normalized;
+  }
+
+  private scopedNavigationPath(path: string): string {
+    return this.authStore.role() === 'SUPER_ADMIN'
+      ? path
+      : this.removeQueryParam(path, 'branchId');
+  }
+
+  private removeQueryParam(path: string, key: string): string {
+    const [pathWithoutHash, hash = ''] = path.split('#', 2);
+    const [basePath, queryString = ''] = pathWithoutHash.split('?', 2);
+    if (queryString.length === 0) {
+      return path;
+    }
+
+    const params = new URLSearchParams(queryString);
+    params.delete(key);
+    const nextQueryString = params.toString();
+    const nextHash = hash.length > 0 ? `#${hash}` : '';
+    return `${basePath}${nextQueryString.length > 0 ? `?${nextQueryString}` : ''}${nextHash}`;
   }
 
   private mergeBranchOptionsFromDashboard(dashboard: SurveyDashboardResponse): void {
@@ -320,11 +347,12 @@ export class SurveyDashboardStore {
   }
 
   private mergeTemplateOptionsFromDashboard(dashboard: SurveyDashboardResponse): void {
-    const internalTemplates = new Map<string, SurveyDashboardTemplateOption>(
-      this.internalTemplatesSignal().map((template) => [template.id, template]),
-    );
-    const anonymousTemplates = new Map<string, SurveyDashboardTemplateOption>(
-      this.anonymousTemplatesSignal().map((template) => [template.id, template]),
+    if (this.authStore.role() === 'SUPER_ADMIN' && !this.querySignal().branchId) {
+      return;
+    }
+
+    const templates = new Map<string, SurveyDashboardTemplateOption>(
+      this.templatesSignal().map((template) => [template.id, template]),
     );
 
     dashboard.templatePerformance.forEach((template) => {
@@ -334,25 +362,21 @@ export class SurveyDashboardStore {
 
       const option: SurveyDashboardTemplateOption = {
         id: template.templateId,
+        templateKind: template.source === 'Anonymous' ? 'Anonymous' : 'Authorized',
+        dashboardSource: template.source === 'Anonymous' ? 'Anonymous' : 'Internal',
         nameEn: template.templateNameEn,
         nameAr: template.templateNameAr,
+        displayName: template.templateNameEn || template.templateNameAr || '',
         branchId: template.branchId,
         branchNameEn: template.branchNameEn,
         branchNameAr: template.branchNameAr,
+        branchCode: '',
       };
 
-      if (template.source === 'Internal') {
-        internalTemplates.set(template.templateId, option);
-        return;
-      }
-
-      if (template.source === 'Anonymous') {
-        anonymousTemplates.set(template.templateId, option);
-      }
+      templates.set(template.templateId, option);
     });
 
-    this.internalTemplatesSignal.set([...internalTemplates.values()]);
-    this.anonymousTemplatesSignal.set([...anonymousTemplates.values()]);
+    this.templatesSignal.set([...templates.values()]);
   }
 
   private positiveInteger(value: number | undefined, fallback: number): number {

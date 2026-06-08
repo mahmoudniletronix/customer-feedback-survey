@@ -4,6 +4,7 @@ export const QUESTION_ANSWER_TYPE = {
   StarRating: 3,
   Complain: 4,
   Smiles: 5,
+  Image: 6,
 } as const;
 
 export type QuestionAnswerType = (typeof QUESTION_ANSWER_TYPE)[keyof typeof QUESTION_ANSWER_TYPE];
@@ -53,6 +54,7 @@ export const QUESTION_ANSWER_TYPE_LABEL_KEYS: Record<QuestionAnswerType, string>
   [QUESTION_ANSWER_TYPE.StarRating]: 'questions.typeStarRating',
   [QUESTION_ANSWER_TYPE.Complain]: 'questions.typeComplain',
   [QUESTION_ANSWER_TYPE.Smiles]: 'questions.typeSmiles',
+  [QUESTION_ANSWER_TYPE.Image]: 'questions.typeImage',
 };
 
 export const SMILE_LEVELS: readonly SmileLevel[] = [
@@ -94,6 +96,9 @@ export function toQuestionAnswerType(value: QuestionAnswerTypeInput): QuestionAn
     }
     if (normalized === 'smiles' || normalized === 'smile') {
       return QUESTION_ANSWER_TYPE.Smiles;
+    }
+    if (normalized === 'image' || normalized === 'photo' || normalized === 'picture') {
+      return QUESTION_ANSWER_TYPE.Image;
     }
   }
 
@@ -145,7 +150,8 @@ function isQuestionAnswerType(value: number): value is QuestionAnswerType {
     value === QUESTION_ANSWER_TYPE.Voice ||
     value === QUESTION_ANSWER_TYPE.StarRating ||
     value === QUESTION_ANSWER_TYPE.Complain ||
-    value === QUESTION_ANSWER_TYPE.Smiles
+    value === QUESTION_ANSWER_TYPE.Smiles ||
+    value === QUESTION_ANSWER_TYPE.Image
   );
 }
 

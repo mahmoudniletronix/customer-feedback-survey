@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
+import { I18nService } from '../../../../../core/services/i18n.service';
+import { ToastService } from '../../../../../shared/ui/toast/toast.service';
 import {
   OperatorAssignedTemplate,
   OperatorLatestTemplateResponse,
@@ -26,6 +28,8 @@ interface ApiErrorResponse {
 @Injectable()
 export class OperatorTemplatesStore {
   private readonly operatorTemplatesService = inject(OperatorTemplatesService);
+  private readonly i18n = inject(I18nService);
+  private readonly toastService = inject(ToastService);
   private readonly myTemplatesSignal = signal<OperatorMyTemplates | null>(null);
   private readonly submittedResponseSignal = signal<OperatorTemplateResponseResult | null>(null);
   private readonly loadingSignal = signal(false);
@@ -116,11 +120,19 @@ export class OperatorTemplatesStore {
           this.submittedResponseSignal.set(response);
           this.applySubmittedResponse(templateId, response, answers);
           this.submitSuccessSignal.set('operatorTemplates.submitSuccess');
+          this.toastService.success(
+            this.i18n.translate('operatorTemplates.submitSuccessToastTitle'),
+            this.i18n.translate('operatorTemplates.submitSuccessToastDescription'),
+          );
           onSubmitted(response);
         },
         error: (error: unknown) => {
           const submitError = this.readSubmitError(error);
           this.submitErrorSignal.set(submitError);
+          this.toastService.error(
+            this.i18n.translate('operatorTemplates.submitErrorToastTitle'),
+            this.i18n.translate(submitError),
+          );
 
           if (this.shouldRefreshTemplatesAfterSubmitError(submitError)) {
             if (this.isTemplateAvailabilitySubmitError(submitError)) {
@@ -314,6 +326,8 @@ export class OperatorTemplatesStore {
           textAnswer: answer.textAnswer ?? null,
           voiceFileName: answer.voiceFile?.name ?? null,
           voiceFileUrl: null,
+          imageFileName: answer.imageFile?.name ?? null,
+          imageFileUrl: null,
         };
       }),
     };

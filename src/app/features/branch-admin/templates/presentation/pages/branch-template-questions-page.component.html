@@ -31,14 +31,14 @@
         <app-button
           type="button"
           variant="secondary"
-          [disabled]="!isDirty() || savingTemplateFlow()"
+          [disabled]="!canAssignQuestions() || !isDirty() || savingTemplateFlow()"
           (pressed)="resetSelection()"
         >
           {{ 'branchTemplates.resetQuestions' | t }}
         </app-button>
         <app-button
           type="button"
-          [disabled]="!hasPendingChanges() || savingTemplateFlow()"
+          [disabled]="!canSavePendingChanges() || savingTemplateFlow()"
           [loading]="savingTemplateFlow()"
           (pressed)="saveQuestions()"
         >
@@ -212,7 +212,12 @@
                           }
                         </div>
                         <div class="flex shrink-0 justify-end">
-                          <app-button type="button" size="sm" (pressed)="addQuestion(question)">
+                          <app-button
+                            type="button"
+                            size="sm"
+                            [disabled]="!canAssignQuestions()"
+                            (pressed)="addQuestion(question)"
+                          >
                             <app-icon [icon]="plusIcon" [size]="15" />
                             {{ 'branchTemplates.addQuestion' | t }}
                           </app-button>
@@ -260,7 +265,7 @@
               ) {
                 <article
                   class="group flex min-w-0 flex-col gap-2 rounded-lg border border-cyan-100 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/60 transition lg:flex-row lg:items-center lg:justify-between"
-                  draggable="true"
+                  [attr.draggable]="canAssignQuestions() ? 'true' : 'false'"
                   [class.opacity-60]="draggingQuestionId() === question.questionId"
                   (dragstart)="startDrag(question.questionId)"
                   (dragover)="allowDrop($event)"
@@ -304,7 +309,7 @@
                       type="button"
                       size="sm"
                       variant="secondary"
-                      [disabled]="first"
+                      [disabled]="!canAssignQuestions() || first"
                       (pressed)="moveQuestion(question.questionId, -1)"
                     >
                       <app-icon [icon]="chevronUpIcon" [size]="13" />
@@ -313,7 +318,7 @@
                       type="button"
                       size="sm"
                       variant="secondary"
-                      [disabled]="last"
+                      [disabled]="!canAssignQuestions() || last"
                       (pressed)="moveQuestion(question.questionId, 1)"
                     >
                       <app-icon [icon]="chevronDownIcon" [size]="13" />
@@ -323,6 +328,7 @@
                         type="button"
                         size="sm"
                         variant="danger"
+                        [disabled]="!canAssignQuestions()"
                         (pressed)="removeQuestion(question.questionId)"
                       >
                         <app-icon [icon]="trashIcon" [size]="13" />
@@ -349,7 +355,7 @@
         </div>
 
         <div class="border-t border-slate-100">
-          @if (selectedQuestions().length > 0) {
+          @if (selectedQuestions().length > 0 && canManageQuestionConditions()) {
             <app-branch-template-conditional-logic
               [questions]="conditionQuestions()"
               [candidateQuestions]="conditionCandidateQuestions()"

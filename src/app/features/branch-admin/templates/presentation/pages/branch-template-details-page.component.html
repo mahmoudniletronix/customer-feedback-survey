@@ -29,6 +29,7 @@
           </app-button>
           <app-button
             type="button"
+            [disabled]="!canUpdate()"
             [loading]="templatesStore.updating()"
             (pressed)="updateTemplate()"
           >
@@ -36,24 +37,30 @@
             {{ 'common.save' | t }}
           </app-button>
         } @else {
-          <app-button type="button" (pressed)="openQuestionsManager()">
-            <app-icon [icon]="listChecksIcon" [size]="15" />
-            {{ 'branchTemplates.manageQuestions' | t }}
-          </app-button>
-          <app-button type="button" variant="secondary" (pressed)="enableEdit()">
-            <app-icon [icon]="editIcon" [size]="15" />
-            {{ 'common.edit' | t }}
-          </app-button>
-          <app-button
-            type="button"
-            variant="danger"
-            [disabled]="!template.isActive || templatesStore.deleting()"
-            [loading]="templatesStore.deleting()"
-            (pressed)="deleteTemplate()"
-          >
-            <app-icon [icon]="deleteIcon" [size]="15" />
-            {{ 'common.delete' | t }}
-          </app-button>
+          @if (canAssignQuestions()) {
+            <app-button type="button" (pressed)="openQuestionsManager()">
+              <app-icon [icon]="listChecksIcon" [size]="15" />
+              {{ 'branchTemplates.manageQuestions' | t }}
+            </app-button>
+          }
+          @if (canUpdate()) {
+            <app-button type="button" variant="secondary" (pressed)="enableEdit()">
+              <app-icon [icon]="editIcon" [size]="15" />
+              {{ 'common.edit' | t }}
+            </app-button>
+          }
+          @if (canDelete()) {
+            <app-button
+              type="button"
+              variant="danger"
+              [disabled]="!template.isActive || templatesStore.deleting()"
+              [loading]="templatesStore.deleting()"
+              (pressed)="deleteTemplate()"
+            >
+              <app-icon [icon]="deleteIcon" [size]="15" />
+              {{ 'common.delete' | t }}
+            </app-button>
+          }
         }
       </div>
     }
@@ -166,7 +173,13 @@
                   {{ 'branchTemplates.customInputsSubtitle' | t }}
                 </p>
               </div>
-              <app-button type="button" size="sm" variant="secondary" (pressed)="addCustomInput()">
+              <app-button
+                type="button"
+                size="sm"
+                variant="secondary"
+                [disabled]="!canUpdate()"
+                (pressed)="addCustomInput()"
+              >
                 <app-icon [icon]="plusIcon" [size]="14" />
                 {{ 'branchTemplates.addCustomInput' | t }}
               </app-button>
@@ -386,7 +399,11 @@
             <app-button type="button" variant="secondary" (pressed)="cancelEdit()">
               {{ 'common.cancel' | t }}
             </app-button>
-            <app-button type="submit" [loading]="templatesStore.updating()">
+            <app-button
+              type="submit"
+              [disabled]="!canUpdate()"
+              [loading]="templatesStore.updating()"
+            >
               <app-icon [icon]="saveIcon" [size]="17" />
               {{ 'common.save' | t }}
             </app-button>

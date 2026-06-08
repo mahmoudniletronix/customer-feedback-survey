@@ -76,7 +76,7 @@ export class BranchResponsesHistoryPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.authStore.role() === 'BRANCH_ADMIN') {
+    if (this.authStore.isBranchScopedActor()) {
       this.branchStore.load();
     }
 

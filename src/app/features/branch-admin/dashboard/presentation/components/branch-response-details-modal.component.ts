@@ -5,6 +5,7 @@ import {
   CircleGauge,
   FileText,
   Hash,
+  Image as ImageIcon,
   Mic,
   UserRound,
 } from 'lucide-angular';
@@ -59,6 +60,7 @@ export class BranchResponseDetailsModalComponent {
   readonly fileIcon = FileText;
   readonly gaugeIcon = CircleGauge;
   readonly hashIcon = Hash;
+  readonly imageIcon = ImageIcon;
   readonly micIcon = Mic;
   readonly userIcon = UserRound;
   readonly scaleSlots: readonly ScaleSlot[] = [
@@ -102,6 +104,10 @@ export class BranchResponseDetailsModalComponent {
       return answer.textAnswer || answer.displayValue || '-';
     }
 
+    if (answer.questionType === 'Image') {
+      return answer.imageFileName || answer.displayValue || this.i18n.translate('operatorTemplates.imageFileAnswer');
+    }
+
     return answer.voiceFileName || answer.displayValue || this.i18n.translate('branchReports.voice');
   }
 
@@ -110,18 +116,11 @@ export class BranchResponseDetailsModalComponent {
   }
 
   voiceUrl(answer: BranchSurveyResponseAnswer): string {
-    const voiceFileUrl = answer.voiceFileUrl;
-    if (!voiceFileUrl) {
-      return '';
-    }
+    return this.toMediaUrl(answer.voiceFileUrl);
+  }
 
-    if (/^https?:\/\//i.test(voiceFileUrl)) {
-      return voiceFileUrl;
-    }
-
-    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
-    const path = voiceFileUrl.startsWith('/') ? voiceFileUrl : `/${voiceFileUrl}`;
-    return `${baseUrl}${path}`;
+  imageUrl(answer: BranchSurveyResponseAnswer): string {
+    return this.toMediaUrl(answer.imageFileUrl);
   }
 
   private localized(englishText: string, arabicText: string | null | undefined): string {
@@ -130,6 +129,19 @@ export class BranchResponseDetailsModalComponent {
     }
 
     return englishText || arabicText || '-';
+  }
+
+  private toMediaUrl(url: string | null): string {
+    if (!url) {
+      return '';
+    }
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${baseUrl}${path}`;
   }
 
   private toAnswerTree(

@@ -510,19 +510,19 @@
                   <div class="space-y-2">
                     @for (option of question.options; track option.optionId) {
                       <label
-                        class="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition hover:border-cyan-100 hover:bg-cyan-50/40"
+                        class="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border p-3 transition hover:border-cyan-100 hover:bg-cyan-50/40"
                         [class.border-cyan-200]="selectedOptionId(question) === option.optionId"
                         [class.bg-cyan-50]="selectedOptionId(question) === option.optionId"
                         [class.border-slate-100]="selectedOptionId(question) !== option.optionId"
                       >
                         <input
                           type="radio"
-                          class="mt-1 h-4 w-4 shrink-0 accent-[var(--theme-color-accent)]"
+                          class="h-4 w-4 shrink-0 accent-[var(--theme-color-accent)]"
                           [name]="'question-' + question.id"
                           [checked]="selectedOptionId(question) === option.optionId"
                           (change)="selectSingleChoice(question, option.optionId)"
                         />
-                        <span class="min-w-0">
+                        <span class="flex min-h-8 min-w-0 flex-1 items-center">
                           <span
                             class="block break-words font-bold text-slate-800 [overflow-wrap:anywhere]"
                           >
@@ -723,6 +723,68 @@
                             controls
                             [src]="voicePreviewUrl(question)"
                           ></audio>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else if (isImage(question)) {
+                  <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div class="flex items-start gap-3">
+                        <span
+                          class="flex w-11 shrink-0 items-center justify-center bg-white text-[var(--theme-color-accent)]"
+                        >
+                          <app-icon [icon]="imageIcon" [size]="20" />
+                        </span>
+                        <div class="min-w-0">
+                          <h4 class="font-bold text-slate-900">
+                            {{ 'operatorTemplates.uploadImage' | t }}
+                          </h4>
+                          <p class="mt-1 max-w-xl text-xs leading-5 text-slate-500">
+                            {{ 'operatorTemplates.imageHelp' | t }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <input
+                      class="mt-3 block w-full text-xs text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-[var(--theme-color-accent)] file:px-3 file:py-2 file:text-xs file:font-bold file:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      (change)="updateImageFile(question, $event)"
+                    />
+
+                    @if (imageFileName(question)) {
+                      <div class="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
+                        <div
+                          class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div class="min-w-0">
+                            <p class="text-xs font-bold text-emerald-800">
+                              {{ 'operatorTemplates.imageAnswerReady' | t }}
+                            </p>
+                            <p
+                              class="mt-1 break-words text-[11px] font-semibold text-emerald-700 [overflow-wrap:anywhere]"
+                            >
+                              {{ imageFileName(question) }}
+                            </p>
+                          </div>
+                          <app-button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            (pressed)="discardImageAnswer(question)"
+                          >
+                            <app-icon [icon]="trashIcon" [size]="14" />
+                            {{ 'operatorTemplates.discardImageAnswer' | t }}
+                          </app-button>
+                        </div>
+                        @if (imagePreviewUrl(question)) {
+                          <img
+                            class="mt-3 max-h-60 w-full rounded-lg object-contain ring-1 ring-emerald-100"
+                            [src]="imagePreviewUrl(question)"
+                            [alt]="imageFileName(question)"
+                          />
                         }
                       </div>
                     }
@@ -1040,6 +1102,21 @@
                           </div>
                           @if (answer.voiceFileUrl) {
                             <audio class="mt-2 w-full" controls [src]="answer.voiceFileUrl"></audio>
+                          }
+                          @if (answer.imageFileUrl) {
+                            <a
+                              class="mt-2 block w-fit text-[11px] font-extrabold text-[var(--theme-color-secondary)]"
+                              [href]="answer.imageFileUrl"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {{ 'operatorTemplates.openImageFile' | t }}
+                            </a>
+                            <img
+                              class="mt-2 max-h-56 w-full rounded-lg object-contain ring-1 ring-slate-100"
+                              [src]="answer.imageFileUrl"
+                              [alt]="answer.imageFileName || answer.answer"
+                            />
                           }
                         </div>
                       }

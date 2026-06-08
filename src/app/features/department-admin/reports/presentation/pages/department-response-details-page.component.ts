@@ -1,7 +1,7 @@
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ArrowLeft, FileText, Mic } from 'lucide-angular';
+import { ArrowLeft, FileText, Image as ImageIcon, Mic } from 'lucide-angular';
 import { environment } from '../../../../../../environments/environment';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -36,6 +36,7 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
 
   readonly backIcon = ArrowLeft;
   readonly fileIcon = FileText;
+  readonly imageIcon = ImageIcon;
   readonly micIcon = Mic;
   readonly scaleSlots: readonly ScaleSlot[] = [
     { index: 1 },
@@ -94,6 +95,10 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
       return answer.textAnswer || answer.displayValue || '-';
     }
 
+    if (answer.questionType === 'Image') {
+      return answer.imageFileName || answer.displayValue || this.i18n.translate('operatorTemplates.imageFileAnswer');
+    }
+
     return (
       answer.voiceFileName ||
       answer.displayValue ||
@@ -107,6 +112,7 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
     if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
     if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');
+    if (answer.questionType === 'Image') return this.i18n.translate('questions.typeImage');
 
     return answer.questionTypeName || answer.questionType;
   }
@@ -116,18 +122,25 @@ export class DepartmentResponseDetailsPageComponent implements OnInit {
   }
 
   voiceUrl(answer: DepartmentResponseAnswer): string {
-    const voiceFileUrl = answer.voiceFileUrl;
-    if (!voiceFileUrl) return '';
-    if (/^https?:\/\//i.test(voiceFileUrl)) return voiceFileUrl;
+    return this.toMediaUrl(answer.voiceFileUrl);
+  }
 
-    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
-    const path = voiceFileUrl.startsWith('/') ? voiceFileUrl : `/${voiceFileUrl}`;
-    return `${baseUrl}${path}`;
+  imageUrl(answer: DepartmentResponseAnswer): string {
+    return this.toMediaUrl(answer.imageFileUrl);
   }
 
   private localized(englishText: string, arabicText: string | null | undefined): string {
     if (this.i18n.language() === 'ar') return arabicText || englishText || '-';
     return englishText || arabicText || '-';
+  }
+
+  private toMediaUrl(url: string | null): string {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
+
+    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${baseUrl}${path}`;
   }
 
   private toAnswerTree(

@@ -1,5 +1,11 @@
 export type Role = 'SUPER_ADMIN' | 'BRANCH_ADMIN' | 'DEPARTMENT_ADMIN' | 'BRANCH_USER' | 'OPERATOR';
-export type UserType = 'SuperAdmin' | 'BranchAdmin' | 'DepartmentAdmin' | 'BranchUser' | 'Operator';
+export type UserType =
+  | 'SuperAdmin'
+  | 'BranchAdmin'
+  | 'BranchArea'
+  | 'DepartmentAdmin'
+  | 'BranchUser'
+  | 'Operator';
 
 export interface User {
   id: string;
@@ -18,5 +24,9 @@ export interface AuthSession {
   userType: UserType;
   roles: readonly string[];
   permissions: readonly string[];
+  firstLoginFlag?: boolean;
+  passwordExpiredFlag?: boolean;
+  passwordChangedOnUtc?: string;
+  passwordExpiresOnUtc?: string;
   expiresAt?: number;
 }

@@ -70,7 +70,7 @@
 .brand-subtitle {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgb(var(--theme-accent-rgb) / 60%);
+  color: rgb(var(--on) / 78%);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -100,7 +100,7 @@
   min-height: 3.25rem;
   padding: 0.65rem 0.75rem;
   border-radius: 0.9rem;
-  color: rgb(var(--on) / 70%);
+  color: rgb(var(--on) / 84%);
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -125,20 +125,20 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: rgb(var(--on) / 5%);
+  background: rgb(var(--on) / 8%);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .nav-item:hover .nav-icon-box {
-  background: rgb(var(--on) / 12%);
-  color: var(--accent);
+  background: rgb(var(--on) / 92%);
+  color: var(--theme-color-primary);
 }
 
 .nav-item-active {
-  background: rgb(var(--on) / 12%) !important;
+  background: rgb(var(--on) / 14%) !important;
   color: var(--text) !important;
-  box-shadow: inset 0 0 0 1px rgb(var(--on) / 10%);
+  box-shadow: inset 0 0 0 1px rgb(var(--on) / 16%);
 }
 
 .nav-item:focus-visible {
@@ -148,9 +148,9 @@
 }
 
 .nav-item-active .nav-icon-box {
-  background: var(--accent) !important;
-  color: var(--text) !important;
-  box-shadow: 0 4px 12px rgb(var(--theme-accent-rgb) / 30%);
+  background: rgb(var(--on) / 95%) !important;
+  color: var(--theme-color-primary) !important;
+  box-shadow: 0 4px 12px rgb(var(--shadow) / 18%);
 }
 
 .nav-label {
@@ -169,8 +169,8 @@
   min-height: 3rem;
   padding: 0.75rem;
   border-radius: 0.9rem;
-  background: rgb(var(--on) / 5%);
-  color: rgb(var(--on) / 80%);
+  background: rgb(var(--on) / 8%);
+  color: rgb(var(--on) / 88%);
   font-weight: 700;
   font-size: 0.85rem;
   transition: all 0.2s ease;
@@ -178,7 +178,7 @@
 }
 
 .collapse-btn:hover {
-  background: rgb(var(--on) / 10%);
+  background: rgb(var(--on) / 14%);
   color: var(--text);
   border-color: rgb(var(--on) / 10%);
 }

@@ -82,6 +82,10 @@ const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
     value: QUESTION_ANSWER_TYPE.Smiles,
     labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.Smiles],
   },
+  {
+    value: QUESTION_ANSWER_TYPE.Image,
+    labelKey: QUESTION_ANSWER_TYPE_LABEL_KEYS[QUESTION_ANSWER_TYPE.Image],
+  },
 ];
 
 type QuestionMainField = 'groupId' | 'textEn' | 'textAr' | 'type';
@@ -168,6 +172,8 @@ export class QuestionsPageComponent implements OnInit {
   readonly editIsSingleChoice = computed(
     () => this.editAnswerType() === QUESTION_ANSWER_TYPE.SingleChoice,
   );
+  readonly createIsImage = computed(() => this.createAnswerType() === QUESTION_ANSWER_TYPE.Image);
+  readonly editIsImage = computed(() => this.editAnswerType() === QUESTION_ANSWER_TYPE.Image);
   readonly isGroupScoped = computed(() => this.scopedGroupId() !== null);
   readonly canSubmitQuestionForm = computed(
     () => this.isGroupScoped() || this.questionsStore.groupsSelection().length > 0,

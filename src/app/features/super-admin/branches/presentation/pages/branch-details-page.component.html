@@ -72,6 +72,16 @@
         {{ departmentsStore.error() ?? '' | t }}
       </div>
     }
+    @if (resetPasswordSuccess()) {
+      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ resetPasswordSuccess() ?? '' | t }}
+      </div>
+    }
+    @if (resetPasswordError()) {
+      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+        {{ resetPasswordError() ?? '' | t }}
+      </div>
+    }
 
     <app-card>
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -157,17 +167,32 @@
       <app-card [title]="'branches.branchAdmins' | t">
         <div class="space-y-2">
           @for (admin of branch.branchAdmins; track admin.branchAdminId) {
-            <button
-              type="button"
-              class="w-full border border-slate-100 p-3 text-start transition hover:border-[var(--theme-color-accent)]/40 hover:bg-cyan-50/40"
-              (click)="openBranchAdminDetails(admin)"
-            >
-              <p class="font-bold text-slate-900">{{ localizedDisplayName(admin) }}</p>
-              <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
-              @if (admin.phoneNumber) {
-                <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
-              }
-            </button>
+            <div class="border border-slate-100 p-3 transition hover:border-[var(--theme-color-accent)]/40 hover:bg-cyan-50/40">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <button type="button" class="min-w-0 flex-1 text-start" (click)="openBranchAdminDetails(admin)">
+                  <p class="font-bold text-slate-900">{{ localizedDisplayName(admin) }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
+                  @if (admin.phoneNumber) {
+                    <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
+                  }
+                </button>
+                @if (canResetPassword('BRANCH_ADMIN', admin.applicationUserId)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="
+                      resettingPassword() &&
+                      resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                    "
+                    (pressed)="openResetPassword('BRANCH_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                  >
+                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                    {{ 'users.resetPassword' | t }}
+                  </app-button>
+                }
+              </div>
+            </div>
           } @empty {
             <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
           }
@@ -207,9 +232,26 @@
                 </div>
               </div>
               @if (department.departmentAdmins.length > 0) {
-                <div class="mt-3 border-t border-slate-100 pt-3">
+                <div class="mt-3 space-y-2 border-t border-slate-100 pt-3">
                   @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
-                    <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
+                    <div class="flex flex-col gap-2 rounded-lg bg-white p-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
+                      @if (canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
+                        <app-button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          [loading]="
+                            resettingPassword() &&
+                            resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                          "
+                          (pressed)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                        >
+                          <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                          {{ 'users.resetPassword' | t }}
+                        </app-button>
+                      }
+                    </div>
                   }
                 </div>
               }
@@ -224,8 +266,27 @@
         <div class="space-y-2">
           @for (user of branch.branchUsers; track user.branchUserId) {
             <div class="border border-slate-100 p-3">
-              <p class="font-bold text-slate-900">{{ localizedDisplayName(user) }}</p>
-              <p class="mt-1 text-xs text-slate-500">{{ user.userName }} - {{ user.email }}</p>
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p class="font-bold text-slate-900">{{ localizedDisplayName(user) }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ user.userName }} - {{ user.email }}</p>
+                </div>
+                @if (canResetPassword('BRANCH_USER', user.applicationUserId)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="
+                      resettingPassword() &&
+                      resetPasswordTarget()?.applicationUserId === user.applicationUserId
+                    "
+                    (pressed)="openResetPassword('BRANCH_USER', user.applicationUserId, localizedDisplayName(user), $event)"
+                  >
+                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                    {{ 'users.resetPassword' | t }}
+                  </app-button>
+                }
+              </div>
               @if (user.roles.length > 0) {
                 <div class="mt-2 flex flex-wrap gap-2">
                   @for (role of user.roles; track role.roleId) {
@@ -383,7 +444,24 @@
         <div class="border border-slate-100 p-3">
           <p class="text-xs font-bold text-slate-500">{{ 'branches.departmentAdminsCount' | t }}</p>
           @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
-            <p class="mt-2 text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
+            <div class="mt-2 flex flex-col gap-2 rounded-lg bg-slate-50 p-2 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
+              @if (canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
+                <app-button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  [loading]="
+                    resettingPassword() &&
+                    resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                  "
+                  (pressed)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, localizedDisplayName(admin), $event)"
+                >
+                  <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                  {{ 'users.resetPassword' | t }}
+                </app-button>
+              }
+            </div>
           }
         </div>
       }
@@ -475,3 +553,11 @@
     </app-button>
   </form>
 </app-modal>
+
+<app-reset-password-modal
+  [open]="resetPasswordModalOpen()"
+  [loading]="resettingPassword()"
+  [selectedUserLabel]="resetPasswordTarget()?.label ?? ''"
+  (closed)="closeResetPassword()"
+  (confirmed)="resetPassword($event)"
+/>

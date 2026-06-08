@@ -14,6 +14,7 @@ export const GLOBAL_QUESTION_TYPE = {
   Smiles: 3,
   Complain: 4,
   Voice: 5,
+  Image: 6,
 } as const;
 
 export type GlobalQuestionType = (typeof GLOBAL_QUESTION_TYPE)[keyof typeof GLOBAL_QUESTION_TYPE];
@@ -43,6 +44,10 @@ export const GLOBAL_QUESTION_TYPE_OPTIONS: readonly GlobalQuestionTypeOption[] =
   {
     value: GLOBAL_QUESTION_TYPE.Voice,
     labelKey: 'questions.typeVoice',
+  },
+  {
+    value: GLOBAL_QUESTION_TYPE.Image,
+    labelKey: 'questions.typeImage',
   },
 ];
 
@@ -110,7 +115,7 @@ export interface GlobalQuestionApiResponse extends EditableScopeApiFields {
   groupNameAr?: string | null;
   textEn?: string;
   textAr?: string | null;
-  type?: number;
+  type?: number | string | null;
   typeName?: string | null;
   isActive?: boolean;
   createdOnUtc?: string;
@@ -128,6 +133,40 @@ export interface GlobalQuestionsPageApiResponse {
 export function toGlobalQuestionType(
   value: string | number | null | undefined,
 ): GlobalQuestionType | null {
+  if (typeof value === 'string') {
+    const numericValue = Number(value);
+    if (Number.isInteger(numericValue)) {
+      return toGlobalQuestionType(numericValue);
+    }
+
+    const normalized = value.replace(/[\s_-]/g, '').toLowerCase();
+    if (normalized === 'singlechoice' || normalized === 'multichoice' || normalized === 'multiplechoice') {
+      return GLOBAL_QUESTION_TYPE.SingleChoice;
+    }
+    if (normalized === 'starrating' || normalized === 'rating') {
+      return GLOBAL_QUESTION_TYPE.StarRating;
+    }
+    if (normalized === 'smiles' || normalized === 'smile') {
+      return GLOBAL_QUESTION_TYPE.Smiles;
+    }
+    if (
+      normalized === 'complain' ||
+      normalized === 'complaint' ||
+      normalized === 'freetext' ||
+      normalized === 'textarea'
+    ) {
+      return GLOBAL_QUESTION_TYPE.Complain;
+    }
+    if (normalized === 'voice') {
+      return GLOBAL_QUESTION_TYPE.Voice;
+    }
+    if (normalized === 'image' || normalized === 'photo' || normalized === 'picture') {
+      return GLOBAL_QUESTION_TYPE.Image;
+    }
+
+    return null;
+  }
+
   const numericValue = typeof value === 'string' ? Number(value) : value;
 
   if (
@@ -135,7 +174,8 @@ export function toGlobalQuestionType(
     numericValue === GLOBAL_QUESTION_TYPE.StarRating ||
     numericValue === GLOBAL_QUESTION_TYPE.Smiles ||
     numericValue === GLOBAL_QUESTION_TYPE.Complain ||
-    numericValue === GLOBAL_QUESTION_TYPE.Voice
+    numericValue === GLOBAL_QUESTION_TYPE.Voice ||
+    numericValue === GLOBAL_QUESTION_TYPE.Image
   ) {
     return numericValue;
   }

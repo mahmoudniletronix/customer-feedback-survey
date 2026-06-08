@@ -313,7 +313,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return true;
     }
 
-    if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
+    if (this.authStore.isBranchScopedActor() || this.authStore.hasApiRole('Template Editor')) {
       return !template.isGlobal;
     }
 
@@ -332,7 +332,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return true;
     }
 
-    if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
+    if (this.authStore.isBranchScopedActor() || this.authStore.hasApiRole('Template Editor')) {
       return !template.isGlobal;
     }
 
@@ -351,7 +351,7 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
       return true;
     }
 
-    if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
+    if (this.authStore.isBranchScopedActor() || this.authStore.hasApiRole('Template Editor')) {
       return !template.isGlobal;
     }
 
@@ -555,6 +555,10 @@ export class AnonymousTemplateDetailsPageComponent implements OnInit {
 
     if (normalizedTypeName === 'stars' || normalizedTypeName === 'starrating') {
       return isArabic ? 'تقييم بالنجوم' : 'Star rating';
+    }
+
+    if (normalizedTypeName === 'image') {
+      return this.i18n.translate('questions.typeImage');
     }
 
     return typeName || '-';

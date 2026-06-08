@@ -19,7 +19,7 @@
     ),
     var(--theme-color-primary)
   );
-  color: var(--app-footer-color, var(--theme-color-on-primary-muted));
+  color: var(--app-footer-color, var(--theme-color-on-primary));
   box-shadow: var(--app-footer-shadow, 0 -10px 24px rgb(var(--theme-shadow-rgb) / 5%));
 }
 
@@ -29,6 +29,19 @@
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  text-shadow: 0 1px 2px rgb(var(--theme-shadow-rgb) / 18%);
+}
+
+.app-footer-logo-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.45rem;
+  padding: 0.125rem 0.35rem;
+  border: 1px solid rgb(var(--theme-surface-rgb) / 78%);
+  border-radius: 0.375rem;
+  background: rgb(var(--theme-surface-rgb) / 96%);
+  box-shadow: 0 4px 10px rgb(var(--theme-shadow-rgb) / 12%);
 }
 
 .app-footer-logo {

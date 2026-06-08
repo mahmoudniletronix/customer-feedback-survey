@@ -158,7 +158,7 @@ export class GlobalQuestionsService {
   }
 
   private readGlobalQuestionType(
-    type: number | undefined,
+    type: number | string | null | undefined,
     typeName: string | null | undefined,
   ): GlobalQuestionType {
     return (
@@ -197,6 +197,9 @@ export class GlobalQuestionsService {
     }
     if (normalized === 'voice') {
       return GLOBAL_QUESTION_TYPE.Voice;
+    }
+    if (normalized === 'image' || normalized === 'photo' || normalized === 'picture') {
+      return GLOBAL_QUESTION_TYPE.Image;
     }
 
     return null;

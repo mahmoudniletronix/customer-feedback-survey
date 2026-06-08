@@ -81,7 +81,7 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
   });
 
   readonly normalTemplates = computed<readonly BranchTemplatesPdfReportTemplateOption[]>(() =>
-    this.authStore.role() === 'BRANCH_ADMIN'
+    this.authStore.isBranchAdminUserType()
       ? (this.branchStore.branch()?.templates ?? []).map((template) => ({
           id: template.templateId,
           kind: 'Normal',
@@ -108,7 +108,7 @@ export class BranchTemplatesPdfReportPageComponent implements OnInit, OnDestroy 
   );
 
   ngOnInit(): void {
-    if (this.authStore.role() === 'BRANCH_ADMIN') {
+    if (this.authStore.isBranchAdminUserType()) {
       this.branchStore.load();
     } else {
       this.loadBranchUserNormalTemplates();

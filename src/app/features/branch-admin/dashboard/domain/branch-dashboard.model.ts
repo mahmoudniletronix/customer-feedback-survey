@@ -5,7 +5,8 @@ export type BranchSurveyResponseQuestionType =
   | 'StarRating'
   | 'Smiles'
   | 'Complain'
-  | 'Voice';
+  | 'Voice'
+  | 'Image';
 
 export interface BranchDashboardQuery {
   from?: string;
@@ -205,6 +206,8 @@ export interface BranchSurveyResponseAnswer {
   textAnswer: string | null;
   voiceFileName: string | null;
   voiceFileUrl: string | null;
+  imageFileName: string | null;
+  imageFileUrl: string | null;
   displayValue: string;
   children: readonly BranchSurveyResponseAnswer[];
 }

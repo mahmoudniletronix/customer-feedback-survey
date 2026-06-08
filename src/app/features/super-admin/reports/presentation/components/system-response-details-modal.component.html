@@ -180,6 +180,28 @@
                   } @else {
                     <p class="text-[11px] font-semibold text-slate-500">{{ 'systemResponseDetails.noVoiceFile' | t }}</p>
                   }
+                } @else if (node.answer.questionType === 'Image') {
+                  <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                    {{ answerValueLabel(node.answer) }}
+                  </p>
+                  <p class="mt-0.5 break-words text-[11px] font-semibold text-slate-700 [overflow-wrap:anywhere]">
+                    {{ displayAnswer(node.answer) }}
+                  </p>
+                  @if (imageUrl(node.answer)) {
+                    <a
+                      class="mt-2 inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+                      [href]="imageUrl(node.answer)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {{ 'operatorTemplates.openImageFile' | t }}
+                    </a>
+                    <img
+                      class="mt-2 max-h-56 w-full rounded-lg object-contain ring-1 ring-slate-100"
+                      [src]="imageUrl(node.answer)"
+                      [alt]="displayAnswer(node.answer)"
+                    />
+                  }
                 } @else {
                   <p class="text-[10px] font-black uppercase tracking-wide text-slate-400">
                     {{ answerValueLabel(node.answer) }}

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronDown, ChevronLeft, ChevronRight, FileText, Pencil, Plus, Search, SlidersHorizontal, UserCog } from 'lucide-angular';
+import { ChevronDown, ChevronLeft, ChevronRight, FileText, KeyRound, Pencil, Plus, Search, SlidersHorizontal, UserCog } from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -10,6 +10,10 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import {
+  ResetPasswordModalComponent,
+  ResetPasswordModalValue,
+} from '../../../../../shared/ui/reset-password-modal/reset-password-modal.component';
 import { OperatorListItem, OperatorTemplateSelectionItem } from '../../domain/operator.model';
 import { OperatorsStore } from '../state/operators.store';
 
@@ -32,6 +36,7 @@ interface OperatorTemplateBranchGroup {
     InputComponent,
     ModalComponent,
     ReactiveFormsModule,
+    ResetPasswordModalComponent,
     TranslatePipe,
   ],
   templateUrl: './operators-page.component.html',
@@ -48,6 +53,7 @@ export class OperatorsPageComponent implements OnInit {
   readonly chevronDownIcon = ChevronDown;
   readonly chevronRightIcon = ChevronRight;
   readonly editIcon = Pencil;
+  readonly resetPasswordIcon = KeyRound;
   readonly templatesIcon = FileText;
   readonly plusIcon = Plus;
   readonly searchIcon = Search;
@@ -59,6 +65,8 @@ export class OperatorsPageComponent implements OnInit {
   readonly createModalOpen = signal(false);
   readonly editModalOpen = signal(false);
   readonly selectedOperator = signal<OperatorListItem | null>(null);
+  readonly resetPasswordModalOpen = signal(false);
+  readonly selectedResetPasswordOperator = signal<OperatorListItem | null>(null);
   readonly templatesModalOpen = signal(false);
   readonly selectedTemplatesOperator = signal<OperatorListItem | null>(null);
   readonly templatesSearchText = signal('');
@@ -68,6 +76,13 @@ export class OperatorsPageComponent implements OnInit {
   readonly isDepartmentAdmin = computed(() => this.authStore.role() === 'DEPARTMENT_ADMIN');
   readonly currentDepartmentId = computed(() => this.authStore.user()?.departmentId ?? '');
   readonly canCreateOperator = computed(() => this.isSuperAdmin() || this.isDepartmentAdmin());
+  readonly canResetOperatorPassword = computed(() =>
+    this.authStore.canResetUserPassword('OPERATOR'),
+  );
+  readonly selectedResetPasswordOperatorLabel = computed(() => {
+    const operator = this.selectedResetPasswordOperator();
+    return operator ? `${operator.nameEn} - ${operator.userName}` : '';
+  });
   readonly activeTemplateBranchesCount = computed(
     () =>
       new Set(
@@ -268,6 +283,32 @@ export class OperatorsPageComponent implements OnInit {
     this.operatorsStore.clearTemplatesSelection();
   }
 
+  openResetPassword(operator: OperatorListItem): void {
+    if (!this.canResetPassword(operator)) {
+      return;
+    }
+
+    this.operatorsStore.clearMessages();
+    this.selectedResetPasswordOperator.set(operator);
+    this.resetPasswordModalOpen.set(true);
+  }
+
+  closeResetPassword(): void {
+    this.selectedResetPasswordOperator.set(null);
+    this.resetPasswordModalOpen.set(false);
+  }
+
+  resetPassword(payload: ResetPasswordModalValue): void {
+    const operator = this.selectedResetPasswordOperator();
+    if (!operator || this.operatorsStore.resettingPassword()) {
+      return;
+    }
+
+    this.operatorsStore.resetPassword(operator.applicationUserId, payload, () =>
+      this.closeResetPassword(),
+    );
+  }
+
   updateTemplatesSearchText(event: Event): void {
     this.templatesSearchText.set(event.target instanceof HTMLInputElement ? event.target.value : '');
   }
@@ -369,6 +410,10 @@ export class OperatorsPageComponent implements OnInit {
     }
 
     return operator.createdBy.nameEn || operator.createdBy.nameAr || '-';
+  }
+
+  canResetPassword(operator: OperatorListItem): boolean {
+    return this.authStore.canResetUserPassword('OPERATOR', operator.applicationUserId);
   }
 
   operatorFieldError(field: keyof typeof this.operatorForm.controls): string {

@@ -118,6 +118,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   readonly canRestore = computed(() => this.authStore.canManageGlobalQuestions('Restore'));
   readonly canUpdate = computed(() => this.authStore.canManageGlobalQuestions('Update'));
   readonly isSingleChoice = computed(() => this.answerType() === GLOBAL_QUESTION_TYPE.SingleChoice);
+  readonly isImage = computed(() => this.answerType() === GLOBAL_QUESTION_TYPE.Image);
   readonly questionModalOpen = computed(() => this.createModalOpen() || this.editModalOpen());
   readonly questionModalTitle = computed(() =>
     this.editModalOpen() ? 'globalQuestions.updateTitle' : 'globalQuestions.createTitle',

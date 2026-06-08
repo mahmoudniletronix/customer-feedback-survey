@@ -148,7 +148,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   );
   readonly canViewDashboard = computed(
     () =>
-      (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.role() === 'BRANCH_USER') &&
+      this.authStore.isBranchScopedActor() &&
       this.authStore.hasPermission('AnonymousTemplates.ViewResponses'),
   );
   readonly canViewBranchResponsesReport = computed(() => this.authStore.canAccessBranchDashboard());
@@ -158,7 +158,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       return 2;
     }
 
-    if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
+    if (this.authStore.isBranchScopedActor() || this.authStore.hasApiRole('Template Editor')) {
       return 1;
     }
 
@@ -585,7 +585,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       return true;
     }
 
-    if (this.authStore.role() === 'BRANCH_ADMIN' || this.authStore.hasApiRole('Template Editor')) {
+    if (this.authStore.isBranchScopedActor() || this.authStore.hasApiRole('Template Editor')) {
       return !template.isGlobal;
     }
 
