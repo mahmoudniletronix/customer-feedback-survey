@@ -2,5 +2,31 @@
   <div card-actions class="flex w-11 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]">
     <app-icon [icon]="usersIcon" [size]="20" />
   </div>
-  <app-user-table [users]="usersStore.users()" />
+
+  <div class="space-y-3">
+    @if (usersStore.success()) {
+      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ usersStore.success() ?? '' | t }}
+      </div>
+    }
+
+    @if (usersStore.error()) {
+      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+        {{ usersStore.error() ?? '' | t }}
+      </div>
+    }
+
+    <app-user-table
+      [users]="usersStore.users()"
+      (resetPasswordRequested)="openResetPassword($event)"
+    />
+  </div>
 </app-card>
+
+<app-reset-password-modal
+  [open]="resetPasswordModalOpen()"
+  [loading]="usersStore.resettingPassword()"
+  [selectedUserLabel]="selectedUserLabel()"
+  (closed)="closeResetPassword()"
+  (confirmed)="resetPassword($event)"
+/>

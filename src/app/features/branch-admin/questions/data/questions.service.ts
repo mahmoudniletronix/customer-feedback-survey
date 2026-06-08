@@ -54,7 +54,7 @@ export class QuestionsService {
 
   restore(questionId: string): Observable<QuestionListItem> {
     return this.http
-      .put<QuestionApiResponse>(`${this.questionsUrl}/${questionId}/restore`, {})
+      .put<QuestionApiResponse>(`${this.questionsUrl}/${questionId}/restore`, null)
       .pipe(map((response) => this.toQuestion(response)));
   }
 

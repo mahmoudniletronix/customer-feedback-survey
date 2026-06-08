@@ -212,6 +212,16 @@
                       >
                         <app-icon [icon]="templatesIcon" [size]="15" />
                       </app-button>
+                      @if (canResetPassword(operator)) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          (pressed)="openResetPassword(operator)"
+                        >
+                          <app-icon [icon]="resetPasswordIcon" [size]="15" />
+                        </app-button>
+                      }
                       <app-button
                         size="sm"
                         type="button"
@@ -317,6 +327,17 @@
                 <app-icon [icon]="templatesIcon" [size]="15" />
                 {{ 'operators.manageTemplates' | t }}
               </app-button>
+              @if (canResetPassword(operator)) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  (pressed)="openResetPassword(operator)"
+                >
+                  <app-icon [icon]="resetPasswordIcon" [size]="15" />
+                  {{ 'users.resetPassword' | t }}
+                </app-button>
+              }
               <app-button
                 size="sm"
                 type="button"
@@ -476,6 +497,14 @@
     </div>
   </form>
 </app-modal>
+
+<app-reset-password-modal
+  [open]="resetPasswordModalOpen()"
+  [loading]="operatorsStore.resettingPassword()"
+  [selectedUserLabel]="selectedResetPasswordOperatorLabel()"
+  (closed)="closeResetPassword()"
+  (confirmed)="resetPassword($event)"
+/>
 
 <app-modal
   [title]="'operators.updateTitle' | t"

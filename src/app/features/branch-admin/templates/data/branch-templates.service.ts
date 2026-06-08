@@ -141,7 +141,7 @@ export class BranchTemplatesService {
 
   restore(templateId: string): Observable<BranchTemplate> {
     return this.http
-      .put<BranchTemplateApiResponse>(`${this.templatesUrl}/${templateId}/restore`, {})
+      .put<BranchTemplateApiResponse>(`${this.templatesUrl}/${templateId}/restore`, null)
       .pipe(map((response) => this.toTemplate(response)));
   }
 

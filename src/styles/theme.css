@@ -4,9 +4,9 @@
   --theme-font-family-base:
     Cairo, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --theme-color-primary: #003b71;
-  --theme-color-secondary: #0066a1;
-  --theme-color-accent: #0099d8;
+  --theme-color-primary: #148496;
+  --theme-color-secondary: #0f6f7f;
+  --theme-color-accent: #18a7bd;
   --theme-color-background: #ffffff;
   --theme-color-text: #333333;
   --theme-color-success: #00a9a5;
@@ -20,7 +20,7 @@
   --theme-color-heading: #0f172a;
   --theme-color-muted-text: #64748b;
   --theme-color-on-primary: #ffffff;
-  --theme-color-on-primary-muted: #d8e7f3;
+  --theme-color-on-primary-muted: #e9fbff;
   --theme-color-overlay: rgb(2 6 23 / 45%);
   --theme-color-grid-line: #e5eaf1;
 
@@ -55,9 +55,9 @@
     var(--theme-color-surface)
   );
 
-  --theme-primary-rgb: 0 59 113;
-  --theme-secondary-rgb: 0 102 161;
-  --theme-accent-rgb: 0 153 216;
+  --theme-primary-rgb: 20 132 150;
+  --theme-secondary-rgb: 15 111 127;
+  --theme-accent-rgb: 24 167 189;
   --theme-surface-rgb: 255 255 255;
   --theme-border-rgb: 226 232 240;
   --theme-shadow-rgb: 15 23 42;
@@ -66,7 +66,7 @@
   --theme-warning-rgb: 255 193 7;
   --theme-danger-rgb: 211 47 47;
 
-  --theme-sidebar-bg: linear-gradient(180deg, var(--theme-color-primary) 0%, #002b52 100%);
+  --theme-sidebar-bg: linear-gradient(180deg, var(--theme-color-primary) 0%, #0a4f5b 100%);
   --theme-focus-ring: rgb(var(--theme-accent-rgb) / 18%);
 
   /* Backward-compatible aliases for existing global styles. */

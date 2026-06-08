@@ -85,7 +85,7 @@ export class QuestionGroupsService {
 
   restore(groupId: string): Observable<QuestionGroupListItem> {
     return this.http
-      .put<QuestionGroupApiResponse>(`${this.questionGroupsUrl}/${groupId}/restore`, {})
+      .put<QuestionGroupApiResponse>(`${this.questionGroupsUrl}/${groupId}/restore`, null)
       .pipe(map((response) => this.toQuestionGroup(response)));
   }
 

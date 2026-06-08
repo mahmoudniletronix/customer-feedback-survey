@@ -2,16 +2,30 @@ import { DatePipe, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ArrowLeft, Pencil, Save, Trash2, UserPlus, UsersRound, X } from 'lucide-angular';
+import { finalize, take } from 'rxjs';
+import { ArrowLeft, KeyRound, Pencil, Save, Trash2, UserPlus, UsersRound, X } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { Role } from '../../../../../shared/models/role.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import {
+  ResetPasswordModalComponent,
+  ResetPasswordModalValue,
+} from '../../../../../shared/ui/reset-password-modal/reset-password-modal.component';
+import { UserPasswordResetService } from '../../../../auth/data/user-password-reset.service';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { DepartmentAdminsStore } from '../../../../department-admin/department-admins/presentation/state/department-admins.store';
 import { DepartmentsStore } from '../state/departments.store';
+
+interface ResetPasswordTarget {
+  readonly applicationUserId: string;
+  readonly label: string;
+  readonly role: Role;
+}
 
 @Component({
   selector: 'app-department-details-page',
@@ -24,6 +38,7 @@ import { DepartmentsStore } from '../state/departments.store';
     IconComponent,
     InputComponent,
     ModalComponent,
+    ResetPasswordModalComponent,
     TranslatePipe,
   ],
   templateUrl: './department-details-page.component.html',
@@ -33,20 +48,28 @@ import { DepartmentsStore } from '../state/departments.store';
 export class DepartmentDetailsPageComponent implements OnInit {
   readonly departmentsStore = inject(DepartmentsStore);
   readonly departmentAdminsStore = inject(DepartmentAdminsStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
+  private readonly userPasswordResetService = inject(UserPasswordResetService);
 
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
+  readonly resetPasswordIcon = KeyRound;
   readonly saveIcon = Save;
   readonly userPlusIcon = UserPlus;
   readonly usersIcon = UsersRound;
   readonly editMode = signal(false);
   readonly createDepartmentAdminModalOpen = signal(false);
+  readonly resetPasswordModalOpen = signal(false);
+  readonly resetPasswordTarget = signal<ResetPasswordTarget | null>(null);
+  readonly resettingPassword = signal(false);
+  readonly resetPasswordSuccess = signal<string | null>(null);
+  readonly resetPasswordError = signal<string | null>(null);
 
   readonly departmentForm = this.formBuilder.nonNullable.group({
     nameEn: ['', [Validators.required, Validators.maxLength(200)]],
@@ -168,6 +191,57 @@ export class DepartmentDetailsPageComponent implements OnInit {
       this.closeCreateDepartmentAdminModal();
       this.departmentsStore.loadDetails(department.id, false);
     });
+  }
+
+  canResetPassword(role: Role, applicationUserId: string): boolean {
+    return this.authStore.canResetUserPassword(role, applicationUserId);
+  }
+
+  openResetPassword(
+    role: Role,
+    applicationUserId: string,
+    label: string,
+    event?: MouseEvent,
+  ): void {
+    event?.stopPropagation();
+    if (!this.canResetPassword(role, applicationUserId)) {
+      return;
+    }
+
+    this.resetPasswordSuccess.set(null);
+    this.resetPasswordError.set(null);
+    this.resetPasswordTarget.set({ applicationUserId, label, role });
+    this.resetPasswordModalOpen.set(true);
+  }
+
+  closeResetPassword(): void {
+    this.resetPasswordTarget.set(null);
+    this.resetPasswordModalOpen.set(false);
+  }
+
+  resetPassword(payload: ResetPasswordModalValue): void {
+    const target = this.resetPasswordTarget();
+    if (!target || this.resettingPassword()) {
+      return;
+    }
+
+    this.resettingPassword.set(true);
+    this.resetPasswordSuccess.set(null);
+    this.resetPasswordError.set(null);
+
+    this.userPasswordResetService
+      .resetPassword(target.applicationUserId, payload)
+      .pipe(
+        take(1),
+        finalize(() => this.resettingPassword.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.resetPasswordSuccess.set('users.resetPasswordSuccess');
+          this.closeResetPassword();
+        },
+        error: () => this.resetPasswordError.set('users.resetPasswordError'),
+      });
   }
 
   departmentDisplayName(department: { nameEn: string | null; nameAr?: string | null }): string {

@@ -113,7 +113,27 @@
                 [class.bg-slate-50]="depth === 0"
                 [class.bg-emerald-50]="depth > 0"
               >
-                @if (voiceUrl(node.answer)) {
+                @if (imageUrl(node.answer)) {
+                  <div class="space-y-1.5">
+                    <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+                      <app-icon class="text-[var(--theme-color-accent)]" [icon]="imageIcon" [size]="13" />
+                      {{ answerDisplayValue(node.answer) }}
+                    </p>
+                    <a
+                      class="inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+                      [href]="imageUrl(node.answer)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {{ 'operatorTemplates.openImageFile' | t }}
+                    </a>
+                    <img
+                      class="max-h-56 w-full rounded-lg object-contain ring-1 ring-slate-100"
+                      [src]="imageUrl(node.answer)"
+                      [alt]="answerDisplayValue(node.answer)"
+                    />
+                  </div>
+                } @else if (voiceUrl(node.answer)) {
                   <div class="space-y-1.5">
                     <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
                       <app-icon class="text-[var(--theme-color-accent)]" [icon]="micIcon" [size]="13" />

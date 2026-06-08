@@ -57,6 +57,16 @@
         {{ departmentAdminsStore.error() ?? '' | t }}
       </div>
     }
+    @if (resetPasswordSuccess()) {
+      <div class="border border-emerald-100 bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">
+        {{ resetPasswordSuccess() ?? '' | t }}
+      </div>
+    }
+    @if (resetPasswordError()) {
+      <div class="border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-[var(--theme-color-danger)]">
+        {{ resetPasswordError() ?? '' | t }}
+      </div>
+    }
 
     <app-card [title]="departmentDisplayName(department)">
       <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -124,11 +134,30 @@
         <div class="space-y-2">
           @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
             <div class="border border-slate-100 p-3">
-              <p class="font-bold text-slate-900">{{ personDisplayName(admin) }}</p>
-              <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
-              @if (admin.phoneNumber) {
-                <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
-              }
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p class="font-bold text-slate-900">{{ personDisplayName(admin) }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ admin.userName }} - {{ admin.email }}</p>
+                  @if (admin.phoneNumber) {
+                    <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
+                  }
+                </div>
+                @if (canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="
+                      resettingPassword() &&
+                      resetPasswordTarget()?.applicationUserId === admin.applicationUserId
+                    "
+                    (pressed)="openResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId, personDisplayName(admin), $event)"
+                  >
+                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                    {{ 'users.resetPassword' | t }}
+                  </app-button>
+                }
+              </div>
             </div>
           } @empty {
             <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
@@ -140,11 +169,30 @@
         <div class="space-y-2">
           @for (operator of department.operators; track operator.operatorId) {
             <div class="border border-slate-100 p-3">
-              <p class="font-bold text-slate-900">{{ personDisplayName(operator) }}</p>
-              <p class="mt-1 text-xs text-slate-500">{{ operator.userName }} - {{ operator.email }}</p>
-              @if (operator.phoneNumber) {
-                <p class="mt-1 text-xs text-slate-500">{{ operator.phoneNumber }}</p>
-              }
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <p class="font-bold text-slate-900">{{ personDisplayName(operator) }}</p>
+                  <p class="mt-1 text-xs text-slate-500">{{ operator.userName }} - {{ operator.email }}</p>
+                  @if (operator.phoneNumber) {
+                    <p class="mt-1 text-xs text-slate-500">{{ operator.phoneNumber }}</p>
+                  }
+                </div>
+                @if (canResetPassword('OPERATOR', operator.applicationUserId)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="
+                      resettingPassword() &&
+                      resetPasswordTarget()?.applicationUserId === operator.applicationUserId
+                    "
+                    (pressed)="openResetPassword('OPERATOR', operator.applicationUserId, personDisplayName(operator), $event)"
+                  >
+                    <app-icon [icon]="resetPasswordIcon" [size]="14" />
+                    {{ 'users.resetPassword' | t }}
+                  </app-button>
+                }
+              </div>
             </div>
           } @empty {
             <p class="text-slate-500">{{ 'common.noRecords' | t }}</p>
@@ -222,3 +270,11 @@
     </app-button>
   </form>
 </app-modal>
+
+<app-reset-password-modal
+  [open]="resetPasswordModalOpen()"
+  [loading]="resettingPassword()"
+  [selectedUserLabel]="resetPasswordTarget()?.label ?? ''"
+  (closed)="closeResetPassword()"
+  (confirmed)="resetPassword($event)"
+/>

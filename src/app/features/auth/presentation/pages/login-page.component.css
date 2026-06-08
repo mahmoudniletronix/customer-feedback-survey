@@ -77,7 +77,7 @@
   /* Override app-footer styling to be minimal and blend with the background */
   --app-footer-background: transparent;
   --app-footer-border: none;
-  --app-footer-color: var(--theme-color-muted-text);
+  --app-footer-color: var(--theme-color-text);
   --app-footer-shadow: none;
 }
 

@@ -30,19 +30,19 @@
     </div>
 
     <!-- Nav -->
-    <nav class="sidebar-nav min-h-0 flex-1 space-y-2.5 overflow-y-auto custom-scrollbar">
+    <nav class="sidebar-nav min-h-0 flex-1 space-y-2.5 overflow-x-hidden overflow-y-auto custom-scrollbar">
       @for (item of menuItems(); track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="nav-item-active"
           [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
-          class="nav-item group"
+          class="nav-item group min-w-0 w-full"
           (click)="close.emit()"
         >
           <div class="nav-icon-box">
             <app-icon [icon]="item.icon" [size]="20" />
           </div>
-          <span class="nav-label">{{ item.labelKey | t }}</span>
+          <span class="nav-label flex-1">{{ item.labelKey | t }}</span>
         </a>
       }
     </nav>

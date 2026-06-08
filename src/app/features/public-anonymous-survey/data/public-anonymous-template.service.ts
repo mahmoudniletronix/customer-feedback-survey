@@ -45,7 +45,7 @@ export class PublicAnonymousTemplateService {
     return this.http
       .post<PublicAnonymousSubmissionApiResponse>(
         `${this.anonTemplatesUrl}/${anonymousTemplateId}/responses`,
-        payload,
+        this.toResponseFormData(payload),
         {
           context: new HttpContext()
             .set(SKIP_AUTH, true)
@@ -203,6 +203,46 @@ export class PublicAnonymousTemplateService {
       answersCount: response.answersCount ?? 0,
       customInputValuesCount: response.customInputValuesCount ?? 0,
     };
+  }
+
+  private toResponseFormData(payload: SubmitPublicAnonymousResponsePayload): FormData {
+    const formData = new FormData();
+
+    payload.customInputValues.forEach((customInput, index) => {
+      const prefix = `CustomInputValues[${index}]`;
+      formData.append(`${prefix}.CustomInputId`, customInput.customInputId);
+      if (customInput.stringValue !== null) {
+        formData.append(`${prefix}.StringValue`, customInput.stringValue);
+      }
+      if (customInput.integerValue !== null) {
+        formData.append(`${prefix}.IntegerValue`, String(customInput.integerValue));
+      }
+    });
+
+    payload.answers.forEach((answer, index) => {
+      const prefix = `Answers[${index}]`;
+      formData.append(`${prefix}.AnonymousTemplateQuestionId`, answer.anonymousTemplateQuestionId);
+      if (answer.selectedQuestionOptionId) {
+        formData.append(`${prefix}.SelectedQuestionOptionId`, answer.selectedQuestionOptionId);
+      }
+      if (answer.starRatingValue !== null) {
+        formData.append(`${prefix}.StarRatingValue`, String(answer.starRatingValue));
+      }
+      if (answer.smileValue !== null) {
+        formData.append(`${prefix}.SmileValue`, String(answer.smileValue));
+      }
+      if (answer.textAnswer) {
+        formData.append(`${prefix}.TextAnswer`, answer.textAnswer);
+      }
+      if (answer.voiceFileName) {
+        formData.append(`${prefix}.VoiceFileName`, answer.voiceFileName);
+      }
+      if (answer.imageFile) {
+        formData.append(`${prefix}.ImageFile`, answer.imageFile, answer.imageFile.name);
+      }
+    });
+
+    return formData;
   }
 
   private toRootQuestionIds(

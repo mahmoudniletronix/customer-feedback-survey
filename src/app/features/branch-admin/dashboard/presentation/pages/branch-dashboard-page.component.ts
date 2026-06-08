@@ -217,7 +217,7 @@ export class BranchDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.authStore.role() === 'BRANCH_ADMIN') {
+    if (this.authStore.isBranchScopedActor()) {
       this.branchStore.load();
     }
     this.dashboardStore.load();

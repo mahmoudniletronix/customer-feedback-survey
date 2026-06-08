@@ -9,7 +9,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   imports: [TranslatePipe],
   template: `
     <footer
-      class="border-t border-[var(--theme-color-accent)] bg-[var(--theme-color-primary)] px-4 py-3 text-center text-[11px] font-bold text-[var(--theme-color-on-primary-muted)] shadow-[0_-10px_24px_rgb(var(--theme-shadow-rgb)/5%)]"
+      class="border-t border-white/20 bg-[var(--theme-color-primary)] px-4 py-3 text-center text-[11px] font-bold text-[var(--theme-color-on-primary)] shadow-[0_-10px_24px_rgb(var(--theme-shadow-rgb)/5%)]"
       [attr.aria-label]="'publicAnonymousTemplates.footerPoweredBy' | t"
       [attr.dir]="i18n.direction()"
     >
@@ -22,8 +22,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
         <span class="uppercase tracking-wide">
           {{ 'publicAnonymousTemplates.footerPoweredBy' | t }}
         </span>
-        <img class="h-4 w-auto object-contain" [src]="brandAssets.publicSurveyFooterLogo" alt="NILETRONIX" />
-        <span class="break-words text-[var(--theme-color-accent)] [unicode-bidi:isolate]" dir="ltr">
+        <span
+          class="inline-flex min-h-6 items-center justify-center rounded-md border border-white/80 bg-white/95 px-1.5 py-0.5 shadow-sm shadow-slate-900/10"
+        >
+          <img class="h-4 w-auto object-contain" [src]="brandAssets.publicSurveyFooterLogo" alt="NILETRONIX" />
+        </span>
+        <span class="break-words text-[var(--theme-color-on-primary)] [unicode-bidi:isolate]" dir="ltr">
           www.niletronix.com
         </span>
       </a>

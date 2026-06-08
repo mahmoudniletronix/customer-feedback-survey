@@ -111,39 +111,26 @@
             </label>
           }
 
-          @if (sourceSignal() === 'Internal') {
-            <label class="flex flex-col gap-0.5 sm:min-w-[12rem] sm:max-w-[18rem]">
-              <span class="text-[9px] font-bold text-slate-500">{{
-                'surveyDashboard.template' | t
-              }}</span>
-              <select
-                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
-                formControlName="templateId"
-              >
-                <option value="">{{ 'surveyDashboard.allInternalTemplates' | t }}</option>
-                @for (template of internalTemplateOptions(); track template.id) {
-                  <option [value]="template.id">{{ templateOptionName(template) }}</option>
-                }
-              </select>
-            </label>
-          }
-
-          @if (sourceSignal() === 'Anonymous') {
-            <label class="flex flex-col gap-0.5 sm:min-w-[12rem] sm:max-w-[18rem]">
-              <span class="text-[9px] font-bold text-slate-500">{{
-                'surveyDashboard.anonymousTemplate' | t
-              }}</span>
-              <select
-                class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
-                formControlName="anonymousTemplateId"
-              >
-                <option value="">{{ 'surveyDashboard.allAnonymousTemplates' | t }}</option>
-                @for (template of anonymousTemplateOptions(); track template.id) {
-                  <option [value]="template.id">{{ templateOptionName(template) }}</option>
-                }
-              </select>
-            </label>
-          }
+          <label class="flex flex-col gap-0.5 sm:min-w-[14rem] sm:max-w-[22rem]">
+            <span class="text-[9px] font-bold text-slate-500">{{
+              'surveyDashboard.template' | t
+            }}</span>
+            <select
+              class="h-7 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
+              formControlName="templateId"
+            >
+              <option value="">
+                {{
+                  templatesSelectionDisabled()
+                    ? ('surveyDashboard.selectBranchForTemplates' | t)
+                    : ('surveyDashboard.allDashboardTemplates' | t)
+                }}
+              </option>
+              @for (template of templateOptions(); track template.id) {
+                <option [value]="template.id">{{ templateOptionName(template) }}</option>
+              }
+            </select>
+          </label>
 
           <label class="flex flex-col gap-0.5 sm:min-w-[8rem]">
             <span class="text-[9px] font-bold text-slate-500">{{
@@ -595,35 +582,45 @@
         <div class="mt-2 flex flex-wrap gap-1.5">
           <span
             class="rounded-full px-2 py-1 text-[10px] font-black {{
-              sourceClass(dashboard.filters.source)
+              sourceClass(dashboard.appliedFilters.source)
             }}"
           >
-            {{ sourceLabel(dashboard.filters.source) }}
+            {{ sourceLabel(dashboard.appliedFilters.source) }}
           </span>
+          @if (dashboard.appliedFilters.templateKind) {
+            <span
+              class="rounded-full px-2 py-1 text-[10px] font-black {{
+                templateKindClass(dashboard.appliedFilters.templateKind)
+              }}"
+            >
+              {{ templateKindLabel(dashboard.appliedFilters.templateKind) }}
+            </span>
+          }
           <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
-            {{ 'surveyDashboard.topQuestions' | t }}: {{ dashboard.filters.topQuestionsCount }}
+            {{ 'surveyDashboard.topQuestions' | t }}:
+            {{ dashboard.appliedFilters.topQuestionsCount }}
           </span>
           <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
             {{ 'surveyDashboard.criticalCount' | t }}:
-            {{ dashboard.filters.criticalResponsesCount }}
+            {{ dashboard.appliedFilters.criticalResponsesCount }}
           </span>
           <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
             {{ 'surveyDashboard.criticalScore' | t }}:
-            {{ dashboard.filters.criticalScoreThreshold }}
+            {{ dashboard.appliedFilters.criticalScoreThreshold }}
           </span>
-          @if (dashboard.filters.templateId) {
+          @if (dashboard.appliedFilters.templateId) {
             <span
               class="max-w-full truncate rounded-full bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-700"
             >
-              {{ 'surveyDashboard.templateFilter' | t }}: {{ dashboard.filters.templateId }}
+              {{ 'surveyDashboard.templateFilter' | t }}: {{ dashboard.appliedFilters.templateId }}
             </span>
           }
-          @if (dashboard.filters.anonymousTemplateId) {
+          @if (dashboard.appliedFilters.anonymousTemplateId) {
             <span
               class="max-w-full truncate rounded-full bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700"
             >
               {{ 'surveyDashboard.anonymousTemplateFilter' | t }}:
-              {{ dashboard.filters.anonymousTemplateId }}
+              {{ dashboard.appliedFilters.anonymousTemplateId }}
             </span>
           }
         </div>

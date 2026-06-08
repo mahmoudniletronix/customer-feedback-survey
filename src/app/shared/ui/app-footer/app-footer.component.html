@@ -1,8 +1,10 @@
 <footer class="app-footer" [attr.aria-label]="'common.poweredBy' | t">
   <span class="app-footer-text">{{ 'common.poweredBy' | t }}</span>
-  <img
-    class="app-footer-logo"
-    [src]="brandAssets.footerLogo"
-    [attr.alt]="'common.niletronixLogoAlt' | t"
-  />
+  <span class="app-footer-logo-shell">
+    <img
+      class="app-footer-logo"
+      [src]="brandAssets.footerLogo"
+      [attr.alt]="'common.niletronixLogoAlt' | t"
+    />
+  </span>
 </footer>

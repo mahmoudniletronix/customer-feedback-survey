@@ -13,6 +13,8 @@ import {
   UpdateOperatorTemplatesPayload,
 } from '../../domain/operator.model';
 import { OperatorsService } from '../../data/operators.service';
+import { UserPasswordResetService } from '../../../../auth/data/user-password-reset.service';
+import { ResetUserPasswordRequest } from '../../../../auth/domain/user-password-reset.model';
 
 interface ApiErrorItem {
   code?: string;
@@ -36,6 +38,7 @@ export class OperatorsStore {
   };
 
   private readonly operatorsService = inject(OperatorsService);
+  private readonly userPasswordResetService = inject(UserPasswordResetService);
   private readonly operatorsSignal = signal<readonly OperatorListItem[]>([]);
   private readonly departmentsSignal = signal<readonly OperatorDepartmentSelection[]>([]);
   private readonly activeTemplatesSignal = signal<readonly OperatorActiveTemplateSelection[]>([]);
@@ -51,6 +54,7 @@ export class OperatorsStore {
   private readonly activeTemplatesLoadingSignal = signal(false);
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
+  private readonly resettingPasswordSignal = signal(false);
   private readonly templatesSelectionLoadingSignal = signal(false);
   private readonly templatesSelectionSavingSignal = signal(false);
   private readonly templatesSelectionErrorSignal = signal<string | null>(null);
@@ -73,6 +77,7 @@ export class OperatorsStore {
   readonly activeTemplatesLoading = this.activeTemplatesLoadingSignal.asReadonly();
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
+  readonly resettingPassword = this.resettingPasswordSignal.asReadonly();
   readonly templatesSelectionLoading = this.templatesSelectionLoadingSignal.asReadonly();
   readonly templatesSelectionSaving = this.templatesSelectionSavingSignal.asReadonly();
   readonly templatesSelectionError = this.templatesSelectionErrorSignal.asReadonly();
@@ -313,6 +318,36 @@ export class OperatorsStore {
       });
   }
 
+  resetPassword(
+    applicationUserId: string,
+    payload: ResetUserPasswordRequest,
+    onReset: () => void,
+  ): void {
+    if (this.resettingPasswordSignal()) {
+      return;
+    }
+
+    this.resettingPasswordSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.userPasswordResetService
+      .resetPassword(applicationUserId, payload)
+      .pipe(
+        take(1),
+        finalize(() => this.resettingPasswordSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('operators.resetPasswordSuccess');
+          onReset();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'operators.resetPasswordError'));
+        },
+      });
+  }
+
   clearTemplatesSelection(): void {
     this.templatesSelectionSignal.set(null);
     this.templatesSelectionErrorSignal.set(null);
@@ -360,6 +395,15 @@ export class OperatorsStore {
     if (normalized.includes('currentactor') || normalized.includes('notallowed')) {
       return 'operators.currentActorNotAllowed';
     }
+    if (normalized.includes('self') || normalized.includes('ownpassword')) {
+      return 'users.resetPasswordSelfForbidden';
+    }
+    if (normalized.includes('targetusernotfound')) {
+      return 'operators.notFound';
+    }
+    if (normalized.includes('targetuserinactive') || normalized.includes('userinactive')) {
+      return 'operators.userInactive';
+    }
     if (normalized.includes('scope') || normalized.includes('mismatch')) {
       return 'operators.scopeMismatch';
     }
@@ -368,6 +412,18 @@ export class OperatorsStore {
     }
     if (normalized.includes('email') && normalized.includes('already')) {
       return 'operators.emailAlreadyExists';
+    }
+    if (normalized.includes('confirmnewpassword')) {
+      return 'auth.changePasswordConfirmPasswordNotMatched';
+    }
+    if (normalized.includes('newpassword') && normalized.includes('required')) {
+      return 'auth.changePasswordNewPasswordRequired';
+    }
+    if (normalized.includes('newpassword') && normalized.includes('maxlength')) {
+      return 'auth.changePasswordNewPasswordMaxLength';
+    }
+    if (normalized.includes('newpassword')) {
+      return 'auth.changePasswordNewPasswordMinLength';
     }
     if (normalized.includes('password')) {
       return 'operators.passwordInvalid';

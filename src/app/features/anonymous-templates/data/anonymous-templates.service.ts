@@ -627,6 +627,8 @@ export class AnonymousTemplatesService {
       textAnswer: response.textAnswer ?? null,
       voiceFileName: response.voiceFileName ?? null,
       voiceUrl: response.voiceUrl ?? null,
+      imageFileName: response.imageFileName ?? null,
+      imageFileUrl: response.imageFileUrl ?? response.imageUrl ?? null,
       children: (response.children ?? response.childAnswers ?? []).map((childAnswer) =>
         this.toResponseAnswer(childAnswer),
       ),

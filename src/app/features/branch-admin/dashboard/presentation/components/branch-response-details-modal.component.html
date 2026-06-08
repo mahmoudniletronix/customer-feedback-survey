@@ -281,6 +281,33 @@
                     </p>
                   }
                 }
+                @case ('Image') {
+                  @if (imageUrl(node.answer)) {
+                    <div class="space-y-1.5">
+                      <p class="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+                        <app-icon class="text-[var(--theme-color-accent)]" [icon]="imageIcon" [size]="13" />
+                        {{ displayAnswer(node.answer) }}
+                      </p>
+                      <a
+                        class="inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100"
+                        [href]="imageUrl(node.answer)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {{ 'operatorTemplates.openImageFile' | t }}
+                      </a>
+                      <img
+                        class="max-h-56 w-full rounded-lg object-contain ring-1 ring-slate-100"
+                        [src]="imageUrl(node.answer)"
+                        [alt]="displayAnswer(node.answer)"
+                      />
+                    </div>
+                  } @else {
+                    <p class="text-[11px] font-semibold text-slate-500">
+                      {{ displayAnswer(node.answer) }}
+                    </p>
+                  }
+                }
               }
             </div>
 

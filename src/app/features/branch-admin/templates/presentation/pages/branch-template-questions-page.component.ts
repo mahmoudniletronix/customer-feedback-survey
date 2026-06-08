@@ -31,6 +31,7 @@ import {
   QuestionCondition,
   QuestionConditionPayload,
 } from '../../../../../shared/models/question-condition.model';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
@@ -40,6 +41,7 @@ import { BranchTemplatePreviewComponent } from '../components/branch-template-pr
 import {
   BranchTemplateQuestionSelection,
   BranchTemplateQuestionSelectionItem,
+  UpdateBranchTemplateQuestionsPayload,
 } from '../../domain/branch-template.model';
 import { BranchTemplatesStore } from '../state/branch-templates.store';
 
@@ -82,6 +84,7 @@ type TemplateBuilderTab = 'questions' | 'preview';
 })
 export class BranchTemplateQuestionsPageComponent implements OnInit {
   readonly templatesStore = inject(BranchTemplatesStore);
+  private readonly authStore = inject(AuthStore);
   private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
@@ -150,6 +153,17 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     const template = this.templatesStore.selectedTemplate();
     return selection?.templateNameAr || template?.nameAr || '';
   });
+  readonly canAssignQuestions = computed(() =>
+    this.authStore.canManageTemplates('AssignQuestions'),
+  );
+  readonly canManageQuestionConditions = computed(() =>
+    this.authStore.canManageTemplates('ManageQuestionConditions'),
+  );
+  readonly canSavePendingChanges = computed(
+    () =>
+      (this.isDirty() && this.canAssignQuestions()) ||
+      (this.conditionsDirty() && this.canManageQuestionConditions()),
+  );
 
   constructor() {
     effect(() => {
@@ -179,7 +193,9 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
     }
 
     this.templatesStore.loadDetails(templateId);
-    this.templatesStore.loadQuestionsSelection(templateId);
+    if (this.canAssignQuestions()) {
+      this.templatesStore.loadQuestionsSelection(templateId);
+    }
   }
 
   goBack(): void {
@@ -197,6 +213,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
   addQuestion(question: TemplateQuestionManagerItem): void {
     if (
+      !this.canAssignQuestions() ||
       !this.isSelectableQuestion(question) ||
       this.selectedQuestionIds().has(question.questionId)
     ) {
@@ -211,6 +228,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   }
 
   removeQuestion(questionId: string): void {
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     this.selectedQuestions.update((questions) =>
       questions.filter((question) => question.questionId !== questionId),
     );
@@ -218,6 +239,8 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
   addRelatedQuestion(question: TemplateQuestionManagerItem): void {
     if (
+      !this.canAssignQuestions() ||
+      !this.canManageQuestionConditions() ||
       !this.isSelectableQuestion(question) ||
       this.selectedQuestionIds().has(question.questionId)
     ) {
@@ -231,6 +254,10 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   }
 
   moveQuestion(questionId: string, direction: -1 | 1): void {
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     const currentQuestions = [...this.selectedQuestions()];
     const currentIndex = currentQuestions.findIndex(
       (question) => question.questionId === questionId,
@@ -246,14 +273,26 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   }
 
   startDrag(questionId: string): void {
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     this.draggingQuestionId.set(questionId);
   }
 
   allowDrop(event: DragEvent): void {
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     event.preventDefault();
   }
 
   dropOnQuestion(event: DragEvent, targetQuestionId: string): void {
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     event.preventDefault();
     const draggedQuestionId = this.draggingQuestionId();
     this.draggingQuestionId.set(null);
@@ -284,25 +323,59 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
   saveQuestions(): void {
     const templateId = this.templateId();
-    if (templateId.length === 0 || this.savingTemplateFlow() || !this.hasPendingChanges()) {
+    const questionsChanged = this.isDirty();
+    const conditionsChanged = this.conditionsDirty();
+
+    if (
+      templateId.length === 0 ||
+      this.savingTemplateFlow() ||
+      !this.canSavePendingChanges() ||
+      (questionsChanged && !this.canAssignQuestions()) ||
+      (conditionsChanged && !this.canManageQuestionConditions())
+    ) {
       return;
     }
 
-    this.templatesStore.updateTemplateQuestionsAndConditions(
+    const questionsPayload = this.toQuestionsPayload();
+    const resetState = (): void => {
+      this.initializedTemplateId.set('');
+      this.conditionsDirty.set(false);
+    };
+
+    if (questionsChanged && conditionsChanged) {
+      this.templatesStore.updateTemplateQuestionsAndConditions(
+        templateId,
+        questionsPayload,
+        (selection) => ({
+          conditions: this.toResolvedConditionPayload(selection),
+        }),
+        true,
+        resetState,
+      );
+      return;
+    }
+
+    if (questionsChanged) {
+      this.templatesStore.updateTemplateQuestions(templateId, questionsPayload, resetState);
+      return;
+    }
+
+    this.templatesStore.updateTemplateQuestionConditions(
       templateId,
-      { questionIds: this.selectedQuestions().map((question) => question.questionId) },
-      (selection) => ({
-        conditions: this.toResolvedConditionPayload(selection),
-      }),
-      this.isDirty(),
-      () => {
-        this.initializedTemplateId.set('');
-        this.conditionsDirty.set(false);
+      {
+        conditions: this.toResolvedConditionPayload(
+          this.templatesStore.questionsSelection() ?? this.emptyQuestionSelection(templateId),
+        ),
       },
+      resetState,
     );
   }
 
   resetSelection(): void {
+    if (!this.canAssignQuestions()) {
+      return;
+    }
+
     this.initializedTemplateId.set('');
     const selection = this.templatesStore.questionsSelection();
     if (!selection) {
@@ -370,11 +443,41 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
   }
 
   updateDraftConditions(conditions: readonly QuestionCondition[]): void {
+    if (!this.canManageQuestionConditions()) {
+      return;
+    }
+
     this.draftConditions.set(conditions);
   }
 
   updateConditionsDirty(isDirty: boolean): void {
+    if (!this.canManageQuestionConditions()) {
+      return;
+    }
+
     this.conditionsDirty.set(isDirty);
+  }
+
+  private toQuestionsPayload(): UpdateBranchTemplateQuestionsPayload {
+    return {
+      questions: this.selectedQuestions().map((question, index) => ({
+        questionId: question.questionId,
+        order: index + 1,
+      })),
+    };
+  }
+
+  private emptyQuestionSelection(templateId: string): BranchTemplateQuestionSelection {
+    return {
+      templateId,
+      branchId: '',
+      templateNameEn: '',
+      templateNameAr: '',
+      status: 'Draft',
+      isActive: true,
+      groups: [],
+      questionConditions: [],
+    };
   }
 
   private flattenSelectionQuestions(): readonly TemplateQuestionManagerItem[] {

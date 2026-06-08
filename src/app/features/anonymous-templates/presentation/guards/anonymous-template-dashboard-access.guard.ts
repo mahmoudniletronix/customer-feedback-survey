@@ -7,7 +7,7 @@ export const anonymousTemplateDashboardAccessGuard: CanActivateFn = () => {
   const router = inject(Router);
   const canAccess =
     authStore.isAuthenticated() &&
-    (authStore.role() === 'BRANCH_ADMIN' || authStore.role() === 'BRANCH_USER') &&
+    authStore.isBranchScopedActor() &&
     authStore.hasPermission('AnonymousTemplates.ViewResponses');
 
   return canAccess ? true : router.createUrlTree(['/dashboard']);

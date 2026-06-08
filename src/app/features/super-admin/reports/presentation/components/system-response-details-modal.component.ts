@@ -46,6 +46,9 @@ export class SystemResponseDetailsModalComponent {
     if (answer.questionType === 'StarRating') return `${answer.starRatingValue ?? '-'} / 5`;
     if (answer.questionType === 'Smiles') return `${answer.smileValue ?? '-'} / 5`;
     if (answer.questionType === 'Complain') return answer.textAnswer || answer.displayValue || '-';
+    if (answer.questionType === 'Image') {
+      return answer.imageFileName || answer.displayValue || this.i18n.translate('operatorTemplates.imageFileAnswer');
+    }
     return answer.voiceFileName || answer.displayValue || this.i18n.translate('systemResponseDetails.voiceAnswer');
   }
 
@@ -62,6 +65,9 @@ export class SystemResponseDetailsModalComponent {
     if (answer.questionType === 'Complain') {
       return this.i18n.translate('systemResponseDetails.textAnswer');
     }
+    if (answer.questionType === 'Image') {
+      return this.i18n.translate('questions.typeImage');
+    }
     return this.i18n.translate('systemResponseDetails.voiceAnswer');
   }
 
@@ -71,6 +77,7 @@ export class SystemResponseDetailsModalComponent {
     if (answer.questionType === 'Smiles') return this.i18n.translate('questions.typeSmiles');
     if (answer.questionType === 'Complain') return this.i18n.translate('questions.typeComplain');
     if (answer.questionType === 'Voice') return this.i18n.translate('questions.typeVoice');
+    if (answer.questionType === 'Image') return this.i18n.translate('questions.typeImage');
     return answer.questionTypeName || answer.questionType;
   }
 
@@ -99,10 +106,18 @@ export class SystemResponseDetailsModalComponent {
   }
 
   voiceUrl(answer: SystemResponseAnswer): string {
-    if (!answer.voiceFileUrl) return '';
-    if (/^https?:\/\//i.test(answer.voiceFileUrl)) return answer.voiceFileUrl;
+    return this.toMediaUrl(answer.voiceFileUrl);
+  }
+
+  imageUrl(answer: SystemResponseAnswer): string {
+    return this.toMediaUrl(answer.imageFileUrl);
+  }
+
+  private toMediaUrl(url: string | null): string {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
     const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
-    const path = answer.voiceFileUrl.startsWith('/') ? answer.voiceFileUrl : `/${answer.voiceFileUrl}`;
+    const path = url.startsWith('/') ? url : `/${url}`;
     return `${baseUrl}${path}`;
   }
 

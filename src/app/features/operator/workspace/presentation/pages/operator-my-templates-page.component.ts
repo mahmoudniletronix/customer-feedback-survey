@@ -17,6 +17,7 @@ import {
   ClipboardList,
   FileText,
   HelpCircle,
+  Image as ImageIcon,
   Mic,
   RefreshCw,
   Send,
@@ -145,6 +146,8 @@ interface OperatorLatestAnswerView {
   answer: string;
   voiceFileName: string;
   voiceFileUrl: string;
+  imageFileName: string;
+  imageFileUrl: string;
 }
 
 interface OperatorAnswerDraft extends ConditionalQuestionAnswerState {
@@ -153,6 +156,7 @@ interface OperatorAnswerDraft extends ConditionalQuestionAnswerState {
   questionType: string;
   textAnswer: string;
   voiceFile: File | null;
+  imageFile: File | null;
 }
 
 interface OperatorSummaryAnswer {
@@ -175,6 +179,9 @@ type WindowWithWebkitAudioContext = Window & typeof globalThis & {
 
 const VOICE_EXTENSIONS = new Set(['mp3', 'wav', 'm4a', 'aac', 'ogg']);
 const MAX_VOICE_FILE_BYTES = 10 * 1024 * 1024;
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_IMAGE_FILE_BYTES = 5 * 1024 * 1024;
 const RATING_VALUES = [1, 2, 3, 4, 5] as const;
 const ALL_BRANCHES_FILTER_ID = 'all';
 
@@ -206,6 +213,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   readonly checkIcon = CheckCircle2;
   readonly clipboardIcon = ClipboardList;
   readonly fileTextIcon = FileText;
+  readonly imageIcon = ImageIcon;
   readonly micIcon = Mic;
   readonly questionIcon = HelpCircle;
   readonly refreshIcon = RefreshCw;
@@ -274,6 +282,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   readonly recordingElapsedSeconds = signal(0);
   readonly recordingError = signal('');
   readonly voicePreviewUrls = signal<Record<string, string>>({});
+  readonly imagePreviewUrls = signal<Record<string, string>>({});
   readonly animatedScaleSelection = signal<ScaleSelectionAnimation | null>(null);
   readonly visibleQuestions = computed<readonly OperatorQuestionView[]>(() => {
     const template = this.activeTemplate();
@@ -387,6 +396,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.clearScaleSelectionAnimation();
     this.stopRecordingResources();
     this.revokeAllVoicePreviews();
+    this.revokeAllImagePreviews();
   }
 
   reloadTemplates(): void {
@@ -431,6 +441,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.clearScaleSelectionAnimation();
     this.stopRecordingResources();
     this.revokeAllVoicePreviews();
+    this.revokeAllImagePreviews();
     this.activeTemplate.set(null);
     this.currentQuestionIndex.set(0);
     this.customInputsOpen.set(false);
@@ -604,6 +615,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.clearScaleSelectionAnimation();
     this.stopRecordingResources();
     this.revokeAllVoicePreviews();
+    this.revokeAllImagePreviews();
     this.operatorTemplatesStore.clearSubmitState();
     this.resetResponseState(template, false);
   }
@@ -670,6 +682,17 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     const target = event.target;
     const voiceFile = target instanceof HTMLInputElement ? (target.files?.[0] ?? null) : null;
     this.setVoiceFile(question, voiceFile);
+    this.markQuestionTouched(question.id);
+
+    if (target instanceof HTMLInputElement) {
+      target.value = '';
+    }
+  }
+
+  updateImageFile(question: OperatorQuestionView, event: Event): void {
+    const target = event.target;
+    const imageFile = target instanceof HTMLInputElement ? (target.files?.[0] ?? null) : null;
+    this.setImageFile(question, imageFile);
     this.markQuestionTouched(question.id);
 
     if (target instanceof HTMLInputElement) {
@@ -752,6 +775,11 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.markQuestionTouched(question.id);
   }
 
+  discardImageAnswer(question: OperatorQuestionView): void {
+    this.setImageFile(question, null);
+    this.markQuestionTouched(question.id);
+  }
+
   visibleQuestionError(question: OperatorQuestionView): string {
     return this.touchedQuestionIds().has(question.id) ? this.questionError(question) : '';
   }
@@ -778,6 +806,14 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   voicePreviewUrl(question: OperatorQuestionView): string {
     return this.voicePreviewUrls()[question.id] ?? '';
+  }
+
+  imageFileName(question: OperatorQuestionView): string {
+    return this.answerDraft(question).imageFile?.name ?? '';
+  }
+
+  imagePreviewUrl(question: OperatorQuestionView): string {
+    return this.imagePreviewUrls()[question.id] ?? '';
   }
 
   isRecording(question: OperatorQuestionView): boolean {
@@ -821,6 +857,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
   isVoice(question: OperatorQuestionView): boolean {
     return question.answerType === QUESTION_ANSWER_TYPE.Voice;
+  }
+
+  isImage(question: OperatorQuestionView): boolean {
+    return question.answerType === QUESTION_ANSWER_TYPE.Image;
   }
 
   isStarRating(question: OperatorQuestionView): boolean {
@@ -1011,6 +1051,9 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     } else if (answerType === QUESTION_ANSWER_TYPE.Voice) {
       displayAnswer =
         answer.voiceFileName || this.i18n.translate('operatorTemplates.voiceFileAnswer');
+    } else if (answerType === QUESTION_ANSWER_TYPE.Image) {
+      displayAnswer =
+        answer.imageFileName || this.i18n.translate('operatorTemplates.imageFileAnswer');
     } else if (answerType === QUESTION_ANSWER_TYPE.StarRating) {
       displayAnswer =
         answer.starRatingValue !== null ? `${answer.starRatingValue} / 5` : fallbackAnswer;
@@ -1034,6 +1077,8 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       answer: displayAnswer,
       voiceFileName: answer.voiceFileName ?? '',
       voiceFileUrl: answer.voiceFileUrl ?? '',
+      imageFileName: answer.imageFileName ?? '',
+      imageFileUrl: answer.imageFileUrl ?? '',
     };
   }
 
@@ -1089,6 +1134,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.clearScaleSelectionAnimation();
     this.stopRecordingResources();
     this.revokeAllVoicePreviews();
+    this.revokeAllImagePreviews();
     this.activeTemplate.set(null);
     this.currentQuestionIndex.set(0);
     this.summaryOpen.set(false);
@@ -1105,6 +1151,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     this.clearScaleSelectionAnimation();
     this.stopRecordingResources();
     this.revokeAllVoicePreviews();
+    this.revokeAllImagePreviews();
     this.activeTemplate.set(null);
     this.currentQuestionIndex.set(0);
     this.summaryOpen.set(false);
@@ -1169,6 +1216,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         smileValue: answer.smileValue,
         textAnswer: answer.textAnswer ?? '',
         voiceFile: null,
+        imageFile: null,
       };
 
       return drafts;
@@ -1185,6 +1233,7 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
       smileValue: null,
       textAnswer: '',
       voiceFile: null,
+      imageFile: null,
     };
   }
 
@@ -1218,6 +1267,21 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
     const previewUrl = URL.createObjectURL(voiceFile);
     this.voicePreviewUrls.update((urls) => ({
+      ...urls,
+      [question.id]: previewUrl,
+    }));
+  }
+
+  private setImageFile(question: OperatorQuestionView, imageFile: File | null): void {
+    this.revokeImagePreview(question.id);
+    this.updateAnswer(question, { imageFile });
+
+    if (!imageFile) {
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    this.imagePreviewUrls.update((urls) => ({
       ...urls,
       [question.id]: previewUrl,
     }));
@@ -1270,6 +1334,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
     Object.keys(this.voicePreviewUrls())
       .filter((templateQuestionId) => !visibleIds.has(templateQuestionId))
       .forEach((templateQuestionId) => this.revokeVoicePreview(templateQuestionId));
+
+    Object.keys(this.imagePreviewUrls())
+      .filter((templateQuestionId) => !visibleIds.has(templateQuestionId))
+      .forEach((templateQuestionId) => this.revokeImagePreview(templateQuestionId));
 
     const recordingQuestionId = this.recordingQuestionId();
     if (recordingQuestionId && !visibleIds.has(recordingQuestionId)) {
@@ -1377,6 +1445,22 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         : 'operatorTemplates.voiceFileTooLarge';
     }
 
+    if (this.isImage(question)) {
+      if (!draft.imageFile) {
+        return 'operatorTemplates.imageFileRequired';
+      }
+
+      const extension = this.fileExtension(draft.imageFile.name);
+      const mimeType = draft.imageFile.type.toLowerCase();
+      if (!IMAGE_EXTENSIONS.has(extension) || !IMAGE_MIME_TYPES.has(mimeType)) {
+        return 'operatorTemplates.imageExtensionInvalid';
+      }
+
+      return draft.imageFile.size <= MAX_IMAGE_FILE_BYTES
+        ? ''
+        : 'operatorTemplates.imageFileTooLarge';
+    }
+
     if (this.isStarRating(question)) {
       return this.isScaleValue(draft.starRatingValue) ? '' : 'operatorTemplates.starRatingRequired';
     }
@@ -1423,6 +1507,14 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
         submissions.push({
           questionId: question.questionId,
           voiceFile: draft.voiceFile ?? undefined,
+        });
+        continue;
+      }
+
+      if (this.isImage(question)) {
+        submissions.push({
+          questionId: question.questionId,
+          imageFile: draft.imageFile ?? undefined,
         });
         continue;
       }
@@ -1490,6 +1582,10 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
 
     if (this.isVoice(question)) {
       return draft.voiceFile?.name ?? '';
+    }
+
+    if (this.isImage(question)) {
+      return draft.imageFile?.name ?? '';
     }
 
     if (this.isStarRating(question)) {
@@ -1640,6 +1736,23 @@ export class OperatorMyTemplatesPageComponent implements OnInit, OnDestroy {
   private revokeAllVoicePreviews(): void {
     Object.values(this.voicePreviewUrls()).forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
     this.voicePreviewUrls.set({});
+  }
+
+  private revokeImagePreview(questionId: string): void {
+    const previewUrl = this.imagePreviewUrls()[questionId];
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    this.imagePreviewUrls.update((urls) => {
+      const { [questionId]: removedUrl, ...remainingUrls } = urls;
+      return remainingUrls;
+    });
+  }
+
+  private revokeAllImagePreviews(): void {
+    Object.values(this.imagePreviewUrls()).forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+    this.imagePreviewUrls.set({});
   }
 
   private localizedText(englishText: string, arabicText: string, isArabic: boolean): string {

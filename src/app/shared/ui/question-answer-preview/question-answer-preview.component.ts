@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { MessageSquareText, Mic, Star } from 'lucide-angular';
+import { Image as ImageIcon, MessageSquareText, Mic, Star } from 'lucide-angular';
 import { I18nService } from '../../../core/services/i18n.service';
 import {
   QUESTION_ANSWER_TYPE,
@@ -37,6 +37,7 @@ export class QuestionAnswerPreviewComponent {
   readonly micIcon = Mic;
   readonly messageIcon = MessageSquareText;
   readonly starIcon = Star;
+  readonly imageIcon = ImageIcon;
   readonly previewItems = [1, 2, 3, 4, 5] as const;
   readonly smileLevels = SMILE_LEVELS;
 
@@ -46,6 +47,7 @@ export class QuestionAnswerPreviewComponent {
   readonly isStarRating = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.StarRating);
   readonly isComplain = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Complain);
   readonly isSmiles = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Smiles);
+  readonly isImage = computed(() => this.answerType() === QUESTION_ANSWER_TYPE.Image);
   readonly localizedOptions = computed<readonly LocalizedAnswerOption[]>(() => {
     const isArabic = this.i18n.language() === 'ar';
 

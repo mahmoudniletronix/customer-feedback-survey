@@ -2,6 +2,7 @@ import { DatePipe, DecimalPipe, Location, NgTemplateOutlet } from '@angular/comm
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ArrowLeft, ClipboardCheck, FileText, MessageSquareText } from 'lucide-angular';
+import { environment } from '../../../../../environments/environment';
 import {
   QUESTION_ANSWER_TYPE,
   toQuestionAnswerType,
@@ -142,8 +143,19 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
     if (answerType === QUESTION_ANSWER_TYPE.Complain) {
       return answer.textAnswer?.trim() || '-';
     }
+    if (answerType === QUESTION_ANSWER_TYPE.Image) {
+      return answer.imageFileName?.trim() || answer.imageFileUrl?.trim() || '-';
+    }
 
     return answer.voiceFileName?.trim() || answer.voiceUrl?.trim() || '-';
+  }
+
+  imageUrl(answer: AnonymousTemplateResponseAnswer): string {
+    return this.toMediaUrl(answer.imageFileUrl);
+  }
+
+  voiceUrl(answer: AnonymousTemplateResponseAnswer): string {
+    return this.toMediaUrl(answer.voiceUrl);
   }
 
   answerValueBadge(answer: AnonymousTemplateResponseAnswer): string {
@@ -166,6 +178,19 @@ export class AnonymousTemplateResponseDetailsPageComponent implements OnInit {
     }
 
     return answer.selectedOptionTextEn || answer.selectedOptionTextAr || '';
+  }
+
+  private toMediaUrl(url: string | null): string {
+    if (!url) {
+      return '';
+    }
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    const baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${baseUrl}${path}`;
   }
 
   private toNestedAnswerNode(

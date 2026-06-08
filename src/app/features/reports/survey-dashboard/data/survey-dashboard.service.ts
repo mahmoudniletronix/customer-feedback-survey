@@ -43,11 +43,14 @@ import {
   SurveyDashboardSourceBreakdown,
   SurveyDashboardSourceMetrics,
   SurveyDashboardSummary,
+  SurveyDashboardTemplateDashboardSource,
   SurveyDashboardTemplateCustomInput,
   SurveyDashboardTemplateDetails,
+  SurveyDashboardTemplateKind,
   SurveyDashboardTemplateOption,
   SurveyDashboardTemplatePerformance,
   SurveyDashboardTemplateQuestion,
+  SurveyDashboardTemplatesSelectionQuery,
   SurveyDashboardTrendPoint,
 } from '../domain/survey-dashboard.model';
 
@@ -58,6 +61,7 @@ export class SurveyDashboardService {
   private readonly http = inject(HttpClient);
   private readonly reportsUrl = `${environment.apiBaseUrl}/api/reports`;
   private readonly dashboardUrl = `${this.reportsUrl}/survey-dashboard`;
+  private readonly dashboardTemplatesSelectionUrl = `${this.dashboardUrl}/templates-selection`;
   private readonly templatesUrl = `${environment.apiBaseUrl}/api/templates`;
   private readonly anonymousTemplatesUrl = `${environment.apiBaseUrl}/api/anonymous-templates`;
 
@@ -121,6 +125,22 @@ export class SurveyDashboardService {
       );
   }
 
+  getDashboardTemplateOptions(
+    query: SurveyDashboardTemplatesSelectionQuery = {},
+  ): Observable<readonly SurveyDashboardTemplateOption[]> {
+    return this.http
+      .get<unknown>(this.dashboardTemplatesSelectionUrl, {
+        params: this.toTemplatesSelectionParams(query),
+      })
+      .pipe(
+        map((response) =>
+          this.readPageArray(response)
+            .map((item) => this.toDashboardTemplateOption(item))
+            .filter((item) => item.id.length > 0),
+        ),
+      );
+  }
+
   getAnonymousTemplateOptions(): Observable<readonly SurveyDashboardTemplateOption[]> {
     const params = new HttpParams().set('pageNumber', '1').set('pageSize', '100');
 
@@ -138,9 +158,9 @@ export class SurveyDashboardService {
   private toDashboardParams(query: SurveyDashboardQuery): HttpParams {
     let params = new HttpParams();
     if (query.branchId) params = params.set('branchId', query.branchId);
-    if (query.source) params = params.set('source', query.source);
+    if (query.source && !query.templateId) params = params.set('source', query.source);
     if (query.templateId) params = params.set('templateId', query.templateId);
-    if (query.anonymousTemplateId) {
+    if (query.anonymousTemplateId && !query.templateId) {
       params = params.set('anonymousTemplateId', query.anonymousTemplateId);
     }
     if (query.from) params = params.set('from', query.from);
@@ -159,11 +179,25 @@ export class SurveyDashboardService {
     return params;
   }
 
+  private toTemplatesSelectionParams(query: SurveyDashboardTemplatesSelectionQuery): HttpParams {
+    let params = new HttpParams();
+    if (query.branchId) params = params.set('branchId', query.branchId);
+    if (query.searchText) params = params.set('searchText', query.searchText);
+    if (query.templateKind) params = params.set('templateKind', query.templateKind);
+    return params;
+  }
+
   private toDashboard(response: ApiRecord): SurveyDashboardResponse {
+    const filters = this.toAppliedFilters(this.readRecord(response['filters']));
+    const appliedFilters = this.toAppliedFilters(
+      this.readRecord(response['appliedFilters']) ?? this.readRecord(response['filters']),
+    );
+
     return {
       period: this.toPeriod(this.readRecord(response['period'])),
       scope: this.toScope(this.readRecord(response['scope'])),
-      filters: this.toAppliedFilters(this.readRecord(response['filters'])),
+      filters,
+      appliedFilters,
       summary: this.toSummary(this.readRecord(response['summary'])),
       sourceBreakdown: this.toSourceBreakdown(this.readRecord(response['sourceBreakdown'])),
       branchesSummary: this.readArray(response['branchesSummary']).map((item) =>
@@ -212,6 +246,10 @@ export class SurveyDashboardService {
       branchId: this.readNullableString(filters, 'branchId'),
       templateId: this.readNullableString(filters, 'templateId'),
       anonymousTemplateId: this.readNullableString(filters, 'anonymousTemplateId'),
+      templateKind: this.toTemplateKindOrNull(this.readString(filters, 'templateKind')),
+      from: this.readNullableString(filters, 'from'),
+      to: this.readNullableString(filters, 'to'),
+      groupBy: this.toGroupBy(this.readString(filters, 'groupBy')),
       topQuestionsCount: this.readNumber(filters, 'topQuestionsCount') || 5,
       criticalResponsesCount: this.readNumber(filters, 'criticalResponsesCount') || 10,
       criticalScoreThreshold: this.readNumber(filters, 'criticalScoreThreshold') || 40,
@@ -419,24 +457,61 @@ export class SurveyDashboardService {
   }
 
   private toTemplateOption(item: ApiRecord): SurveyDashboardTemplateOption {
+    const nameEn = this.readString(item, 'nameEn');
+    const nameAr = this.readNullableString(item, 'nameAr');
+
     return {
       id: this.readRecordId(item['id']) || this.readRecordId(item['templateId']),
-      nameEn: this.readString(item, 'nameEn'),
-      nameAr: this.readNullableString(item, 'nameAr'),
+      templateKind: 'Authorized',
+      dashboardSource: 'Internal',
+      nameEn,
+      nameAr,
+      displayName: this.readString(item, 'displayName') || nameEn || nameAr || '',
       branchId: this.readNullableString(item, 'branchId'),
       branchNameEn: this.readNullableString(item, 'branchNameEn'),
       branchNameAr: this.readNullableString(item, 'branchNameAr'),
+      branchCode: this.readString(item, 'branchCode'),
     };
   }
 
   private toAnonymousTemplateOption(item: ApiRecord): SurveyDashboardTemplateOption {
+    const nameEn = this.readString(item, 'nameEn');
+    const nameAr = this.readNullableString(item, 'nameAr');
+
     return {
       id: this.readRecordId(item['anonymousTemplateId']) || this.readRecordId(item['id']),
-      nameEn: this.readString(item, 'nameEn'),
-      nameAr: this.readNullableString(item, 'nameAr'),
+      templateKind: 'Anonymous',
+      dashboardSource: 'Anonymous',
+      nameEn,
+      nameAr,
+      displayName: this.readString(item, 'displayName') || nameEn || nameAr || '',
       branchId: this.readNullableString(item, 'branchId'),
       branchNameEn: this.readNullableString(item, 'branchNameEn'),
       branchNameAr: this.readNullableString(item, 'branchNameAr'),
+      branchCode: this.readString(item, 'branchCode'),
+    };
+  }
+
+  private toDashboardTemplateOption(item: ApiRecord): SurveyDashboardTemplateOption {
+    const nameEn = this.readString(item, 'nameEn');
+    const nameAr = this.readNullableString(item, 'nameAr');
+    const templateKind = this.toTemplateKind(this.readString(item, 'templateKind'));
+    const dashboardSource = this.toTemplateDashboardSource(
+      this.readString(item, 'dashboardSource'),
+      templateKind,
+    );
+
+    return {
+      id: this.readRecordId(item['templateId']),
+      templateKind,
+      dashboardSource,
+      nameEn,
+      nameAr,
+      displayName: this.readString(item, 'displayName') || nameEn || nameAr || '',
+      branchId: this.readNullableString(item, 'branchId'),
+      branchNameEn: this.readNullableString(item, 'branchNameEn'),
+      branchNameAr: this.readNullableString(item, 'branchNameAr'),
+      branchCode: this.readString(item, 'branchCode'),
     };
   }
 
@@ -507,6 +582,9 @@ export class SurveyDashboardService {
       voiceFileName: this.readNullableString(item, 'voiceFileName'),
       voiceFileUrl:
         this.readNullableString(item, 'voiceFileUrl') ?? this.readNullableString(item, 'voiceUrl'),
+      imageFileName: this.readNullableString(item, 'imageFileName'),
+      imageFileUrl:
+        this.readNullableString(item, 'imageFileUrl') ?? this.readNullableString(item, 'imageUrl'),
       displayValue: this.readString(item, 'displayValue'),
       children: this.readAnswerChildren(item).map((answer) => this.toInternalResponseAnswer(answer)),
     };
@@ -592,6 +670,9 @@ export class SurveyDashboardService {
       textAnswer: this.readNullableString(item, 'textAnswer'),
       voiceFileName: this.readNullableString(item, 'voiceFileName'),
       voiceUrl: this.readNullableString(item, 'voiceUrl'),
+      imageFileName: this.readNullableString(item, 'imageFileName'),
+      imageFileUrl:
+        this.readNullableString(item, 'imageFileUrl') ?? this.readNullableString(item, 'imageUrl'),
       children: this.readAnswerChildren(item).map((answer) =>
         this.toAnonymousResponseAnswer(answer),
       ),
@@ -821,6 +902,29 @@ export class SurveyDashboardService {
     return 'All';
   }
 
+  private toTemplateKind(value: string): SurveyDashboardTemplateKind {
+    return value === 'Anonymous' ? 'Anonymous' : 'Authorized';
+  }
+
+  private toTemplateKindOrNull(value: string): SurveyDashboardTemplateKind | null {
+    if (value === 'Authorized' || value === 'Anonymous') {
+      return value;
+    }
+
+    return null;
+  }
+
+  private toTemplateDashboardSource(
+    value: string,
+    templateKind: SurveyDashboardTemplateKind,
+  ): SurveyDashboardTemplateDashboardSource {
+    if (value === 'Internal' || value === 'Anonymous') {
+      return value;
+    }
+
+    return templateKind === 'Anonymous' ? 'Anonymous' : 'Internal';
+  }
+
   private toGroupBy(value: string): SurveyDashboardGroupBy {
     return value === 'Month' ? 'Month' : 'Day';
   }
@@ -831,7 +935,8 @@ export class SurveyDashboardService {
       value === 'StarRating' ||
       value === 'Smiles' ||
       value === 'Complain' ||
-      value === 'Voice'
+      value === 'Voice' ||
+      value === 'Image'
     ) {
       return value;
     }

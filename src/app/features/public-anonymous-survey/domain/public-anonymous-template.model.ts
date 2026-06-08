@@ -1,7 +1,13 @@
 import { ScopeApiFields, ScopeState } from '../../../shared/models/resource-scope.model';
 
 export type PublicCustomInputType = 1 | 2;
-export type PublicQuestionKind = 'singleChoice' | 'starRating' | 'smiles' | 'complain' | 'voice';
+export type PublicQuestionKind =
+  | 'singleChoice'
+  | 'starRating'
+  | 'smiles'
+  | 'complain'
+  | 'voice'
+  | 'image';
 
 export interface PublicAnonymousTemplate extends ScopeState {
   anonymousTemplateId: string;
@@ -139,6 +145,8 @@ export interface PublicAnonymousAnswerDraft {
   smileValue: number | null;
   textAnswer: string;
   voiceFileName: string;
+  imageFileName: string;
+  imageFile: File | null;
 }
 
 export interface SubmitPublicAnonymousResponsePayload {
@@ -159,6 +167,7 @@ export interface PublicAnonymousAnswerPayload {
   smileValue: number | null;
   textAnswer: string | null;
   voiceFileName: string | null;
+  imageFile: File | null;
 }
 
 export interface PublicAnonymousSubmissionResult {

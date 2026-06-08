@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import {
   Bell,
   Briefcase,
   ChevronDown,
+  KeyRound,
   Languages,
   LogOut,
   Menu,
@@ -31,9 +32,11 @@ export class MainLayoutComponent {
   readonly authStore = inject(AuthStore);
   readonly branchContext = inject(BranchContextService);
   readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
   readonly sidebarCollapsed = signal(false);
   readonly mobileSidebarOpen = signal(false);
   readonly languagesIcon = Languages;
+  readonly changePasswordIcon = KeyRound;
   readonly logoutIcon = LogOut;
   readonly menuIcon = Menu;
   readonly userIcon = UserRound;
@@ -168,6 +171,10 @@ export class MainLayoutComponent {
 
   logout(): void {
     this.authStore.logout();
+  }
+
+  changePassword(): void {
+    void this.router.navigateByUrl('/auth/change-password');
   }
 
   private isDesktopSidebarViewport(): boolean {

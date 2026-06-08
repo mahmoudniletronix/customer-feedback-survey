@@ -6,7 +6,7 @@ import { TokenStorageService } from '../services/token-storage.service';
 export const SKIP_AUTH = new HttpContextToken<boolean>(() => false);
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
-  if (request.context.get(SKIP_AUTH) || request.url.includes('/api/auth/')) {
+  if (request.context.get(SKIP_AUTH)) {
     return next(request);
   }
 

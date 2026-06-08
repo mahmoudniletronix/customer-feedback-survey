@@ -39,6 +39,8 @@ interface MenuItem {
     | 'globalQuestionGroups'
     | 'globalQuestions'
     | 'anonymousTemplates'
+    | 'branchAreas'
+    | 'branchUsers'
     | 'surveyDashboard'
     | 'systemReports'
     | 'departmentReports'
@@ -98,7 +100,8 @@ const MENU_ITEMS: readonly MenuItem[] = [
     labelKey: 'branchUsers.title',
     path: '/branch-admin/users',
     icon: UsersRound,
-    roles: ['BRANCH_ADMIN'],
+    roles: [],
+    feature: 'branchUsers',
     exact: true,
   },
   {
@@ -143,6 +146,15 @@ const MENU_ITEMS: readonly MenuItem[] = [
     path: '/branches',
     icon: Building2,
     roles: ['SUPER_ADMIN'],
+  },
+  {
+    label: 'Branch Areas',
+    labelKey: 'branchAreas.navTitle',
+    path: '/branch-areas',
+    icon: UsersRound,
+    roles: [],
+    feature: 'branchAreas',
+    exact: true,
   },
   {
     label: 'Templates',
@@ -254,6 +266,12 @@ export class SidebarComponent {
     }
     if (feature === 'anonymousTemplates') {
       return this.authStore.canAccessAnonymousTemplates();
+    }
+    if (feature === 'branchAreas') {
+      return this.authStore.canAccessBranchAreas();
+    }
+    if (feature === 'branchUsers') {
+      return this.authStore.canAccessBranchUsers();
     }
     if (feature === 'surveyDashboard') {
       return this.authStore.canAccessSurveyDashboard();

@@ -28,6 +28,7 @@ import {
   Plus,
 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import {
   isSingleChoiceAnswerType,
   QuestionAnswerOption,
@@ -136,6 +137,7 @@ interface TemplateDetailsQuestionView {
 export class BranchTemplateDetailsPageComponent implements OnInit {
   readonly templatesStore = inject(BranchTemplatesStore);
   readonly responsesStore = inject(BranchResponsesHistoryStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly location = inject(Location);
@@ -201,6 +203,11 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
       this.templatesStore.selectedTemplate()?.questionConditions ??
       [],
   );
+  readonly canUpdate = computed(() => this.authStore.canManageTemplates('Update'));
+  readonly canDelete = computed(() => this.authStore.canManageTemplates('Delete'));
+  readonly canAssignQuestions = computed(() =>
+    this.authStore.canManageTemplates('AssignQuestions'),
+  );
 
   readonly templateForm = this.formBuilder.nonNullable.group({
     nameEn: ['', [Validators.required, Validators.maxLength(200)]],
@@ -256,7 +263,9 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     }
 
     this.templatesStore.loadDetails(templateId);
-    this.templatesStore.loadQuestionsSelection(templateId);
+    if (this.canAssignQuestions()) {
+      this.templatesStore.loadQuestionsSelection(templateId);
+    }
     this.responsesStore.load({ templateId, pageNumber: 1, pageSize: 10 });
   }
 
@@ -265,6 +274,10 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   enableEdit(): void {
+    if (!this.canUpdate()) {
+      return;
+    }
+
     const template = this.templatesStore.selectedTemplate();
     if (template) {
       this.patchTemplateForm(template);
@@ -286,7 +299,12 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
     this.validateTemplateDates();
     this.validateCustomInputs();
 
-    if (!template || this.templateForm.invalid || this.templatesStore.updating()) {
+    if (
+      !template ||
+      this.templateForm.invalid ||
+      this.templatesStore.updating() ||
+      !this.canUpdate()
+    ) {
       return;
     }
 
@@ -304,10 +322,18 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
   }
 
   addCustomInput(): void {
+    if (!this.canUpdate()) {
+      return;
+    }
+
     this.customInputsArray.push(this.createCustomInputGroup(this.customInputsArray.length + 1));
   }
 
   removeCustomInput(index: number): void {
+    if (!this.canUpdate()) {
+      return;
+    }
+
     this.customInputsArray.removeAt(index);
     this.validateCustomInputs();
   }
@@ -381,7 +407,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
   deleteTemplate(): void {
     const template = this.templatesStore.selectedTemplate();
-    if (!template || this.templatesStore.deleting()) {
+    if (!template || this.templatesStore.deleting() || !this.canDelete()) {
       return;
     }
 
@@ -397,7 +423,7 @@ export class BranchTemplateDetailsPageComponent implements OnInit {
 
   openQuestionsManager(): void {
     const template = this.templatesStore.selectedTemplate();
-    if (!template) {
+    if (!template || !this.canAssignQuestions()) {
       return;
     }
 

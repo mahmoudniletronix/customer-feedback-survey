@@ -87,6 +87,8 @@ export interface OperatorLatestTemplateAnswer {
   textAnswer: string | null;
   voiceFileName: string | null;
   voiceFileUrl: string | null;
+  imageFileName: string | null;
+  imageFileUrl: string | null;
 }
 
 export interface OperatorAssignedTemplateQuestion extends ScopeState {
@@ -111,6 +113,7 @@ export interface OperatorTemplateAnswerSubmission {
   smileValue?: number;
   textAnswer?: string;
   voiceFile?: File;
+  imageFile?: File;
 }
 
 export interface OperatorTemplateCustomInputSubmission {
@@ -214,6 +217,8 @@ export interface OperatorLatestTemplateAnswerApiResponse {
   textAnswer?: string | null;
   voiceFileName?: string | null;
   voiceFileUrl?: string | null;
+  imageFileName?: string | null;
+  imageFileUrl?: string | null;
 }
 
 export interface OperatorAssignedTemplateQuestionApiResponse extends ScopeApiFields {

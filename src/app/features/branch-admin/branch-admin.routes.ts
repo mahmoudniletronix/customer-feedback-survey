@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { roleGuard } from '../../core/guards/role.guard';
 import { BranchDashboardService } from './dashboard/data/branch-dashboard.service';
 import { branchDashboardAccessGuard } from './dashboard/presentation/guards/branch-dashboard-access.guard';
 import { BranchResponsesHistoryStore } from './dashboard/presentation/state/branch-responses-history.store';
@@ -7,6 +6,7 @@ import { BranchDashboardStore } from './dashboard/presentation/state/branch-dash
 import { BranchAdminBranchService } from './branch/data/branch-admin-branch.service';
 import { BranchAdminBranchStore } from './branch/presentation/state/branch-admin-branch.store';
 import { BranchUsersService } from '../branch-user/branch-users/data/branch-users.service';
+import { branchUsersAccessGuard } from '../branch-user/branch-users/presentation/guards/branch-users-access.guard';
 import { BranchUsersStore } from '../branch-user/branch-users/presentation/state/branch-users.store';
 import { questionGroupsAccessGuard } from './question-groups/presentation/guards/question-groups-access.guard';
 import { QuestionGroupsService } from './question-groups/data/question-groups.service';
@@ -15,6 +15,7 @@ import { questionsAccessGuard } from './questions/presentation/guards/questions-
 import { QuestionsService } from './questions/data/questions.service';
 import { QuestionsStore } from './questions/presentation/state/questions.store';
 import { BranchSatisfactionReportService } from './reports/data/branch-satisfaction-report.service';
+import { BranchTemplatesExcelReportService } from './reports/data/branch-templates-excel-report.service';
 import { BranchTemplatesPdfReportService } from './reports/data/branch-templates-pdf-report.service';
 import { BranchSatisfactionReportStore } from './reports/presentation/state/branch-satisfaction-report.store';
 import { BranchTemplatesPdfReportStore } from './reports/presentation/state/branch-templates-pdf-report.store';
@@ -76,6 +77,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
         canActivate: [branchDashboardAccessGuard],
         providers: [
           AnonymousTemplatesService,
+          BranchTemplatesExcelReportService,
           BranchTemplatesPdfReportService,
           BranchTemplatesPdfReportStore,
         ],
@@ -86,7 +88,7 @@ export const BRANCH_ADMIN_ROUTES: Routes = [
       },
       {
         path: 'users',
-        canActivate: [roleGuard(['BRANCH_ADMIN'])],
+        canActivate: [branchUsersAccessGuard],
         loadComponent: () =>
           import('../branch-user/branch-users/presentation/pages/branch-users-page.component').then(
             (m) => m.BranchUsersPageComponent,

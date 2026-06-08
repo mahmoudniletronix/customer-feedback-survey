@@ -1,12 +1,23 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminBranchDetails } from '../../domain/branch-admin-branch.model';
 import { BranchAdminBranchService } from '../../data/branch-admin-branch.service';
+
+interface ApiErrorItem {
+  code?: string;
+  messageName?: string;
+}
+
+interface ApiErrorResponse {
+  errors?: readonly ApiErrorItem[];
+}
 
 @Injectable()
 export class BranchAdminBranchStore {
   private readonly branchService = inject(BranchAdminBranchService);
+  private readonly authStore = inject(AuthStore);
   private readonly branchSignal = signal<BranchAdminBranchDetails | null>(null);
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -41,6 +52,21 @@ export class BranchAdminBranchStore {
       return 'branchAdmin.branchLoadError';
     }
 
+    const code = this.readFirstErrorCode(error.error);
+    if (code === 'BranchArea.SelectedBranchRequired') {
+      this.authStore.logout();
+      return 'branchAdmin.selectedBranchRequired';
+    }
+
+    if (code === 'BranchArea.SelectedBranchNotAllowed') {
+      this.authStore.logout();
+      return 'branchAdmin.selectedBranchNotAllowed';
+    }
+
+    if (code === 'CurrentBranchScope.CurrentBranchActorNotFound') {
+      return 'branchAdmin.currentBranchActorNotFound';
+    }
+
     if (error.status === 401) {
       return 'branchAdmin.unauthorized';
     }
@@ -54,5 +80,18 @@ export class BranchAdminBranchStore {
     }
 
     return 'branchAdmin.branchLoadError';
+  }
+
+  private readFirstErrorCode(errorBody: unknown): string {
+    if (!this.isApiErrorResponse(errorBody)) {
+      return '';
+    }
+
+    const firstError = errorBody.errors?.[0];
+    return firstError?.code ?? firstError?.messageName ?? '';
+  }
+
+  private isApiErrorResponse(value: unknown): value is ApiErrorResponse {
+    return typeof value === 'object' && value !== null && 'errors' in value;
   }
 }

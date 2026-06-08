@@ -117,6 +117,10 @@ export class TokenStorageService {
       typeof user['email'] === 'string' &&
       this.isRole(user['role']) &&
       this.isOptionalNumber(value['expiresAt']) &&
+      this.isOptionalBoolean(value['firstLoginFlag']) &&
+      this.isOptionalBoolean(value['passwordExpiredFlag']) &&
+      this.isOptionalString(value['passwordChangedOnUtc']) &&
+      this.isOptionalString(value['passwordExpiresOnUtc']) &&
       this.isOptionalString(user['branchNameEn']) &&
       this.isOptionalString(user['branchNameAr'])
     );
@@ -134,6 +138,10 @@ export class TokenStorageService {
     return value === undefined || typeof value === 'number';
   }
 
+  private isOptionalBoolean(value: unknown): boolean {
+    return value === undefined || typeof value === 'boolean';
+  }
+
   private isRole(value: unknown): value is Role {
     return (
       value === 'SUPER_ADMIN' ||
@@ -148,6 +156,7 @@ export class TokenStorageService {
     return (
       value === 'SuperAdmin' ||
       value === 'BranchAdmin' ||
+      value === 'BranchArea' ||
       value === 'DepartmentAdmin' ||
       value === 'BranchUser' ||
       value === 'Operator'
@@ -189,6 +198,18 @@ export class TokenStorageService {
       roles,
       permissions,
       user,
+      firstLoginFlag:
+        this.readBoolean(payload, 'firstLoginFlag', 'FirstLoginFlag') ?? undefined,
+      passwordExpiredFlag:
+        this.readBoolean(payload, 'passwordExpiredFlag', 'PasswordExpiredFlag') ?? undefined,
+      passwordChangedOnUtc:
+        this.readString(payload, 'passwordChangedOnUtc') ??
+        this.readString(payload, 'PasswordChangedOnUtc') ??
+        undefined,
+      passwordExpiresOnUtc:
+        this.readString(payload, 'passwordExpiresOnUtc') ??
+        this.readString(payload, 'PasswordExpiresOnUtc') ??
+        undefined,
     };
 
     this.setSession(session);
@@ -267,6 +288,9 @@ export class TokenStorageService {
     if (roles.some((role) => role === 'System Administrator' || role === 'SuperAdmin')) {
       return 'SuperAdmin';
     }
+    if (roles.some((role) => this.normalizeRole(role) === 'brancharea')) {
+      return 'BranchArea';
+    }
     if (roles.some((role) => role === 'BranchAdmin' || role === 'Branch Administrator')) {
       return 'BranchAdmin';
     }
@@ -297,6 +321,9 @@ export class TokenStorageService {
     if (userType === 'BranchAdmin') {
       return 'BRANCH_ADMIN';
     }
+    if (userType === 'BranchArea') {
+      return 'BRANCH_ADMIN';
+    }
     if (userType === 'BranchUser') {
       return 'BRANCH_USER';
     }
@@ -321,11 +348,20 @@ export class TokenStorageService {
       userName;
 
     return {
-      id: this.readString(payload, 'sub') ?? email,
+      id:
+        this.readString(payload, 'applicationUserId') ??
+        this.readString(payload, 'ApplicationUserId') ??
+        this.readString(payload, 'application_user_id') ??
+        this.readString(payload, 'userId') ??
+        this.readString(payload, 'UserId') ??
+        this.readString(payload, 'sub') ??
+        email,
       name: userName,
       email,
       role,
       branchId:
+        this.readString(payload, 'activeBranchId') ??
+        this.readString(payload, 'ActiveBranchId') ??
         this.readString(payload, 'branchId') ??
         this.readString(payload, 'BranchId') ??
         this.readString(payload, 'branch_id') ??
@@ -345,6 +381,41 @@ export class TokenStorageService {
     return typeof value === 'string' && value.length > 0 ? value : null;
   }
 
+  private readBoolean(payload: Record<string, unknown>, ...keys: readonly string[]): boolean | null {
+    for (const key of keys) {
+      const value = this.toBoolean(payload[key]);
+      if (value !== null) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
+  private toBoolean(value: unknown): boolean | null {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true') {
+      return true;
+    }
+    if (normalized === 'false') {
+      return false;
+    }
+
+    return null;
+  }
+
+  private normalizeRole(role: string): string {
+    return role.replace(/[\s_-]/g, '').toLowerCase();
+  }
+
   private enrichSession(session: AuthSession): AuthSession {
     const payload = this.decodeJwtPayload(session.token);
     if (!payload) {
@@ -353,6 +424,24 @@ export class TokenStorageService {
 
     const branchNameEn = session.user.branchNameEn ?? this.readBranchNameEn(payload) ?? undefined;
     const branchNameAr = session.user.branchNameAr ?? this.readBranchNameAr(payload) ?? undefined;
+    const firstLoginFlag =
+      session.firstLoginFlag ??
+      this.readBoolean(payload, 'firstLoginFlag', 'FirstLoginFlag') ??
+      undefined;
+    const passwordExpiredFlag =
+      session.passwordExpiredFlag ??
+      this.readBoolean(payload, 'passwordExpiredFlag', 'PasswordExpiredFlag') ??
+      undefined;
+    const passwordChangedOnUtc =
+      session.passwordChangedOnUtc ??
+      this.readString(payload, 'passwordChangedOnUtc') ??
+      this.readString(payload, 'PasswordChangedOnUtc') ??
+      undefined;
+    const passwordExpiresOnUtc =
+      session.passwordExpiresOnUtc ??
+      this.readString(payload, 'passwordExpiresOnUtc') ??
+      this.readString(payload, 'PasswordExpiresOnUtc') ??
+      undefined;
     const permissions = [
       ...new Set([
         ...session.permissions,
@@ -371,6 +460,10 @@ export class TokenStorageService {
     if (
       branchNameEn === session.user.branchNameEn &&
       branchNameAr === session.user.branchNameAr &&
+      firstLoginFlag === session.firstLoginFlag &&
+      passwordExpiredFlag === session.passwordExpiredFlag &&
+      passwordChangedOnUtc === session.passwordChangedOnUtc &&
+      passwordExpiresOnUtc === session.passwordExpiresOnUtc &&
       permissions.length === session.permissions.length
     ) {
       return session;
@@ -384,6 +477,10 @@ export class TokenStorageService {
         branchNameAr,
       },
       permissions,
+      firstLoginFlag,
+      passwordExpiredFlag,
+      passwordChangedOnUtc,
+      passwordExpiresOnUtc,
     };
   }
 

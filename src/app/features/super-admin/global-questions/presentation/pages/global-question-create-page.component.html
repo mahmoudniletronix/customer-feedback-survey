@@ -585,6 +585,11 @@
             {{ questionFieldError('type') | t }}
           </span>
         }
+        @if (isImage()) {
+          <span class="mt-2 block rounded-lg border border-cyan-100 bg-cyan-50 p-2 text-xs font-semibold text-[var(--theme-color-secondary)]">
+            {{ 'questions.imageQuestionHelp' | t }}
+          </span>
+        }
       </label>
     </div>
 

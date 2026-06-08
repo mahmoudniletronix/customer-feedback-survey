@@ -40,10 +40,12 @@
               : ('branchDashboard.showFilters' | t)
           }}
         </button>
-        <app-button size="sm" type="button" (pressed)="openCreateTemplate()">
-          <app-icon [icon]="plusIcon" [size]="14" />
-          {{ 'branchTemplates.createAction' | t }}
-        </app-button>
+        @if (canCreate()) {
+          <app-button size="sm" type="button" (pressed)="openCreateTemplate()">
+            <app-icon [icon]="plusIcon" [size]="14" />
+            {{ 'branchTemplates.createAction' | t }}
+          </app-button>
+        }
       </div>
     </div>
   </div>
@@ -280,45 +282,53 @@
                   </td>
                   <td class="px-3 py-2">
                     <div class="flex flex-wrap justify-end gap-1.5">
-                      <app-button
-                        size="sm"
-                        type="button"
-                        (pressed)="openTemplateQuestions($event, template)"
-                      >
-                        <app-icon [icon]="listChecksIcon" [size]="15" />
-                      </app-button>
-                      <app-button
-                        size="sm"
-                        type="button"
-                        variant="secondary"
-                        [disabled]="editTemplateLoadingId() !== null"
-                        [loading]="editTemplateLoadingId() === template.templateId"
-                        (pressed)="openEditTemplate($event, template)"
-                      >
-                        <app-icon [icon]="editIcon" [size]="15" />
-                      </app-button>
-                      @if (template.isActive) {
+                      @if (canAssignQuestions()) {
                         <app-button
                           size="sm"
                           type="button"
-                          variant="danger"
-                          [disabled]="templatesStore.deleting()"
-                          [loading]="templatesStore.deleting()"
-                          (pressed)="deleteTemplate($event, template)"
+                          (pressed)="openTemplateQuestions($event, template)"
                         >
-                          <app-icon [icon]="deleteIcon" [size]="15" />
+                          <app-icon [icon]="listChecksIcon" [size]="15" />
                         </app-button>
-                      } @else {
+                      }
+                      @if (canUpdate()) {
                         <app-button
                           size="sm"
                           type="button"
                           variant="secondary"
-                          [disabled]="templatesStore.restoring()"
-                          [loading]="templatesStore.restoring()"
-                          (pressed)="restoreTemplate($event, template)"
+                          [disabled]="editTemplateLoadingId() !== null"
+                          [loading]="editTemplateLoadingId() === template.templateId"
+                          (pressed)="openEditTemplate($event, template)"
                         >
-                          <app-icon [icon]="restoreIcon" [size]="15" />
+                          <app-icon [icon]="editIcon" [size]="15" />
                         </app-button>
+                      }
+                      @if (template.isActive) {
+                        @if (canDelete()) {
+                          <app-button
+                            size="sm"
+                            type="button"
+                            variant="danger"
+                            [disabled]="templatesStore.deleting()"
+                            [loading]="templatesStore.deleting()"
+                            (pressed)="deleteTemplate($event, template)"
+                          >
+                            <app-icon [icon]="deleteIcon" [size]="15" />
+                          </app-button>
+                        }
+                      } @else {
+                        @if (canRestore()) {
+                          <app-button
+                            size="sm"
+                            type="button"
+                            variant="secondary"
+                            [disabled]="templatesStore.restoring()"
+                            [loading]="templatesStore.restoring()"
+                            (pressed)="restoreTemplate($event, template)"
+                          >
+                            <app-icon [icon]="restoreIcon" [size]="15" />
+                          </app-button>
+                        }
                       }
                     </div>
                   </td>
@@ -447,55 +457,63 @@
             <div
               class="grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 sm:flex sm:flex-wrap sm:justify-end"
             >
-              <app-button
-                size="sm"
-                type="button"
-                (pressed)="openTemplateQuestions($event, template)"
-              >
-                <app-icon [icon]="listChecksIcon" [size]="15" />
-                {{ 'branchTemplates.manageQuestions' | t }}
-              </app-button>
-              <div class="flex justify-end">
+              @if (canAssignQuestions()) {
                 <app-button
                   size="sm"
                   type="button"
-                  variant="secondary"
-                  [disabled]="editTemplateLoadingId() !== null"
-                  [loading]="editTemplateLoadingId() === template.templateId"
-                  (pressed)="openEditTemplate($event, template)"
+                  (pressed)="openTemplateQuestions($event, template)"
                 >
-                  <app-icon [icon]="editIcon" [size]="15" />
-                  {{ 'common.edit' | t }}
+                  <app-icon [icon]="listChecksIcon" [size]="15" />
+                  {{ 'branchTemplates.manageQuestions' | t }}
                 </app-button>
-              </div>
-              @if (template.isActive) {
-                <div class="flex justify-end">
-                  <app-button
-                    size="sm"
-                    type="button"
-                    variant="danger"
-                    [disabled]="templatesStore.deleting()"
-                    [loading]="templatesStore.deleting()"
-                    (pressed)="deleteTemplate($event, template)"
-                  >
-                    <app-icon [icon]="deleteIcon" [size]="15" />
-                    {{ 'common.delete' | t }}
-                  </app-button>
-                </div>
-              } @else {
+              }
+              @if (canUpdate()) {
                 <div class="flex justify-end">
                   <app-button
                     size="sm"
                     type="button"
                     variant="secondary"
-                    [disabled]="templatesStore.restoring()"
-                    [loading]="templatesStore.restoring()"
-                    (pressed)="restoreTemplate($event, template)"
+                    [disabled]="editTemplateLoadingId() !== null"
+                    [loading]="editTemplateLoadingId() === template.templateId"
+                    (pressed)="openEditTemplate($event, template)"
                   >
-                    <app-icon [icon]="restoreIcon" [size]="15" />
-                    {{ 'branchTemplates.restore' | t }}
+                    <app-icon [icon]="editIcon" [size]="15" />
+                    {{ 'common.edit' | t }}
                   </app-button>
                 </div>
+              }
+              @if (template.isActive) {
+                @if (canDelete()) {
+                  <div class="flex justify-end">
+                    <app-button
+                      size="sm"
+                      type="button"
+                      variant="danger"
+                      [disabled]="templatesStore.deleting()"
+                      [loading]="templatesStore.deleting()"
+                      (pressed)="deleteTemplate($event, template)"
+                    >
+                      <app-icon [icon]="deleteIcon" [size]="15" />
+                      {{ 'common.delete' | t }}
+                    </app-button>
+                  </div>
+                }
+              } @else {
+                @if (canRestore()) {
+                  <div class="flex justify-end">
+                    <app-button
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                      [disabled]="templatesStore.restoring()"
+                      [loading]="templatesStore.restoring()"
+                      (pressed)="restoreTemplate($event, template)"
+                    >
+                      <app-icon [icon]="restoreIcon" [size]="15" />
+                      {{ 'branchTemplates.restore' | t }}
+                    </app-button>
+                  </div>
+                }
               }
             </div>
           </article>

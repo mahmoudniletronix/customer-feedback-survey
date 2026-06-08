@@ -21,7 +21,8 @@
 }
 
 .auth-hero-content,
-.hero-stats {
+.hero-stats,
+.hero-animation-panel {
   position: relative;
   z-index: 1;
 }
@@ -29,6 +30,7 @@
 .hero-logo,
 .hero-title,
 .hero-description,
+.hero-animation-panel,
 .stat-card,
 .login-stage {
   animation: auth-fade-up 520ms ease both;
@@ -40,6 +42,25 @@
 
 .hero-description {
   animation-delay: 140ms;
+}
+
+.hero-animation-panel {
+  align-self: center;
+  width: min(100%, 34rem);
+  margin-block-start: clamp(2.5rem, 7vh, 5rem);
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid rgb(var(--theme-surface-rgb) / 70%);
+  border-radius: 1.25rem;
+  background: rgb(var(--theme-surface-rgb) / 98%);
+  box-shadow: 0 24px 60px rgb(var(--theme-shadow-rgb) / 18%);
+}
+
+.hero-animation-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 450 / 253;
+  object-fit: contain;
 }
 
 .stat-card {
@@ -140,6 +161,7 @@
   .hero-logo,
   .hero-title,
   .hero-description,
+  .hero-animation-panel,
   .stat-card,
   .login-stage {
     animation: none;

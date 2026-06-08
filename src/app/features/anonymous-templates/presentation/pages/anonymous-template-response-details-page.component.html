@@ -200,10 +200,24 @@
                 >
                   {{ answerDisplayValue(node.answer) }}
                 </p>
-                @if (node.answer.voiceUrl) {
+                @if (imageUrl(node.answer)) {
                   <a
                     class="mt-2 inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100 transition hover:bg-cyan-50"
-                    [href]="node.answer.voiceUrl"
+                    [href]="imageUrl(node.answer)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {{ 'operatorTemplates.openImageFile' | t }}
+                  </a>
+                  <img
+                    class="mt-2 max-h-64 w-full rounded-lg object-contain ring-1 ring-slate-100"
+                    [src]="imageUrl(node.answer)"
+                    [alt]="answerDisplayValue(node.answer)"
+                  />
+                } @else if (voiceUrl(node.answer)) {
+                  <a
+                    class="mt-2 inline-flex rounded-lg bg-white px-2 py-1 text-[11px] font-extrabold text-[var(--theme-color-secondary)] ring-1 ring-cyan-100 transition hover:bg-cyan-50"
+                    [href]="voiceUrl(node.answer)"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

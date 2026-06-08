@@ -6,7 +6,8 @@ export type DepartmentResponseQuestionType =
   | 'StarRating'
   | 'Smiles'
   | 'Complain'
-  | 'Voice';
+  | 'Voice'
+  | 'Image';
 
 export interface DepartmentDashboardQuery {
   from?: string;
@@ -253,6 +254,8 @@ export interface DepartmentResponseAnswer {
   textAnswer: string | null;
   voiceFileName: string | null;
   voiceFileUrl: string | null;
+  imageFileName: string | null;
+  imageFileUrl: string | null;
   displayValue: string;
   children: readonly DepartmentResponseAnswer[];
 }

@@ -318,6 +318,8 @@ export interface AnonymousTemplateResponseAnswer {
   textAnswer: string | null;
   voiceFileName: string | null;
   voiceUrl: string | null;
+  imageFileName: string | null;
+  imageFileUrl: string | null;
   children: readonly AnonymousTemplateResponseAnswer[];
 }
 
@@ -614,6 +616,9 @@ export interface AnonymousTemplateResponseAnswerApiResponse {
   textAnswer?: string | null;
   voiceFileName?: string | null;
   voiceUrl?: string | null;
+  imageFileName?: string | null;
+  imageFileUrl?: string | null;
+  imageUrl?: string | null;
   children?: readonly AnonymousTemplateResponseAnswerApiResponse[];
   childAnswers?: readonly AnonymousTemplateResponseAnswerApiResponse[];
 }
