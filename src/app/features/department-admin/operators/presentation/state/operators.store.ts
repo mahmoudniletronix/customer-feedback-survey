@@ -54,6 +54,8 @@ export class OperatorsStore {
   private readonly activeTemplatesLoadingSignal = signal(false);
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
+  private readonly deactivatingSignal = signal(false);
+  private readonly restoringSignal = signal(false);
   private readonly resettingPasswordSignal = signal(false);
   private readonly templatesSelectionLoadingSignal = signal(false);
   private readonly templatesSelectionSavingSignal = signal(false);
@@ -77,6 +79,8 @@ export class OperatorsStore {
   readonly activeTemplatesLoading = this.activeTemplatesLoadingSignal.asReadonly();
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
+  readonly deactivating = this.deactivatingSignal.asReadonly();
+  readonly restoring = this.restoringSignal.asReadonly();
   readonly resettingPassword = this.resettingPasswordSignal.asReadonly();
   readonly templatesSelectionLoading = this.templatesSelectionLoadingSignal.asReadonly();
   readonly templatesSelectionSaving = this.templatesSelectionSavingSignal.asReadonly();
@@ -248,6 +252,62 @@ export class OperatorsStore {
       });
   }
 
+  deactivateOperator(operatorId: string, onDeactivated: () => void): void {
+    if (this.deactivatingSignal()) {
+      return;
+    }
+
+    this.deactivatingSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.operatorsService
+      .deactivate(operatorId)
+      .pipe(
+        take(1),
+        finalize(() => this.deactivatingSignal.set(false)),
+      )
+      .subscribe({
+        next: (stateChange) => {
+          this.successSignal.set('operators.deactivateSuccess');
+          this.markOperatorActive(stateChange.operatorId || operatorId, stateChange.isActive);
+          this.load();
+          onDeactivated();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'operators.deactivateError'));
+        },
+      });
+  }
+
+  restoreOperator(operatorId: string, onRestored: () => void): void {
+    if (this.restoringSignal()) {
+      return;
+    }
+
+    this.restoringSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.operatorsService
+      .restore(operatorId)
+      .pipe(
+        take(1),
+        finalize(() => this.restoringSignal.set(false)),
+      )
+      .subscribe({
+        next: (stateChange) => {
+          this.successSignal.set('operators.restoreSuccess');
+          this.markOperatorActive(stateChange.operatorId || operatorId, stateChange.isActive);
+          this.load();
+          onRestored();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'operators.restoreError'));
+        },
+      });
+  }
+
   loadTemplatesSelection(operatorId: string, searchText = ''): void {
     if (this.templatesSelectionLoadingSignal()) {
       return;
@@ -378,7 +438,9 @@ export class OperatorsStore {
       return 'operators.forbidden';
     }
     if (error.status === 404) {
-      return 'operators.departmentNotFound';
+      return fallbackKey === 'operators.deactivateError' || fallbackKey === 'operators.restoreError'
+        ? 'operators.notFound'
+        : 'operators.departmentNotFound';
     }
     if (error.status === 400 || error.status === 422) {
       return this.readProblemDetailsMessage(error.error) || 'operators.validationError';
@@ -479,7 +541,15 @@ export class OperatorsStore {
     return typeof value === 'object' && value !== null;
   }
 
-  private replaceOperator(operatorId: string, updatedOperator: UpdateOperatorPayload & { operatorId: string; applicationUserId: string; departmentId: string }): void {
+  private replaceOperator(
+    operatorId: string,
+    updatedOperator: UpdateOperatorPayload & {
+      operatorId: string;
+      applicationUserId: string;
+      departmentId: string;
+      isActive?: boolean;
+    },
+  ): void {
     this.operatorsSignal.update((operators) =>
       operators.map((operator) =>
         operator.operatorId === operatorId
@@ -492,8 +562,17 @@ export class OperatorsStore {
               nameAr: updatedOperator.nameAr,
               email: updatedOperator.email,
               phoneNumber: updatedOperator.phoneNumber,
+              isActive: updatedOperator.isActive ?? operator.isActive,
             }
           : operator,
+      ),
+    );
+  }
+
+  private markOperatorActive(operatorId: string, isActive: boolean): void {
+    this.operatorsSignal.update((operators) =>
+      operators.map((operator) =>
+        operator.operatorId === operatorId ? { ...operator, isActive } : operator,
       ),
     );
   }

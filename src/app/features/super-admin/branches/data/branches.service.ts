@@ -151,7 +151,8 @@ export class BranchesService {
       nameAr: response.nameAr ?? '',
       userName: response.userName ?? '',
       email: response.email ?? '',
-      phoneNumber: response.phoneNumber ?? ''
+      phoneNumber: response.phoneNumber ?? '',
+      isActive: response.isActive ?? true
     };
   }
 
@@ -179,7 +180,8 @@ export class BranchesService {
       nameAr: response.nameAr ?? '',
       userName: response.userName ?? '',
       email: response.email ?? '',
-      phoneNumber: response.phoneNumber ?? ''
+      phoneNumber: response.phoneNumber ?? '',
+      isActive: response.isActive ?? true
     };
   }
 

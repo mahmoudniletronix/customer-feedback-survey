@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } fr
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, take } from 'rxjs';
-import { ArrowLeft, KeyRound, Pencil, Save, Trash2, UserPlus, X } from 'lucide-angular';
+import { ArrowLeft, KeyRound, Pencil, RotateCcw, Save, Trash2, UserPlus, UserX, X } from 'lucide-angular';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
@@ -21,7 +21,11 @@ import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { BranchAdminsStore } from '../../../branch-admins/presentation/state/branch-admins.store';
 import { DepartmentAdminsStore } from '../../../../department-admin/department-admins/presentation/state/department-admins.store';
 import { DepartmentsStore } from '../../../departments/presentation/state/departments.store';
-import { BranchDetailsBranchAdmin, BranchDetailsDepartment } from '../../domain/branch.model';
+import {
+  BranchDetailsBranchAdmin,
+  BranchDetailsDepartment,
+  BranchDetailsDepartmentAdmin,
+} from '../../domain/branch.model';
 import { BranchesStore } from '../state/branches.store';
 
 interface ResetPasswordTarget {
@@ -62,8 +66,10 @@ export class BranchDetailsPageComponent implements OnInit {
 
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
+  readonly deactivateIcon = UserX;
   readonly editIcon = Pencil;
   readonly resetPasswordIcon = KeyRound;
+  readonly restoreIcon = RotateCcw;
   readonly saveIcon = Save;
   readonly deleteIcon = Trash2;
   readonly userPlusIcon = UserPlus;
@@ -187,6 +193,10 @@ export class BranchDetailsPageComponent implements OnInit {
   }
 
   openCreateDepartmentAdmin(department: BranchDetailsDepartment): void {
+    if (!department.isActive) {
+      return;
+    }
+
     this.departmentAdminsStore.clearMessages();
     this.selectedDepartment.set(department);
     this.departmentAdminForm.reset();
@@ -251,7 +261,7 @@ export class BranchDetailsPageComponent implements OnInit {
   deleteBranchAdmin(): void {
     const branch = this.branchesStore.selectedBranchDetails();
     const admin = this.selectedBranchAdmin();
-    if (!branch || !admin || this.branchAdminsStore.deleting()) {
+    if (!branch || !admin || !admin.isActive || this.branchAdminsStore.deleting()) {
       return;
     }
 
@@ -261,6 +271,42 @@ export class BranchDetailsPageComponent implements OnInit {
     }
 
     this.branchAdminsStore.deleteBranchAdmin(admin.branchAdminId, () => {
+      this.closeBranchAdminDetails();
+      this.branchesStore.loadDetails(branch.id);
+    });
+  }
+
+  deactivateBranchAdmin(admin: BranchDetailsBranchAdmin, event?: MouseEvent): void {
+    event?.stopPropagation();
+    const branch = this.branchesStore.selectedBranchDetails();
+    if (!branch || !this.canDeactivateBranchAdmin(admin) || this.branchAdminsStore.deactivating()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('branchAdmins.deactivateConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.branchAdminsStore.deactivateBranchAdmin(admin.branchAdminId, () => {
+      this.closeBranchAdminDetails();
+      this.branchesStore.loadDetails(branch.id);
+    });
+  }
+
+  restoreBranchAdmin(admin: BranchDetailsBranchAdmin, event?: MouseEvent): void {
+    event?.stopPropagation();
+    const branch = this.branchesStore.selectedBranchDetails();
+    if (!branch || !this.canRestoreBranchAdmin(admin) || this.branchAdminsStore.restoring()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('branchAdmins.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.branchAdminsStore.restoreBranchAdmin(admin.branchAdminId, () => {
       this.closeBranchAdminDetails();
       this.branchesStore.loadDetails(branch.id);
     });
@@ -300,7 +346,7 @@ export class BranchDetailsPageComponent implements OnInit {
   deleteDepartment(): void {
     const branch = this.branchesStore.selectedBranchDetails();
     const department = this.selectedDepartmentDetails();
-    if (!branch || !department || this.departmentsStore.deleting()) {
+    if (!branch || !department || !department.isActive || this.departmentsStore.deleting()) {
       return;
     }
 
@@ -310,6 +356,24 @@ export class BranchDetailsPageComponent implements OnInit {
     }
 
     this.departmentsStore.deleteDepartment(department.departmentId, () => {
+      this.closeDepartmentDetails();
+      this.branchesStore.loadDetails(branch.id);
+    });
+  }
+
+  restoreDepartment(): void {
+    const branch = this.branchesStore.selectedBranchDetails();
+    const department = this.selectedDepartmentDetails();
+    if (!branch || !department || !this.canRestoreDepartment(department) || this.departmentsStore.restoring()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departments.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.departmentsStore.restoreDepartment(department.departmentId, () => {
       this.closeDepartmentDetails();
       this.branchesStore.loadDetails(branch.id);
     });
@@ -387,6 +451,62 @@ export class BranchDetailsPageComponent implements OnInit {
 
   canResetPassword(role: Role, applicationUserId: string): boolean {
     return this.authStore.canResetUserPassword(role, applicationUserId);
+  }
+
+  canDeactivateBranchAdmin(admin: BranchDetailsBranchAdmin): boolean {
+    return admin.isActive && this.authStore.canDeactivateBranchAdmins();
+  }
+
+  canRestoreBranchAdmin(admin: BranchDetailsBranchAdmin): boolean {
+    return !admin.isActive && this.authStore.canRestoreBranchAdmins();
+  }
+
+  canDeactivateDepartmentAdmin(admin: BranchDetailsDepartmentAdmin): boolean {
+    return admin.isActive && this.authStore.canDeactivateDepartmentAdmins();
+  }
+
+  canRestoreDepartmentAdmin(admin: BranchDetailsDepartmentAdmin): boolean {
+    return !admin.isActive && this.authStore.canRestoreDepartmentAdmins();
+  }
+
+  canRestoreDepartment(department: BranchDetailsDepartment): boolean {
+    return !department.isActive && this.authStore.canRestoreDepartments();
+  }
+
+  deactivateDepartmentAdmin(admin: BranchDetailsDepartmentAdmin, event?: MouseEvent): void {
+    event?.stopPropagation();
+    const branch = this.branchesStore.selectedBranchDetails();
+    if (!branch || !this.canDeactivateDepartmentAdmin(admin) || this.departmentAdminsStore.deactivating()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departmentAdmins.deactivateConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.departmentAdminsStore.deactivateDepartmentAdmin(admin.departmentAdminId, () => {
+      this.closeDepartmentDetails();
+      this.branchesStore.loadDetails(branch.id);
+    });
+  }
+
+  restoreDepartmentAdmin(admin: BranchDetailsDepartmentAdmin, event?: MouseEvent): void {
+    event?.stopPropagation();
+    const branch = this.branchesStore.selectedBranchDetails();
+    if (!branch || !this.canRestoreDepartmentAdmin(admin) || this.departmentAdminsStore.restoring()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departmentAdmins.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.departmentAdminsStore.restoreDepartmentAdmin(admin.departmentAdminId, () => {
+      this.closeDepartmentDetails();
+      this.branchesStore.loadDetails(branch.id);
+    });
   }
 
   openResetPassword(

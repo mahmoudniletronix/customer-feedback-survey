@@ -18,7 +18,9 @@ interface ApiErrorItem {
 }
 
 interface ApiErrorResponse {
+  detail?: string;
   errors?: readonly ApiErrorItem[];
+  title?: string;
 }
 
 @Injectable()
@@ -44,6 +46,7 @@ export class DepartmentsStore {
   private readonly creatingSignal = signal(false);
   private readonly updatingSignal = signal(false);
   private readonly deletingSignal = signal(false);
+  private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
   private readonly lastCreatedSignal = signal<Department | null>(null);
@@ -62,6 +65,7 @@ export class DepartmentsStore {
   readonly creating = this.creatingSignal.asReadonly();
   readonly updating = this.updatingSignal.asReadonly();
   readonly deleting = this.deletingSignal.asReadonly();
+  readonly restoring = this.restoringSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
   readonly lastCreated = this.lastCreatedSignal.asReadonly();
@@ -250,6 +254,35 @@ export class DepartmentsStore {
       });
   }
 
+  restoreDepartment(departmentId: string, onRestored: () => void): void {
+    if (this.restoringSignal()) {
+      return;
+    }
+
+    this.restoringSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.departmentsService
+      .restore(departmentId)
+      .pipe(
+        take(1),
+        finalize(() => this.restoringSignal.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('departments.restoreSuccess');
+          this.markDepartmentActive(departmentId);
+          this.load();
+          this.loadSelection();
+          onRestored();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readMutationErrorKey(error, 'departments.restoreError'));
+        },
+      });
+  }
+
   clearDetails(): void {
     this.selectedDetailsSignal.set(null);
     this.detailsErrorSignal.set(null);
@@ -297,6 +330,19 @@ export class DepartmentsStore {
     const details = this.selectedDetailsSignal();
     if (details?.id === departmentId) {
       this.selectedDetailsSignal.set({ ...details, isActive: false });
+    }
+  }
+
+  private markDepartmentActive(departmentId: string): void {
+    this.departmentsSignal.update((departments) =>
+      departments.map((department) =>
+        department.id === departmentId ? { ...department, isActive: true } : department
+      )
+    );
+
+    const details = this.selectedDetailsSignal();
+    if (details?.id === departmentId) {
+      this.selectedDetailsSignal.set({ ...details, isActive: true });
     }
   }
 
@@ -350,6 +396,10 @@ export class DepartmentsStore {
       return 'departments.notFound';
     }
 
+    if (error.status === 400 || error.status === 422) {
+      return this.readProblemDetailsMessage(error.error) || fallbackKey;
+    }
+
     return fallbackKey;
   }
 
@@ -362,11 +412,20 @@ export class DepartmentsStore {
     return firstError?.code ?? firstError?.messageName ?? firstError?.message ?? '';
   }
 
+  private readProblemDetailsMessage(errorBody: unknown): string {
+    if (!this.isApiErrorResponse(errorBody)) {
+      return '';
+    }
+
+    const firstError = errorBody.errors?.[0];
+    return firstError?.message ?? errorBody.detail ?? errorBody.title ?? '';
+  }
+
   private readDepartmentId(id: string | number | undefined, fallbackId: string): string {
     return typeof id === 'string' || typeof id === 'number' ? String(id) : fallbackId;
   }
 
   private isApiErrorResponse(value: unknown): value is ApiErrorResponse {
-    return typeof value === 'object' && value !== null && 'errors' in value;
+    return typeof value === 'object' && value !== null;
   }
 }

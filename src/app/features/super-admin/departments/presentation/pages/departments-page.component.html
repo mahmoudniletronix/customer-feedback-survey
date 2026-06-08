@@ -105,10 +105,22 @@
                 <app-icon [icon]="editIcon" [size]="15" />
                 {{ 'common.edit' | t }}
               </app-button>
-              <app-button size="sm" variant="danger" (pressed)="deleteDepartment(department, $event)">
-                <app-icon [icon]="deleteIcon" [size]="15" />
-                {{ 'common.delete' | t }}
-              </app-button>
+              @if (department.isActive) {
+                <app-button size="sm" variant="danger" (pressed)="deleteDepartment(department, $event)">
+                  <app-icon [icon]="deleteIcon" [size]="15" />
+                  {{ 'common.delete' | t }}
+                </app-button>
+              } @else if (canRestoreDepartments()) {
+                <app-button
+                  size="sm"
+                  variant="secondary"
+                  [loading]="departmentsStore.restoring()"
+                  (pressed)="restoreDepartment(department, $event)"
+                >
+                  <app-icon [icon]="restoreIcon" [size]="15" />
+                  {{ 'common.restore' | t }}
+                </app-button>
+              }
             </div>
           </div>
         </div>
@@ -119,7 +131,7 @@
       }
     </div>
 
-    <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white md:block">
+    <div class="hidden overflow-hidden rounded-lg border border-slate-100 bg-white md:block mt-4">
       <div class="overflow-x-auto">
         <table class="min-w-[60rem] divide-y divide-slate-100 lg:min-w-full">
           <thead class="bg-slate-50 text-start text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -169,10 +181,22 @@
                       <app-icon [icon]="editIcon" [size]="15" />
                       {{ 'common.edit' | t }}
                     </app-button>
-                    <app-button size="sm" variant="danger" (pressed)="deleteDepartment(department, $event)">
-                      <app-icon [icon]="deleteIcon" [size]="15" />
-                      {{ 'common.delete' | t }}
-                    </app-button>
+                    @if (department.isActive) {
+                      <app-button size="sm" variant="danger" (pressed)="deleteDepartment(department, $event)">
+                        <app-icon [icon]="deleteIcon" [size]="15" />
+                        {{ 'common.delete' | t }}
+                      </app-button>
+                    } @else if (canRestoreDepartments()) {
+                      <app-button
+                        size="sm"
+                        variant="secondary"
+                        [loading]="departmentsStore.restoring()"
+                        (pressed)="restoreDepartment(department, $event)"
+                      >
+                        <app-icon [icon]="restoreIcon" [size]="15" />
+                        {{ 'common.restore' | t }}
+                      </app-button>
+                    }
                   </div>
                 </td>
               </tr>
@@ -265,10 +289,17 @@
 
     <div class="flex flex-col justify-between gap-2 sm:flex-row sm:flex-wrap">
       @if (selectedDepartment(); as department) {
-        <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment(department)">
-          <app-icon [icon]="deleteIcon" [size]="16" />
-          {{ 'common.delete' | t }}
-        </app-button>
+        @if (department.isActive) {
+          <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment(department)">
+            <app-icon [icon]="deleteIcon" [size]="16" />
+            {{ 'common.delete' | t }}
+          </app-button>
+        } @else if (canRestoreDepartments()) {
+          <app-button type="button" variant="secondary" [loading]="departmentsStore.restoring()" (pressed)="restoreDepartment(department)">
+            <app-icon [icon]="restoreIcon" [size]="16" />
+            {{ 'common.restore' | t }}
+          </app-button>
+        }
       }
       <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         <app-button type="button" variant="secondary" (pressed)="closeEdit()">

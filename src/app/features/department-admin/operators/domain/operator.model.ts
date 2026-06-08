@@ -14,6 +14,7 @@ export interface OperatorListItem {
   userName: string;
   email: string;
   phoneNumber: string;
+  isActive: boolean;
   createdBy: CreatedByUser | null;
   createdOnUtc: string;
 }
@@ -52,6 +53,14 @@ export interface UpdateOperatorResponse {
   nameAr: string;
   email: string;
   phoneNumber: string;
+  isActive: boolean;
+}
+
+export interface OperatorStateChangeResult {
+  operatorId: string;
+  applicationUserId: string;
+  departmentId: string;
+  isActive: boolean;
 }
 
 export interface OperatorsQuery {
@@ -138,6 +147,7 @@ export interface OperatorApiResponse {
   userName?: string;
   email?: string;
   phoneNumber?: string | null;
+  isActive?: boolean | null;
   createdBy?: CreatedByUserApiResponse | null;
   createdOnUtc?: string;
 }
@@ -159,6 +169,14 @@ export interface UpdateOperatorApiResponse {
   nameAr?: string | null;
   email?: string;
   phoneNumber?: string | null;
+  isActive?: boolean | null;
+}
+
+export interface OperatorStateChangeApiResponse {
+  operatorId?: string | number;
+  applicationUserId?: string | number;
+  departmentId?: string | number;
+  isActive?: boolean | null;
 }
 
 export interface OperatorsPageApiResponse {

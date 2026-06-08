@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } fr
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { finalize, take } from 'rxjs';
-import { ArrowLeft, KeyRound, Pencil, Save, Trash2, UserPlus, UsersRound, X } from 'lucide-angular';
+import { ArrowLeft, KeyRound, Pencil, RotateCcw, Save, Trash2, UserPlus, UsersRound, UserX, X } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { Role } from '../../../../../shared/models/role.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -19,6 +19,7 @@ import {
 import { UserPasswordResetService } from '../../../../auth/data/user-password-reset.service';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { DepartmentAdminsStore } from '../../../../department-admin/department-admins/presentation/state/department-admins.store';
+import { DepartmentDetailsUser } from '../../domain/department.model';
 import { DepartmentsStore } from '../state/departments.store';
 
 interface ResetPasswordTarget {
@@ -57,9 +58,11 @@ export class DepartmentDetailsPageComponent implements OnInit {
 
   readonly arrowLeftIcon = ArrowLeft;
   readonly cancelIcon = X;
+  readonly deactivateIcon = UserX;
   readonly deleteIcon = Trash2;
   readonly editIcon = Pencil;
   readonly resetPasswordIcon = KeyRound;
+  readonly restoreIcon = RotateCcw;
   readonly saveIcon = Save;
   readonly userPlusIcon = UserPlus;
   readonly usersIcon = UsersRound;
@@ -148,7 +151,7 @@ export class DepartmentDetailsPageComponent implements OnInit {
 
   deleteDepartment(): void {
     const department = this.departmentsStore.selectedDetails();
-    if (!department || this.departmentsStore.deleting()) {
+    if (!department || !department.isActive || this.departmentsStore.deleting()) {
       return;
     }
 
@@ -162,9 +165,30 @@ export class DepartmentDetailsPageComponent implements OnInit {
     });
   }
 
+  restoreDepartment(): void {
+    const department = this.departmentsStore.selectedDetails();
+    if (
+      !department ||
+      department.isActive ||
+      !this.authStore.canRestoreDepartments() ||
+      this.departmentsStore.restoring()
+    ) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departments.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.departmentsStore.restoreDepartment(department.id, () => {
+      this.departmentsStore.loadDetails(department.id, false);
+    });
+  }
+
   openCreateDepartmentAdmin(): void {
     const department = this.departmentsStore.selectedDetails();
-    if (!department) {
+    if (!department || !department.isActive) {
       return;
     }
 
@@ -195,6 +219,56 @@ export class DepartmentDetailsPageComponent implements OnInit {
 
   canResetPassword(role: Role, applicationUserId: string): boolean {
     return this.authStore.canResetUserPassword(role, applicationUserId);
+  }
+
+  canRestoreDepartment(department: { isActive: boolean }): boolean {
+    return !department.isActive && this.authStore.canRestoreDepartments();
+  }
+
+  canDeactivateDepartmentAdmin(admin: DepartmentDetailsUser): boolean {
+    return Boolean(admin.departmentAdminId) && admin.isActive && this.authStore.canDeactivateDepartmentAdmins();
+  }
+
+  canRestoreDepartmentAdmin(admin: DepartmentDetailsUser): boolean {
+    return Boolean(admin.departmentAdminId) && !admin.isActive && this.authStore.canRestoreDepartmentAdmins();
+  }
+
+  deactivateDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): void {
+    event?.stopPropagation();
+    if (!admin.departmentAdminId || !this.canDeactivateDepartmentAdmin(admin) || this.departmentAdminsStore.deactivating()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departmentAdmins.deactivateConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    const department = this.departmentsStore.selectedDetails();
+    this.departmentAdminsStore.deactivateDepartmentAdmin(admin.departmentAdminId, () => {
+      if (department) {
+        this.departmentsStore.loadDetails(department.id, false);
+      }
+    });
+  }
+
+  restoreDepartmentAdmin(admin: DepartmentDetailsUser, event?: MouseEvent): void {
+    event?.stopPropagation();
+    if (!admin.departmentAdminId || !this.canRestoreDepartmentAdmin(admin) || this.departmentAdminsStore.restoring()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departmentAdmins.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    const department = this.departmentsStore.selectedDetails();
+    this.departmentAdminsStore.restoreDepartmentAdmin(admin.departmentAdminId, () => {
+      if (department) {
+        this.departmentsStore.loadDetails(department.id, false);
+      }
+    });
   }
 
   openResetPassword(

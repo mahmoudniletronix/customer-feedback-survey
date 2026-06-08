@@ -20,6 +20,7 @@ import {
   DepartmentPageResult,
   DepartmentSelection,
   DepartmentSelectionApiResponse,
+  RestoreDepartmentApiResponse,
   UpdateDepartmentApiResponse,
   UpdateDepartmentPayload,
 } from '../domain/department.model';
@@ -66,6 +67,13 @@ export class DepartmentsService {
 
   delete(departmentId: string): Observable<DeleteDepartmentApiResponse> {
     return this.http.delete<DeleteDepartmentApiResponse>(`${this.departmentsUrl}/${departmentId}`);
+  }
+
+  restore(departmentId: string): Observable<RestoreDepartmentApiResponse> {
+    return this.http.put<RestoreDepartmentApiResponse>(
+      `${this.departmentsUrl}/${departmentId}/restore`,
+      null,
+    );
   }
 
   private toDepartmentPageResult(
@@ -147,6 +155,7 @@ export class DepartmentsService {
       userName: response.userName ?? '',
       email: response.email ?? '',
       phoneNumber: response.phoneNumber ?? '',
+      isActive: response.isActive ?? true,
     };
   }
 

@@ -358,6 +358,38 @@ export class AuthStore {
     return this.role() === 'SUPER_ADMIN' && this.hasPermission('BranchAreas.Restore');
   }
 
+  canDeactivateBranchAdmins(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('BranchAdmins.Deactivate');
+  }
+
+  canRestoreBranchAdmins(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('BranchAdmins.Restore');
+  }
+
+  canDeactivateDepartmentAdmins(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('DepartmentAdmins.Deactivate');
+  }
+
+  canRestoreDepartmentAdmins(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('DepartmentAdmins.Restore');
+  }
+
+  canRestoreDepartments(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('Departments.Restore');
+  }
+
+  canCreateSuperAdmins(): boolean {
+    return this.role() === 'SUPER_ADMIN' && this.hasPermission('SuperAdmins.Create');
+  }
+
+  canDeactivateOperators(): boolean {
+    return this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Operators.Deactivate');
+  }
+
+  canRestoreOperators(): boolean {
+    return this.role() === 'DEPARTMENT_ADMIN' && this.hasPermission('Operators.Restore');
+  }
+
   canAccessBranchUsers(): boolean {
     return (
       this.isBranchAdminUserType() ||

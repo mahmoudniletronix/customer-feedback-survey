@@ -43,6 +43,8 @@ export interface DeleteDepartmentApiResponse {
   isActive?: boolean;
 }
 
+export interface RestoreDepartmentApiResponse extends DeleteDepartmentApiResponse {}
+
 export interface DepartmentListQuery {
   pageNumber: number;
   pageSize: number;
@@ -87,6 +89,7 @@ export interface DepartmentDetailsUser {
   userName: string;
   email: string;
   phoneNumber: string;
+  isActive: boolean;
 }
 
 export interface DepartmentApiResponse {
@@ -133,4 +136,5 @@ export interface DepartmentDetailsUserApiResponse {
   userName?: string;
   email?: string;
   phoneNumber?: string | null;
+  isActive?: boolean | null;
 }

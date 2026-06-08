@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { finalize, take } from 'rxjs';
-import { ManagedUser } from '../../domain/user-management.model';
+import { CreateSuperAdminPayload, ManagedUser } from '../../domain/user-management.model';
 import { UsersService } from '../../data/users.service';
 import { UserPasswordResetService } from '../../../../auth/data/user-password-reset.service';
 import { ResetUserPasswordRequest } from '../../../../auth/domain/user-password-reset.model';
@@ -23,18 +23,22 @@ export class UsersStore {
   private readonly usersService = inject(UsersService);
   private readonly userPasswordResetService = inject(UserPasswordResetService);
   private readonly usersSignal = signal<readonly ManagedUser[]>([]);
+  private readonly creatingSuperAdminSignal = signal(false);
   private readonly resettingPasswordSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
 
   readonly users = this.usersSignal.asReadonly();
+  readonly creatingSuperAdmin = this.creatingSuperAdminSignal.asReadonly();
   readonly resettingPassword = this.resettingPasswordSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
 
-  load(): void {
+  load(clearSuccess = true): void {
     this.errorSignal.set(null);
-    this.successSignal.set(null);
+    if (clearSuccess) {
+      this.successSignal.set(null);
+    }
     this.usersService
       .list()
       .pipe(take(1))
@@ -77,6 +81,33 @@ export class UsersStore {
       });
   }
 
+  createSuperAdmin(payload: CreateSuperAdminPayload, onCreated: () => void): void {
+    if (this.creatingSuperAdminSignal()) {
+      return;
+    }
+
+    this.creatingSuperAdminSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.usersService
+      .createSuperAdmin(payload)
+      .pipe(
+        take(1),
+        finalize(() => this.creatingSuperAdminSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('users.createSuperAdminSuccess');
+          this.load(false);
+          onCreated();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'users.createSuperAdminError'));
+        },
+      });
+  }
+
   clearMessages(): void {
     this.errorSignal.set(null);
     this.successSignal.set(null);
@@ -97,7 +128,9 @@ export class UsersStore {
       return 'users.unauthorized';
     }
     if (error.status === 403) {
-      return 'users.resetPasswordForbidden';
+      return fallbackKey === 'users.createSuperAdminError'
+        ? 'users.createSuperAdminForbidden'
+        : 'users.resetPasswordForbidden';
     }
     if (error.status === 404) {
       return 'users.userNotFound';
@@ -113,6 +146,12 @@ export class UsersStore {
     const normalized = marker.replace(/[\s_-]/g, '').toLowerCase();
     if (normalized.includes('targetusernotfound')) {
       return 'users.userNotFound';
+    }
+    if (normalized.includes('username') && normalized.includes('already')) {
+      return 'users.userNameAlreadyExists';
+    }
+    if (normalized.includes('email') && normalized.includes('already')) {
+      return 'users.emailAlreadyExists';
     }
     if (normalized.includes('currentactorprofilenotfound')) {
       return 'users.currentActorProfileNotFound';
@@ -140,6 +179,9 @@ export class UsersStore {
     }
     if (normalized.includes('newpassword')) {
       return 'auth.changePasswordNewPasswordMinLength';
+    }
+    if (normalized.includes('password')) {
+      return 'users.passwordInvalid';
     }
 
     return '';

@@ -68,6 +68,7 @@ export interface BranchDetailsBranchAdmin {
   userName: string;
   email: string;
   phoneNumber: string;
+  isActive: boolean;
 }
 
 export interface BranchDetailsDepartment {
@@ -88,6 +89,7 @@ export interface BranchDetailsDepartmentAdmin {
   userName: string;
   email: string;
   phoneNumber: string;
+  isActive: boolean;
 }
 
 export interface BranchDetailsBranchUser {
@@ -207,6 +209,7 @@ export interface BranchDetailsBranchAdminApiResponse {
   userName?: string;
   email?: string;
   phoneNumber?: string | null;
+  isActive?: boolean | null;
 }
 
 export interface BranchDetailsDepartmentApiResponse {
@@ -227,6 +230,7 @@ export interface BranchDetailsDepartmentAdminApiResponse {
   userName?: string;
   email?: string;
   phoneNumber?: string | null;
+  isActive?: boolean | null;
 }
 
 export interface BranchDetailsBranchUserApiResponse {

@@ -1,6 +1,14 @@
 <app-card [title]="'users.adminManagement' | t" [subtitle]="'users.subtitle' | t">
-  <div card-actions class="flex w-11 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]">
-    <app-icon [icon]="usersIcon" [size]="20" />
+  <div card-actions class="flex flex-wrap items-center justify-end gap-2">
+    @if (canCreateSuperAdmin()) {
+      <app-button type="button" size="sm" (pressed)="openCreateSuperAdmin()">
+        <app-icon [icon]="createIcon" [size]="15" />
+        {{ 'users.createSuperAdmin' | t }}
+      </app-button>
+    }
+    <div class="flex h-9 w-11 items-center justify-center bg-cyan-50 text-[var(--theme-color-accent)]">
+      <app-icon [icon]="usersIcon" [size]="20" />
+    </div>
   </div>
 
   <div class="space-y-3">
@@ -30,3 +38,73 @@
   (closed)="closeResetPassword()"
   (confirmed)="resetPassword($event)"
 />
+
+<app-modal
+  [title]="'users.createSuperAdmin' | t"
+  [open]="createSuperAdminModalOpen()"
+  (closed)="closeCreateSuperAdmin()"
+  size="lg"
+>
+  <form class="space-y-3" [formGroup]="createSuperAdminForm" (ngSubmit)="createSuperAdmin()">
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'users.nameEn' | t"
+        [placeholder]="'users.nameEnPlaceholder' | t"
+        formControlName="nameEn"
+        [error]="createSuperAdminFieldError('nameEn') | t"
+      />
+      <app-input
+        [label]="'users.nameAr' | t"
+        [placeholder]="'users.nameArPlaceholder' | t"
+        formControlName="nameAr"
+        [error]="createSuperAdminFieldError('nameAr') | t"
+      />
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'branches.userName' | t"
+        [placeholder]="'users.userNamePlaceholder' | t"
+        formControlName="userName"
+        [error]="createSuperAdminFieldError('userName') | t"
+      />
+      <app-input
+        [label]="'common.email' | t"
+        type="email"
+        [placeholder]="'users.emailPlaceholder' | t"
+        formControlName="email"
+        [error]="createSuperAdminFieldError('email') | t"
+      />
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <app-input
+        [label]="'branches.phoneNumber' | t"
+        [placeholder]="'users.phoneNumberPlaceholder' | t"
+        formControlName="phoneNumber"
+        [error]="createSuperAdminFieldError('phoneNumber') | t"
+      />
+      <app-input
+        [label]="'common.password' | t"
+        type="password"
+        [placeholder]="'users.passwordPlaceholder' | t"
+        formControlName="password"
+        [error]="createSuperAdminFieldError('password') | t"
+      />
+    </div>
+
+    <div class="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+      <app-button type="button" variant="secondary" (pressed)="closeCreateSuperAdmin()">
+        {{ 'common.cancel' | t }}
+      </app-button>
+      <app-button
+        type="submit"
+        [disabled]="!canCreateSuperAdmin()"
+        [loading]="usersStore.creatingSuperAdmin()"
+      >
+        <app-icon [icon]="createIcon" [size]="17" />
+        {{ 'common.create' | t }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>

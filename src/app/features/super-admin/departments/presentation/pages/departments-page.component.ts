@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ChevronLeft, ChevronRight, CirclePlus, Eye, Network, Pencil, Search, Trash2 } from 'lucide-angular';
+import { ChevronLeft, ChevronRight, CirclePlus, Eye, Network, Pencil, RotateCcw, Search, Trash2 } from 'lucide-angular';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
@@ -10,6 +10,7 @@ import { CardComponent } from '../../../../../shared/ui/card/card.component';
 import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 import { InputComponent } from '../../../../../shared/ui/input/input.component';
 import { ModalComponent } from '../../../../../shared/ui/modal/modal.component';
+import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { Department } from '../../domain/department.model';
 import { DepartmentsStore } from '../state/departments.store';
 
@@ -32,6 +33,7 @@ import { DepartmentsStore } from '../state/departments.store';
 })
 export class DepartmentsPageComponent implements OnInit {
   readonly departmentsStore = inject(DepartmentsStore);
+  private readonly authStore = inject(AuthStore);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
@@ -48,6 +50,8 @@ export class DepartmentsPageComponent implements OnInit {
   readonly editIcon = Pencil;
   readonly searchIcon = Search;
   readonly deleteIcon = Trash2;
+  readonly restoreIcon = RotateCcw;
+  readonly canRestoreDepartments = computed(() => this.authStore.canRestoreDepartments());
 
   readonly searchForm = this.formBuilder.nonNullable.group({
     searchText: [''],
@@ -139,7 +143,7 @@ export class DepartmentsPageComponent implements OnInit {
 
   deleteDepartment(department: Department, event?: MouseEvent): void {
     event?.stopPropagation();
-    if (this.departmentsStore.deleting()) {
+    if (!department.isActive || this.departmentsStore.deleting()) {
       return;
     }
 
@@ -149,6 +153,22 @@ export class DepartmentsPageComponent implements OnInit {
     }
 
     this.departmentsStore.deleteDepartment(department.id, () => {
+      this.closeEdit();
+    });
+  }
+
+  restoreDepartment(department: Department, event?: MouseEvent): void {
+    event?.stopPropagation();
+    if (department.isActive || !this.canRestoreDepartments() || this.departmentsStore.restoring()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('departments.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.departmentsStore.restoreDepartment(department.id, () => {
       this.closeEdit();
     });
   }

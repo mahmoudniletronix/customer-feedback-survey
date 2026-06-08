@@ -9,11 +9,14 @@ import { DepartmentAdminsService } from '../../data/department-admins.service';
 
 interface ApiErrorItem {
   code?: string;
+  message?: string;
   messageName?: string;
 }
 
 interface ApiErrorResponse {
+  detail?: string;
   errors?: readonly ApiErrorItem[];
+  title?: string;
 }
 
 const ERROR_KEY_BY_CODE: Record<string, string> = {
@@ -42,11 +45,15 @@ const ERROR_KEY_BY_CODE: Record<string, string> = {
 export class DepartmentAdminsStore {
   private readonly departmentAdminsService = inject(DepartmentAdminsService);
   private readonly creatingSignal = signal(false);
+  private readonly deactivatingSignal = signal(false);
+  private readonly restoringSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly successSignal = signal<string | null>(null);
   private readonly lastCreatedSignal = signal<CreateDepartmentAdminResponse | null>(null);
 
   readonly creating = this.creatingSignal.asReadonly();
+  readonly deactivating = this.deactivatingSignal.asReadonly();
+  readonly restoring = this.restoringSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly success = this.successSignal.asReadonly();
   readonly lastCreated = this.lastCreatedSignal.asReadonly();
@@ -69,7 +76,59 @@ export class DepartmentAdminsStore {
           onCreated();
         },
         error: (error: unknown) => {
-          this.errorSignal.set(this.readErrorKey(error));
+          this.errorSignal.set(this.readErrorKey(error, 'departmentAdmins.createError'));
+        },
+      });
+  }
+
+  deactivateDepartmentAdmin(departmentAdminId: string, onDeactivated: () => void): void {
+    if (this.deactivatingSignal()) {
+      return;
+    }
+
+    this.deactivatingSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.departmentAdminsService
+      .deactivate(departmentAdminId)
+      .pipe(
+        take(1),
+        finalize(() => this.deactivatingSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('departmentAdmins.deactivateSuccess');
+          onDeactivated();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'departmentAdmins.deactivateError'));
+        },
+      });
+  }
+
+  restoreDepartmentAdmin(departmentAdminId: string, onRestored: () => void): void {
+    if (this.restoringSignal()) {
+      return;
+    }
+
+    this.restoringSignal.set(true);
+    this.errorSignal.set(null);
+    this.successSignal.set(null);
+
+    this.departmentAdminsService
+      .restore(departmentAdminId)
+      .pipe(
+        take(1),
+        finalize(() => this.restoringSignal.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.successSignal.set('departmentAdmins.restoreSuccess');
+          onRestored();
+        },
+        error: (error: unknown) => {
+          this.errorSignal.set(this.readErrorKey(error, 'departmentAdmins.restoreError'));
         },
       });
   }
@@ -79,9 +138,9 @@ export class DepartmentAdminsStore {
     this.successSignal.set(null);
   }
 
-  private readErrorKey(error: unknown): string {
+  private readErrorKey(error: unknown, fallbackKey: string): string {
     if (!(error instanceof HttpErrorResponse)) {
-      return 'departmentAdmins.createError';
+      return fallbackKey;
     }
 
     const code = this.readFirstErrorCode(error.error);
@@ -98,10 +157,16 @@ export class DepartmentAdminsStore {
     }
 
     if (error.status === 404) {
-      return 'departmentAdmins.departmentNotFound';
+      return fallbackKey === 'departmentAdmins.createError'
+        ? 'departmentAdmins.departmentNotFound'
+        : 'departmentAdmins.notFound';
     }
 
-    return 'departmentAdmins.createError';
+    if (error.status === 400 || error.status === 422) {
+      return this.readProblemDetailsMessage(error.error) || fallbackKey;
+    }
+
+    return fallbackKey;
   }
 
   private readFirstErrorCode(errorBody: unknown): string {
@@ -110,10 +175,19 @@ export class DepartmentAdminsStore {
     }
 
     const firstError = errorBody.errors?.[0];
-    return firstError?.code ?? firstError?.messageName ?? '';
+    return firstError?.code ?? firstError?.messageName ?? firstError?.message ?? '';
+  }
+
+  private readProblemDetailsMessage(errorBody: unknown): string {
+    if (!this.isApiErrorResponse(errorBody)) {
+      return '';
+    }
+
+    const firstError = errorBody.errors?.[0];
+    return firstError?.message ?? errorBody.detail ?? errorBody.title ?? '';
   }
 
   private isApiErrorResponse(value: unknown): value is ApiErrorResponse {
-    return typeof value === 'object' && value !== null && 'errors' in value;
+    return typeof value === 'object' && value !== null;
   }
 }

@@ -13,6 +13,8 @@ import {
   OperatorDepartmentSelection,
   OperatorDepartmentSelectionApiResponse,
   OperatorListItem,
+  OperatorStateChangeApiResponse,
+  OperatorStateChangeResult,
   OperatorTemplateQuestionSelectionApiResponse,
   OperatorTemplateQuestionSelectionItem,
   OperatorTemplatesSelection,
@@ -67,6 +69,20 @@ export class OperatorsService {
     return this.http
       .put<UpdateOperatorApiResponse>(`${this.operatorsUrl}/${operatorId}`, payload)
       .pipe(map((response) => this.toUpdateResponse(response, operatorId, payload)));
+  }
+
+  deactivate(operatorId: string): Observable<OperatorStateChangeResult> {
+    return this.http.put<OperatorStateChangeApiResponse>(
+      `${this.operatorsUrl}/${operatorId}/deactivate`,
+      null,
+    ).pipe(map((response) => this.toStateChange(response, operatorId, false)));
+  }
+
+  restore(operatorId: string): Observable<OperatorStateChangeResult> {
+    return this.http.put<OperatorStateChangeApiResponse>(
+      `${this.operatorsUrl}/${operatorId}/restore`,
+      null,
+    ).pipe(map((response) => this.toStateChange(response, operatorId, true)));
   }
 
   templatesSelection(
@@ -165,6 +181,7 @@ export class OperatorsService {
       userName: response.userName ?? '',
       email: response.email ?? '',
       phoneNumber: response.phoneNumber ?? '',
+      isActive: response.isActive ?? true,
       createdBy: toCreatedByUser(response.createdBy),
       createdOnUtc: response.createdOnUtc ?? '',
     };
@@ -197,6 +214,20 @@ export class OperatorsService {
       nameAr: response.nameAr ?? fallbackPayload.nameAr,
       email: response.email ?? fallbackPayload.email,
       phoneNumber: response.phoneNumber ?? fallbackPayload.phoneNumber,
+      isActive: response.isActive ?? true,
+    };
+  }
+
+  private toStateChange(
+    response: OperatorStateChangeApiResponse,
+    fallbackOperatorId: string,
+    fallbackIsActive: boolean,
+  ): OperatorStateChangeResult {
+    return {
+      operatorId: this.readRecordId(response.operatorId) || fallbackOperatorId,
+      applicationUserId: this.readRecordId(response.applicationUserId),
+      departmentId: this.readRecordId(response.departmentId),
+      isActive: response.isActive ?? fallbackIsActive,
     };
   }
 

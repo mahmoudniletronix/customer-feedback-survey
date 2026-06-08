@@ -16,3 +16,15 @@ export interface CreateDepartmentAdminResponse {
   userName: string;
   email: string;
 }
+
+export interface DepartmentAdminStateChangeResult {
+  departmentAdminId: string;
+  applicationUserId: string;
+  isActive: boolean;
+}
+
+export interface DepartmentAdminStateChangeApiResponse {
+  departmentAdminId?: string | number;
+  applicationUserId?: string | number;
+  isActive?: boolean | null;
+}

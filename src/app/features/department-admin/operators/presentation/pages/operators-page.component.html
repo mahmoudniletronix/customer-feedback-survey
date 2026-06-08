@@ -174,6 +174,15 @@
                         {{ operator.nameAr }}
                       </p>
                     }
+                    <span
+                      class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                      [class.bg-emerald-50]="operator.isActive"
+                      [class.text-emerald-700]="operator.isActive"
+                      [class.bg-slate-100]="!operator.isActive"
+                      [class.text-slate-500]="!operator.isActive"
+                    >
+                      {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
+                    </span>
                   </td>
                   <td class="text-slate-700">
                     <p class="break-words [overflow-wrap:anywhere]">{{ operator.userName }}</p>
@@ -203,15 +212,17 @@
                     {{ operator.createdOnUtc ? (operator.createdOnUtc | date: 'mediumDate') : '-' }}
                   </td>
                   <td class="px-3 py-2">
-                    <div class="flex justify-end gap-2">
-                      <app-button
-                        size="sm"
-                        type="button"
-                        variant="secondary"
-                        (pressed)="openOperatorTemplates(operator)"
-                      >
-                        <app-icon [icon]="templatesIcon" [size]="15" />
-                      </app-button>
+                    <div class="flex flex-wrap justify-end gap-2">
+                      @if (operator.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          (pressed)="openOperatorTemplates(operator)"
+                        >
+                          <app-icon [icon]="templatesIcon" [size]="15" />
+                        </app-button>
+                      }
                       @if (canResetPassword(operator)) {
                         <app-button
                           size="sm"
@@ -222,14 +233,41 @@
                           <app-icon [icon]="resetPasswordIcon" [size]="15" />
                         </app-button>
                       }
-                      <app-button
-                        size="sm"
-                        type="button"
-                        variant="secondary"
-                        (pressed)="openEditOperator(operator)"
-                      >
-                        <app-icon [icon]="editIcon" [size]="15" />
-                      </app-button>
+                      @if (operator.isActive) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          (pressed)="openEditOperator(operator)"
+                        >
+                          <app-icon [icon]="editIcon" [size]="15" />
+                        </app-button>
+                      }
+                      @if (canDeactivate(operator)) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="danger"
+                          [loading]="operatorsStore.deactivating()"
+                          (pressed)="deactivateOperator(operator)"
+                        >
+                          <app-icon [icon]="deactivateIcon" [size]="15" />
+                        </app-button>
+                      }
+                      @if (canRestore(operator)) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          [loading]="operatorsStore.restoring()"
+                          (pressed)="restoreOperator(operator)"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="15" />
+                        </app-button>
+                      }
+                      @if (!operator.isActive && !canRestore(operator)) {
+                        <span class="text-xs font-semibold text-slate-400">-</span>
+                      }
                     </div>
                   </td>
                 </tr>
@@ -281,6 +319,15 @@
                     {{ operator.nameAr }}
                   </p>
                 }
+                <span
+                  class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  [class.bg-emerald-50]="operator.isActive"
+                  [class.text-emerald-700]="operator.isActive"
+                  [class.bg-slate-100]="!operator.isActive"
+                  [class.text-slate-500]="!operator.isActive"
+                >
+                  {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
+                </span>
               </div>
             </div>
 
@@ -318,15 +365,17 @@
             </div>
 
             <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
-              <app-button
-                size="sm"
-                type="button"
-                variant="secondary"
-                (pressed)="openOperatorTemplates(operator)"
-              >
-                <app-icon [icon]="templatesIcon" [size]="15" />
-                {{ 'operators.manageTemplates' | t }}
-              </app-button>
+              @if (operator.isActive) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  (pressed)="openOperatorTemplates(operator)"
+                >
+                  <app-icon [icon]="templatesIcon" [size]="15" />
+                  {{ 'operators.manageTemplates' | t }}
+                </app-button>
+              }
               @if (canResetPassword(operator)) {
                 <app-button
                   size="sm"
@@ -338,15 +387,41 @@
                   {{ 'users.resetPassword' | t }}
                 </app-button>
               }
-              <app-button
-                size="sm"
-                type="button"
-                variant="secondary"
-                (pressed)="openEditOperator(operator)"
-              >
-                <app-icon [icon]="editIcon" [size]="15" />
-                {{ 'common.edit' | t }}
-              </app-button>
+              @if (operator.isActive) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  (pressed)="openEditOperator(operator)"
+                >
+                  <app-icon [icon]="editIcon" [size]="15" />
+                  {{ 'common.edit' | t }}
+                </app-button>
+              }
+              @if (canDeactivate(operator)) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="danger"
+                  [loading]="operatorsStore.deactivating()"
+                  (pressed)="deactivateOperator(operator)"
+                >
+                  <app-icon [icon]="deactivateIcon" [size]="15" />
+                  {{ 'operators.deactivateAction' | t }}
+                </app-button>
+              }
+              @if (canRestore(operator)) {
+                <app-button
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                  [loading]="operatorsStore.restoring()"
+                  (pressed)="restoreOperator(operator)"
+                >
+                  <app-icon [icon]="restoreIcon" [size]="15" />
+                  {{ 'common.restore' | t }}
+                </app-button>
+              }
             </div>
           </article>
         } @empty {

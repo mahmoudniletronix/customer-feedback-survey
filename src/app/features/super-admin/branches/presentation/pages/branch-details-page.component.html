@@ -175,8 +175,18 @@
                   @if (admin.phoneNumber) {
                     <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
                   }
+                  <span
+                    class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    [class.bg-emerald-50]="admin.isActive"
+                    [class.text-emerald-700]="admin.isActive"
+                    [class.bg-slate-100]="!admin.isActive"
+                    [class.text-slate-500]="!admin.isActive"
+                  >
+                    {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  </span>
                 </button>
-                @if (canResetPassword('BRANCH_ADMIN', admin.applicationUserId)) {
+                <div class="flex flex-wrap gap-2 sm:justify-end">
+                @if (admin.isActive && canResetPassword('BRANCH_ADMIN', admin.applicationUserId)) {
                   <app-button
                     type="button"
                     size="sm"
@@ -191,6 +201,31 @@
                     {{ 'users.resetPassword' | t }}
                   </app-button>
                 }
+                @if (canDeactivateBranchAdmin(admin)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    [loading]="branchAdminsStore.deactivating()"
+                    (pressed)="deactivateBranchAdmin(admin, $event)"
+                  >
+                    <app-icon [icon]="deactivateIcon" [size]="14" />
+                    {{ 'branchAdmins.deactivateAction' | t }}
+                  </app-button>
+                }
+                @if (canRestoreBranchAdmin(admin)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="branchAdminsStore.restoring()"
+                    (pressed)="restoreBranchAdmin(admin, $event)"
+                  >
+                    <app-icon [icon]="restoreIcon" [size]="14" />
+                    {{ 'common.restore' | t }}
+                  </app-button>
+                }
+                </div>
               </div>
             </div>
           } @empty {
@@ -215,20 +250,31 @@
                   <p class="font-bold text-slate-900">
                     {{ codedDisplayName(department) }}
                   </p>
+                  <span
+                    class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    [class.bg-emerald-50]="department.isActive"
+                    [class.text-emerald-700]="department.isActive"
+                    [class.bg-slate-100]="!department.isActive"
+                    [class.text-slate-500]="!department.isActive"
+                  >
+                    {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  </span>
                 </div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                   <p class="text-xs font-semibold text-slate-500">
                     {{ 'branches.operatorsCount' | t }}: {{ department.operatorsCount }}
                   </p>
-                  <app-button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    (pressed)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
-                  >
-                    <app-icon [icon]="userPlusIcon" [size]="15" />
-                    {{ 'departmentAdmins.createDepartmentAdmin' | t }}
-                  </app-button>
+                  @if (department.isActive) {
+                    <app-button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      (pressed)="$event.stopPropagation(); openCreateDepartmentAdmin(department)"
+                    >
+                      <app-icon [icon]="userPlusIcon" [size]="15" />
+                      {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+                    </app-button>
+                  }
                 </div>
               </div>
               @if (department.departmentAdmins.length > 0) {
@@ -236,7 +282,17 @@
                   @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
                     <div class="flex flex-col gap-2 rounded-lg bg-white p-2 sm:flex-row sm:items-center sm:justify-between">
                       <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
-                      @if (canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
+                      <div class="flex flex-wrap gap-2 sm:justify-end">
+                      <span
+                        class="inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        [class.bg-emerald-50]="admin.isActive"
+                        [class.text-emerald-700]="admin.isActive"
+                        [class.bg-slate-100]="!admin.isActive"
+                        [class.text-slate-500]="!admin.isActive"
+                      >
+                        {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+                      </span>
+                      @if (admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
                         <app-button
                           type="button"
                           size="sm"
@@ -251,6 +307,31 @@
                           {{ 'users.resetPassword' | t }}
                         </app-button>
                       }
+                      @if (canDeactivateDepartmentAdmin(admin)) {
+                        <app-button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          [loading]="departmentAdminsStore.deactivating()"
+                          (pressed)="deactivateDepartmentAdmin(admin, $event)"
+                        >
+                          <app-icon [icon]="deactivateIcon" [size]="14" />
+                          {{ 'departmentAdmins.deactivateAction' | t }}
+                        </app-button>
+                      }
+                      @if (canRestoreDepartmentAdmin(admin)) {
+                        <app-button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          [loading]="departmentAdminsStore.restoring()"
+                          (pressed)="restoreDepartmentAdmin(admin, $event)"
+                        >
+                          <app-icon [icon]="restoreIcon" [size]="14" />
+                          {{ 'common.restore' | t }}
+                        </app-button>
+                      }
+                      </div>
                     </div>
                   }
                 </div>
@@ -356,6 +437,15 @@
         @if (admin.phoneNumber) {
           <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
         }
+        <span
+          class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+          [class.bg-emerald-50]="admin.isActive"
+          [class.text-emerald-700]="admin.isActive"
+          [class.bg-slate-100]="!admin.isActive"
+          [class.text-slate-500]="!admin.isActive"
+        >
+          {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+        </span>
       </div>
 
       <div class="grid gap-3 md:grid-cols-2">
@@ -392,10 +482,17 @@
       </div>
 
       <div class="flex flex-col justify-between gap-2 pt-1 sm:flex-row sm:flex-wrap">
-        <app-button type="button" variant="danger" [loading]="branchAdminsStore.deleting()" (pressed)="deleteBranchAdmin()">
-          <app-icon [icon]="deleteIcon" [size]="16" />
-          {{ 'common.delete' | t }}
-        </app-button>
+        @if (canDeactivateBranchAdmin(admin)) {
+          <app-button type="button" variant="danger" [loading]="branchAdminsStore.deactivating()" (pressed)="deactivateBranchAdmin(admin)">
+            <app-icon [icon]="deactivateIcon" [size]="16" />
+            {{ 'branchAdmins.deactivateAction' | t }}
+          </app-button>
+        } @else if (canRestoreBranchAdmin(admin)) {
+          <app-button type="button" variant="secondary" [loading]="branchAdminsStore.restoring()" (pressed)="restoreBranchAdmin(admin)">
+            <app-icon [icon]="restoreIcon" [size]="16" />
+            {{ 'common.restore' | t }}
+          </app-button>
+        }
         <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           <app-button type="button" variant="secondary" (pressed)="closeBranchAdminDetails()">
             <app-icon [icon]="cancelIcon" [size]="16" />
@@ -425,6 +522,15 @@
         <p class="mt-2 text-xs font-semibold text-slate-500">
           {{ 'branches.operatorsCount' | t }}: {{ department.operatorsCount }}
         </p>
+        <span
+          class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+          [class.bg-emerald-50]="department.isActive"
+          [class.text-emerald-700]="department.isActive"
+          [class.bg-slate-100]="!department.isActive"
+          [class.text-slate-500]="!department.isActive"
+        >
+          {{ (department.isActive ? 'common.active' : 'branches.inactive') | t }}
+        </span>
       </div>
 
       <div class="grid gap-3 md:grid-cols-2">
@@ -446,7 +552,17 @@
           @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
             <div class="mt-2 flex flex-col gap-2 rounded-lg bg-slate-50 p-2 sm:flex-row sm:items-center sm:justify-between">
               <p class="text-xs text-slate-600">{{ localizedDisplayName(admin) }} - {{ admin.email }}</p>
-              @if (canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
+              <div class="flex flex-wrap gap-2 sm:justify-end">
+              <span
+                class="inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                [class.bg-emerald-50]="admin.isActive"
+                [class.text-emerald-700]="admin.isActive"
+                [class.bg-slate-100]="!admin.isActive"
+                [class.text-slate-500]="!admin.isActive"
+              >
+                {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+              </span>
+              @if (admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
                 <app-button
                   type="button"
                   size="sm"
@@ -461,16 +577,48 @@
                   {{ 'users.resetPassword' | t }}
                 </app-button>
               }
+              @if (canDeactivateDepartmentAdmin(admin)) {
+                <app-button
+                  type="button"
+                  size="sm"
+                  variant="danger"
+                  [loading]="departmentAdminsStore.deactivating()"
+                  (pressed)="deactivateDepartmentAdmin(admin, $event)"
+                >
+                  <app-icon [icon]="deactivateIcon" [size]="14" />
+                  {{ 'departmentAdmins.deactivateAction' | t }}
+                </app-button>
+              }
+              @if (canRestoreDepartmentAdmin(admin)) {
+                <app-button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  [loading]="departmentAdminsStore.restoring()"
+                  (pressed)="restoreDepartmentAdmin(admin, $event)"
+                >
+                  <app-icon [icon]="restoreIcon" [size]="14" />
+                  {{ 'common.restore' | t }}
+                </app-button>
+              }
+              </div>
             </div>
           }
         </div>
       }
 
       <div class="flex flex-col justify-between gap-2 pt-1 sm:flex-row sm:flex-wrap">
-        <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
-          <app-icon [icon]="deleteIcon" [size]="16" />
-          {{ 'common.delete' | t }}
-        </app-button>
+        @if (department.isActive) {
+          <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
+            <app-icon [icon]="deleteIcon" [size]="16" />
+            {{ 'common.delete' | t }}
+          </app-button>
+        } @else if (canRestoreDepartment(department)) {
+          <app-button type="button" variant="secondary" [loading]="departmentsStore.restoring()" (pressed)="restoreDepartment()">
+            <app-icon [icon]="restoreIcon" [size]="16" />
+            {{ 'common.restore' | t }}
+          </app-button>
+        }
         <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           <app-button type="button" variant="secondary" (pressed)="closeDepartmentDetails()">
             <app-icon [icon]="cancelIcon" [size]="16" />

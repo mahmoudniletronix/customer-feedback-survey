@@ -19,10 +19,17 @@
             {{ 'common.edit' | t }}
           </app-button>
         }
-        <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
-          <app-icon [icon]="deleteIcon" [size]="17" />
-          {{ 'common.delete' | t }}
-        </app-button>
+        @if (department.isActive) {
+          <app-button type="button" variant="danger" [loading]="departmentsStore.deleting()" (pressed)="deleteDepartment()">
+            <app-icon [icon]="deleteIcon" [size]="17" />
+            {{ 'common.delete' | t }}
+          </app-button>
+        } @else if (canRestoreDepartment(department)) {
+          <app-button type="button" variant="secondary" [loading]="departmentsStore.restoring()" (pressed)="restoreDepartment()">
+            <app-icon [icon]="restoreIcon" [size]="17" />
+            {{ 'common.restore' | t }}
+          </app-button>
+        }
       </div>
     }
   </div>
@@ -126,10 +133,12 @@
     <div class="grid gap-3 xl:grid-cols-2">
       <app-card [title]="'departments.departmentAdmins' | t">
         <div card-actions>
-          <app-button type="button" size="sm" variant="secondary" (pressed)="openCreateDepartmentAdmin()">
-            <app-icon [icon]="userPlusIcon" [size]="15" />
-            {{ 'departmentAdmins.createDepartmentAdmin' | t }}
-          </app-button>
+          @if (department.isActive) {
+            <app-button type="button" size="sm" variant="secondary" (pressed)="openCreateDepartmentAdmin()">
+              <app-icon [icon]="userPlusIcon" [size]="15" />
+              {{ 'departmentAdmins.createDepartmentAdmin' | t }}
+            </app-button>
+          }
         </div>
         <div class="space-y-2">
           @for (admin of department.departmentAdmins; track admin.departmentAdminId) {
@@ -141,8 +150,18 @@
                   @if (admin.phoneNumber) {
                     <p class="mt-1 text-xs text-slate-500">{{ admin.phoneNumber }}</p>
                   }
+                  <span
+                    class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    [class.bg-emerald-50]="admin.isActive"
+                    [class.text-emerald-700]="admin.isActive"
+                    [class.bg-slate-100]="!admin.isActive"
+                    [class.text-slate-500]="!admin.isActive"
+                  >
+                    {{ (admin.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  </span>
                 </div>
-                @if (canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
+                <div class="flex flex-wrap gap-2 sm:justify-end">
+                @if (admin.isActive && canResetPassword('DEPARTMENT_ADMIN', admin.applicationUserId)) {
                   <app-button
                     type="button"
                     size="sm"
@@ -157,6 +176,31 @@
                     {{ 'users.resetPassword' | t }}
                   </app-button>
                 }
+                @if (canDeactivateDepartmentAdmin(admin)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="danger"
+                    [loading]="departmentAdminsStore.deactivating()"
+                    (pressed)="deactivateDepartmentAdmin(admin, $event)"
+                  >
+                    <app-icon [icon]="deactivateIcon" [size]="14" />
+                    {{ 'departmentAdmins.deactivateAction' | t }}
+                  </app-button>
+                }
+                @if (canRestoreDepartmentAdmin(admin)) {
+                  <app-button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    [loading]="departmentAdminsStore.restoring()"
+                    (pressed)="restoreDepartmentAdmin(admin, $event)"
+                  >
+                    <app-icon [icon]="restoreIcon" [size]="14" />
+                    {{ 'common.restore' | t }}
+                  </app-button>
+                }
+                </div>
               </div>
             </div>
           } @empty {
@@ -176,8 +220,17 @@
                   @if (operator.phoneNumber) {
                     <p class="mt-1 text-xs text-slate-500">{{ operator.phoneNumber }}</p>
                   }
+                  <span
+                    class="mt-2 inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    [class.bg-emerald-50]="operator.isActive"
+                    [class.text-emerald-700]="operator.isActive"
+                    [class.bg-slate-100]="!operator.isActive"
+                    [class.text-slate-500]="!operator.isActive"
+                  >
+                    {{ (operator.isActive ? 'common.active' : 'branches.inactive') | t }}
+                  </span>
                 </div>
-                @if (canResetPassword('OPERATOR', operator.applicationUserId)) {
+                @if (operator.isActive && canResetPassword('OPERATOR', operator.applicationUserId)) {
                   <app-button
                     type="button"
                     size="sm"

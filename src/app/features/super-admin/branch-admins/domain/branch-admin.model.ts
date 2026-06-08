@@ -6,3 +6,15 @@ export interface UpdateBranchAdminPayload {
   phoneNumber: string;
 }
 
+export interface BranchAdminStateChangeResult {
+  branchAdminId: string;
+  applicationUserId: string;
+  isActive: boolean;
+}
+
+export interface BranchAdminStateChangeApiResponse {
+  branchAdminId?: string | number;
+  applicationUserId?: string | number;
+  isActive?: boolean | null;
+}
+

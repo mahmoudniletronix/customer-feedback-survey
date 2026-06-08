@@ -23,6 +23,7 @@ import {
   AnswerScaleValue,
   QuestionAnswerOption,
 } from '../../../../../shared/models/question-answer.model';
+import { DEFAULT_SINGLE_CHOICE_OPTIONS } from '../../../../../shared/models/default-question-options.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../../shared/ui/card/card.component';
@@ -445,10 +446,9 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
       textEn: ['', [Validators.required, Validators.maxLength(1000)]],
       textAr: ['', [Validators.maxLength(1000)]],
       type: [String(GLOBAL_QUESTION_TYPE.SingleChoice), [Validators.required]],
-      options: this.formBuilder.array<FormGroup<GlobalQuestionOptionFormControls>>([
-        this.createOptionForm(1, 'Excellent', '', 5),
-        this.createOptionForm(2, 'Good', '', 4),
-      ]),
+      options: this.formBuilder.array<FormGroup<GlobalQuestionOptionFormControls>>(
+        this.createDefaultOptionForms(),
+      ),
     });
   }
 
@@ -491,9 +491,7 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
       textAr: '',
       type: String(GLOBAL_QUESTION_TYPE.SingleChoice),
     });
-    this.options.clear();
-    this.options.push(this.createOptionForm(1, 'Excellent', '', 5));
-    this.options.push(this.createOptionForm(2, 'Good', '', 4));
+    this.setDefaultOptions();
     this.answerType.set(GLOBAL_QUESTION_TYPE.SingleChoice);
     this.syncOptionsState(GLOBAL_QUESTION_TYPE.SingleChoice);
     this.optionsError.set('');
@@ -515,21 +513,34 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
     }
 
     if (this.options.length === 0) {
-      this.options.push(this.createOptionForm(1, 'Excellent', '', 5));
-      this.options.push(this.createOptionForm(2, 'Good', '', 4));
+      this.setDefaultOptions();
     }
   }
 
   private syncOptionsState(answerType: GlobalQuestionType): void {
     if (answerType === GLOBAL_QUESTION_TYPE.SingleChoice) {
       if (this.options.length === 0) {
-        this.options.push(this.createOptionForm(1, 'Excellent', '', 5));
+        this.setDefaultOptions();
       }
       this.options.enable();
       return;
     }
 
     this.options.disable();
+  }
+
+  private createDefaultOptionForms(): FormGroup<GlobalQuestionOptionFormControls>[] {
+    return DEFAULT_SINGLE_CHOICE_OPTIONS.map((option) =>
+      this.createOptionForm(option.order, option.textEn, option.textAr, option.value),
+    );
+  }
+
+  private setDefaultOptions(): void {
+    this.options.clear();
+
+    for (const option of this.createDefaultOptionForms()) {
+      this.options.push(option);
+    }
   }
 
   private openEditQuestionForm(question: GlobalQuestionListItem): void {
@@ -681,8 +692,9 @@ export class GlobalQuestionCreatePageComponent implements OnInit {
   }
 
   private toDefaultOptionValue(order: number): AnswerScaleValue {
-    if (order === 1 || order === 2 || order === 3 || order === 4 || order === 5) {
-      return order;
+    const defaultOption = DEFAULT_SINGLE_CHOICE_OPTIONS.find((option) => option.order === order);
+    if (defaultOption) {
+      return defaultOption.value;
     }
 
     return 5;

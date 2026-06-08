@@ -1,7 +1,20 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ChevronDown, ChevronLeft, ChevronRight, FileText, KeyRound, Pencil, Plus, Search, SlidersHorizontal, UserCog } from 'lucide-angular';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  KeyRound,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
+  UserCog,
+  UserX,
+} from 'lucide-angular';
 import { AuthStore } from '../../../../auth/presentation/state/auth.store';
 import { I18nService } from '../../../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
@@ -53,6 +66,8 @@ export class OperatorsPageComponent implements OnInit {
   readonly chevronDownIcon = ChevronDown;
   readonly chevronRightIcon = ChevronRight;
   readonly editIcon = Pencil;
+  readonly deactivateIcon = UserX;
+  readonly restoreIcon = RotateCcw;
   readonly resetPasswordIcon = KeyRound;
   readonly templatesIcon = FileText;
   readonly plusIcon = Plus;
@@ -79,6 +94,8 @@ export class OperatorsPageComponent implements OnInit {
   readonly canResetOperatorPassword = computed(() =>
     this.authStore.canResetUserPassword('OPERATOR'),
   );
+  readonly canDeactivateOperator = computed(() => this.authStore.canDeactivateOperators());
+  readonly canRestoreOperator = computed(() => this.authStore.canRestoreOperators());
   readonly selectedResetPasswordOperatorLabel = computed(() => {
     const operator = this.selectedResetPasswordOperator();
     return operator ? `${operator.nameEn} - ${operator.userName}` : '';
@@ -224,6 +241,10 @@ export class OperatorsPageComponent implements OnInit {
   }
 
   openEditOperator(operator: OperatorListItem): void {
+    if (!operator.isActive) {
+      return;
+    }
+
     this.operatorsStore.clearMessages();
     this.selectedOperator.set(operator);
     this.editOperatorForm.setValue({
@@ -264,6 +285,10 @@ export class OperatorsPageComponent implements OnInit {
   }
 
   openOperatorTemplates(operator: OperatorListItem): void {
+    if (!operator.isActive) {
+      return;
+    }
+
     this.operatorsStore.clearMessages();
     this.selectedTemplatesOperator.set(operator);
     this.templatesSearchText.set('');
@@ -291,6 +316,32 @@ export class OperatorsPageComponent implements OnInit {
     this.operatorsStore.clearMessages();
     this.selectedResetPasswordOperator.set(operator);
     this.resetPasswordModalOpen.set(true);
+  }
+
+  deactivateOperator(operator: OperatorListItem): void {
+    if (!operator.isActive || !this.canDeactivateOperator() || this.operatorsStore.deactivating()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('operators.deactivateConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.operatorsStore.deactivateOperator(operator.operatorId, () => undefined);
+  }
+
+  restoreOperator(operator: OperatorListItem): void {
+    if (operator.isActive || !this.canRestoreOperator() || this.operatorsStore.restoring()) {
+      return;
+    }
+
+    const confirmed = globalThis.confirm(this.i18n.translate('operators.restoreConfirm'));
+    if (!confirmed) {
+      return;
+    }
+
+    this.operatorsStore.restoreOperator(operator.operatorId, () => undefined);
   }
 
   closeResetPassword(): void {
@@ -413,7 +464,15 @@ export class OperatorsPageComponent implements OnInit {
   }
 
   canResetPassword(operator: OperatorListItem): boolean {
-    return this.authStore.canResetUserPassword('OPERATOR', operator.applicationUserId);
+    return operator.isActive && this.authStore.canResetUserPassword('OPERATOR', operator.applicationUserId);
+  }
+
+  canDeactivate(operator: OperatorListItem): boolean {
+    return operator.isActive && this.canDeactivateOperator();
+  }
+
+  canRestore(operator: OperatorListItem): boolean {
+    return !operator.isActive && this.canRestoreOperator();
   }
 
   operatorFieldError(field: keyof typeof this.operatorForm.controls): string {

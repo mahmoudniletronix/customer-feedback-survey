@@ -43,6 +43,10 @@ import {
   questionAnswerTypeLabelKey,
   toQuestionAnswerType,
 } from '../../../../../shared/models/question-answer.model';
+import {
+  DEFAULT_SINGLE_CHOICE_OPTIONS,
+  DefaultQuestionAnswerOption,
+} from '../../../../../shared/models/default-question-options.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { BackButtonComponent } from '../../../../../shared/ui/back-button/back-button.component';
 import { ButtonComponent } from '../../../../../shared/ui/button/button.component';
@@ -617,27 +621,29 @@ export class QuestionsPageComponent implements OnInit {
       textEn: ['', [Validators.required, Validators.maxLength(500)]],
       textAr: ['', [Validators.maxLength(500)]],
       type: [String(QUESTION_ANSWER_TYPE.SingleChoice), [Validators.required]],
-      options: this.formBuilder.array<FormGroup<QuestionOptionFormControls>>([
-        this.createOptionForm(1),
-        this.createOptionForm(2),
-      ]),
+      options: this.formBuilder.array<FormGroup<QuestionOptionFormControls>>(
+        this.createDefaultOptionForms(),
+      ),
     });
   }
 
   private createOptionForm(
     order: number,
     option?: QuestionAnswerOption,
+    defaultTextEn = '',
+    defaultTextAr = '',
+    defaultValue: AnswerScaleValue = this.toDefaultOptionValue(order),
   ): FormGroup<QuestionOptionFormControls> {
     return this.formBuilder.nonNullable.group({
       optionId: [option?.optionId ?? ''],
-      textEn: [option?.textEn ?? '', [Validators.required]],
-      textAr: [option?.textAr ?? ''],
+      textEn: [option?.textEn ?? defaultTextEn, [Validators.required]],
+      textAr: [option?.textAr ?? defaultTextAr],
       order: [
         String(option?.order || order),
         [Validators.required, Validators.pattern(/^[1-9]\d*$/)],
       ],
       value: [
-        String(option?.value ?? this.toDefaultOptionValue(order)),
+        String(option?.value ?? defaultValue),
         [Validators.required, Validators.pattern(/^[1-5]$/)],
       ],
     });
@@ -683,6 +689,11 @@ export class QuestionsPageComponent implements OnInit {
   ): void {
     optionsControl.clear();
 
+    if (options.length === 0) {
+      this.setDefaultOptions(optionsControl);
+      return;
+    }
+
     for (const option of options) {
       optionsControl.push(this.createOptionForm(option.order, option));
     }
@@ -704,8 +715,37 @@ export class QuestionsPageComponent implements OnInit {
   }
 
   private ensureMinimumOptions(optionsControl: QuestionOptionsFormArray): void {
+    if (optionsControl.length === 0) {
+      this.setDefaultOptions(optionsControl);
+      return;
+    }
+
     while (optionsControl.length < 2) {
       optionsControl.push(this.createOptionForm(optionsControl.length + 1));
+    }
+  }
+
+  private createDefaultOptionForms(): FormGroup<QuestionOptionFormControls>[] {
+    return DEFAULT_SINGLE_CHOICE_OPTIONS.map((option) => this.createDefaultOptionForm(option));
+  }
+
+  private createDefaultOptionForm(
+    option: DefaultQuestionAnswerOption,
+  ): FormGroup<QuestionOptionFormControls> {
+    return this.createOptionForm(
+      option.order,
+      undefined,
+      option.textEn,
+      option.textAr,
+      option.value,
+    );
+  }
+
+  private setDefaultOptions(optionsControl: QuestionOptionsFormArray): void {
+    optionsControl.clear();
+
+    for (const option of this.createDefaultOptionForms()) {
+      optionsControl.push(option);
     }
   }
 
@@ -871,8 +911,9 @@ export class QuestionsPageComponent implements OnInit {
   }
 
   private toDefaultOptionValue(order: number): AnswerScaleValue {
-    if (order === 1 || order === 2 || order === 3 || order === 4 || order === 5) {
-      return order;
+    const defaultOption = DEFAULT_SINGLE_CHOICE_OPTIONS.find((option) => option.order === order);
+    if (defaultOption) {
+      return defaultOption.value;
     }
 
     return 5;
