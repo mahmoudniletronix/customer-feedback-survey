@@ -71,7 +71,11 @@ export class QuestionAnswerPreviewComponent {
     return englishText || arabicText;
   }
 
-  private secondaryLocalizedText(englishText: string, arabicText: string, isArabic: boolean): string {
+  private secondaryLocalizedText(
+    englishText: string,
+    arabicText: string,
+    isArabic: boolean,
+  ): string {
     if (isArabic) {
       return englishText;
     }
