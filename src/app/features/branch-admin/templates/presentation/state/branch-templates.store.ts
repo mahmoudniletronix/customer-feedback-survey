@@ -341,7 +341,7 @@ export class BranchTemplatesStore {
         next: (result) => {
           const selection = this.mergeUpdatedQuestionsSelection(
             templateId,
-            payload.questions,
+            payload.questionIds,
             result,
           );
           this.questionsSelectionSignal.set(selection);
@@ -393,7 +393,7 @@ export class BranchTemplatesStore {
           map((result) => {
             const selection = this.mergeUpdatedQuestionsSelection(
               templateId,
-              questionsPayload.questions,
+              questionsPayload.questionIds,
               result,
               [],
             );
@@ -548,7 +548,7 @@ export class BranchTemplatesStore {
 
   private mergeUpdatedQuestionsSelection(
     templateId: string,
-    requestedQuestions: UpdateBranchTemplateQuestionsPayload['questions'],
+    requestedQuestionIds: UpdateBranchTemplateQuestionsPayload['questionIds'],
     result: UpdateBranchTemplateQuestionsResult,
     questionConditions = this.questionsSelectionSignal()?.questionConditions ?? [],
   ): BranchTemplateQuestionSelection {
@@ -559,7 +559,7 @@ export class BranchTemplatesStore {
         .map((question) => [question.questionId, question]),
     );
     const requestedOrderByQuestionId = new Map(
-      requestedQuestions.map((question) => [question.questionId, question.order]),
+      requestedQuestionIds.map((questionId, index) => [questionId, index + 1]),
     );
     const baseSelection: BranchTemplateQuestionSelection = currentSelection ?? {
       templateId: result.templateId || templateId,

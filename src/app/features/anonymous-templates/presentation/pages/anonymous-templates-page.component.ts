@@ -1,4 +1,5 @@
 import { DOCUMENT, DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import {
   AbstractControl,
@@ -18,6 +19,7 @@ import {
   Download,
   Edit,
   Eye,
+  FilePlus2,
   FileText,
   Globe2,
   Link,
@@ -30,9 +32,12 @@ import {
   Trash2,
 } from 'lucide-angular';
 import { Router } from '@angular/router';
+import { finalize, take } from 'rxjs';
 import { AuthStore } from '../../../auth/presentation/state/auth.store';
 import { BranchesService } from '../../../super-admin/branches/data/branches.service';
 import { BranchSelection } from '../../../super-admin/branches/domain/branch.model';
+import { SuperAdminTemplatesService } from '../../../super-admin/templates/data/super-admin-templates.service';
+import { SuperAdminTemplateCopyResult } from '../../../super-admin/templates/domain/super-admin-template.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
@@ -79,6 +84,19 @@ interface CustomInputFormControls {
 
 type CustomInputFormGroup = FormGroup<CustomInputFormControls>;
 
+interface CopyApiErrorItem {
+  code?: string;
+  message?: string;
+  messageName?: string;
+}
+
+interface CopyApiErrorResponse {
+  errors?: readonly CopyApiErrorItem[];
+  title?: string;
+  detail?: string;
+  message?: string;
+}
+
 @Component({
   selector: 'app-anonymous-templates-page',
   standalone: true,
@@ -100,6 +118,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly anonymousTemplatesStore = inject(AnonymousTemplatesStore);
   private readonly authStore = inject(AuthStore);
   private readonly branchesService = inject(BranchesService);
+  private readonly superAdminTemplatesService = inject(SuperAdminTemplatesService);
   private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
   private readonly i18n = inject(I18nService);
@@ -113,6 +132,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly downloadIcon = Download;
   readonly editIcon = Edit;
   readonly detailsIcon = Eye;
+  readonly filePlusIcon = FilePlus2;
   readonly fileTextIcon = FileText;
   readonly globeIcon = Globe2;
   readonly linkIcon = Link;
@@ -130,6 +150,12 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly copiedTemplateId = signal<string | null>(null);
   readonly branchOptions = signal<readonly BranchSelection[]>([]);
   readonly branchOptionsLoading = signal(false);
+  readonly copyModalOpen = signal(false);
+  readonly copyError = signal<string | null>(null);
+  readonly copySuccess = signal<string | null>(null);
+  readonly copyResult = signal<SuperAdminTemplateCopyResult | null>(null);
+  readonly copyingTemplate = signal(false);
+  readonly templatePendingCopy = signal<AnonymousTemplateListItem | null>(null);
   readonly createModalOpen = signal(false);
   readonly deleteModalOpen = signal(false);
   readonly restoreModalOpen = signal(false);
@@ -146,6 +172,7 @@ export class AnonymousTemplatesPageComponent implements OnInit {
   readonly canViewResponses = computed(() =>
     this.authStore.canManageAnonymousTemplates('ViewResponses'),
   );
+  readonly canCopyToBranch = computed(() => this.authStore.role() === 'SUPER_ADMIN');
   readonly canViewDashboard = computed(
     () =>
       this.authStore.isBranchScopedActor() &&
@@ -176,6 +203,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     isActive: [''],
     pageSize: ['10'],
     orderSort: [''],
+  });
+
+  readonly copyForm = this.formBuilder.nonNullable.group({
+    branchId: ['', [Validators.required]],
   });
 
   readonly templateForm = this.formBuilder.nonNullable.group({
@@ -321,6 +352,66 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     ]);
   }
 
+  openCopyTemplateToBranch(template: AnonymousTemplateListItem): void {
+    if (!this.canCopyTemplateToBranch(template)) {
+      return;
+    }
+
+    this.templatePendingCopy.set(template);
+    this.copyForm.reset({ branchId: '' });
+    this.copyError.set(null);
+    this.copySuccess.set(null);
+    this.copyResult.set(null);
+    this.copyModalOpen.set(true);
+  }
+
+  closeCopyTemplateToBranch(): void {
+    if (this.copyingTemplate()) {
+      return;
+    }
+
+    this.templatePendingCopy.set(null);
+    this.copyForm.reset({ branchId: '' });
+    this.copyModalOpen.set(false);
+    this.copyError.set(null);
+    this.copySuccess.set(null);
+    this.copyResult.set(null);
+  }
+
+  copySelectedTemplateToBranch(): void {
+    this.copyForm.markAllAsTouched();
+    const template = this.templatePendingCopy();
+
+    if (!template || this.copyForm.invalid || this.copyingTemplate()) {
+      return;
+    }
+
+    this.copyingTemplate.set(true);
+    this.copyError.set(null);
+    this.copySuccess.set(null);
+    this.copyResult.set(null);
+
+    this.superAdminTemplatesService
+      .copyToBranch({
+        templateId: template.anonymousTemplateId,
+        branchId: this.copyForm.controls.branchId.value,
+      })
+      .pipe(
+        take(1),
+        finalize(() => this.copyingTemplate.set(false)),
+      )
+      .subscribe({
+        next: (result) => {
+          this.copyResult.set(result);
+          this.copySuccess.set('superAdminTemplates.copySuccess');
+          this.anonymousTemplatesStore.load();
+        },
+        error: (error: unknown) => {
+          this.copyError.set(this.readCopyErrorMessage(error));
+        },
+      });
+  }
+
   openDeleteTemplate(template: AnonymousTemplateListItem): void {
     if (!this.canDeleteTemplate(template)) {
       return;
@@ -395,6 +486,10 @@ export class AnonymousTemplatesPageComponent implements OnInit {
 
   canUpdateTemplate(template: AnonymousTemplateListItem): boolean {
     return this.canUpdate() && template.isActive && this.canUseTemplateAction(template);
+  }
+
+  canCopyTemplateToBranch(template: AnonymousTemplateListItem): boolean {
+    return this.canCopyToBranch() && template.anonymousTemplateId.length > 0;
   }
 
   resetForm(): void {
@@ -565,6 +660,18 @@ export class AnonymousTemplatesPageComponent implements OnInit {
     return this.localizedText(template.branchNameEn, template.branchNameAr);
   }
 
+  copyResultQrCodeSrc(result: SuperAdminTemplateCopyResult): string {
+    if (!result.qrCode) {
+      return '';
+    }
+
+    if (result.qrCode.startsWith('data:image') || result.qrCode.startsWith('http')) {
+      return result.qrCode;
+    }
+
+    return `data:image/png;base64,${result.qrCode}`;
+  }
+
   private localizedText(
     enValue: string | null | undefined,
     arValue: string | null | undefined,
@@ -593,6 +700,57 @@ export class AnonymousTemplatesPageComponent implements OnInit {
       this.authStore.hasPermission('AnonymousTemplates.Update') ||
       this.authStore.hasPermission('AnonymousTemplates.Restore') ||
       this.authStore.hasPermission('AnonymousTemplates.ViewResponses');
+  }
+
+  private readCopyErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'superAdminTemplates.copyError';
+    }
+
+    if (error.status === 401) {
+      return 'anonymousTemplates.unauthorized';
+    }
+    if (error.status === 403) {
+      return 'anonymousTemplates.forbidden';
+    }
+
+    const backendMessage = this.readCopyProblemDetailsMessage(error.error);
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    if (error.status === 404) {
+      return 'superAdminTemplates.copyNotFound';
+    }
+    if (error.status === 409) {
+      return 'superAdminTemplates.copyAlreadyExists';
+    }
+    if (error.status === 400 || error.status === 422) {
+      return 'superAdminTemplates.copyValidationError';
+    }
+
+    return 'superAdminTemplates.copyError';
+  }
+
+  private readCopyProblemDetailsMessage(errorBody: unknown): string | null {
+    if (!this.isCopyApiErrorResponse(errorBody)) {
+      return null;
+    }
+
+    const firstError = errorBody.errors?.[0];
+    return (
+      firstError?.message ??
+      firstError?.messageName ??
+      firstError?.code ??
+      errorBody.detail ??
+      errorBody.message ??
+      errorBody.title ??
+      null
+    );
+  }
+
+  private isCopyApiErrorResponse(errorBody: unknown): errorBody is CopyApiErrorResponse {
+    return typeof errorBody === 'object' && errorBody !== null;
   }
 
   private loadBranchOptionsForSuperAdmin(): void {

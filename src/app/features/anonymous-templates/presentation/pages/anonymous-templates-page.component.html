@@ -306,6 +306,16 @@
                           <app-icon [icon]="responsesIcon" [size]="14" />
                         </app-button>
                       }
+                      @if (canCopyTemplateToBranch(template)) {
+                        <app-button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          (pressed)="openCopyTemplateToBranch(template)"
+                        >
+                          <app-icon [icon]="filePlusIcon" [size]="14" />
+                        </app-button>
+                      }
                       <app-button
                         size="sm"
                         type="button"
@@ -399,6 +409,132 @@
       </div>
     </div>
   </section>
+
+  <app-modal
+    [title]="'superAdminTemplates.copyToBranch' | t"
+    [open]="copyModalOpen()"
+    (closed)="closeCopyTemplateToBranch()"
+    size="lg"
+  >
+    @if (templatePendingCopy(); as template) {
+      <form class="space-y-3" [formGroup]="copyForm" (ngSubmit)="copySelectedTemplateToBranch()">
+        <p class="text-[11px] font-semibold text-slate-500">
+          {{ 'superAdminTemplates.copyToBranchDescription' | t }}
+        </p>
+
+        <div class="grid gap-2 sm:grid-cols-2">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-extrabold uppercase text-slate-500">
+              {{ 'superAdminTemplates.sourceTemplate' | t }}
+            </p>
+            <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
+              {{ templateDisplayName(template) }}
+            </p>
+            <p class="mt-1 text-[11px] font-semibold text-slate-500">
+              {{ 'superAdminTemplates.anonymous' | t }}
+            </p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-extrabold uppercase text-slate-500">
+              {{ 'superAdminTemplates.sourceBranch' | t }}
+            </p>
+            <p class="mt-1 break-words text-[12px] font-black text-slate-950 [overflow-wrap:anywhere]">
+              {{ template.isGlobal ? ('anonymousTemplates.globalScope' | t) : branchDisplayName(template) }}
+            </p>
+          </div>
+        </div>
+
+        <label class="flex min-w-0 flex-col gap-1">
+          <span class="text-[10px] font-bold text-slate-500">{{ 'superAdminTemplates.targetBranch' | t }}</span>
+          <select
+            class="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12px] font-semibold text-slate-700 outline-none transition focus:border-[var(--theme-color-accent)] focus:ring-2 focus:ring-[var(--theme-color-accent)]/15"
+            formControlName="branchId"
+            [disabled]="branchOptionsLoading() || copyingTemplate()"
+          >
+            <option value="">
+              {{ branchOptionsLoading() ? ('superAdminTemplates.loadingBranches' | t) : ('superAdminTemplates.selectTargetBranch' | t) }}
+            </option>
+            @for (branch of branchOptions(); track branch.id) {
+              <option [value]="branch.id">{{ branchOptionDisplayName(branch) }}</option>
+            }
+          </select>
+          @if (copyForm.controls.branchId.touched && copyForm.controls.branchId.invalid) {
+            <span class="text-[10px] font-bold text-[var(--theme-color-danger)]">
+              {{ 'superAdminTemplates.targetBranchRequired' | t }}
+            </span>
+          }
+        </label>
+
+        @if (copyError()) {
+          <div class="rounded-md border border-rose-100 bg-rose-50 p-2 text-[11px] font-semibold text-[var(--theme-color-danger)]">
+            {{ copyError() ?? '' | t }}
+          </div>
+        }
+
+        @if (copySuccess()) {
+          <div class="rounded-md border border-emerald-100 bg-emerald-50 p-2 text-[11px] font-semibold text-emerald-700">
+            {{ copySuccess() ?? '' | t }}
+          </div>
+        }
+
+        @if (copyResult(); as result) {
+          <div class="rounded-lg border border-cyan-100 bg-cyan-50/70 p-3">
+            <p class="text-[10px] font-extrabold uppercase text-slate-500">
+              {{ 'superAdminTemplates.newTemplateId' | t }}
+            </p>
+            <p class="mt-1 break-words text-[11px] font-black text-slate-950 [overflow-wrap:anywhere]">
+              {{ result.templateId || '-' }}
+            </p>
+
+            <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <div>
+                <p class="text-[10px] font-extrabold uppercase text-slate-500">
+                  {{ 'superAdminTemplates.copiedPublicUrl' | t }}
+                </p>
+                @if (result.publicUrl) {
+                  <a
+                    class="mt-1 block break-words text-[11px] font-bold text-[var(--theme-color-secondary)] underline-offset-2 hover:underline [overflow-wrap:anywhere]"
+                    [href]="result.publicUrl"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {{ result.publicUrl }}
+                  </a>
+                } @else {
+                  <p class="mt-1 text-[11px] font-semibold text-slate-500">{{ 'superAdminTemplates.noPublicUrl' | t }}</p>
+                }
+              </div>
+              @if (result.qrCode) {
+                <div class="flex flex-col items-center gap-1 rounded-lg border border-cyan-100 bg-white p-2">
+                  <app-icon [icon]="qrCodeIcon" [size]="14" />
+                  <img
+                    class="h-20 w-20 rounded-md object-contain"
+                    [src]="copyResultQrCodeSrc(result)"
+                    [alt]="'superAdminTemplates.copiedQrCode' | t"
+                  />
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="flex justify-end gap-2 border-t border-slate-100 pt-3">
+          <app-button size="sm" type="button" variant="secondary" (pressed)="closeCopyTemplateToBranch()">
+            {{ 'common.cancel' | t }}
+          </app-button>
+          <app-button
+            size="sm"
+            type="submit"
+            [loading]="copyingTemplate()"
+            [disabled]="copyForm.invalid || branchOptionsLoading()"
+          >
+            <app-icon [icon]="filePlusIcon" [size]="14" />
+            {{ 'superAdminTemplates.copySubmit' | t }}
+          </app-button>
+        </div>
+      </form>
+    }
+  </app-modal>
 
   <app-modal
     [title]="'anonymousTemplates.deleteTitle' | t"

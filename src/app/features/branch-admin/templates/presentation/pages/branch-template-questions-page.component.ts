@@ -460,10 +460,7 @@ export class BranchTemplateQuestionsPageComponent implements OnInit {
 
   private toQuestionsPayload(): UpdateBranchTemplateQuestionsPayload {
     return {
-      questions: this.selectedQuestions().map((question, index) => ({
-        questionId: question.questionId,
-        order: index + 1,
-      })),
+      questionIds: this.selectedQuestions().map((question) => question.questionId),
     };
   }
 

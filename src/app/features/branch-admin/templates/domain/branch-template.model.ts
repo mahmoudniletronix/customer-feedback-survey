@@ -142,13 +142,8 @@ export interface BranchTemplateQuestionSelectionItem extends SelectableEditableS
   options: readonly QuestionAnswerOption[];
 }
 
-export interface UpdateBranchTemplateQuestionPayload {
-  questionId: string;
-  order: number;
-}
-
 export interface UpdateBranchTemplateQuestionsPayload {
-  questions: readonly UpdateBranchTemplateQuestionPayload[];
+  questionIds: readonly string[];
 }
 
 export type UpdateBranchTemplateQuestionConditionsPayload = UpdateQuestionConditionsPayload;
